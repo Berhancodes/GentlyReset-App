@@ -11,6 +11,7 @@ export function canProceed(step: OnboardingStep, answer: OnboardingAnswer | unde
   switch (step.type) {
     case 'welcome':
     case 'story':
+    case 'beforeAfter':
     case 'loading':
     case 'result':
     case 'resultDetails':

@@ -26,6 +26,7 @@ type OnboardingScreenLayoutProps = {
   hideProgress?: boolean;
   onBack?: () => void;
   avoidKeyboard?: boolean;
+  showTitle?: boolean;
 };
 
 export function OnboardingScreenLayout({
@@ -39,6 +40,7 @@ export function OnboardingScreenLayout({
   hideProgress = false,
   onBack,
   avoidKeyboard = false,
+  showTitle = true,
 }: OnboardingScreenLayoutProps) {
   const { step } = useCurrentOnboardingStep();
   const chapterId = step?.chapter;
@@ -83,7 +85,7 @@ export function OnboardingScreenLayout({
               {eyebrow}
             </AppText>
           ) : null}
-          <AppText variant="display">{title}</AppText>
+          {showTitle ? <AppText variant="display">{title}</AppText> : null}
           {subtitle ? (
             <AppText variant="subtitle" color="secondary">
               {subtitle}

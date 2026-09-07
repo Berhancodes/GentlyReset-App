@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { colors, radius, shadows, spacing } from '@/design-system';
-import { hapticSelection } from '@/utils/haptics';
+import { hapticSelection, hapticSuccess } from '@/utils/haptics';
 
 import { AppText } from '../Text';
 
@@ -11,6 +11,7 @@ type ChoiceCardProps = {
   selected?: boolean;
   disabled?: boolean;
   comfortable?: boolean;
+  haptic?: 'selection' | 'success' | 'none';
   onPress: () => void;
 };
 
@@ -20,6 +21,7 @@ export function ChoiceCard({
   selected = false,
   disabled = false,
   comfortable = false,
+  haptic = 'selection',
   onPress,
 }: ChoiceCardProps) {
   return (
@@ -29,7 +31,12 @@ export function ChoiceCard({
       accessibilityState={{ selected, disabled }}
       disabled={disabled}
       onPress={() => {
-        void hapticSelection();
+        if (haptic === 'selection') {
+          void hapticSelection();
+        }
+        if (haptic === 'success') {
+          void hapticSuccess();
+        }
         onPress();
       }}
       style={({ pressed }) => [

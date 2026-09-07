@@ -25,6 +25,8 @@ export type ResetProfile = {
   description: string;
   advice: string;
   emphasized: string;
+  biggestPattern: string;
+  whatUsuallyHelps: string;
   strengths: readonly string[];
   challenges: readonly string[];
   shareQuote: string;
@@ -35,6 +37,7 @@ export type OnboardingOption = {
   id: string;
   label: string;
   description?: string;
+  selectHaptic?: 'selection' | 'success';
 };
 
 export type ScalePoint = {
@@ -98,6 +101,12 @@ export type StoryStep = BaseOnboardingStep & {
   type: 'story';
   body?: string;
   ctaLabel: string;
+  dynamicCopy?: 'outOfBalance' | 'consistencyStage';
+};
+
+export type BeforeAfterStep = BaseOnboardingStep & {
+  type: 'beforeAfter';
+  ctaLabel: string;
 };
 
 export type LoadingStep = BaseOnboardingStep & {
@@ -143,6 +152,7 @@ export type OnboardingStep =
   | ScaleStep
   | TextInputStep
   | StoryStep
+  | BeforeAfterStep
   | LoadingStep
   | ResultStep
   | ResultDetailsStep
@@ -156,6 +166,7 @@ export type OnboardingAnswer =
   | { type: 'scale'; value: number }
   | { type: 'textInput'; value: string }
   | { type: 'story' }
+  | { type: 'beforeAfter' }
   | { type: 'loading' }
   | { type: 'result' }
   | { type: 'resultDetails' }

@@ -37,6 +37,7 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
             description={option.description}
             comfortable={step.comfortable}
             selected={selectedId === option.id}
+            haptic={option.selectHaptic ?? 'selection'}
             onPress={() => {
               setAnswer(step.id, { type: 'singleChoice', optionId: option.id });
             }}

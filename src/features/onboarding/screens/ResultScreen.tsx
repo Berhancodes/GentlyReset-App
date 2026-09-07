@@ -6,7 +6,9 @@ import { OnboardingScreenLayout } from '@/features/onboarding/components/Onboard
 import { OnboardingTextButton } from '@/features/onboarding/components/OnboardingTextButton';
 import { getResetProfile } from '@/features/onboarding/data/mockResetProfile';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
+import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { ResultStep } from '@/features/onboarding/types/onboarding';
+import { deriveResetApproach } from '@/features/onboarding/utils/deriveResetApproach';
 
 type ResultScreenProps = {
   step: ResultStep;
@@ -14,7 +16,12 @@ type ResultScreenProps = {
 
 export function ResultScreen({ step }: ResultScreenProps) {
   const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
+  const answers = useOnboardingStore((state) => state.answers);
   const profile = getResetProfile(step.profileId);
+  const approach = deriveResetApproach(answers);
+  const approachLines = [approach.time, approach.support, approach.length].filter(
+    (value): value is string => Boolean(value),
+  );
 
   return (
     <OnboardingScreenLayout
@@ -37,6 +44,20 @@ export function ResultScreen({ step }: ResultScreenProps) {
         <AppText variant="body" color="secondary">
           {profile.description}
         </AppText>
+        <ProfileSection label="your biggest pattern" value={profile.biggestPattern} />
+        <ProfileSection label="what usually helps" value={profile.whatUsuallyHelps} />
+        {approachLines.length > 0 ? (
+          <View style={styles.section}>
+            <AppText variant="label" color="muted">
+              your Gently Reset approach
+            </AppText>
+            {approachLines.map((line) => (
+              <AppText key={line} variant="body">
+                {line}
+              </AppText>
+            ))}
+          </View>
+        ) : null}
         <AppText variant="body" color="secondary">
           {profile.advice}
         </AppText>
@@ -46,9 +67,24 @@ export function ResultScreen({ step }: ResultScreenProps) {
   );
 }
 
+function ProfileSection({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.section}>
+      <AppText variant="label" color="muted">
+        {label}
+      </AppText>
+      <AppText variant="body">{value}</AppText>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   copy: {
     gap: spacing.md,
+  },
+  section: {
+    gap: spacing.xxs,
+    paddingTop: spacing.xs,
   },
   footer: {
     gap: spacing.xs,

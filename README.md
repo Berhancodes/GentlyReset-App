@@ -71,11 +71,15 @@ Route files should re-export a screen from `src/features`. UI implementation and
 
 Onboarding is a list of typed steps in `src/features/onboarding/data/onboardingSteps.ts`.
 
-`OnboardingStep` is a discriminated union (`welcome`, `singleChoice`, `multiChoice`, `scale`, `textInput`, `story`, `loading`, `result`, `resultDetails`, `sharePreview`, `final`). Each type has the fields it actually needs.
+`OnboardingStep` is a discriminated union (`welcome`, `singleChoice`, `multiChoice`, `scale`, `textInput`, `story`, `beforeAfter`, `loading`, `result`, `resultDetails`, `sharePreview`, `final`). Each type has the fields it actually needs.
 
-`OnboardingRenderer` dispatches the current step to a focused screen. `useOnboardingStore` holds the step index and answers only — no presentation.
+`OnboardingRenderer` dispatches the current step to a focused screen. `useOnboardingStore` holds the step index and answers keyed by stable step id — no presentation.
 
-The production questionnaire lives in `src/features/onboarding/data/onboardingSteps.ts`. Reset profile copy is mocked in `src/features/onboarding/data/mockResetProfile.ts` until personalization is real.
+The production questionnaire lives in `src/features/onboarding/data/onboardingSteps.ts`. There are exactly 21 core personalization questions across four chapters (4 / 4 / 5 / 8). `profileAccuracy` is a question-style screen after the Reset Type reveal and is not counted in those 21.
+
+Reset profile copy is mocked in `src/features/onboarding/data/mockResetProfile.ts` until personalization is real. Share is stubbed. Loading is timer-based. There is no paywall, AI, or backend yet.
+
+`successStatement` includes a "something else..." option as a selectable choice. A follow-up text field can be added later without changing the step id.
 
 In development, a small `dev` control on onboarding lets you jump to any step.
 
