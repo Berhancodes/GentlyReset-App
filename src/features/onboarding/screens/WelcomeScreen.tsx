@@ -1,6 +1,6 @@
 import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, useReducedMotion } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   colors,
@@ -16,6 +16,9 @@ import type { WelcomeStep } from '@/features/onboarding/types/onboarding';
 import { hapticImpact } from '@/utils/haptics';
 
 const WELCOME_ART = require('../../../../assets/images/onboarding/welcome-sunset.png');
+
+/** Breathing room between the CTA and the bottom safe-area inset. */
+const CTA_SAFE_AREA_GAP = 36;
 
 function readableTextShadow(blur: number) {
   if (Platform.OS === 'web') {
@@ -35,6 +38,7 @@ type WelcomeScreenProps = {
 
 export function WelcomeScreen({ step }: WelcomeScreenProps) {
   const { goToNext } = useOnboardingNavigation();
+  const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
   const copyEntering = reduceMotion ? undefined : FadeIn.duration(520);
   const ctaEntering = reduceMotion ? undefined : FadeInDown.duration(480).delay(160);
@@ -49,7 +53,7 @@ export function WelcomeScreen({ step }: WelcomeScreenProps) {
         style={styles.background}
       />
       <View style={styles.bottomWash} />
-      <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={styles.safe}>
+      <SafeAreaView edges={['top', 'right', 'left']} style={styles.safe}>
         <Animated.View entering={copyEntering} style={styles.copy}>
           <Text
             accessibilityRole="header"
@@ -70,7 +74,10 @@ export function WelcomeScreen({ step }: WelcomeScreenProps) {
           ) : null}
         </Animated.View>
         <View style={styles.stage} />
-        <Animated.View entering={ctaEntering} style={styles.ctaWrap}>
+        <Animated.View
+          entering={ctaEntering}
+          style={{ paddingBottom: insets.bottom + CTA_SAFE_AREA_GAP }}
+        >
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={step.ctaLabel}
@@ -138,9 +145,6 @@ const styles = StyleSheet.create({
   },
   stage: {
     flex: 1,
-  },
-  ctaWrap: {
-    paddingBottom: spacing.sm,
   },
   cta: {
     minHeight: 56,
