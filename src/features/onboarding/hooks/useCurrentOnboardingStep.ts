@@ -1,7 +1,6 @@
 import { ONBOARDING_STEPS } from '@/features/onboarding/data/onboardingSteps';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { OnboardingStep } from '@/features/onboarding/types/onboarding';
-import { getCoreQuestionProgress } from '@/features/onboarding/utils/getCoreQuestionProgress';
 
 export function useCurrentOnboardingStep() {
   const currentStepIndex = useOnboardingStore((state) => state.currentStepIndex);
@@ -14,6 +13,6 @@ export function useCurrentOnboardingStep() {
     answer: step ? answers[step.id] : undefined,
     currentStepIndex,
     totalSteps,
-    progress: getCoreQuestionProgress(step?.id, currentStepIndex),
+    progress: (currentStepIndex + 1) / totalSteps,
   };
 }
