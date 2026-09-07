@@ -71,18 +71,22 @@ export function ChoiceCard({
           </AppText>
         ) : null}
       </View>
-      {indicatorVisible ? (
+      {indicatorVisible && selected ? (
         <View
-          style={[styles.indicator, selected ? styles.indicatorSelected : styles.indicatorIdle]}
+          style={[styles.indicator, styles.indicatorSelected]}
           accessibilityElementsHidden
           importantForAccessibility="no"
         >
-          {selected ? (
-            <AppText variant="caption" color="inverse" align="center">
-              ✓
-            </AppText>
-          ) : null}
+          <AppText variant="caption" color="inverse" align="center">
+            ✓
+          </AppText>
         </View>
+      ) : indicatorVisible ? (
+        <View
+          style={styles.indicatorSpacer}
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+        />
       ) : null}
     </Pressable>
   );
@@ -112,7 +116,7 @@ const styles = StyleSheet.create({
   },
   idle: {
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: 'transparent',
   },
   selected: {
     backgroundColor: colors.surface.choiceSelected,
@@ -144,12 +148,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  indicatorIdle: {
-    borderWidth: 1.5,
-    borderColor: colors.border.default,
-    backgroundColor: 'transparent',
-  },
   indicatorSelected: {
     backgroundColor: colors.text.primary,
+  },
+  indicatorSpacer: {
+    width: 22,
+    height: 22,
   },
 });
