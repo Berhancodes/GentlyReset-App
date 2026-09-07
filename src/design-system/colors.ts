@@ -9,6 +9,7 @@ const palette = {
   brownSecondary: '#8B5A32',
   brownDisabled: '#C4A88F',
   gold: '#E6B84A',
+  goldSoft: '#F4E4A8',
   peach: '#EFAE82',
   sage: '#8E9B63',
   blue: '#8799A0',
@@ -33,12 +34,15 @@ export const colors = {
     raised: palette.white,
     selected: palette.creamPeach,
     disabled: palette.creamMuted,
+    choice: palette.creamSoft,
+    choiceSelected: palette.goldSoft,
   },
   text: {
     primary: palette.brown,
     secondary: palette.brownSecondary,
     muted: palette.blue,
     inverse: palette.cream,
+    helper: 'rgba(74, 44, 24, 0.64)',
   },
   accent: {
     gold: palette.gold,

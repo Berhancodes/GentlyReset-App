@@ -5,7 +5,7 @@ import { ProgressBar } from '@/components/ui';
 import { useCurrentOnboardingStep } from '@/features/onboarding/hooks/useCurrentOnboardingStep';
 import { getCoreQuestionProgress } from '@/features/onboarding/utils/getCoreQuestionProgress';
 
-const BAR_WIDTH = 160;
+const BAR_WIDTH = 136;
 
 let lastCoreProgress = 0;
 

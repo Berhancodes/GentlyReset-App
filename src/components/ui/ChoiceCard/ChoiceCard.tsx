@@ -1,16 +1,20 @@
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { colors, radius, shadows, spacing } from '@/design-system';
+import { AppText } from '@/components/ui/Text';
+import { colors, radius, spacing } from '@/design-system';
 import { hapticSelection, hapticSuccess } from '@/utils/haptics';
 
-import { AppText } from '../Text';
+export type ChoiceCardVariant = 'row' | 'tile';
 
 type ChoiceCardProps = {
   label: string;
   description?: string;
   selected?: boolean;
   disabled?: boolean;
-  comfortable?: boolean;
+  variant?: ChoiceCardVariant;
+  leading?: ReactNode;
+  showIndicator?: boolean;
   haptic?: 'selection' | 'success' | 'none';
   onPress: () => void;
 };
@@ -20,10 +24,15 @@ export function ChoiceCard({
   description,
   selected = false,
   disabled = false,
-  comfortable = false,
+  variant = 'row',
+  leading,
+  showIndicator,
   haptic = 'selection',
   onPress,
 }: ChoiceCardProps) {
+  const isTile = variant === 'tile';
+  const indicatorVisible = showIndicator ?? !isTile;
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -41,90 +50,106 @@ export function ChoiceCard({
       }}
       style={({ pressed }) => [
         styles.card,
-        comfortable && styles.comfortable,
+        isTile ? styles.tile : styles.row,
         selected ? styles.selected : styles.idle,
         disabled && styles.disabled,
         pressed && !disabled && styles.pressed,
       ]}
     >
-      <View style={styles.copy}>
-        <AppText variant="body" color={disabled ? 'muted' : 'primary'}>
+      {leading ? <View style={styles.leading}>{leading}</View> : null}
+      <View style={[styles.copy, isTile && styles.copyTile]}>
+        <AppText
+          variant={description ? 'optionTitle' : isTile ? 'optionLabel' : 'optionTitle'}
+          color={disabled ? 'muted' : 'primary'}
+          align={isTile ? 'center' : 'left'}
+        >
           {label}
         </AppText>
         {description ? (
-          <AppText variant="caption" color="secondary">
+          <AppText variant="optionSubtitle" color="secondary" align={isTile ? 'center' : 'left'}>
             {description}
           </AppText>
         ) : null}
       </View>
-      <View
-        style={[styles.indicator, selected ? styles.indicatorSelected : styles.indicatorIdle]}
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-      >
-        {selected ? <View style={styles.indicatorDot} /> : null}
-      </View>
+      {indicatorVisible ? (
+        <View
+          style={[styles.indicator, selected ? styles.indicatorSelected : styles.indicatorIdle]}
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+        >
+          {selected ? (
+            <AppText variant="caption" color="inverse" align="center">
+              ✓
+            </AppText>
+          ) : null}
+        </View>
+      ) : null}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    minHeight: 56,
-    borderRadius: radius.lg,
-    borderWidth: 1.5,
+    borderRadius: radius.card,
+    backgroundColor: colors.surface.choice,
+  },
+  row: {
+    minHeight: 64,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: spacing.sm,
-    backgroundColor: colors.surface.raised,
-    ...shadows.soft,
   },
-  comfortable: {
-    minHeight: 72,
-    paddingVertical: spacing.lg,
+  tile: {
+    minHeight: 112,
+    flex: 1,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
   },
   idle: {
-    borderColor: colors.border.default,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
   },
   selected: {
-    borderColor: colors.border.selected,
-    backgroundColor: colors.surface.selected,
+    backgroundColor: colors.surface.choiceSelected,
+    borderWidth: 1,
+    borderColor: colors.accent.gold,
   },
   pressed: {
-    opacity: 0.92,
-    transform: [{ scale: 0.99 }],
+    transform: [{ scale: 0.985 }],
   },
   disabled: {
-    backgroundColor: colors.surface.disabled,
-    opacity: 0.7,
+    opacity: 0.55,
+  },
+  leading: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   copy: {
     flex: 1,
     gap: spacing.xxs,
   },
+  copyTile: {
+    flex: 0,
+    alignItems: 'center',
+  },
   indicator: {
     width: 22,
     height: 22,
     borderRadius: radius.pill,
-    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
   indicatorIdle: {
+    borderWidth: 1.5,
     borderColor: colors.border.default,
-    backgroundColor: colors.surface.primary,
+    backgroundColor: 'transparent',
   },
   indicatorSelected: {
-    borderColor: colors.text.primary,
-    backgroundColor: colors.surface.raised,
-  },
-  indicatorDot: {
-    width: 10,
-    height: 10,
-    borderRadius: radius.pill,
     backgroundColor: colors.text.primary,
   },
 });

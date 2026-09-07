@@ -20,6 +20,7 @@ export const fontSizes = {
   md: 17,
   lg: 20,
   xl: 28,
+  question: 30,
   display: 34,
 } as const;
 
@@ -29,6 +30,7 @@ export const lineHeights = {
   md: 24,
   lg: 28,
   xl: 34,
+  question: 36,
   display: 40,
 } as const;
 
@@ -84,6 +86,37 @@ export const textVariants = {
     fontSize: fontSizes.md,
     lineHeight: lineHeights.md,
     fontWeight: fontWeights.semibold,
+  },
+  questionTitle: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.question,
+    lineHeight: lineHeights.question,
+    fontWeight: fontWeights.bold,
+    letterSpacing: -0.45,
+  },
+  questionHelper: {
+    fontFamily: fontFamilies.sans,
+    fontSize: fontSizes.sm,
+    lineHeight: 22,
+    fontWeight: fontWeights.medium,
+  },
+  optionLabel: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.sm,
+    lineHeight: lineHeights.sm,
+    fontWeight: fontWeights.medium,
+  },
+  optionTitle: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.md,
+    lineHeight: lineHeights.md,
+    fontWeight: fontWeights.semibold,
+  },
+  optionSubtitle: {
+    fontFamily: fontFamilies.sans,
+    fontSize: fontSizes.sm,
+    lineHeight: lineHeights.sm,
+    fontWeight: fontWeights.regular,
   },
 } as const satisfies Record<string, TextStyle>;
 

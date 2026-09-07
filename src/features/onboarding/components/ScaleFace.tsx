@@ -13,7 +13,7 @@ type ScaleFaceProps = {
 export function ScaleFace({ mood, selected }: ScaleFaceProps) {
   const eyeHeight = mood <= 2 ? 5 : mood >= 5 ? 8 : 6;
   const mouthWidth = mood <= 2 ? 10 : 14;
-  const mouthColor = selected ? colors.text.inverse : colors.text.primary;
+  const mouthColor = colors.text.primary;
 
   return (
     <View style={[styles.face, selected ? styles.faceSelected : styles.faceIdle]}>
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   faceIdle: {
-    backgroundColor: colors.surface.selected,
+    backgroundColor: colors.background.primary,
   },
   faceSelected: {
     backgroundColor: colors.accent.peach,

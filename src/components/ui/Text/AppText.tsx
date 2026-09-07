@@ -9,6 +9,7 @@ const colorMap = {
   muted: colors.text.muted,
   inverse: colors.text.inverse,
   gold: colors.accent.gold,
+  helper: colors.text.helper,
 } as const;
 
 export type AppTextColor = keyof typeof colorMap;
@@ -20,7 +21,7 @@ type AppTextProps = Omit<TextProps, 'style'> & {
   children: ReactNode;
 };
 
-const HEADER_VARIANTS: ReadonlySet<TextVariant> = new Set(['display', 'title']);
+const HEADER_VARIANTS: ReadonlySet<TextVariant> = new Set(['display', 'title', 'questionTitle']);
 
 export function AppText({
   variant = 'body',

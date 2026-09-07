@@ -54,7 +54,7 @@ export function PrimaryButton({
 const styles = StyleSheet.create({
   base: {
     minHeight: 56,
-    borderRadius: radius.xl,
+    borderRadius: radius.xxl,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
@@ -64,7 +64,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.action.primaryBackground,
   },
   disabled: {
-    backgroundColor: colors.action.primaryBackgroundDisabled,
+    backgroundColor: colors.action.primaryBackground,
+    opacity: 0.38,
   },
   pressed: {
     backgroundColor: colors.action.primaryBackgroundPressed,
@@ -77,6 +78,6 @@ const styles = StyleSheet.create({
     color: colors.action.primaryText,
   },
   labelDisabled: {
-    color: colors.action.primaryTextDisabled,
+    color: colors.action.primaryText,
   },
 });

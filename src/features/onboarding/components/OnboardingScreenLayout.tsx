@@ -10,6 +10,7 @@ import {
 
 import { AppText, Screen } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
+import { BackChevron } from '@/features/onboarding/components/BackChevron';
 import { IllustrationPlaceholder } from '@/features/onboarding/components/IllustrationPlaceholder';
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
 import type { OnboardingIllustrationKey } from '@/features/onboarding/types/onboarding';
@@ -26,6 +27,7 @@ type OnboardingScreenLayoutProps = {
   onBack?: () => void;
   avoidKeyboard?: boolean;
   showTitle?: boolean;
+  tone?: 'default' | 'question';
 };
 
 export function OnboardingScreenLayout({
@@ -40,31 +42,56 @@ export function OnboardingScreenLayout({
   onBack,
   avoidKeyboard = false,
   showTitle = true,
+  tone = 'default',
 }: OnboardingScreenLayoutProps) {
   const showProgress = !hideProgress;
+  const isQuestion = tone === 'question';
 
   const body = (
     <Screen>
-      <View style={styles.header}>
-        {showProgress ? <OnboardingProgress /> : <View style={styles.progressSpacer} />}
-        {onBack ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-            onPress={onBack}
-            hitSlop={spacing.sm}
-            style={styles.backButton}
-          >
-            <AppText variant="caption" color="secondary">
-              back
-            </AppText>
-          </Pressable>
-        ) : null}
-      </View>
+      {isQuestion ? (
+        <View style={styles.questionNav}>
+          {onBack ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+              onPress={onBack}
+              hitSlop={spacing.sm}
+              style={styles.navSide}
+            >
+              <BackChevron />
+            </Pressable>
+          ) : (
+            <View style={styles.navSide} />
+          )}
+          <View style={styles.navCenter}>{showProgress ? <OnboardingProgress /> : null}</View>
+          <View style={styles.navSide} />
+        </View>
+      ) : (
+        <View style={styles.header}>
+          {showProgress ? <OnboardingProgress /> : <View style={styles.progressSpacer} />}
+          {onBack ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+              onPress={onBack}
+              hitSlop={spacing.sm}
+              style={styles.backButton}
+            >
+              <AppText variant="caption" color="secondary">
+                back
+              </AppText>
+            </Pressable>
+          ) : null}
+        </View>
+      )}
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          isQuestion ? styles.questionScrollContent : null,
+        ]}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
@@ -72,15 +99,20 @@ export function OnboardingScreenLayout({
         {illustrationKey ? (
           <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
         ) : null}
-        <View style={styles.copy}>
+        <View style={[styles.copy, isQuestion ? styles.questionCopy : null]}>
           {eyebrow ? (
-            <AppText variant="label" color="muted">
+            <AppText variant="questionHelper" color="helper">
               {eyebrow}
             </AppText>
           ) : null}
-          {showTitle ? <AppText variant="display">{title}</AppText> : null}
+          {showTitle ? (
+            <AppText variant={isQuestion ? 'questionTitle' : 'display'}>{title}</AppText>
+          ) : null}
           {subtitle ? (
-            <AppText variant="subtitle" color="secondary">
+            <AppText
+              variant={isQuestion ? 'questionHelper' : 'subtitle'}
+              color={isQuestion ? 'helper' : 'secondary'}
+            >
               {subtitle}
             </AppText>
           ) : null}
@@ -88,7 +120,9 @@ export function OnboardingScreenLayout({
         {children}
       </ScrollView>
 
-      {footer ? <View style={styles.footer}>{footer}</View> : null}
+      {footer ? (
+        <View style={[styles.footer, isQuestion ? styles.questionFooter : null]}>{footer}</View>
+      ) : null}
     </Screen>
   );
 
@@ -114,6 +148,23 @@ const styles = StyleSheet.create({
     paddingTop: spacing.xs,
     gap: spacing.sm,
   },
+  questionNav: {
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: spacing.xs,
+  },
+  navSide: {
+    width: 44,
+    height: 44,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  navCenter: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   progressSpacer: {
     height: spacing.xs,
   },
@@ -131,13 +182,25 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
     gap: spacing.lg,
   },
+  questionScrollContent: {
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.lg,
+    gap: spacing.lg,
+  },
   copy: {
     gap: spacing.sm,
+  },
+  questionCopy: {
+    gap: spacing.xs,
   },
   footer: {
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
     gap: spacing.xs,
     backgroundColor: colors.background.primary,
+  },
+  questionFooter: {
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
   },
 });

@@ -8,6 +8,7 @@ import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardi
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { TextInputStep } from '@/features/onboarding/types/onboarding';
 import { canProceed } from '@/features/onboarding/utils/canProceed';
+import { getQuestionHelper } from '@/features/onboarding/utils/getQuestionHelper';
 
 type TextInputScreenProps = {
   step: TextInputStep;
@@ -21,8 +22,9 @@ export function TextInputScreen({ step }: TextInputScreenProps) {
 
   return (
     <OnboardingScreenLayout
+      tone="question"
       title={step.title}
-      subtitle={step.subtitle}
+      subtitle={getQuestionHelper(step)}
       eyebrow={step.eyebrow}
       hideProgress={step.hideProgress}
       onBack={canGoBack ? goBack : undefined}
@@ -39,7 +41,7 @@ export function TextInputScreen({ step }: TextInputScreenProps) {
             />
           )}
           <PrimaryButton
-            label="continue"
+            label="next"
             disabled={!canProceed(step, answer)}
             onPress={() => {
               Keyboard.dismiss();
@@ -53,7 +55,7 @@ export function TextInputScreen({ step }: TextInputScreenProps) {
         <TextInput
           accessibilityLabel={step.title}
           placeholder={step.placeholder}
-          placeholderTextColor={colors.text.muted}
+          placeholderTextColor={colors.text.helper}
           value={value}
           maxLength={step.maxLength}
           multiline={step.multiline}
@@ -77,16 +79,15 @@ const styles = StyleSheet.create({
   input: {
     ...textVariants.body,
     minHeight: 56,
-    borderRadius: radius.lg,
-    borderWidth: 1.5,
-    borderColor: colors.border.default,
-    backgroundColor: colors.surface.raised,
+    borderRadius: radius.card,
+    borderWidth: 0,
+    backgroundColor: colors.surface.choice,
     color: colors.text.primary,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
   },
   multiline: {
-    minHeight: 140,
+    minHeight: 168,
     paddingTop: spacing.md,
   },
 });

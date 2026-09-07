@@ -51,6 +51,7 @@ export const ONBOARDING_STEPS = [
     title: 'what brought you here today?',
     required: true,
     minSelections: 1,
+    layout: 'stacked',
     options: [
       { id: 'stuck', label: 'I feel stuck' },
       { id: 'overwhelmed', label: "I'm overwhelmed" },
@@ -67,6 +68,7 @@ export const ONBOARDING_STEPS = [
     title: 'what feels the most out of balance right now?',
     required: true,
     minSelections: 1,
+    layout: 'grid2',
     options: [
       { id: 'mind', label: 'my mind' },
       { id: 'energy', label: 'my energy' },
@@ -84,6 +86,7 @@ export const ONBOARDING_STEPS = [
     chapter: 'where-you-are',
     title: 'how have you been feeling most days lately?',
     required: true,
+    layout: 'feelingList',
     options: [
       { id: 'drained', label: 'drained' },
       { id: 'overwhelmed', label: 'overwhelmed' },
@@ -100,6 +103,7 @@ export const ONBOARDING_STEPS = [
     title: 'which thought has been showing up the most lately?',
     required: true,
     comfortable: true,
+    layout: 'stacked',
     options: [
       { id: 'further-ahead', label: 'I should be further ahead.' },
       { id: 'get-it-together', label: "Why can't I just get it together?" },
@@ -130,6 +134,7 @@ export const ONBOARDING_STEPS = [
     title: 'when you know something would be good for you, what usually stops you?',
     required: true,
     minSelections: 1,
+    layout: 'grid2',
     options: [
       { id: 'overthink', label: 'I overthink it' },
       { id: 'put-off', label: 'I put it off' },
@@ -148,6 +153,7 @@ export const ONBOARDING_STEPS = [
     title: 'what usually happens when you try to get your life together?',
     required: true,
     comfortable: true,
+    layout: 'stacked',
     options: [
       { id: 'all-in-burn-out', label: 'I go all-in and burn out' },
       { id: 'plan-dont-start', label: "I make a plan but don't start" },
@@ -164,6 +170,7 @@ export const ONBOARDING_STEPS = [
     title: 'when you fall off track, what do you usually tell yourself?',
     required: true,
     comfortable: true,
+    layout: 'stacked',
     options: [
       { id: 'here-we-go', label: 'here we go again.' },
       { id: 'ruined-progress', label: 'I ruined my progress.' },
@@ -180,6 +187,7 @@ export const ONBOARDING_STEPS = [
     title: "what's hardest for you?",
     required: true,
     comfortable: true,
+    layout: 'stackedWithSubtitle',
     options: [
       {
         id: 'starting',
@@ -218,6 +226,7 @@ export const ONBOARDING_STEPS = [
     title: "imagine it's 30 days from now and things are actually getting better. what's changed?",
     required: true,
     minSelections: 1,
+    layout: 'stacked',
     options: [
       { id: 'wake-up-better', label: 'I wake up feeling better' },
       { id: 'consistent', label: "I'm finally consistent with something" },
@@ -236,6 +245,7 @@ export const ONBOARDING_STEPS = [
     title: 'what do you want to feel more often?',
     required: true,
     minSelections: 1,
+    layout: 'grid3',
     options: [
       { id: 'calm', label: 'calm' },
       { id: 'confident', label: 'confident' },
@@ -254,6 +264,7 @@ export const ONBOARDING_STEPS = [
     title: 'what do you want your days to have more of?',
     required: true,
     minSelections: 1,
+    layout: 'grid2',
     options: [
       { id: 'structure', label: 'structure' },
       { id: 'exercise', label: 'exercise' },
@@ -272,6 +283,7 @@ export const ONBOARDING_STEPS = [
     title: 'which version of yourself are you trying to become?',
     required: true,
     comfortable: true,
+    layout: 'stacked',
     options: [
       { id: 'keeps-promises', label: 'someone who keeps promises to themselves' },
       { id: 'feels-calm', label: 'someone who feels calm' },
@@ -290,6 +302,7 @@ export const ONBOARDING_STEPS = [
     title: "what's one thing you'd love to be able to say 30 days from now?",
     required: true,
     comfortable: true,
+    layout: 'stacked',
     options: [
       { id: 'stuck-with-it', label: 'I actually stuck with it.' },
       { id: 'feel-better', label: 'I feel so much better.' },
@@ -331,6 +344,7 @@ export const ONBOARDING_STEPS = [
     title: 'how much can you realistically give yourself each day?',
     required: true,
     comfortable: true,
+    layout: 'stackedWithSubtitle',
     options: [
       { id: 'five', label: '5 minutes', description: 'just help me start' },
       { id: 'ten', label: '10 minutes', description: 'small but meaningful' },
@@ -344,6 +358,7 @@ export const ONBOARDING_STEPS = [
     chapter: 'your-reset',
     title: 'when would a reset help you most?',
     required: true,
+    layout: 'stacked',
     options: [
       { id: 'wake-up', label: 'when I wake up' },
       { id: 'during-day', label: 'during the day' },
@@ -359,6 +374,7 @@ export const ONBOARDING_STEPS = [
     title: "how do you want me to treat you when you're struggling?",
     required: true,
     comfortable: true,
+    layout: 'stacked',
     options: [
       { id: 'be-gentle', label: 'be gentle with me' },
       { id: 'remind-what-matters', label: 'remind me what matters' },
@@ -374,6 +390,7 @@ export const ONBOARDING_STEPS = [
     chapter: 'your-reset',
     title: 'what should happen if you miss a day?',
     required: true,
+    layout: 'stacked',
     options: [
       { id: 'continue', label: 'just help me continue' },
       { id: 'easier-day', label: 'give me an easier day' },
@@ -389,6 +406,7 @@ export const ONBOARDING_STEPS = [
     title: "what's most likely to make you stop using Gently Reset?",
     required: true,
     comfortable: true,
+    layout: 'stacked',
     options: [
       { id: 'asks-too-much', label: 'it asks too much from me' },
       { id: 'forget-apps', label: 'I forget about apps' },
@@ -431,6 +449,7 @@ export const ONBOARDING_STEPS = [
     title: 'can you give yourself 30 days to see what changes?',
     required: true,
     comfortable: true,
+    layout: 'stackedWithSubtitle',
     options: [
       {
         id: 'in',
@@ -509,6 +528,7 @@ export const ONBOARDING_STEPS = [
     title: 'does this sound like you?',
     hideProgress: true,
     required: true,
+    layout: 'stacked',
     options: [
       { id: 'scarily-accurate', label: 'scarily accurate 😭' },
       { id: 'mostly', label: 'mostly' },

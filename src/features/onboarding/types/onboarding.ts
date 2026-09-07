@@ -33,6 +33,8 @@ export type ResetProfile = {
   illustrationKey: OnboardingIllustrationKey;
 };
 
+export type QuestionLayout = 'grid2' | 'grid3' | 'stacked' | 'stackedWithSubtitle' | 'feelingList';
+
 export type OnboardingOption = {
   id: string;
   label: string;
@@ -76,6 +78,7 @@ export type SingleChoiceStep = BaseOnboardingStep & {
   type: 'singleChoice';
   options: readonly OnboardingOption[];
   comfortable?: boolean;
+  layout?: QuestionLayout;
 };
 
 export type MultiChoiceStep = BaseOnboardingStep & {
@@ -83,6 +86,7 @@ export type MultiChoiceStep = BaseOnboardingStep & {
   options: readonly OnboardingOption[];
   minSelections?: number;
   maxSelections?: number;
+  layout?: QuestionLayout;
 };
 
 export type ScaleStep = BaseOnboardingStep & {
