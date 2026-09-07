@@ -59,8 +59,8 @@ export const colors = {
     primaryTextDisabled: palette.creamDisabledText,
   },
   progress: {
-    track: palette.sandTrack,
-    fill: palette.gold,
+    track: palette.sandSubtle,
+    fill: palette.brown,
   },
   overlay: {
     scrim: 'rgba(74, 44, 24, 0.35)',

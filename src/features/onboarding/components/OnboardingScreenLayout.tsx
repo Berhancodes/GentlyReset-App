@@ -12,7 +12,6 @@ import { AppText, Screen } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
 import { IllustrationPlaceholder } from '@/features/onboarding/components/IllustrationPlaceholder';
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
-import { useCurrentOnboardingStep } from '@/features/onboarding/hooks/useCurrentOnboardingStep';
 import type { OnboardingIllustrationKey } from '@/features/onboarding/types/onboarding';
 
 type OnboardingScreenLayoutProps = {
@@ -42,18 +41,12 @@ export function OnboardingScreenLayout({
   avoidKeyboard = false,
   showTitle = true,
 }: OnboardingScreenLayoutProps) {
-  const { step } = useCurrentOnboardingStep();
-  const chapterId = step?.chapter;
-  const showProgress = !hideProgress && Boolean(chapterId);
+  const showProgress = !hideProgress;
 
   const body = (
     <Screen>
       <View style={styles.header}>
-        {showProgress && chapterId ? (
-          <OnboardingProgress chapterId={chapterId} />
-        ) : (
-          <View style={styles.progressSpacer} />
-        )}
+        {showProgress ? <OnboardingProgress /> : <View style={styles.progressSpacer} />}
         {onBack ? (
           <Pressable
             accessibilityRole="button"
