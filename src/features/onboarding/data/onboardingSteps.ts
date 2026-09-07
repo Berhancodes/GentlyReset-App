@@ -36,8 +36,8 @@ export const ONBOARDING_STEPS = [
   {
     id: 'welcome',
     type: 'welcome',
-    title: "you don't need to have everything figured out.",
-    subtitle: "we'll start where you are.",
+    title: 'gently\nreset',
+    subtitle: 'a calmer, kinder you\nis possible.',
     ctaLabel: 'start my reset',
     illustrationKey: 'welcome',
     illustrationSize: 'large',
