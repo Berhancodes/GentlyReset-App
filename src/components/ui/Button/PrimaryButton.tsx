@@ -1,13 +1,14 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { colors, radius, spacing, textVariants } from '@/design-system';
-import { hapticImpact } from '@/utils/haptics';
+import { hapticImpact, hapticSuccess } from '@/utils/haptics';
 
 type PrimaryButtonProps = {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   accessibilityHint?: string;
+  haptic?: 'light' | 'success' | 'none';
 };
 
 export function PrimaryButton({
@@ -15,6 +16,7 @@ export function PrimaryButton({
   onPress,
   disabled = false,
   accessibilityHint,
+  haptic = 'light',
 }: PrimaryButtonProps) {
   return (
     <Pressable
@@ -24,7 +26,12 @@ export function PrimaryButton({
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={() => {
-        void hapticImpact();
+        if (haptic === 'light') {
+          void hapticImpact();
+        }
+        if (haptic === 'success') {
+          void hapticSuccess();
+        }
         onPress();
       }}
       style={({ pressed }) => [

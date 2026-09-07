@@ -1,7 +1,6 @@
 import { AppText, PrimaryButton } from '@/components/ui';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
-import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { StoryStep } from '@/features/onboarding/types/onboarding';
 
 type StoryScreenProps = {
@@ -9,27 +8,24 @@ type StoryScreenProps = {
 };
 
 export function StoryScreen({ step }: StoryScreenProps) {
-  const setAnswer = useOnboardingStore((state) => state.setAnswer);
   const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
 
   return (
     <OnboardingScreenLayout
       title={step.title}
       subtitle={step.subtitle}
+      eyebrow={step.eyebrow}
+      illustrationKey={step.illustrationKey}
+      illustrationSize={step.illustrationSize ?? 'large'}
+      hideProgress
       onBack={canGoBack ? goBack : undefined}
-      footer={
-        <PrimaryButton
-          label={step.ctaLabel ?? 'continue'}
-          onPress={() => {
-            setAnswer(step.id, { type: 'story' });
-            goToNext();
-          }}
-        />
-      }
+      footer={<PrimaryButton label={step.ctaLabel} onPress={goToNext} />}
     >
-      <AppText variant="body" color="secondary">
-        {step.body}
-      </AppText>
+      {step.body ? (
+        <AppText variant="body" color="secondary">
+          {step.body}
+        </AppText>
+      ) : null}
     </OnboardingScreenLayout>
   );
 }

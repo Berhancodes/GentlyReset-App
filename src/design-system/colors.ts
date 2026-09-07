@@ -62,6 +62,9 @@ export const colors = {
     track: palette.sandTrack,
     fill: palette.gold,
   },
+  overlay: {
+    scrim: 'rgba(74, 44, 24, 0.35)',
+  },
 } as const;
 
 export type Colors = typeof colors;

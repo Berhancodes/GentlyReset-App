@@ -1,6 +1,10 @@
+import { StyleSheet, View } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+
+import { AppText, Screen } from '@/components/ui';
+import { DevStepJumper } from '@/features/onboarding/components/DevStepJumper';
 import { OnboardingRenderer } from '@/features/onboarding/components/OnboardingRenderer';
 import { useCurrentOnboardingStep } from '@/features/onboarding/hooks/useCurrentOnboardingStep';
-import { AppText, Screen } from '@/components/ui';
 
 export function OnboardingFlow() {
   const { step } = useCurrentOnboardingStep();
@@ -15,5 +19,26 @@ export function OnboardingFlow() {
     );
   }
 
-  return <OnboardingRenderer step={step} />;
+  return (
+    <View style={styles.root}>
+      <Animated.View
+        key={step.id}
+        entering={FadeIn.duration(280)}
+        exiting={FadeOut.duration(160)}
+        style={styles.frame}
+      >
+        <OnboardingRenderer step={step} />
+      </Animated.View>
+      <DevStepJumper />
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  frame: {
+    flex: 1,
+  },
+});

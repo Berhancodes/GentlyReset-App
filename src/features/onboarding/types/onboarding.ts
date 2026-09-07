@@ -1,12 +1,35 @@
-export type OnboardingStepType =
+export const ONBOARDING_CHAPTERS = [
+  { id: 'where-you-are', label: 'where you are' },
+  { id: 'whats-holding-you-back', label: "what's holding you back" },
+  { id: 'where-youre-going', label: "where you're going" },
+  { id: 'your-reset', label: 'your reset' },
+] as const;
+
+export type OnboardingChapterId = (typeof ONBOARDING_CHAPTERS)[number]['id'];
+
+export type OnboardingIllustrationKey =
   | 'welcome'
-  | 'singleChoice'
-  | 'multiChoice'
-  | 'scale'
-  | 'textInput'
-  | 'story'
-  | 'loading'
-  | 'result';
+  | 'carrying'
+  | 'detective'
+  | 'path'
+  | 'self'
+  | 'buildingReset'
+  | 'gotYou'
+  | 'overloadedDreamer'
+  | 'companion';
+
+export type ResetProfile = {
+  id: string;
+  name: string;
+  summary: string;
+  description: string;
+  advice: string;
+  emphasized: string;
+  strengths: readonly string[];
+  challenges: readonly string[];
+  shareQuote: string;
+  illustrationKey: OnboardingIllustrationKey;
+};
 
 export type OnboardingOption = {
   id: string;
@@ -14,12 +37,30 @@ export type OnboardingOption = {
   description?: string;
 };
 
+export type ScalePoint = {
+  value: number;
+  label: string;
+};
+
+export type LoadingStage = {
+  id: string;
+  label: string;
+};
+
+export type PlanPreviewItem = {
+  dayLabel: string;
+  title: string;
+};
+
 type BaseOnboardingStep = {
   id: string;
-  chapter: string;
+  chapter?: OnboardingChapterId;
   title: string;
   subtitle?: string;
-  asset?: string;
+  eyebrow?: string;
+  illustrationKey?: OnboardingIllustrationKey;
+  illustrationSize?: 'default' | 'large';
+  hideProgress?: boolean;
   required: boolean;
 };
 
@@ -31,6 +72,7 @@ export type WelcomeStep = BaseOnboardingStep & {
 export type SingleChoiceStep = BaseOnboardingStep & {
   type: 'singleChoice';
   options: readonly OnboardingOption[];
+  comfortable?: boolean;
 };
 
 export type MultiChoiceStep = BaseOnboardingStep & {
@@ -42,33 +84,56 @@ export type MultiChoiceStep = BaseOnboardingStep & {
 
 export type ScaleStep = BaseOnboardingStep & {
   type: 'scale';
-  min: number;
-  max: number;
-  minLabel?: string;
-  maxLabel?: string;
+  points: readonly ScalePoint[];
 };
 
 export type TextInputStep = BaseOnboardingStep & {
   type: 'textInput';
   placeholder?: string;
   maxLength?: number;
+  multiline?: boolean;
 };
 
 export type StoryStep = BaseOnboardingStep & {
   type: 'story';
-  body: string;
-  ctaLabel?: string;
+  body?: string;
+  ctaLabel: string;
 };
 
 export type LoadingStep = BaseOnboardingStep & {
   type: 'loading';
-  durationMs: number;
+  stages: readonly LoadingStage[];
+  /**
+   * Mock-only total duration. Replace with real personalization progress later
+   * without rewriting LoadingScreen.
+   */
+  mockDurationMs: number;
 };
 
 export type ResultStep = BaseOnboardingStep & {
   type: 'result';
-  body: string;
+  profileId: string;
   ctaLabel: string;
+  secondaryCtaLabel?: string;
+};
+
+export type ResultDetailsStep = BaseOnboardingStep & {
+  type: 'resultDetails';
+  profileId: string;
+  ctaLabel: string;
+};
+
+export type SharePreviewStep = BaseOnboardingStep & {
+  type: 'sharePreview';
+  profileId: string;
+  shareCtaLabel: string;
+  continueCtaLabel: string;
+};
+
+export type FinalStep = BaseOnboardingStep & {
+  type: 'final';
+  ctaLabel: string;
+  preview: readonly PlanPreviewItem[];
 };
 
 export type OnboardingStep =
@@ -79,7 +144,10 @@ export type OnboardingStep =
   | TextInputStep
   | StoryStep
   | LoadingStep
-  | ResultStep;
+  | ResultStep
+  | ResultDetailsStep
+  | SharePreviewStep
+  | FinalStep;
 
 export type OnboardingAnswer =
   | { type: 'welcome' }
@@ -89,4 +157,7 @@ export type OnboardingAnswer =
   | { type: 'textInput'; value: string }
   | { type: 'story' }
   | { type: 'loading' }
-  | { type: 'result' };
+  | { type: 'result' }
+  | { type: 'resultDetails' }
+  | { type: 'sharePreview' }
+  | { type: 'final' };

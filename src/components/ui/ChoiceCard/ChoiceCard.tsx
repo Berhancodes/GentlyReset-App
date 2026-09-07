@@ -10,6 +10,7 @@ type ChoiceCardProps = {
   description?: string;
   selected?: boolean;
   disabled?: boolean;
+  comfortable?: boolean;
   onPress: () => void;
 };
 
@@ -18,13 +19,13 @@ export function ChoiceCard({
   description,
   selected = false,
   disabled = false,
+  comfortable = false,
   onPress,
 }: ChoiceCardProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityHint={description}
+      accessibilityLabel={description ? `${label}. ${description}` : label}
       accessibilityState={{ selected, disabled }}
       disabled={disabled}
       onPress={() => {
@@ -33,6 +34,7 @@ export function ChoiceCard({
       }}
       style={({ pressed }) => [
         styles.card,
+        comfortable && styles.comfortable,
         selected ? styles.selected : styles.idle,
         disabled && styles.disabled,
         pressed && !disabled && styles.pressed,
@@ -61,7 +63,7 @@ export function ChoiceCard({
 
 const styles = StyleSheet.create({
   card: {
-    minHeight: 64,
+    minHeight: 56,
     borderRadius: radius.lg,
     borderWidth: 1.5,
     paddingHorizontal: spacing.md,
@@ -72,6 +74,10 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     backgroundColor: colors.surface.raised,
     ...shadows.soft,
+  },
+  comfortable: {
+    minHeight: 72,
+    paddingVertical: spacing.lg,
   },
   idle: {
     borderColor: colors.border.default,

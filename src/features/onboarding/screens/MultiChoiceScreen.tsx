@@ -14,27 +14,15 @@ type MultiChoiceScreenProps = {
 
 export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
   const answer = useOnboardingStore((state) => state.answers[step.id]);
-  const setAnswer = useOnboardingStore((state) => state.setAnswer);
+  const toggleMultiAnswer = useOnboardingStore((state) => state.toggleMultiAnswer);
   const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
   const selectedIds = answer?.type === 'multiChoice' ? answer.optionIds : [];
-
-  function toggle(optionId: string) {
-    const isSelected = selectedIds.includes(optionId);
-    const nextIds = isSelected
-      ? selectedIds.filter((id) => id !== optionId)
-      : [...selectedIds, optionId];
-
-    if (!isSelected && step.maxSelections && nextIds.length > step.maxSelections) {
-      return;
-    }
-
-    setAnswer(step.id, { type: 'multiChoice', optionIds: nextIds });
-  }
 
   return (
     <OnboardingScreenLayout
       title={step.title}
       subtitle={step.subtitle}
+      hideProgress={step.hideProgress}
       onBack={canGoBack ? goBack : undefined}
       footer={
         <PrimaryButton label="continue" disabled={!canProceed(step, answer)} onPress={goToNext} />
@@ -47,7 +35,9 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
             label={option.label}
             description={option.description}
             selected={selectedIds.includes(option.id)}
-            onPress={() => toggle(option.id)}
+            onPress={() => {
+              toggleMultiAnswer(step.id, option.id, step.maxSelections);
+            }}
           />
         ))}
       </View>

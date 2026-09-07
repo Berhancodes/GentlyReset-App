@@ -1,8 +1,9 @@
-import { StyleSheet, TextInput } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { PrimaryButton } from '@/components/ui';
 import { colors, radius, spacing, textVariants } from '@/design-system';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
+import { OnboardingTextButton } from '@/features/onboarding/components/OnboardingTextButton';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { TextInputStep } from '@/features/onboarding/types/onboarding';
@@ -22,29 +23,57 @@ export function TextInputScreen({ step }: TextInputScreenProps) {
     <OnboardingScreenLayout
       title={step.title}
       subtitle={step.subtitle}
+      eyebrow={step.eyebrow}
+      hideProgress={step.hideProgress}
       onBack={canGoBack ? goBack : undefined}
+      avoidKeyboard
       footer={
-        <PrimaryButton label="continue" disabled={!canProceed(step, answer)} onPress={goToNext} />
+        <View style={styles.footerStack}>
+          {step.required ? null : (
+            <OnboardingTextButton
+              label="skip"
+              onPress={() => {
+                Keyboard.dismiss();
+                goToNext();
+              }}
+            />
+          )}
+          <PrimaryButton
+            label="continue"
+            disabled={!canProceed(step, answer)}
+            onPress={() => {
+              Keyboard.dismiss();
+              goToNext();
+            }}
+          />
+        </View>
       }
     >
-      <TextInput
-        accessibilityLabel={step.title}
-        placeholder={step.placeholder}
-        placeholderTextColor={colors.text.muted}
-        value={value}
-        maxLength={step.maxLength}
-        onChangeText={(nextValue) => {
-          setAnswer(step.id, { type: 'textInput', value: nextValue });
-        }}
-        allowFontScaling
-        maxFontSizeMultiplier={1.5}
-        style={styles.input}
-      />
+      <Pressable accessible={false} onPress={Keyboard.dismiss}>
+        <TextInput
+          accessibilityLabel={step.title}
+          placeholder={step.placeholder}
+          placeholderTextColor={colors.text.muted}
+          value={value}
+          maxLength={step.maxLength}
+          multiline={step.multiline}
+          textAlignVertical={step.multiline ? 'top' : 'center'}
+          onChangeText={(nextValue) => {
+            setAnswer(step.id, { type: 'textInput', value: nextValue });
+          }}
+          allowFontScaling
+          maxFontSizeMultiplier={1.5}
+          style={[styles.input, step.multiline ? styles.multiline : null]}
+        />
+      </Pressable>
     </OnboardingScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
+  footerStack: {
+    gap: spacing.xs,
+  },
   input: {
     ...textVariants.body,
     minHeight: 56,
@@ -55,5 +84,9 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+  },
+  multiline: {
+    minHeight: 140,
+    paddingTop: spacing.md,
   },
 });

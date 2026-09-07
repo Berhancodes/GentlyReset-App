@@ -1,36 +1,57 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 
-import { AppText, MascotPlaceholder, ProgressBar, Screen } from '@/components/ui';
+import { AppText, Screen } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
+import { IllustrationPlaceholder } from '@/features/onboarding/components/IllustrationPlaceholder';
+import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
 import { useCurrentOnboardingStep } from '@/features/onboarding/hooks/useCurrentOnboardingStep';
+import type { OnboardingIllustrationKey } from '@/features/onboarding/types/onboarding';
 
 type OnboardingScreenLayoutProps = {
   title: string;
   subtitle?: string;
+  eyebrow?: string;
   children?: ReactNode;
   footer?: ReactNode;
-  showMascot?: boolean;
+  illustrationKey?: OnboardingIllustrationKey;
+  illustrationSize?: 'default' | 'large';
+  hideProgress?: boolean;
   onBack?: () => void;
+  avoidKeyboard?: boolean;
 };
 
 export function OnboardingScreenLayout({
   title,
   subtitle,
+  eyebrow,
   children,
   footer,
-  showMascot = true,
+  illustrationKey,
+  illustrationSize = 'default',
+  hideProgress = false,
   onBack,
+  avoidKeyboard = false,
 }: OnboardingScreenLayoutProps) {
-  const { progress, currentStepIndex, totalSteps } = useCurrentOnboardingStep();
+  const { step } = useCurrentOnboardingStep();
+  const chapterId = step?.chapter;
+  const showProgress = !hideProgress && Boolean(chapterId);
 
-  return (
+  const body = (
     <Screen>
       <View style={styles.header}>
-        <ProgressBar
-          progress={progress}
-          accessibilityLabel={`Step ${currentStepIndex + 1} of ${totalSteps}`}
-        />
+        {showProgress && chapterId ? (
+          <OnboardingProgress chapterId={chapterId} />
+        ) : (
+          <View style={styles.progressSpacer} />
+        )}
         {onBack ? (
           <Pressable
             accessibilityRole="button"
@@ -43,14 +64,25 @@ export function OnboardingScreenLayout({
               back
             </AppText>
           </Pressable>
-        ) : (
-          <View style={styles.backSpacer} />
-        )}
+        ) : null}
       </View>
 
-      <View style={styles.body}>
-        {showMascot ? <MascotPlaceholder /> : null}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        showsVerticalScrollIndicator={false}
+      >
+        {illustrationKey ? (
+          <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
+        ) : null}
         <View style={styles.copy}>
+          {eyebrow ? (
+            <AppText variant="label" color="muted">
+              {eyebrow}
+            </AppText>
+          ) : null}
           <AppText variant="display">{title}</AppText>
           {subtitle ? (
             <AppText variant="subtitle" color="secondary">
@@ -59,29 +91,49 @@ export function OnboardingScreenLayout({
           ) : null}
         </View>
         {children}
-      </View>
+      </ScrollView>
 
       {footer ? <View style={styles.footer}>{footer}</View> : null}
     </Screen>
   );
+
+  if (!avoidKeyboard) {
+    return body;
+  }
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      {body}
+    </KeyboardAvoidingView>
+  );
 }
 
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
   header: {
     paddingTop: spacing.xs,
-    gap: spacing.md,
+    gap: spacing.sm,
+  },
+  progressSpacer: {
+    height: spacing.xs,
   },
   backButton: {
     minHeight: 44,
     justifyContent: 'center',
     alignSelf: 'flex-start',
   },
-  backSpacer: {
-    height: spacing.xs,
-  },
-  body: {
+  scroll: {
     flex: 1,
-    paddingTop: spacing.sm,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.lg,
     gap: spacing.lg,
   },
   copy: {
@@ -90,6 +142,7 @@ const styles = StyleSheet.create({
   footer: {
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
+    gap: spacing.xs,
     backgroundColor: colors.background.primary,
   },
 });

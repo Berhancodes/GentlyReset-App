@@ -2,6 +2,9 @@ import type { OnboardingAnswer, OnboardingStep } from '@/features/onboarding/typ
 
 export function canProceed(step: OnboardingStep, answer: OnboardingAnswer | undefined): boolean {
   if (!step.required) {
+    if (step.type === 'textInput') {
+      return answer?.type === 'textInput' && answer.value.trim().length > 0;
+    }
     return true;
   }
 
@@ -10,6 +13,9 @@ export function canProceed(step: OnboardingStep, answer: OnboardingAnswer | unde
     case 'story':
     case 'loading':
     case 'result':
+    case 'resultDetails':
+    case 'sharePreview':
+    case 'final':
       return true;
     case 'singleChoice':
       return answer?.type === 'singleChoice' && Boolean(answer.optionId);
@@ -21,8 +27,12 @@ export function canProceed(step: OnboardingStep, answer: OnboardingAnswer | unde
       const maxSelections = step.maxSelections ?? answer.optionIds.length;
       return answer.optionIds.length >= minSelections && answer.optionIds.length <= maxSelections;
     }
-    case 'scale':
-      return answer?.type === 'scale' && answer.value >= step.min && answer.value <= step.max;
+    case 'scale': {
+      if (answer?.type !== 'scale') {
+        return false;
+      }
+      return step.points.some((point) => point.value === answer.value);
+    }
     case 'textInput':
       return answer?.type === 'textInput' && answer.value.trim().length > 0;
     default: {

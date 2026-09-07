@@ -22,3 +22,7 @@ export function hapticImpact(
 ): Promise<void> {
   return play(() => Haptics.impactAsync(style));
 }
+
+export function hapticSuccess(): Promise<void> {
+  return play(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success));
+}

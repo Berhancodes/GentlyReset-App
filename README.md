@@ -1,8 +1,7 @@
 # Gently Reset
 
-Gently Reset is a calm, illustrated iOS self-care app. This repository is the **technical foundation**: design tokens, shared UI primitives, Expo Router navigation, and a data-driven onboarding architecture.
-
-Feature work beyond the sample onboarding flow has not started yet.
+Gently Reset is a calm, illustrated iOS self-care app. This repository includes the
+design system, navigation, and a complete data-driven onboarding experience.
 
 ## Tech stack
 
@@ -72,11 +71,13 @@ Route files should re-export a screen from `src/features`. UI implementation and
 
 Onboarding is a list of typed steps in `src/features/onboarding/data/onboardingSteps.ts`.
 
-`OnboardingStep` is a discriminated union (`welcome`, `singleChoice`, `multiChoice`, `scale`, `textInput`, `story`, `loading`, `result`). Each type has the fields it actually needs.
+`OnboardingStep` is a discriminated union (`welcome`, `singleChoice`, `multiChoice`, `scale`, `textInput`, `story`, `loading`, `result`, `resultDetails`, `sharePreview`, `final`). Each type has the fields it actually needs.
 
 `OnboardingRenderer` dispatches the current step to a focused screen. `useOnboardingStore` holds the step index and answers only — no presentation.
 
-Adding a question later means appending to the config, not cloning a screen file.
+The production questionnaire lives in `src/features/onboarding/data/onboardingSteps.ts`. Reset profile copy is mocked in `src/features/onboarding/data/mockResetProfile.ts` until personalization is real.
+
+In development, a small `dev` control on onboarding lets you jump to any step.
 
 The launch gate lives in `src/navigation/getRootHref.ts` so it can later become:
 
@@ -99,7 +100,7 @@ Place production artwork under:
 - `assets/icons/`
 - `assets/fonts/`
 
-The mascot on screen today is an obvious placeholder (`MascotPlaceholder`), not final art.
+The mascot on screen today is an obvious placeholder (`IllustrationPlaceholder`). Drop final art in `assets/images/onboarding/` and register it in `src/features/onboarding/data/onboardingAssets.ts`.
 
 ## Conventions
 

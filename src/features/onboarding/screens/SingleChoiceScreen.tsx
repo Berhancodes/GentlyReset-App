@@ -22,6 +22,8 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
     <OnboardingScreenLayout
       title={step.title}
       subtitle={step.subtitle}
+      eyebrow={step.eyebrow}
+      hideProgress={step.hideProgress}
       onBack={canGoBack ? goBack : undefined}
       footer={
         <PrimaryButton label="continue" disabled={!canProceed(step, answer)} onPress={goToNext} />
@@ -33,6 +35,7 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
             key={option.id}
             label={option.label}
             description={option.description}
+            comfortable={step.comfortable}
             selected={selectedId === option.id}
             onPress={() => {
               setAnswer(step.id, { type: 'singleChoice', optionId: option.id });

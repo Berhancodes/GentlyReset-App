@@ -1,7 +1,10 @@
+import { FinalScreen } from '@/features/onboarding/screens/FinalScreen';
 import { LoadingScreen } from '@/features/onboarding/screens/LoadingScreen';
 import { MultiChoiceScreen } from '@/features/onboarding/screens/MultiChoiceScreen';
+import { ResultDetailsScreen } from '@/features/onboarding/screens/ResultDetailsScreen';
 import { ResultScreen } from '@/features/onboarding/screens/ResultScreen';
 import { ScaleScreen } from '@/features/onboarding/screens/ScaleScreen';
+import { SharePreviewScreen } from '@/features/onboarding/screens/SharePreviewScreen';
 import { SingleChoiceScreen } from '@/features/onboarding/screens/SingleChoiceScreen';
 import { StoryScreen } from '@/features/onboarding/screens/StoryScreen';
 import { TextInputScreen } from '@/features/onboarding/screens/TextInputScreen';
@@ -31,6 +34,12 @@ export function OnboardingRenderer({ step }: OnboardingRendererProps) {
       return <LoadingScreen step={step} />;
     case 'result':
       return <ResultScreen step={step} />;
+    case 'resultDetails':
+      return <ResultDetailsScreen step={step} />;
+    case 'sharePreview':
+      return <SharePreviewScreen step={step} />;
+    case 'final':
+      return <FinalScreen step={step} />;
     default:
       return assertNever(step);
   }
