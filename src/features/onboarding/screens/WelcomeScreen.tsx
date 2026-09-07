@@ -1,4 +1,4 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -16,6 +16,18 @@ import type { WelcomeStep } from '@/features/onboarding/types/onboarding';
 import { hapticImpact } from '@/utils/haptics';
 
 const WELCOME_ART = require('../../../../assets/images/onboarding/welcome-sunset.png');
+
+function readableTextShadow(blur: number) {
+  if (Platform.OS === 'web') {
+    return { textShadow: `0 1px ${blur}px ${colors.overlay.scrim}` };
+  }
+
+  return {
+    textShadowColor: colors.overlay.scrim,
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: blur,
+  };
+}
 
 type WelcomeScreenProps = {
   step: WelcomeStep;
@@ -36,19 +48,23 @@ export function WelcomeScreen({ step }: WelcomeScreenProps) {
         importantForAccessibility="no"
         style={styles.background}
       />
-      <View pointerEvents="none" style={styles.bottomWash} />
+      <View style={styles.bottomWash} />
       <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={styles.safe}>
         <Animated.View entering={copyEntering} style={styles.copy}>
           <Text
             accessibilityRole="header"
             allowFontScaling
             maxFontSizeMultiplier={1.25}
-            style={styles.title}
+            style={[styles.title, readableTextShadow(8)]}
           >
             {step.title}
           </Text>
           {step.subtitle ? (
-            <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.subtitle}>
+            <Text
+              allowFontScaling
+              maxFontSizeMultiplier={1.3}
+              style={[styles.subtitle, readableTextShadow(6)]}
+            >
               {step.subtitle}
             </Text>
           ) : null}
@@ -92,6 +108,7 @@ const styles = StyleSheet.create({
     height: '22%',
     backgroundColor: colors.background.inverse,
     opacity: 0.12,
+    pointerEvents: 'none',
   },
   safe: {
     flex: 1,
@@ -110,9 +127,6 @@ const styles = StyleSheet.create({
     color: colors.text.inverse,
     textAlign: 'center',
     letterSpacing: -0.8,
-    textShadowColor: colors.overlay.scrim,
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 8,
   },
   subtitle: {
     ...textVariants.subtitle,
@@ -121,9 +135,6 @@ const styles = StyleSheet.create({
     color: colors.text.inverse,
     textAlign: 'center',
     lineHeight: 24,
-    textShadowColor: colors.overlay.scrim,
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 6,
   },
   stage: {
     flex: 1,
