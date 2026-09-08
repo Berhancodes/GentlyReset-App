@@ -49,10 +49,7 @@ export function AppTabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View
-      pointerEvents="box-none"
-      style={[styles.dock, { paddingBottom: insets.bottom + TAB_BAR_BOTTOM_GAP }]}
-    >
+    <View style={[styles.dock, { paddingBottom: insets.bottom + TAB_BAR_BOTTOM_GAP }]}>
       <View style={styles.bar}>
         {state.routes.map((route, index) => {
           const meta = TABS[route.name as TabRouteName];
@@ -112,6 +109,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingHorizontal: TAB_BAR_SIDE_INSET,
+    pointerEvents: 'box-none',
   },
   bar: {
     height: TAB_BAR_HEIGHT,

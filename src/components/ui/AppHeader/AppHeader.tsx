@@ -19,7 +19,7 @@ export function AppHeader({ title }: AppHeaderProps) {
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.bar}>
-        <View style={styles.titleWrap} pointerEvents="none">
+        <View style={styles.titleWrap}>
           <AppText variant="navTitle" align="center">
             {title}
           </AppText>
@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
   titleWrap: {
     ...StyleSheet.absoluteFill,
     justifyContent: 'center',
+    pointerEvents: 'none',
   },
   mascot: {
     position: 'absolute',
