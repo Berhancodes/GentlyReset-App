@@ -1,7 +1,15 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 
+import { TabBarIcon } from '@/components/ui';
 import { colors, fontSizes, spacing } from '@/design-system';
+
+const TAB_ICONS = {
+  home: require('../../../../assets/icons/tab-home.png'),
+  journey: require('../../../../assets/icons/tab-journey.png'),
+  reflect: require('../../../../assets/icons/tab-reflect.png'),
+  world: require('../../../../assets/icons/tab-world.png'),
+  you: require('../../../../assets/icons/tab-you.png'),
+} as const;
 
 export default function TabsLayout() {
   return (
@@ -25,35 +33,45 @@ export default function TabsLayout() {
         name="home"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color} size={size} />,
+          tabBarIcon: ({ focused, size }) => (
+            <TabBarIcon source={TAB_ICONS.home} focused={focused} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
         name="journey"
         options={{
           title: 'Journey',
-          tabBarIcon: ({ color, size }) => <Ionicons name="map" color={color} size={size} />,
+          tabBarIcon: ({ focused, size }) => (
+            <TabBarIcon source={TAB_ICONS.journey} focused={focused} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
         name="reflect"
         options={{
           title: 'Reflect',
-          tabBarIcon: ({ color, size }) => <Ionicons name="book" color={color} size={size} />,
+          tabBarIcon: ({ focused, size }) => (
+            <TabBarIcon source={TAB_ICONS.reflect} focused={focused} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
         name="world"
         options={{
           title: 'World',
-          tabBarIcon: ({ color, size }) => <Ionicons name="globe" color={color} size={size} />,
+          tabBarIcon: ({ focused, size }) => (
+            <TabBarIcon source={TAB_ICONS.world} focused={focused} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person" color={color} size={size} />,
+          title: 'You',
+          tabBarIcon: ({ focused, size }) => (
+            <TabBarIcon source={TAB_ICONS.you} focused={focused} size={size} />
+          ),
         }}
       />
     </Tabs>
