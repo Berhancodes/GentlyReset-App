@@ -4,11 +4,11 @@ import { TabBarIcon } from '@/components/ui';
 import { colors, fontSizes, spacing } from '@/design-system';
 
 const TAB_ICONS = {
-  home: require('../../../../assets/icons/tab-home.png'),
-  journey: require('../../../../assets/icons/tab-journey.png'),
-  reflect: require('../../../../assets/icons/tab-reflect.png'),
-  world: require('../../../../assets/icons/tab-world.png'),
-  you: require('../../../../assets/icons/tab-you.png'),
+  home: require('../../../assets/icons/tab-home.png'),
+  journey: require('../../../assets/icons/tab-journey.png'),
+  reflect: require('../../../assets/icons/tab-reflect.png'),
+  world: require('../../../assets/icons/tab-world.png'),
+  you: require('../../../assets/icons/tab-you.png'),
 } as const;
 
 export default function TabsLayout() {
