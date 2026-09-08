@@ -1,11 +1,12 @@
 import { StyleSheet, View } from 'react-native';
 
-import { AppText, Screen } from '@/components/ui';
+import { AppHeader, AppText, Screen } from '@/components/ui';
 import { spacing } from '@/design-system';
 
 export function ProfileScreen() {
   return (
-    <Screen includeBottomSafeArea={false}>
+    <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
+      <AppHeader title="you" />
       <View style={styles.content}>
         <AppText variant="label" color="muted">
           PROFILE
@@ -24,5 +25,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     gap: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
 });

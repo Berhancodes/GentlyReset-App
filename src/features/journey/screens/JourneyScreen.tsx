@@ -1,11 +1,12 @@
 import { StyleSheet, View } from 'react-native';
 
-import { AppText, Screen } from '@/components/ui';
+import { AppHeader, AppText, Screen } from '@/components/ui';
 import { spacing } from '@/design-system';
 
 export function JourneyScreen() {
   return (
-    <Screen includeBottomSafeArea={false}>
+    <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
+      <AppHeader title="my world" />
       <View style={styles.content}>
         <AppText variant="label" color="muted">
           JOURNEY
@@ -24,5 +25,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     gap: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
 });

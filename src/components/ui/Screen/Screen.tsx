@@ -7,6 +7,10 @@ import { colors, spacing } from '@/design-system';
 type ScreenProps = {
   children: ReactNode;
   /**
+   * When false, the top inset is left to a header that paints behind the status bar.
+   */
+  includeTopSafeArea?: boolean;
+  /**
    * When false, the bottom safe area is left to a tab bar or other chrome.
    */
   includeBottomSafeArea?: boolean;
@@ -17,14 +21,18 @@ type ScreenProps = {
 
 export function Screen({
   children,
+  includeTopSafeArea = true,
   includeBottomSafeArea = true,
   padded = true,
   backgroundColor = colors.background.primary,
   testID,
 }: ScreenProps) {
-  const edges: Edge[] = includeBottomSafeArea
-    ? ['top', 'right', 'bottom', 'left']
-    : ['top', 'right', 'left'];
+  const edges: Edge[] = [
+    ...(includeTopSafeArea ? (['top'] as const) : []),
+    'right',
+    ...(includeBottomSafeArea ? (['bottom'] as const) : []),
+    'left',
+  ];
 
   return (
     <SafeAreaView

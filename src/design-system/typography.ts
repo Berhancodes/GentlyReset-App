@@ -87,6 +87,12 @@ export const textVariants = {
     lineHeight: lineHeights.md,
     fontWeight: fontWeights.semibold,
   },
+  navTitle: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.md,
+    lineHeight: lineHeights.sm,
+    fontWeight: fontWeights.semibold,
+  },
   questionTitle: {
     fontFamily: fontFamilies.rounded,
     fontSize: fontSizes.question,

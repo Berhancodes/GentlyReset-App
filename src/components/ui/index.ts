@@ -1,3 +1,4 @@
+export { AppHeader } from './AppHeader';
 export { PrimaryButton } from './Button';
 export { ChoiceCard } from './ChoiceCard';
 export { MascotPlaceholder } from './MascotPlaceholder';

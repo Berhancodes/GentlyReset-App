@@ -21,7 +21,12 @@ type AppTextProps = Omit<TextProps, 'style'> & {
   children: ReactNode;
 };
 
-const HEADER_VARIANTS: ReadonlySet<TextVariant> = new Set(['display', 'title', 'questionTitle']);
+const HEADER_VARIANTS: ReadonlySet<TextVariant> = new Set([
+  'display',
+  'title',
+  'questionTitle',
+  'navTitle',
+]);
 
 export function AppText({
   variant = 'body',
