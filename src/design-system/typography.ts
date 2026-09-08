@@ -15,9 +15,11 @@ export const fontFamilies = {
 } as const;
 
 export const fontSizes = {
+  tab: 11,
   xs: 13,
   sm: 15,
   md: 17,
+  nav: 19,
   lg: 20,
   xl: 28,
   question: 30,
@@ -25,6 +27,7 @@ export const fontSizes = {
 } as const;
 
 export const lineHeights = {
+  tab: 14,
   xs: 18,
   sm: 20,
   md: 24,
@@ -89,8 +92,20 @@ export const textVariants = {
   },
   navTitle: {
     fontFamily: fontFamilies.rounded,
-    fontSize: fontSizes.md,
-    lineHeight: lineHeights.sm,
+    fontSize: fontSizes.nav,
+    lineHeight: lineHeights.md,
+    fontWeight: fontWeights.semibold,
+  },
+  tabLabel: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.tab,
+    lineHeight: lineHeights.tab,
+    fontWeight: fontWeights.medium,
+  },
+  tabLabelActive: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.tab,
+    lineHeight: lineHeights.tab,
     fontWeight: fontWeights.semibold,
   },
   questionTitle: {

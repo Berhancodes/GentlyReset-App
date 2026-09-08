@@ -6,8 +6,8 @@ import { colors, spacing } from '@/design-system';
 
 const MASCOT_HEAD = require('../../../../assets/images/mascot/mascot-head.png');
 
-const HEADER_CONTENT_HEIGHT = spacing.xxl;
-const MASCOT_SIZE = 20;
+const HEADER_CONTENT_HEIGHT = 48;
+const MASCOT_SIZE = 24;
 
 type AppHeaderProps = {
   title: string;
@@ -19,7 +19,7 @@ export function AppHeader({ title }: AppHeaderProps) {
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.bar}>
-        <View style={styles.titleWrap}>
+        <View style={styles.titleWrap} pointerEvents="none">
           <AppText variant="navTitle" align="center">
             {title}
           </AppText>
@@ -46,13 +46,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   titleWrap: {
-    width: '100%',
+    ...StyleSheet.absoluteFill,
+    justifyContent: 'center',
   },
   mascot: {
     position: 'absolute',
-    left: spacing.md,
+    left: spacing.lg,
     top: (HEADER_CONTENT_HEIGHT - MASCOT_SIZE) / 2,
     width: MASCOT_SIZE,
     height: MASCOT_SIZE,
+    zIndex: 1,
   },
 });

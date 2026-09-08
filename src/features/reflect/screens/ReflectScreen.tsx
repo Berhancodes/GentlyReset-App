@@ -23,8 +23,8 @@ export function ReflectScreen() {
 const styles = StyleSheet.create({
   content: {
     flex: 1,
-    justifyContent: 'center',
     gap: spacing.md,
     paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
   },
 });
