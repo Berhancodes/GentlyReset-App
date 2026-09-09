@@ -35,7 +35,7 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
         key={option.id}
         label={option.label}
         description={option.description}
-        variant={isTile ? 'tile' : 'row'}
+        variant={isReasonStep ? 'illustrated' : isTile ? 'tile' : 'row'}
         leading={
           reasonIcon ? (
             <OptionIcon source={reasonIcon} />
@@ -43,7 +43,7 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
             <ChoiceGlyph optionId={option.id} />
           ) : undefined
         }
-        showIndicator={!isTile}
+        showIndicator={!isTile && !isReasonStep}
         selected={selectedIds.includes(option.id)}
         onPress={() => {
           toggleMultiAnswer(step.id, option.id, step.maxSelections);
@@ -52,30 +52,34 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
     );
   });
 
+  const options =
+    layout === 'grid3' ? (
+      <OptionGrid columns={3}>{cards}</OptionGrid>
+    ) : layout === 'grid2' ? (
+      <OptionGrid columns={2}>{cards}</OptionGrid>
+    ) : (
+      <View style={styles.list}>{cards}</View>
+    );
+
   return (
     <OnboardingScreenLayout
       tone="question"
+      compact={isReasonStep}
       title={step.title}
       subtitle={getQuestionHelper(step)}
       hideProgress={step.hideProgress}
       onBack={canGoBack ? goBack : undefined}
       footer={
-        isReasonStep ? (
-          <View>
-            <ThinkingLogMascot />
-            <PrimaryButton label="next" disabled={!canProceed(step, answer)} onPress={goToNext} />
-          </View>
-        ) : (
-          <PrimaryButton label="next" disabled={!canProceed(step, answer)} onPress={goToNext} />
-        )
+        <PrimaryButton label="next" disabled={!canProceed(step, answer)} onPress={goToNext} />
       }
     >
-      {layout === 'grid3' ? (
-        <OptionGrid columns={3}>{cards}</OptionGrid>
-      ) : layout === 'grid2' ? (
-        <OptionGrid columns={2}>{cards}</OptionGrid>
+      {isReasonStep ? (
+        <View style={styles.reasonBlock}>
+          {options}
+          <ThinkingLogMascot />
+        </View>
       ) : (
-        <View style={styles.list}>{cards}</View>
+        options
       )}
     </OnboardingScreenLayout>
   );
@@ -84,5 +88,8 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
 const styles = StyleSheet.create({
   list: {
     gap: spacing.sm,
+  },
+  reasonBlock: {
+    gap: spacing.xs,
   },
 });

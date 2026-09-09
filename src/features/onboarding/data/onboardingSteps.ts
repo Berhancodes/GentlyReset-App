@@ -51,7 +51,7 @@ export const ONBOARDING_STEPS = [
     title: 'what brought you here today?',
     required: true,
     minSelections: 1,
-    layout: 'stacked',
+    layout: 'grid2',
     options: [
       { id: 'stuck', label: 'I feel stuck' },
       { id: 'overwhelmed', label: "I'm overwhelmed" },

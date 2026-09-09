@@ -28,6 +28,8 @@ type OnboardingScreenLayoutProps = {
   avoidKeyboard?: boolean;
   showTitle?: boolean;
   tone?: 'default' | 'question';
+  /** Tighter vertical gaps so a compact question can fit on one phone screen. */
+  compact?: boolean;
 };
 
 export function OnboardingScreenLayout({
@@ -43,6 +45,7 @@ export function OnboardingScreenLayout({
   avoidKeyboard = false,
   showTitle = true,
   tone = 'default',
+  compact = false,
 }: OnboardingScreenLayoutProps) {
   const showProgress = !hideProgress;
   const isQuestion = tone === 'question';
@@ -91,6 +94,7 @@ export function OnboardingScreenLayout({
         contentContainerStyle={[
           styles.scrollContent,
           isQuestion ? styles.questionScrollContent : null,
+          compact ? styles.compactScrollContent : null,
         ]}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
@@ -121,7 +125,15 @@ export function OnboardingScreenLayout({
       </ScrollView>
 
       {footer ? (
-        <View style={[styles.footer, isQuestion ? styles.questionFooter : null]}>{footer}</View>
+        <View
+          style={[
+            styles.footer,
+            isQuestion ? styles.questionFooter : null,
+            compact ? styles.compactFooter : null,
+          ]}
+        >
+          {footer}
+        </View>
       ) : null}
     </Screen>
   );
@@ -202,5 +214,14 @@ const styles = StyleSheet.create({
   questionFooter: {
     paddingTop: spacing.lg,
     paddingBottom: spacing.lg,
+  },
+  compactScrollContent: {
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+    gap: spacing.md,
+  },
+  compactFooter: {
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
   },
 });
