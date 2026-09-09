@@ -132,6 +132,7 @@ const styles = StyleSheet.create({
   leading: {
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   copy: {
     flex: 1,

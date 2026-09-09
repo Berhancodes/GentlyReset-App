@@ -5,7 +5,9 @@ import { spacing } from '@/design-system';
 import { ChoiceGlyph } from '@/features/onboarding/components/ChoiceGlyph';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { OptionGrid } from '@/features/onboarding/components/OptionGrid';
+import { OptionIcon } from '@/features/onboarding/components/OptionIcon';
 import { ThinkingLogMascot } from '@/features/onboarding/components/ThinkingLogMascot';
+import { getReasonOptionIconSource } from '@/features/onboarding/data/onboardingAssets';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { MultiChoiceStep } from '@/features/onboarding/types/onboarding';
@@ -23,22 +25,32 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
   const selectedIds = answer?.type === 'multiChoice' ? answer.optionIds : [];
   const layout = step.layout ?? 'stacked';
   const isTile = layout === 'grid2' || layout === 'grid3';
-  const showThinkingLogMascot = step.id === 'reason';
+  const isReasonStep = step.id === 'reason';
 
-  const cards = step.options.map((option) => (
-    <ChoiceCard
-      key={option.id}
-      label={option.label}
-      description={option.description}
-      variant={isTile ? 'tile' : 'row'}
-      leading={isTile ? <ChoiceGlyph optionId={option.id} /> : undefined}
-      showIndicator={!isTile}
-      selected={selectedIds.includes(option.id)}
-      onPress={() => {
-        toggleMultiAnswer(step.id, option.id, step.maxSelections);
-      }}
-    />
-  ));
+  const cards = step.options.map((option) => {
+    const reasonIcon = isReasonStep ? getReasonOptionIconSource(option.id) : undefined;
+
+    return (
+      <ChoiceCard
+        key={option.id}
+        label={option.label}
+        description={option.description}
+        variant={isTile ? 'tile' : 'row'}
+        leading={
+          reasonIcon ? (
+            <OptionIcon source={reasonIcon} />
+          ) : isTile ? (
+            <ChoiceGlyph optionId={option.id} />
+          ) : undefined
+        }
+        showIndicator={!isTile}
+        selected={selectedIds.includes(option.id)}
+        onPress={() => {
+          toggleMultiAnswer(step.id, option.id, step.maxSelections);
+        }}
+      />
+    );
+  });
 
   return (
     <OnboardingScreenLayout
@@ -48,7 +60,7 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
       hideProgress={step.hideProgress}
       onBack={canGoBack ? goBack : undefined}
       footer={
-        showThinkingLogMascot ? (
+        isReasonStep ? (
           <View>
             <ThinkingLogMascot />
             <PrimaryButton label="next" disabled={!canProceed(step, answer)} onPress={goToNext} />
