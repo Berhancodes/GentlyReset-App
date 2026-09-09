@@ -6,9 +6,9 @@ const ART_HEIGHT = 1024;
 const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 
 /** Target width on a standard iPhone (~390×844). */
-const ART_MAX_WIDTH = 260;
-const ART_PREFERRED_WIDTH = 240;
-const ART_MIN_WIDTH = 184;
+const ART_MAX_WIDTH = 248;
+const ART_PREFERRED_WIDTH = 220;
+const ART_MIN_WIDTH = 180;
 
 /**
  * Decorative environment illustration for the "what brought you here today?" question.
@@ -16,8 +16,8 @@ const ART_MIN_WIDTH = 184;
  */
 export function ThinkingLogMascot() {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  const sizedByWidth = Math.round(windowWidth * 0.62);
-  const sizedByHeight = Math.round(windowHeight * 0.19 * ART_ASPECT);
+  const sizedByWidth = Math.round(windowWidth * 0.56);
+  const sizedByHeight = Math.round(windowHeight * 0.165 * ART_ASPECT);
   const artWidth = Math.min(
     ART_MAX_WIDTH,
     Math.max(ART_MIN_WIDTH, Math.min(ART_PREFERRED_WIDTH, sizedByWidth, sizedByHeight)),

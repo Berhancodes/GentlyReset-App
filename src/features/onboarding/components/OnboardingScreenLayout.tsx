@@ -187,6 +187,7 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flex: 1,
+    minHeight: 0,
   },
   scrollContent: {
     flexGrow: 1,
@@ -216,12 +217,12 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
   },
   compactScrollContent: {
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
-    gap: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: 0,
+    gap: spacing.sm,
   },
   compactFooter: {
     paddingTop: spacing.md,
-    paddingBottom: spacing.md,
+    paddingBottom: spacing.sm,
   },
 });
