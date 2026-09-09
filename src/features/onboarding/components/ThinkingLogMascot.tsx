@@ -1,30 +1,28 @@
 import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
 
-import { spacing } from '@/design-system';
-
-const THINKING_LOG_ART = require('../../../../assets/images/mascot/mascot-thinking-log.png');
-const ART_WIDTH = 1254;
-const ART_HEIGHT = 1254;
+const WORLD_ART = require('../../../../assets/images/mascot/mascot-thinking-world.png');
+const ART_WIDTH = 1536;
+const ART_HEIGHT = 1024;
 const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 
-/** Compact size so the mascot sits with the answer grid on one phone screen. */
-const MASCOT_MAX_WIDTH = 120;
-const MASCOT_PREFERRED_WIDTH = 112;
-const MASCOT_MIN_WIDTH = 100;
+/** Target width on a standard iPhone (~390×844). */
+const ART_MAX_WIDTH = 260;
+const ART_PREFERRED_WIDTH = 240;
+const ART_MIN_WIDTH = 184;
 
 /**
- * Decorative mascot for the "what brought you here today?" question.
+ * Decorative environment illustration for the "what brought you here today?" question.
  * Not interactive — does not participate in choice selection.
  */
 export function ThinkingLogMascot() {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  const sizedByHeight = Math.round(windowHeight * 0.13);
-  const sizedByWidth = Math.round(windowWidth * 0.3);
-  const mascotWidth = Math.min(
-    MASCOT_MAX_WIDTH,
-    Math.max(MASCOT_MIN_WIDTH, Math.min(MASCOT_PREFERRED_WIDTH, sizedByHeight, sizedByWidth)),
+  const sizedByWidth = Math.round(windowWidth * 0.62);
+  const sizedByHeight = Math.round(windowHeight * 0.19 * ART_ASPECT);
+  const artWidth = Math.min(
+    ART_MAX_WIDTH,
+    Math.max(ART_MIN_WIDTH, Math.min(ART_PREFERRED_WIDTH, sizedByWidth, sizedByHeight)),
   );
-  const mascotHeight = Math.round(mascotWidth / ART_ASPECT);
+  const artHeight = Math.round(artWidth / ART_ASPECT);
 
   return (
     <View
@@ -34,11 +32,11 @@ export function ThinkingLogMascot() {
       style={styles.wrap}
     >
       <Image
-        source={THINKING_LOG_ART}
+        source={WORLD_ART}
         resizeMode="contain"
         accessibilityElementsHidden
         importantForAccessibility="no"
-        style={{ width: mascotWidth, height: mascotHeight }}
+        style={{ width: artWidth, height: artHeight }}
       />
     </View>
   );
@@ -48,6 +46,5 @@ const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
     pointerEvents: 'none',
-    marginTop: spacing.xs,
   },
 });

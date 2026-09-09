@@ -90,6 +90,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   reasonBlock: {
-    gap: spacing.xs,
+    gap: spacing.md,
   },
 });
