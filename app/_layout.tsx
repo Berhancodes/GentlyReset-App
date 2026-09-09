@@ -5,6 +5,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { colors } from '@/design-system';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
@@ -20,24 +21,26 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <GestureHandlerRootView style={styles.root}>
-      <StatusBar style="dark" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: 'fade',
-          contentStyle: { backgroundColor: colors.background.primary },
-        }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Protected guard={!hasCompletedOnboarding}>
-          <Stack.Screen name="(onboarding)" />
-        </Stack.Protected>
-        <Stack.Protected guard={hasCompletedOnboarding}>
-          <Stack.Screen name="(app)" />
-        </Stack.Protected>
-      </Stack>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={styles.root}>
+        <StatusBar style="dark" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: 'fade',
+            contentStyle: { backgroundColor: colors.background.primary },
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Protected guard={!hasCompletedOnboarding}>
+            <Stack.Screen name="(onboarding)" />
+          </Stack.Protected>
+          <Stack.Protected guard={hasCompletedOnboarding}>
+            <Stack.Screen name="(app)" />
+          </Stack.Protected>
+        </Stack>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
 

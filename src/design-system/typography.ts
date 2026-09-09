@@ -19,7 +19,7 @@ export const fontSizes = {
   xs: 13,
   sm: 15,
   md: 17,
-  nav: 19,
+  nav: 18,
   lg: 20,
   xl: 28,
   question: 30,
@@ -30,6 +30,7 @@ export const lineHeights = {
   tab: 14,
   xs: 18,
   sm: 20,
+  nav: 22,
   md: 24,
   lg: 28,
   xl: 34,
@@ -93,7 +94,7 @@ export const textVariants = {
   navTitle: {
     fontFamily: fontFamilies.rounded,
     fontSize: fontSizes.nav,
-    lineHeight: lineHeights.md,
+    lineHeight: lineHeights.nav,
     fontWeight: fontWeights.semibold,
   },
   tabLabel: {

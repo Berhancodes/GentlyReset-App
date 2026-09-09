@@ -6,8 +6,9 @@ import { colors, spacing } from '@/design-system';
 
 const MASCOT_HEAD = require('../../../../assets/images/mascot/mascot-head.png');
 
-const HEADER_CONTENT_HEIGHT = 48;
+const HEADER_ROW_HEIGHT = 48;
 const MASCOT_SIZE = 24;
+const MASCOT_LEFT = spacing.md + spacing.xxs;
 
 type AppHeaderProps = {
   title: string;
@@ -18,12 +19,7 @@ export function AppHeader({ title }: AppHeaderProps) {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      <View style={styles.bar}>
-        <View style={styles.titleWrap}>
-          <AppText variant="navTitle" align="center">
-            {title}
-          </AppText>
-        </View>
+      <View style={styles.row}>
         <Image
           source={MASCOT_HEAD}
           resizeMode="contain"
@@ -32,6 +28,11 @@ export function AppHeader({ title }: AppHeaderProps) {
           importantForAccessibility="no"
           style={styles.mascot}
         />
+        <View style={styles.titleLayer}>
+          <AppText variant="navTitle" align="center">
+            {title}
+          </AppText>
+        </View>
       </View>
     </View>
   );
@@ -41,21 +42,20 @@ const styles = StyleSheet.create({
   root: {
     backgroundColor: colors.background.primary,
   },
-  bar: {
-    height: HEADER_CONTENT_HEIGHT,
-    justifyContent: 'center',
-  },
-  titleWrap: {
-    ...StyleSheet.absoluteFill,
-    justifyContent: 'center',
-    pointerEvents: 'none',
+  row: {
+    height: HEADER_ROW_HEIGHT,
   },
   mascot: {
     position: 'absolute',
-    left: spacing.lg,
-    top: (HEADER_CONTENT_HEIGHT - MASCOT_SIZE) / 2,
+    left: MASCOT_LEFT,
+    top: (HEADER_ROW_HEIGHT - MASCOT_SIZE) / 2,
     width: MASCOT_SIZE,
     height: MASCOT_SIZE,
     zIndex: 1,
+  },
+  titleLayer: {
+    ...StyleSheet.absoluteFill,
+    justifyContent: 'center',
+    pointerEvents: 'none',
   },
 });
