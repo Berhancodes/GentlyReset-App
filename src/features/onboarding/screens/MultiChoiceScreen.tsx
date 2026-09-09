@@ -5,6 +5,7 @@ import { spacing } from '@/design-system';
 import { ChoiceGlyph } from '@/features/onboarding/components/ChoiceGlyph';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { OptionGrid } from '@/features/onboarding/components/OptionGrid';
+import { ThinkingLogMascot } from '@/features/onboarding/components/ThinkingLogMascot';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { MultiChoiceStep } from '@/features/onboarding/types/onboarding';
@@ -22,6 +23,7 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
   const selectedIds = answer?.type === 'multiChoice' ? answer.optionIds : [];
   const layout = step.layout ?? 'stacked';
   const isTile = layout === 'grid2' || layout === 'grid3';
+  const showThinkingLogMascot = step.id === 'reason';
 
   const cards = step.options.map((option) => (
     <ChoiceCard
@@ -46,7 +48,14 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
       hideProgress={step.hideProgress}
       onBack={canGoBack ? goBack : undefined}
       footer={
-        <PrimaryButton label="next" disabled={!canProceed(step, answer)} onPress={goToNext} />
+        showThinkingLogMascot ? (
+          <View>
+            <ThinkingLogMascot />
+            <PrimaryButton label="next" disabled={!canProceed(step, answer)} onPress={goToNext} />
+          </View>
+        ) : (
+          <PrimaryButton label="next" disabled={!canProceed(step, answer)} onPress={goToNext} />
+        )
       }
     >
       {layout === 'grid3' ? (
