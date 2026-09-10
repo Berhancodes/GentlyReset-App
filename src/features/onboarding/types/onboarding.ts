@@ -152,6 +152,13 @@ export type FinalStep = BaseOnboardingStep & {
   preview: readonly PlanPreviewItem[];
 };
 
+export type PaywallStep = BaseOnboardingStep & {
+  type: 'paywall';
+  ctaLabel: string;
+  secondaryCtaLabel: string;
+  benefits: readonly string[];
+};
+
 export type OnboardingStep =
   | WelcomeStep
   | SingleChoiceStep
@@ -164,7 +171,8 @@ export type OnboardingStep =
   | ResultStep
   | ResultDetailsStep
   | SharePreviewStep
-  | FinalStep;
+  | FinalStep
+  | PaywallStep;
 
 export type OnboardingAnswer =
   | { type: 'welcome' }
@@ -178,4 +186,5 @@ export type OnboardingAnswer =
   | { type: 'result' }
   | { type: 'resultDetails' }
   | { type: 'sharePreview' }
-  | { type: 'final' };
+  | { type: 'final' }
+  | { type: 'paywall' };

@@ -2,8 +2,14 @@ import { StyleSheet, View } from 'react-native';
 
 import { colors } from '@/design-system';
 
-export function BackChevron() {
-  return <View accessibilityElementsHidden importantForAccessibility="no" style={styles.glyph} />;
+export function BackChevron({ tone = 'default' }: { tone?: 'default' | 'inverse' }) {
+  return (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no"
+      style={[styles.glyph, tone === 'inverse' ? styles.inverse : null]}
+    />
+  );
 }
 
 const styles = StyleSheet.create({
@@ -15,5 +21,8 @@ const styles = StyleSheet.create({
     borderColor: colors.text.primary,
     transform: [{ rotate: '45deg' }],
     marginLeft: 4,
+  },
+  inverse: {
+    borderColor: colors.text.inverse,
   },
 });

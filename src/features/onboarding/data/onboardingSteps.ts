@@ -573,6 +573,24 @@ export const ONBOARDING_STEPS = [
       { dayLabel: 'Day 3', title: 'Build one repeatable win' },
     ],
   },
+  {
+    id: 'paywall',
+    type: 'paywall',
+    title: 'unlock your\nfull journey',
+    subtitle: 'go further with Gently Reset Pro.',
+    ctaLabel: 'start free trial',
+    secondaryCtaLabel: 'maybe later',
+    hideProgress: true,
+    required: false,
+    benefits: [
+      'full 30-day reset plan',
+      'unlimited check-ins',
+      'ai guidance & insights',
+      'customize your companion',
+      'unlock new worlds',
+      'support our small team',
+    ],
+  },
 ] as const satisfies readonly OnboardingStep[];
 
 export type OnboardingStepId = (typeof ONBOARDING_STEPS)[number]['id'];

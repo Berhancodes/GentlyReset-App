@@ -73,6 +73,9 @@ export function getOnboardingIllustrationSource(key: OnboardingIllustrationKey) 
   return ONBOARDING_ILLUSTRATION_SOURCES[key];
 }
 
+export const PAYWALL_NIGHT_ART =
+  require('../../../../assets/images/onboarding/paywall-night.png') as ImageSourcePropType;
+
 /**
  * Illustrated icons for the "what brought you here today?" cards.
  * Paths stay identical so Page 2 rendering does not change.

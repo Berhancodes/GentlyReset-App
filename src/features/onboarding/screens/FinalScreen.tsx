@@ -5,14 +5,13 @@ import { colors, radius, shadows, spacing } from '@/design-system';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import type { FinalStep } from '@/features/onboarding/types/onboarding';
-import { finishOnboarding } from '@/features/onboarding/utils/finishOnboarding';
 
 type FinalScreenProps = {
   step: FinalStep;
 };
 
 export function FinalScreen({ step }: FinalScreenProps) {
-  const { router, goBack, canGoBack } = useOnboardingNavigation();
+  const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
 
   return (
     <OnboardingScreenLayout
@@ -25,15 +24,7 @@ export function FinalScreen({ step }: FinalScreenProps) {
       illustrationPlacement="afterHero"
       hideProgress
       onBack={canGoBack ? goBack : undefined}
-      footer={
-        <PrimaryButton
-          label={step.ctaLabel}
-          haptic="success"
-          onPress={() => {
-            finishOnboarding(router);
-          }}
-        />
-      }
+      footer={<PrimaryButton label={step.ctaLabel} haptic="success" onPress={goToNext} />}
     >
       <View style={styles.preview}>
         {step.preview.map((item) => (

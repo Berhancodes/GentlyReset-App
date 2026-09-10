@@ -17,6 +17,7 @@ const palette = {
   sandSubtle: '#F0E4D4',
   sandTrack: '#EAD9C4',
   white: '#FFFFFF',
+  night: '#152347',
 } as const;
 
 /**
@@ -28,6 +29,7 @@ export const colors = {
     primary: palette.cream,
     secondary: palette.creamSoft,
     inverse: palette.brown,
+    night: palette.night,
   },
   surface: {
     primary: palette.creamSoft,

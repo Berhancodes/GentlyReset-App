@@ -17,6 +17,7 @@ export function canProceed(step: OnboardingStep, answer: OnboardingAnswer | unde
     case 'resultDetails':
     case 'sharePreview':
     case 'final':
+    case 'paywall':
       return true;
     case 'singleChoice':
       return answer?.type === 'singleChoice' && Boolean(answer.optionId);
