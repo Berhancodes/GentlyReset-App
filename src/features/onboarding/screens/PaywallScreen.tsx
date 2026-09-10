@@ -127,9 +127,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.night,
   },
   background: {
-    ...StyleSheet.absoluteFill,
-    width: '100%',
-    height: '100%',
+    position: 'absolute',
+    left: -36,
+    right: -36,
+    top: -88,
+    bottom: 0,
   },
   safe: {
     flex: 1,
@@ -147,8 +149,8 @@ const styles = StyleSheet.create({
   },
   copy: {
     alignItems: 'center',
-    paddingTop: spacing.sm,
-    gap: spacing.sm,
+    paddingTop: spacing.xs,
+    gap: spacing.xs,
   },
   title: {
     fontFamily: fontFamilies.rounded,
@@ -167,11 +169,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   benefits: {
-    marginTop: spacing.md,
-    gap: spacing.md,
+    marginTop: spacing.sm,
+    gap: spacing.sm,
     width: '100%',
-    maxWidth: 320,
-    paddingLeft: spacing.sm,
+    maxWidth: 300,
+    paddingLeft: spacing.md,
   },
   benefitRow: {
     flexDirection: 'row',
@@ -224,7 +226,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: spacing.xs,
+    marginTop: spacing.xxs,
   },
   skipPressed: {
     opacity: 0.7,
