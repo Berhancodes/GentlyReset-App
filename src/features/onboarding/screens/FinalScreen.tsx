@@ -21,7 +21,7 @@ export function FinalScreen({ step }: FinalScreenProps) {
       subtitle={step.subtitle}
       eyebrow={step.eyebrow}
       illustrationKey={step.illustrationKey ?? 'journey'}
-      illustrationSize="large"
+      illustrationSize={step.illustrationSize ?? 'default'}
       illustrationPlacement="afterHero"
       hideProgress
       onBack={canGoBack ? goBack : undefined}

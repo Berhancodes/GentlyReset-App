@@ -564,7 +564,7 @@ export const ONBOARDING_STEPS = [
     subtitle: 'built around what you told me.',
     ctaLabel: 'start my journey',
     illustrationKey: 'journey',
-    illustrationSize: 'large',
+    illustrationSize: 'default',
     hideProgress: true,
     required: false,
     preview: [
