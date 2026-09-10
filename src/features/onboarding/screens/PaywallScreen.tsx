@@ -125,13 +125,12 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background.night,
+    overflow: 'hidden',
   },
   background: {
-    position: 'absolute',
-    left: -36,
-    right: -36,
-    top: -88,
-    bottom: 0,
+    ...StyleSheet.absoluteFill,
+    width: '100%',
+    height: '100%',
   },
   safe: {
     flex: 1,
@@ -149,8 +148,8 @@ const styles = StyleSheet.create({
   },
   copy: {
     alignItems: 'center',
-    paddingTop: spacing.xs,
-    gap: spacing.xs,
+    paddingTop: spacing.sm,
+    gap: spacing.sm,
   },
   title: {
     fontFamily: fontFamilies.rounded,
