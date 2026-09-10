@@ -1,7 +1,7 @@
 import { Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { PrimaryButton } from '@/components/ui';
-import { colors, radius, spacing, textVariants } from '@/design-system';
+import { colors, radius, shadows, spacing, textVariants } from '@/design-system';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { OnboardingTextButton } from '@/features/onboarding/components/OnboardingTextButton';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
@@ -52,21 +52,23 @@ export function TextInputScreen({ step }: TextInputScreenProps) {
       }
     >
       <Pressable accessible={false} onPress={Keyboard.dismiss}>
-        <TextInput
-          accessibilityLabel={step.title}
-          placeholder={step.placeholder}
-          placeholderTextColor={colors.text.helper}
-          value={value}
-          maxLength={step.maxLength}
-          multiline={step.multiline}
-          textAlignVertical={step.multiline ? 'top' : 'center'}
-          onChangeText={(nextValue) => {
-            setAnswer(step.id, { type: 'textInput', value: nextValue });
-          }}
-          allowFontScaling
-          maxFontSizeMultiplier={1.5}
-          style={[styles.input, step.multiline ? styles.multiline : null]}
-        />
+        <View style={styles.inputWrap}>
+          <TextInput
+            accessibilityLabel={step.title}
+            placeholder={step.placeholder}
+            placeholderTextColor={colors.text.helper}
+            value={value}
+            maxLength={step.maxLength}
+            multiline={step.multiline}
+            textAlignVertical={step.multiline ? 'top' : 'center'}
+            onChangeText={(nextValue) => {
+              setAnswer(step.id, { type: 'textInput', value: nextValue });
+            }}
+            allowFontScaling
+            maxFontSizeMultiplier={1.5}
+            style={[styles.input, step.multiline ? styles.multiline : null]}
+          />
+        </View>
       </Pressable>
     </OnboardingScreenLayout>
   );
@@ -76,12 +78,17 @@ const styles = StyleSheet.create({
   footerStack: {
     gap: spacing.xs,
   },
+  inputWrap: {
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    backgroundColor: colors.surface.choice,
+    ...shadows.soft,
+  },
   input: {
     ...textVariants.body,
     minHeight: 56,
     borderRadius: radius.card,
-    borderWidth: 0,
-    backgroundColor: colors.surface.choice,
     color: colors.text.primary,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,

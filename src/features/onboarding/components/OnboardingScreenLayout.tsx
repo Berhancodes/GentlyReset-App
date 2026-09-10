@@ -12,6 +12,7 @@ import { AppText, Screen } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
 import { BackChevron } from '@/features/onboarding/components/BackChevron';
 import { IllustrationPlaceholder } from '@/features/onboarding/components/IllustrationPlaceholder';
+import { OnboardingHero } from '@/features/onboarding/components/OnboardingHero';
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
 import type { OnboardingIllustrationKey } from '@/features/onboarding/types/onboarding';
 
@@ -27,9 +28,11 @@ type OnboardingScreenLayoutProps = {
   onBack?: () => void;
   avoidKeyboard?: boolean;
   showTitle?: boolean;
-  tone?: 'default' | 'question';
+  tone?: 'default' | 'question' | 'story';
   /** Tighter vertical gaps so a compact question can fit on one phone screen. */
   compact?: boolean;
+  /** Place artwork under the title — used for the reset-type reveal. */
+  illustrationAfterCopy?: boolean;
 };
 
 export function OnboardingScreenLayout({
@@ -46,13 +49,16 @@ export function OnboardingScreenLayout({
   showTitle = true,
   tone = 'default',
   compact = false,
+  illustrationAfterCopy = false,
 }: OnboardingScreenLayoutProps) {
   const showProgress = !hideProgress;
   const isQuestion = tone === 'question';
+  const isStory = tone === 'story';
+  const useBrandNav = isQuestion || isStory;
 
   const body = (
     <Screen>
-      {isQuestion ? (
+      {useBrandNav ? (
         <View style={styles.questionNav}>
           {onBack ? (
             <Pressable
@@ -94,33 +100,26 @@ export function OnboardingScreenLayout({
         contentContainerStyle={[
           styles.scrollContent,
           isQuestion ? styles.questionScrollContent : null,
+          isStory ? styles.storyScrollContent : null,
           compact ? styles.compactScrollContent : null,
         ]}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
       >
-        {illustrationKey ? (
+        {illustrationKey && !illustrationAfterCopy ? (
           <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
         ) : null}
-        <View style={[styles.copy, isQuestion ? styles.questionCopy : null]}>
-          {eyebrow ? (
-            <AppText variant="questionHelper" color="helper">
-              {eyebrow}
-            </AppText>
-          ) : null}
-          {showTitle ? (
-            <AppText variant={isQuestion ? 'questionTitle' : 'display'}>{title}</AppText>
-          ) : null}
-          {subtitle ? (
-            <AppText
-              variant={isQuestion ? 'questionHelper' : 'subtitle'}
-              color={isQuestion ? 'helper' : 'secondary'}
-            >
-              {subtitle}
-            </AppText>
-          ) : null}
-        </View>
+        <OnboardingHero
+          title={title}
+          subtitle={subtitle}
+          eyebrow={eyebrow}
+          showTitle={showTitle}
+          tone={tone}
+        />
+        {illustrationKey && illustrationAfterCopy ? (
+          <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
+        ) : null}
         {children}
       </ScrollView>
 
@@ -129,6 +128,7 @@ export function OnboardingScreenLayout({
           style={[
             styles.footer,
             isQuestion ? styles.questionFooter : null,
+            isStory ? styles.questionFooter : null,
             compact ? styles.compactFooter : null,
           ]}
         >
@@ -200,11 +200,10 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
     gap: spacing.lg,
   },
-  copy: {
-    gap: spacing.sm,
-  },
-  questionCopy: {
-    gap: spacing.xs,
+  storyScrollContent: {
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
+    gap: spacing.xl,
   },
   footer: {
     paddingTop: spacing.md,

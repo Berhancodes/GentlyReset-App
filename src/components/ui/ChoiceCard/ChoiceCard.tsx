@@ -7,7 +7,7 @@ import { hapticSelection, hapticSuccess } from '@/utils/haptics';
 
 export type ChoiceCardVariant = 'row' | 'tile' | 'illustrated';
 
-type ChoiceCardProps = {
+export type ChoiceCardProps = {
   label: string;
   description?: string;
   selected?: boolean;
@@ -52,8 +52,12 @@ export function ChoiceCard({
       style={({ pressed }) => [
         styles.card,
         isIllustrated ? styles.illustrated : isTile ? styles.tile : styles.row,
-        selected ? styles.selected : isIllustrated ? styles.illustratedIdle : styles.idle,
-        isIllustrated ? shadows.soft : null,
+        selected
+          ? styles.selected
+          : isTile && !isIllustrated
+            ? styles.idle
+            : styles.illustratedIdle,
+        isIllustrated || !isTile ? shadows.soft : null,
         disabled && styles.disabled,
         pressed && !disabled && styles.pressed,
       ]}

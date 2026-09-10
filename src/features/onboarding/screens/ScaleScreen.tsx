@@ -3,7 +3,8 @@ import { StyleSheet, View } from 'react-native';
 import { ChoiceCard, PrimaryButton } from '@/components/ui';
 import { spacing } from '@/design-system';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
-import { ScaleFace } from '@/features/onboarding/components/ScaleFace';
+import { OptionIcon } from '@/features/onboarding/components/OptionIcon';
+import { SCALE_ICON_SOURCES } from '@/features/onboarding/data/onboardingAssets';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { ScaleStep } from '@/features/onboarding/types/onboarding';
@@ -32,17 +33,20 @@ export function ScaleScreen({ step }: ScaleScreenProps) {
       }
     >
       <View style={styles.list}>
-        {step.points.map((point) => (
-          <ChoiceCard
-            key={point.value}
-            label={point.label}
-            selected={selectedValue === point.value}
-            leading={<ScaleFace mood={point.value} selected={selectedValue === point.value} />}
-            onPress={() => {
-              setAnswer(step.id, { type: 'scale', value: point.value });
-            }}
-          />
-        ))}
+        {step.points.map((point) => {
+          const icon = SCALE_ICON_SOURCES[point.value];
+          return (
+            <ChoiceCard
+              key={point.value}
+              label={point.label}
+              selected={selectedValue === point.value}
+              leading={icon ? <OptionIcon source={icon} size={40} /> : undefined}
+              onPress={() => {
+                setAnswer(step.id, { type: 'scale', value: point.value });
+              }}
+            />
+          );
+        })}
       </View>
     </OnboardingScreenLayout>
   );

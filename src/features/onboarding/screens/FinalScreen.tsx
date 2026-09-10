@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { AppText, PrimaryButton } from '@/components/ui';
-import { colors, radius, spacing } from '@/design-system';
+import { colors, radius, shadows, spacing } from '@/design-system';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import type { FinalStep } from '@/features/onboarding/types/onboarding';
@@ -16,9 +16,12 @@ export function FinalScreen({ step }: FinalScreenProps) {
 
   return (
     <OnboardingScreenLayout
+      tone="story"
       title={step.title}
       subtitle={step.subtitle}
       eyebrow={step.eyebrow}
+      illustrationKey="path"
+      illustrationSize="large"
       hideProgress
       onBack={canGoBack ? goBack : undefined}
       footer={
@@ -34,10 +37,10 @@ export function FinalScreen({ step }: FinalScreenProps) {
       <View style={styles.preview}>
         {step.preview.map((item) => (
           <View key={item.dayLabel} style={styles.row}>
-            <AppText variant="label" color="muted">
+            <AppText variant="label" color="helper">
               {item.dayLabel}
             </AppText>
-            <AppText variant="body">{item.title}</AppText>
+            <AppText variant="optionTitle">{item.title}</AppText>
           </View>
         ))}
       </View>
@@ -50,12 +53,15 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   row: {
-    minHeight: 56,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface.raised,
+    minHeight: 64,
+    borderRadius: radius.card,
+    backgroundColor: colors.surface.choice,
+    borderWidth: 1,
+    borderColor: colors.border.default,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     justifyContent: 'center',
     gap: spacing.xxs,
+    ...shadows.soft,
   },
 });

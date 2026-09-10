@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { AppText, PrimaryButton } from '@/components/ui';
-import { colors, radius, spacing } from '@/design-system';
+import { colors, radius, shadows, spacing } from '@/design-system';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { getResetProfile } from '@/features/onboarding/data/mockResetProfile';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
@@ -17,7 +17,10 @@ export function ResultDetailsScreen({ step }: ResultDetailsScreenProps) {
 
   return (
     <OnboardingScreenLayout
+      tone="story"
       title={step.title}
+      illustrationKey={step.illustrationKey ?? 'detective'}
+      illustrationSize={step.illustrationSize ?? 'default'}
       hideProgress
       onBack={canGoBack ? goBack : undefined}
       footer={<PrimaryButton label={step.ctaLabel} onPress={goToNext} />}
@@ -74,13 +77,15 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    borderWidth: 1,
+    ...shadows.soft,
   },
   chipStrength: {
-    backgroundColor: colors.surface.selected,
+    backgroundColor: colors.surface.choiceSelected,
+    borderColor: colors.accent.gold,
   },
   chipChallenge: {
-    backgroundColor: colors.background.secondary,
-    borderWidth: 1,
+    backgroundColor: colors.surface.choice,
     borderColor: colors.border.default,
   },
 });

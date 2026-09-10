@@ -25,9 +25,12 @@ export function ResultScreen({ step }: ResultScreenProps) {
 
   return (
     <OnboardingScreenLayout
+      tone="story"
+      eyebrow="your reset type is..."
       title={profile.name}
       illustrationKey={profile.illustrationKey}
-      illustrationSize={step.illustrationSize ?? 'large'}
+      illustrationSize="large"
+      illustrationAfterCopy
       hideProgress
       onBack={canGoBack ? goBack : undefined}
       footer={
@@ -48,7 +51,7 @@ export function ResultScreen({ step }: ResultScreenProps) {
         <ProfileSection label="what usually helps" value={profile.whatUsuallyHelps} />
         {approachLines.length > 0 ? (
           <View style={styles.section}>
-            <AppText variant="label" color="muted">
+            <AppText variant="label" color="helper">
               your Gently Reset approach
             </AppText>
             {approachLines.map((line) => (
@@ -70,7 +73,7 @@ export function ResultScreen({ step }: ResultScreenProps) {
 function ProfileSection({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.section}>
-      <AppText variant="label" color="muted">
+      <AppText variant="label" color="helper">
         {label}
       </AppText>
       <AppText variant="body">{value}</AppText>

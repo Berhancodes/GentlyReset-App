@@ -1,15 +1,11 @@
-import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
 import { colors, radius, spacing } from '@/design-system';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
-import { ONBOARDING_ILLUSTRATIONS } from '@/features/onboarding/data/onboardingAssets';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useStagedLoading } from '@/features/onboarding/hooks/useStagedLoading';
 import type { LoadingStep } from '@/features/onboarding/types/onboarding';
-
-const BUILDING_RESET_ART = require('../../../../assets/images/onboarding/building-reset.png');
-const BUILDING_RESET_ASPECT = 1536 / 1024;
 
 type LoadingScreenProps = {
   step: LoadingStep;
@@ -17,62 +13,49 @@ type LoadingScreenProps = {
 
 export function LoadingScreen({ step }: LoadingScreenProps) {
   const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
-  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const completedCount = useStagedLoading({
     stageCount: step.stages.length,
     mockDurationMs: step.mockDurationMs,
     onComplete: goToNext,
   });
 
-  const maxArtHeight = Math.min(Math.round(windowHeight * 0.22), 188);
-  const artWidth = Math.min(windowWidth - spacing.lg * 2, maxArtHeight * BUILDING_RESET_ASPECT);
-  const artHeight = artWidth / BUILDING_RESET_ASPECT;
-
   return (
     <OnboardingScreenLayout
+      tone="story"
       title={step.title}
       subtitle={step.subtitle}
+      illustrationKey={step.illustrationKey}
+      illustrationSize="large"
       hideProgress
       onBack={canGoBack ? goBack : undefined}
     >
-      <View style={styles.body}>
-        <Image
-          source={BUILDING_RESET_ART}
-          resizeMode="contain"
-          accessibilityRole="image"
-          accessibilityLabel={ONBOARDING_ILLUSTRATIONS.buildingReset.label}
-          style={{ width: artWidth, height: artHeight, alignSelf: 'center' }}
-        />
-        <View accessibilityRole="progressbar" accessibilityLabel={step.title} style={styles.list}>
-          {step.stages.map((stage, index) => {
-            const done = index < completedCount;
-            return (
-              <View key={stage.id} style={styles.row}>
-                <View style={[styles.mark, done ? styles.markDone : styles.markIdle]}>
-                  {done ? (
-                    <AppText variant="label" color="inverse">
-                      ✓
-                    </AppText>
-                  ) : null}
-                </View>
-                <AppText variant="body" color={done ? 'primary' : 'muted'}>
-                  {stage.label}
-                </AppText>
+      <View accessibilityRole="progressbar" accessibilityLabel={step.title} style={styles.list}>
+        {step.stages.map((stage, index) => {
+          const done = index < completedCount;
+          return (
+            <View key={stage.id} style={styles.row}>
+              <View style={[styles.mark, done ? styles.markDone : styles.markIdle]}>
+                {done ? (
+                  <AppText variant="caption" color="inverse" align="center">
+                    ✓
+                  </AppText>
+                ) : null}
               </View>
-            );
-          })}
-        </View>
+              <AppText variant="body" color={done ? 'primary' : 'helper'}>
+                {stage.label}
+              </AppText>
+            </View>
+          );
+        })}
       </View>
     </OnboardingScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  body: {
-    gap: spacing.lg,
-  },
   list: {
     gap: spacing.md,
+    paddingTop: spacing.xs,
   },
   row: {
     flexDirection: 'row',
@@ -81,8 +64,8 @@ const styles = StyleSheet.create({
     minHeight: 44,
   },
   mark: {
-    width: 24,
-    height: 24,
+    width: 22,
+    height: 22,
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
@@ -90,9 +73,9 @@ const styles = StyleSheet.create({
   markIdle: {
     borderWidth: 1.5,
     borderColor: colors.border.default,
-    backgroundColor: colors.surface.primary,
+    backgroundColor: colors.surface.choice,
   },
   markDone: {
-    backgroundColor: colors.accent.sage,
+    backgroundColor: colors.text.primary,
   },
 });

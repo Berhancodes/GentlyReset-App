@@ -20,6 +20,7 @@ export function SharePreviewScreen({ step }: SharePreviewScreenProps) {
 
   return (
     <OnboardingScreenLayout
+      tone="story"
       title={step.title}
       hideProgress
       onBack={canGoBack ? goBack : undefined}
@@ -54,12 +55,14 @@ export function SharePreviewScreen({ step }: SharePreviewScreenProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface.raised,
-    borderRadius: radius.xl,
+    backgroundColor: colors.surface.choice,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border.default,
     padding: spacing.lg,
     gap: spacing.md,
     alignItems: 'center',
-    ...shadows.medium,
+    ...shadows.soft,
   },
   footer: {
     gap: spacing.xs,

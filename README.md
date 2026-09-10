@@ -57,8 +57,9 @@ src/
   utils/
 
 assets/
-  images/mascot/             # Illustrated mascot art goes here
-  images/onboarding/
+  images/mascot/             # Illustrated mascot and environment art
+  images/onboarding/         # Welcome, loading, and Page 2 reason icons
+  onboarding/icons/          # Illustrated option icons for later onboarding screens
   icons/
   fonts/                     # Custom fonts; wire them through typography.ts
 ```

@@ -25,6 +25,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
 
   return (
     <OnboardingScreenLayout
+      tone="story"
       title={step.title}
       subtitle={subtitle}
       eyebrow={step.eyebrow}

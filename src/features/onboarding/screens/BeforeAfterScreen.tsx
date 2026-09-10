@@ -19,6 +19,7 @@ export function BeforeAfterScreen({ step }: BeforeAfterScreenProps) {
 
   return (
     <OnboardingScreenLayout
+      tone="story"
       title={step.title}
       eyebrow={step.eyebrow}
       illustrationKey={step.illustrationKey}
@@ -42,9 +43,7 @@ export function BeforeAfterScreen({ step }: BeforeAfterScreenProps) {
           </View>
         </View>
 
-        <AppText variant="title" align="center" color="muted">
-          ↓
-        </AppText>
+        <View style={styles.connector} />
 
         <View style={styles.group}>
           <AppText variant="label" color="muted">
@@ -67,6 +66,14 @@ const styles = StyleSheet.create({
   stack: {
     gap: spacing.lg,
   },
+  connector: {
+    alignSelf: 'center',
+    width: 2,
+    height: 28,
+    borderRadius: 1,
+    backgroundColor: colors.accent.sage,
+    opacity: 0.7,
+  },
   group: {
     gap: spacing.sm,
   },
@@ -79,13 +86,15 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: colors.surface.selected,
+    backgroundColor: colors.surface.choiceSelected,
+    borderWidth: 1,
+    borderColor: colors.accent.gold,
   },
   chipLater: {
     borderRadius: radius.pill,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.surface.choice,
     borderWidth: 1,
     borderColor: colors.accent.sage,
   },
