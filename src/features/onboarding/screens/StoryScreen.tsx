@@ -31,6 +31,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
       eyebrow={step.eyebrow}
       illustrationKey={step.illustrationKey}
       illustrationSize={step.illustrationSize ?? 'large'}
+      illustrationPlacement="end"
       hideProgress
       onBack={canGoBack ? goBack : undefined}
       footer={<PrimaryButton label={step.ctaLabel} onPress={goToNext} />}

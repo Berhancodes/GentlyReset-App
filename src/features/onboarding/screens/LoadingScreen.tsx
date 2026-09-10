@@ -26,6 +26,7 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
       subtitle={step.subtitle}
       illustrationKey={step.illustrationKey}
       illustrationSize="large"
+      illustrationPlacement="afterHero"
       hideProgress
       onBack={canGoBack ? goBack : undefined}
     >

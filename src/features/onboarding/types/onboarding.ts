@@ -7,6 +7,8 @@ export const ONBOARDING_CHAPTERS = [
 
 export type OnboardingChapterId = (typeof ONBOARDING_CHAPTERS)[number]['id'];
 
+export type OnboardingIllustrationSize = 'default' | 'large' | 'hero';
+
 export type OnboardingIllustrationKey =
   | 'welcome'
   | 'carrying'
@@ -16,7 +18,8 @@ export type OnboardingIllustrationKey =
   | 'buildingReset'
   | 'gotYou'
   | 'overloadedDreamer'
-  | 'companion';
+  | 'companion'
+  | 'journey';
 
 export type ResetProfile = {
   id: string;
@@ -64,7 +67,7 @@ type BaseOnboardingStep = {
   subtitle?: string;
   eyebrow?: string;
   illustrationKey?: OnboardingIllustrationKey;
-  illustrationSize?: 'default' | 'large';
+  illustrationSize?: OnboardingIllustrationSize;
   hideProgress?: boolean;
   required: boolean;
 };

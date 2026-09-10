@@ -14,7 +14,10 @@ import { BackChevron } from '@/features/onboarding/components/BackChevron';
 import { IllustrationPlaceholder } from '@/features/onboarding/components/IllustrationPlaceholder';
 import { OnboardingHero } from '@/features/onboarding/components/OnboardingHero';
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
-import type { OnboardingIllustrationKey } from '@/features/onboarding/types/onboarding';
+import type {
+  OnboardingIllustrationKey,
+  OnboardingIllustrationSize,
+} from '@/features/onboarding/types/onboarding';
 
 type OnboardingScreenLayoutProps = {
   title: string;
@@ -23,7 +26,7 @@ type OnboardingScreenLayoutProps = {
   children?: ReactNode;
   footer?: ReactNode;
   illustrationKey?: OnboardingIllustrationKey;
-  illustrationSize?: 'default' | 'large';
+  illustrationSize?: OnboardingIllustrationSize;
   hideProgress?: boolean;
   onBack?: () => void;
   avoidKeyboard?: boolean;
@@ -31,8 +34,12 @@ type OnboardingScreenLayoutProps = {
   tone?: 'default' | 'question' | 'story';
   /** Tighter vertical gaps so a compact question can fit on one phone screen. */
   compact?: boolean;
-  /** Place artwork under the title — used for the reset-type reveal. */
-  illustrationAfterCopy?: boolean;
+  /**
+   * start: art above copy (questions).
+   * afterHero: title then art then extra content (reveal, plan).
+   * end: all copy, then art (story beats).
+   */
+  illustrationPlacement?: 'start' | 'afterHero' | 'end';
 };
 
 export function OnboardingScreenLayout({
@@ -49,7 +56,7 @@ export function OnboardingScreenLayout({
   showTitle = true,
   tone = 'default',
   compact = false,
-  illustrationAfterCopy = false,
+  illustrationPlacement = 'start',
 }: OnboardingScreenLayoutProps) {
   const showProgress = !hideProgress;
   const isQuestion = tone === 'question';
@@ -107,7 +114,7 @@ export function OnboardingScreenLayout({
         keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
       >
-        {illustrationKey && !illustrationAfterCopy ? (
+        {illustrationKey && illustrationPlacement === 'start' ? (
           <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
         ) : null}
         <OnboardingHero
@@ -117,10 +124,14 @@ export function OnboardingScreenLayout({
           showTitle={showTitle}
           tone={tone}
         />
-        {illustrationKey && illustrationAfterCopy ? (
+        {illustrationKey && illustrationPlacement === 'afterHero' ? (
           <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
         ) : null}
         {children}
+        {illustrationKey && illustrationPlacement === 'end' ? (
+          <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
+        ) : null}
+        {isStory ? <View style={styles.storyFlex} /> : null}
       </ScrollView>
 
       {footer ? (
@@ -203,7 +214,11 @@ const styles = StyleSheet.create({
   storyScrollContent: {
     paddingTop: spacing.md,
     paddingBottom: spacing.md,
-    gap: spacing.xl,
+    gap: spacing.lg,
+  },
+  storyFlex: {
+    flexGrow: 1,
+    minHeight: spacing.sm,
   },
   footer: {
     paddingTop: spacing.md,

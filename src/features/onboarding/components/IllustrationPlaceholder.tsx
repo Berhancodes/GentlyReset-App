@@ -2,32 +2,32 @@ import { MascotScene } from '@/features/onboarding/components/MascotScene';
 import {
   getOnboardingIllustrationSource,
   ONBOARDING_ILLUSTRATIONS,
-  ONBOARDING_ILLUSTRATION_SOURCES,
 } from '@/features/onboarding/data/onboardingAssets';
-import type { OnboardingIllustrationKey } from '@/features/onboarding/types/onboarding';
-
-const FALLBACK_ART = require('../../../../assets/images/mascot/mascot-thinking-world.png');
+import type {
+  OnboardingIllustrationKey,
+  OnboardingIllustrationSize,
+} from '@/features/onboarding/types/onboarding';
 
 type IllustrationPlaceholderProps = {
   illustrationKey: OnboardingIllustrationKey;
-  size?: 'default' | 'large';
+  size?: OnboardingIllustrationSize;
 };
 
 export function IllustrationPlaceholder({
   illustrationKey,
   size = 'default',
 }: IllustrationPlaceholderProps) {
+  const source = getOnboardingIllustrationSource(illustrationKey);
+  if (!source) {
+    return null;
+  }
+
   const meta = ONBOARDING_ILLUSTRATIONS[illustrationKey];
-  const source = getOnboardingIllustrationSource(illustrationKey) ?? FALLBACK_ART;
-  const aspectRatio =
-    source === FALLBACK_ART && !ONBOARDING_ILLUSTRATION_SOURCES[illustrationKey]
-      ? 1536 / 1024
-      : meta.aspectRatio;
 
   return (
     <MascotScene
       source={source}
-      aspectRatio={aspectRatio}
+      aspectRatio={meta.aspectRatio}
       size={size}
       accessibilityLabel={meta.label}
     />

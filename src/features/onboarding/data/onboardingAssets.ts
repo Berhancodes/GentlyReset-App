@@ -35,36 +35,38 @@ export type OnboardingIllustrationMeta = {
   aspectRatio: number;
 };
 
+const SCENE_ASPECT = 1086 / 1448;
+
 export const ONBOARDING_ILLUSTRATIONS: Record<
   OnboardingIllustrationKey,
   OnboardingIllustrationMeta
 > = {
   welcome: { label: 'Gently Reset welcome', motif: 'rest', aspectRatio: 1.5 },
-  carrying: { label: 'Mascot in a quiet meadow', motif: 'carry', aspectRatio: 1536 / 1024 },
-  detective: { label: 'Mascot thinking on a log', motif: 'detect', aspectRatio: 1 },
-  path: { label: 'Mascot in a quiet meadow', motif: 'path', aspectRatio: 1536 / 1024 },
-  self: { label: 'Mascot in a quiet meadow', motif: 'path', aspectRatio: 1536 / 1024 },
-  buildingReset: { label: 'Mascot studying your answers', motif: 'desk', aspectRatio: 1536 / 1024 },
-  gotYou: { label: 'Mascot in a quiet meadow', motif: 'spark', aspectRatio: 1536 / 1024 },
-  overloadedDreamer: { label: 'Mascot stuck in the mud', motif: 'stack', aspectRatio: 1 },
-  companion: {
-    label: 'Gently Reset companion mascot',
-    motif: 'companion',
-    aspectRatio: 1536 / 1024,
+  carrying: { label: 'Mascot carrying too much', motif: 'carry', aspectRatio: SCENE_ASPECT },
+  detective: {
+    label: 'Mascot noticing a small pattern',
+    motif: 'detect',
+    aspectRatio: SCENE_ASPECT,
   },
+  path: { label: 'Mascot choosing a path', motif: 'path', aspectRatio: SCENE_ASPECT },
+  self: { label: 'Mascot choosing a path', motif: 'path', aspectRatio: SCENE_ASPECT },
+  buildingReset: { label: 'Mascot studying your answers', motif: 'desk', aspectRatio: 1536 / 1024 },
+  gotYou: { label: 'Gently Reset has you', motif: 'spark', aspectRatio: SCENE_ASPECT },
+  overloadedDreamer: { label: 'Mascot stuck in the mud', motif: 'stack', aspectRatio: 1 },
+  companion: { label: 'Gently Reset companion', motif: 'companion', aspectRatio: SCENE_ASPECT },
+  journey: { label: 'Mascot starting a 30-day journey', motif: 'path', aspectRatio: SCENE_ASPECT },
 };
 
 export const ONBOARDING_ILLUSTRATION_SOURCES: Partial<
   Record<OnboardingIllustrationKey, ImageSourcePropType>
 > = {
-  carrying: require('../../../../assets/images/mascot/mascot-thinking-world.png'),
-  detective: require('../../../../assets/images/mascot/mascot-thinking-log.png'),
-  path: require('../../../../assets/images/mascot/mascot-thinking-world.png'),
-  self: require('../../../../assets/images/mascot/mascot-thinking-world.png'),
+  carrying: require('../../../../assets/images/mascot/mascot-carrying-too-much.png'),
+  detective: require('../../../../assets/images/mascot/mascot-noticing.png'),
+  path: require('../../../../assets/images/mascot/mascot-choosing-path.png'),
   buildingReset: require('../../../../assets/images/onboarding/building-reset.png'),
-  gotYou: require('../../../../assets/images/mascot/mascot-thinking-world.png'),
   overloadedDreamer: require('../../../../assets/images/mascot/mascot-in-mud.png'),
-  companion: require('../../../../assets/images/mascot/mascot-thinking-world.png'),
+  companion: require('../../../../assets/images/mascot/mascot-companion.png'),
+  journey: require('../../../../assets/images/mascot/mascot-30-day-journey.png'),
 };
 
 export function getOnboardingIllustrationSource(key: OnboardingIllustrationKey) {

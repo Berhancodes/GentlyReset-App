@@ -19,8 +19,6 @@ export function ResultDetailsScreen({ step }: ResultDetailsScreenProps) {
     <OnboardingScreenLayout
       tone="story"
       title={step.title}
-      illustrationKey={step.illustrationKey ?? 'detective'}
-      illustrationSize={step.illustrationSize ?? 'default'}
       hideProgress
       onBack={canGoBack ? goBack : undefined}
       footer={<PrimaryButton label={step.ctaLabel} onPress={goToNext} />}

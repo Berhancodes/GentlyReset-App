@@ -30,7 +30,7 @@ export function ResultScreen({ step }: ResultScreenProps) {
       title={profile.name}
       illustrationKey={profile.illustrationKey}
       illustrationSize="large"
-      illustrationAfterCopy
+      illustrationPlacement="afterHero"
       hideProgress
       onBack={canGoBack ? goBack : undefined}
       footer={

@@ -20,8 +20,9 @@ export function FinalScreen({ step }: FinalScreenProps) {
       title={step.title}
       subtitle={step.subtitle}
       eyebrow={step.eyebrow}
-      illustrationKey="path"
+      illustrationKey={step.illustrationKey ?? 'journey'}
       illustrationSize="large"
+      illustrationPlacement="afterHero"
       hideProgress
       onBack={canGoBack ? goBack : undefined}
       footer={
