@@ -6,9 +6,9 @@ import { colors, spacing } from '@/design-system';
 
 const MASCOT_HEAD = require('../../../../assets/images/mascot/mascot-head.png');
 
-const HEADER_ROW_HEIGHT = 48;
-const MASCOT_SIZE = 24;
-const MASCOT_LEFT = spacing.md + spacing.xxs;
+const HEADER_ROW_HEIGHT = spacing.xxxl;
+const MASCOT_SIZE = 40;
+const MASCOT_LEFT = spacing.md;
 
 type AppHeaderProps = {
   title: string;
