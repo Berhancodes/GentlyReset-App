@@ -1,30 +1,75 @@
-import { StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
-import { AppHeader, AppText, Screen } from '@/components/ui';
-import { spacing } from '@/design-system';
+import { AppText, MainTabHeader, PrimaryButton, Screen } from '@/components/ui';
+import { colors, radius, shadows, spacing, textVariants } from '@/design-system';
+import { MoodSelector } from '@/features/reflect/components/MoodSelector';
 
 export function ReflectScreen() {
+  const [mood, setMood] = useState<1 | 2 | 3 | 4 | 5 | undefined>(undefined);
+  const [entry, setEntry] = useState('');
+
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-      <AppHeader title="journal" />
-      <View style={styles.content}>
-        <AppText variant="label" color="muted">
-          REFLECT
-        </AppText>
-        <AppText variant="display">a softer kind of journal.</AppText>
+      <MainTabHeader title="journal" />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <AppText variant="body" color="secondary">
-          Prompts and notes will land here. The tab exists so routing can stay stable as we build.
+          a space for your thoughts.
         </AppText>
-      </View>
+        <View style={styles.card}>
+          <AppText variant="optionTitle">how are you feeling today?</AppText>
+          <MoodSelector value={mood} onChange={setMood} />
+        </View>
+        <TextInput
+          accessibilityLabel="Journal entry"
+          placeholder="write anything..."
+          placeholderTextColor={colors.text.helper}
+          value={entry}
+          onChangeText={setEntry}
+          multiline
+          textAlignVertical="top"
+          style={styles.composer}
+        />
+        <PrimaryButton label="save entry" onPress={() => undefined} />
+      </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
+  scroll: {
     flex: 1,
-    gap: spacing.md,
+  },
+  content: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.lg,
+    gap: spacing.lg,
+  },
+  card: {
+    gap: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    borderRadius: radius.card,
+    backgroundColor: colors.surface.raised,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+    ...shadows.soft,
+  },
+  composer: {
+    minHeight: 140,
+    borderRadius: radius.card,
+    backgroundColor: colors.surface.raised,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    color: colors.text.primary,
+    ...textVariants.body,
   },
 });

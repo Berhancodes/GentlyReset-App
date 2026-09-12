@@ -93,9 +93,9 @@ export const textVariants = {
   },
   navTitle: {
     fontFamily: fontFamilies.rounded,
-    fontSize: fontSizes.nav,
-    lineHeight: lineHeights.nav,
-    fontWeight: fontWeights.semibold,
+    fontSize: fontSizes.lg,
+    lineHeight: lineHeights.lg,
+    fontWeight: fontWeights.bold,
   },
   tabLabel: {
     fontFamily: fontFamilies.rounded,

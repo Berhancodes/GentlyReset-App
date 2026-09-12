@@ -1,0 +1,1 @@
+export { MainTabHeader } from './MainTabHeader';

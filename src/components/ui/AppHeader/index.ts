@@ -1,1 +1,1 @@
-export { AppHeader } from './AppHeader';
+export { MainTabHeader as AppHeader } from '../MainTabHeader';

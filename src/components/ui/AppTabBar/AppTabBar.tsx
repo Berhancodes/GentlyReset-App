@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/Text';
 import { colors, radius, shadows, spacing } from '@/design-system';
 
-const TAB_ICON_SIZE = 24;
+const TAB_ICON_SIZE = 22;
 
 const TABS = {
   home: {
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: radius.tabBar,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.surface.raised,
     paddingHorizontal: spacing.xs,
     ...shadows.soft,
   },

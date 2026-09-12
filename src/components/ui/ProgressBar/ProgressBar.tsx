@@ -20,12 +20,14 @@ type ProgressBarProps = {
    */
   initialProgress?: number;
   accessibilityLabel?: string;
+  fillColor?: string;
 };
 
 export function ProgressBar({
   progress,
   initialProgress = 0,
   accessibilityLabel = 'Onboarding progress',
+  fillColor = colors.progress.fill,
 }: ProgressBarProps) {
   const clamped = Math.min(1, Math.max(0, progress));
   const clampedInitial = Math.min(1, Math.max(0, initialProgress));
@@ -68,7 +70,7 @@ export function ProgressBar({
       }}
       style={styles.track}
     >
-      <Animated.View style={[styles.fill, fillStyle]} />
+      <Animated.View style={[styles.fill, { backgroundColor: fillColor }, fillStyle]} />
     </View>
   );
 }
@@ -83,6 +85,5 @@ const styles = StyleSheet.create({
   fill: {
     height: '100%',
     borderRadius: radius.pill,
-    backgroundColor: colors.progress.fill,
   },
 });
