@@ -23,7 +23,7 @@ export function HomeScreen() {
         <SceneHero
           source={HOME_MORNING_SCENE}
           accessibilityLabel="Mascot sipping tea on a log at sunrise"
-          aspectRatio={1087 / 1447}
+          aspectRatio={1.08}
         />
         <View style={styles.card}>
           <AppText variant="label" color="helper">

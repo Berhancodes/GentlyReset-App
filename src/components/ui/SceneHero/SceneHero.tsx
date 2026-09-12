@@ -1,4 +1,4 @@
-import { Image, type ImageSourcePropType, StyleSheet, View } from 'react-native';
+import { Image, type ImageSourcePropType, Platform, StyleSheet, View } from 'react-native';
 
 type SceneHeroProps = {
   source: ImageSourcePropType;
@@ -13,7 +13,7 @@ export function SceneHero({ source, accessibilityLabel, aspectRatio }: SceneHero
         source={source}
         accessibilityLabel={accessibilityLabel}
         accessibilityIgnoresInvertColors
-        resizeMode="contain"
+        resizeMode="cover"
         style={styles.image}
       />
     </View>
@@ -28,5 +28,9 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
+    ...Platform.select({
+      web: { objectPosition: 'center 58%' },
+      default: {},
+    }),
   },
 });

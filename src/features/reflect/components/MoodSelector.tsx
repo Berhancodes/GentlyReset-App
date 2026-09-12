@@ -8,25 +8,29 @@ type MoodFaceProps = {
 };
 
 export function MoodFace({ mood, selected }: MoodFaceProps) {
-  const eyeHeight = mood <= 2 ? 5 : mood >= 5 ? 8 : 6;
-  const mouthWidth = mood <= 2 ? 10 : 14;
+  const isFrown = mood <= 2;
+  const isNeutral = mood === 3;
+  const mouthWidth = mood === 1 || mood === 5 ? 16 : 12;
 
   return (
     <View style={[styles.face, selected ? styles.faceSelected : styles.faceIdle]}>
       <View style={styles.eyeRow}>
-        <View style={[styles.eye, { height: eyeHeight }]} />
-        <View style={[styles.eye, { height: eyeHeight }]} />
+        <View style={styles.eye} />
+        <View style={styles.eye} />
       </View>
-      <View
-        style={[
-          styles.mouth,
-          {
-            width: mouthWidth,
-            transform: [{ scaleY: mood <= 2 ? -1 : 1 }],
-            opacity: mood === 3 ? 0.35 : 0.7,
-          },
-        ]}
-      />
+      {isNeutral ? (
+        <View style={styles.neutralMouth} />
+      ) : (
+        <View
+          style={[
+            styles.curveMouth,
+            {
+              width: mouthWidth,
+              transform: [{ rotate: isFrown ? '180deg' : '0deg' }],
+            },
+          ]}
+        />
+      )}
     </View>
   );
 }
@@ -91,12 +95,26 @@ const styles = StyleSheet.create({
   },
   eye: {
     width: 6,
+    height: 6,
     borderRadius: radius.pill,
     backgroundColor: colors.text.primary,
   },
-  mouth: {
-    height: 3,
+  curveMouth: {
+    height: 8,
+    borderBottomWidth: 2,
+    borderLeftWidth: 2,
+    borderRightWidth: 2,
+    borderColor: colors.text.primary,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    marginTop: 2,
+  },
+  neutralMouth: {
+    width: 10,
+    height: 2,
     borderRadius: radius.pill,
     backgroundColor: colors.text.primary,
+    marginTop: 4,
+    opacity: 0.7,
   },
 });

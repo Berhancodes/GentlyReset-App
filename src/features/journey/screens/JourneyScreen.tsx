@@ -25,7 +25,7 @@ export function JourneyScreen() {
         <SceneHero
           source={WORLD_COTTAGE}
           accessibilityLabel="Mascot standing on a path toward a cottage"
-          aspectRatio={1086 / 1448}
+          aspectRatio={1.08}
         />
         <View style={styles.card}>
           <View style={styles.dayRow}>

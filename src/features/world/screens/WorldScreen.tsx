@@ -21,7 +21,7 @@ export function WorldScreen() {
         <SceneHero
           source={FRIENDS_TOGETHER}
           accessibilityLabel="Two mascots sitting together in a meadow"
-          aspectRatio={1087 / 1446}
+          aspectRatio={1.18}
         />
         <View style={styles.actions}>
           <IconRow
