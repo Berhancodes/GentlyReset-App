@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -9,16 +9,27 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { colors } from '@/design-system';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { usePersistedStoresHydrated } from '@/hooks/usePersistedStoresHydrated';
 
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const storesHydrated = usePersistedStoresHydrated();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
 
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(colors.background.primary);
-    void SplashScreen.hideAsync();
   }, []);
+
+  useEffect(() => {
+    if (storesHydrated) {
+      void SplashScreen.hideAsync();
+    }
+  }, [storesHydrated]);
+
+  if (!storesHydrated) {
+    return <View style={styles.root} />;
+  }
 
   return (
     <SafeAreaProvider>

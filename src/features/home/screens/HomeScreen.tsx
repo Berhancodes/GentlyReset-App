@@ -1,11 +1,77 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useLayoutEffect } from 'react';
+import { AppState, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import Animated, { FadeIn, useReducedMotion } from 'react-native-reanimated';
 
-import { AppText, MainTabHeader, SceneHero, Screen } from '@/components/ui';
-import { colors, radius, shadows, spacing } from '@/design-system';
-
-const HOME_MORNING_SCENE = require('../../../../assets/images/app/home-morning-scene.png');
+import { AppText, MainTabHeader, Screen } from '@/components/ui';
+import { spacing } from '@/design-system';
+import { DayProgressHeader } from '@/features/home/components/DayProgressHeader';
+import { HomeScene } from '@/features/home/components/HomeScene';
+import { TodayResetCard } from '@/features/home/components/TodayResetCard';
+import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { useResetStore } from '@/features/reset/store/useResetStore';
+import { getCompanionMessage } from '@/features/reset/utils/companionCopy';
+import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
 
 export function HomeScreen() {
+  const router = useRouter();
+  const reduceMotion = useReducedMotion();
+  const answers = useOnboardingStore((state) => state.answers);
+  const resetStartedOn = useResetStore((state) => state.resetStartedOn);
+  const currentDay = useResetStore((state) => state.currentDay);
+  const completedDays = useResetStore((state) => state.completedDays);
+  const todayCompleted = useResetStore((state) => state.todayCompleted);
+  const todayStarted = useResetStore((state) => state.todayStarted);
+  const missedYesterday = useResetStore((state) => state.missedYesterday);
+  const personalization = useResetStore((state) => state.personalization);
+  const ensureSeeded = useResetStore((state) => state.ensureSeeded);
+  const applyCalendarDay = useResetStore((state) => state.applyCalendarDay);
+  const startToday = useResetStore((state) => state.startToday);
+  const completeToday = useResetStore((state) => state.completeToday);
+
+  const syncDay = useCallback(() => {
+    ensureSeeded(answers);
+    applyCalendarDay();
+  }, [answers, applyCalendarDay, ensureSeeded]);
+
+  useLayoutEffect(() => {
+    syncDay();
+  }, [syncDay]);
+
+  useFocusEffect(
+    useCallback(() => {
+      syncDay();
+    }, [syncDay]),
+  );
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        syncDay();
+      }
+    });
+    return () => subscription.remove();
+  }, [syncDay]);
+
+  if (!resetStartedOn) {
+    return (
+      <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
+        <MainTabHeader title="home" />
+      </Screen>
+    );
+  }
+
+  const task = getTaskForDay(currentDay, personalization);
+  const companionMoment = todayCompleted
+    ? 'completed'
+    : missedYesterday
+      ? 'missed'
+      : todayStarted
+        ? 'started'
+        : 'idle';
+  const companionMessage = getCompanionMessage(companionMoment, personalization, task.minutes);
+  const messageEntering = reduceMotion ? undefined : FadeIn.duration(320);
+
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
       <MainTabHeader title="home" />
@@ -13,32 +79,40 @@ export function HomeScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.greeting}>
-          <AppText variant="title">good morning</AppText>
+        <DayProgressHeader currentDay={currentDay} completedCount={completedDays.length} />
+        <Animated.View key={companionMoment} entering={messageEntering}>
           <AppText variant="body" color="secondary">
-            small steps still move you forward.
+            {companionMessage}
           </AppText>
-        </View>
-        <SceneHero
-          source={HOME_MORNING_SCENE}
-          accessibilityLabel="Mascot sipping tea on a log at sunrise"
-          aspectRatio={1.08}
+        </Animated.View>
+        <TodayResetCard
+          task={task}
+          started={todayStarted}
+          completed={todayCompleted}
+          onStart={startToday}
+          onComplete={completeToday}
         />
-        <View style={styles.card}>
-          <AppText variant="label" color="helper">
-            {"today's reset"}
-          </AppText>
-          <View style={styles.task}>
-            <View style={styles.indicator} />
-            <View style={styles.taskCopy}>
-              <AppText variant="optionTitle">journal for 5 minutes</AppText>
-              <AppText variant="caption" color="helper">
-                a calmer mind starts here.
-              </AppText>
-            </View>
-          </View>
-        </View>
+        <HomeScene completed={todayCompleted} />
+        {todayCompleted ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Save a reflection. How was that?"
+            accessibilityHint="Opens the journal tab"
+            onPress={() => {
+              router.navigate('/(app)/(tabs)/reflect');
+            }}
+            style={({ pressed }) => [styles.reflection, pressed ? styles.reflectionPressed : null]}
+          >
+            <AppText variant="caption" color="helper" align="center">
+              how was that?
+            </AppText>
+            <AppText variant="optionTitle" align="center">
+              save a reflection →
+            </AppText>
+          </Pressable>
+        ) : null}
       </ScrollView>
     </Screen>
   );
@@ -54,34 +128,14 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
     gap: spacing.md,
   },
-  greeting: {
-    gap: spacing.xxs,
-  },
-  card: {
-    marginTop: -spacing.sm,
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    borderRadius: radius.card,
-    backgroundColor: colors.surface.raised,
-    borderWidth: 1,
-    borderColor: colors.border.subtle,
-    ...shadows.soft,
-  },
-  task: {
-    flexDirection: 'row',
+  reflection: {
+    minHeight: 44,
     alignItems: 'center',
-    gap: spacing.md,
+    justifyContent: 'center',
+    gap: spacing.xxs,
+    paddingVertical: spacing.sm,
   },
-  indicator: {
-    width: 22,
-    height: 22,
-    borderRadius: radius.pill,
-    borderWidth: 2,
-    borderColor: colors.border.default,
-  },
-  taskCopy: {
-    flex: 1,
-    gap: 2,
+  reflectionPressed: {
+    opacity: 0.72,
   },
 });

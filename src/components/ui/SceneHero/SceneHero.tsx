@@ -4,11 +4,17 @@ type SceneHeroProps = {
   source: ImageSourcePropType;
   accessibilityLabel: string;
   aspectRatio: number;
+  borderRadius?: number;
 };
 
-export function SceneHero({ source, accessibilityLabel, aspectRatio }: SceneHeroProps) {
+export function SceneHero({
+  source,
+  accessibilityLabel,
+  aspectRatio,
+  borderRadius = 0,
+}: SceneHeroProps) {
   return (
-    <View style={[styles.frame, { aspectRatio }]}>
+    <View style={[styles.frame, { aspectRatio, borderRadius }]}>
       <Image
         source={source}
         accessibilityLabel={accessibilityLabel}

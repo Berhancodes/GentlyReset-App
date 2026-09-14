@@ -16,6 +16,19 @@ export function getMultiChoiceIds(
   return answer?.type === 'multiChoice' ? answer.optionIds : [];
 }
 
+export function getTextInputValue(
+  answers: Record<string, OnboardingAnswer>,
+  stepId: string,
+): string | undefined {
+  const answer = answers[stepId];
+  if (answer?.type !== 'textInput') {
+    return undefined;
+  }
+
+  const trimmed = answer.value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 export function joinNatural(items: readonly string[]): string {
   if (items.length === 0) {
     return '';
