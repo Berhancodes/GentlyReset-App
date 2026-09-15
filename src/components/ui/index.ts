@@ -1,4 +1,5 @@
 export { AppHeader } from './AppHeader';
+export { NoticeDialog } from './NoticeDialog';
 export { IconRow } from './IconRow';
 export { AppTabBar, getTabBarScenePadding } from './AppTabBar';
 export { PrimaryButton } from './Button';

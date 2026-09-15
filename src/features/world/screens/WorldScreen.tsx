@@ -27,7 +27,9 @@ export function WorldScreen() {
         <View style={styles.stageBlock}>
           <AppText variant="label" color="helper">
             {stage.name.toLowerCase()}
-            {completedDays.length > 0 ? ` · ${completedDays.length} days of showing up` : ''}
+            {completedDays.length > 0
+              ? ` · ${completedDays.length} ${completedDays.length === 1 ? 'day' : 'days'} of showing up`
+              : ''}
           </AppText>
           <AppText variant="body" color="secondary">
             {grown}

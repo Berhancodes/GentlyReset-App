@@ -1,17 +1,21 @@
-import { Alert, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { AppText, IconRow, SceneHero } from '@/components/ui';
+import { AppText, IconRow, NoticeDialog, SceneHero } from '@/components/ui';
 import { colors, radius, spacing } from '@/design-system';
-import { inviteFriend } from '@/features/world/utils/inviteFriend';
+import { INVITE_MESSAGE, inviteFriend } from '@/features/world/utils/inviteFriend';
 
 const FRIENDS_TOGETHER = require('../../../../assets/images/app/friends-together.png');
 
-function comingLater(title: string) {
-  Alert.alert(title, 'this will need friends on Gently Reset. coming later.');
-}
+type Notice = {
+  title: string;
+  body: string;
+};
 
 export function FriendsSection() {
+  const [notice, setNotice] = useState<Notice | null>(null);
+
   return (
     <View style={styles.root}>
       <AppText variant="label" color="helper">
@@ -29,27 +33,52 @@ export function FriendsSection() {
           title="invite a friend"
           subtitle="reset together is better"
           onPress={() => {
-            void inviteFriend().catch(() => {
-              Alert.alert(
-                'invite a friend',
-                "I'm doing a 30-day Gently Reset — one small reset a day. Come reset with me.",
-              );
-            });
+            void inviteFriend()
+              .then((result) => {
+                if (result === 'copied') {
+                  setNotice({
+                    title: 'invite a friend',
+                    body: 'invite text copied. paste it to someone you trust.',
+                  });
+                }
+              })
+              .catch(() => {
+                setNotice({
+                  title: 'invite a friend',
+                  body: INVITE_MESSAGE,
+                });
+              });
           }}
         />
         <IconRow
           icon={<Ionicons name="heart" size={26} color={colors.accent.peach} />}
           title="send encouragement"
           subtitle="coming later"
-          onPress={() => comingLater('send encouragement')}
+          onPress={() =>
+            setNotice({
+              title: 'send encouragement',
+              body: 'this will need friends on Gently Reset. coming later.',
+            })
+          }
         />
         <IconRow
           icon={<Ionicons name="people" size={26} color={colors.text.primary} />}
           title="view shared progress"
           subtitle="coming later"
-          onPress={() => comingLater('shared progress')}
+          onPress={() =>
+            setNotice({
+              title: 'shared progress',
+              body: 'this will need friends on Gently Reset. coming later.',
+            })
+          }
         />
       </View>
+      <NoticeDialog
+        visible={notice !== null}
+        title={notice?.title ?? ''}
+        body={notice?.body ?? ''}
+        onClose={() => setNotice(null)}
+      />
     </View>
   );
 }

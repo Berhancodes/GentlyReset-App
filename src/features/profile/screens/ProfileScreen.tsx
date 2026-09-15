@@ -1,7 +1,8 @@
-import { Alert, Image, ScrollView, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { AppText, IconRow, MainTabHeader, Screen } from '@/components/ui';
+import { AppText, IconRow, MainTabHeader, NoticeDialog, Screen } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
 import { getResetProfile } from '@/features/onboarding/data/mockResetProfile';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
@@ -13,12 +14,14 @@ import { minutesFromCommitment } from '@/features/reset/utils/getTaskForDay';
 
 const PROFILE_MASCOT = require('../../../../assets/images/app/profile-mascot.png');
 
-function comingLater(title: string) {
-  Alert.alert(title, 'this part of Gently Reset is coming later.');
-}
+type Notice = {
+  title: string;
+  body: string;
+};
 
 export function ProfileScreen() {
   useSyncResetDay();
+  const [notice, setNotice] = useState<Notice | null>(null);
   const currentDay = useResetStore((state) => state.currentDay);
   const resetTypeId = useResetStore((state) => state.resetTypeId);
   const personalization = useResetStore((state) => state.personalization);
@@ -80,10 +83,10 @@ export function ProfileScreen() {
             title="my reset type"
             showChevron
             onPress={() => {
-              Alert.alert(
-                profile.name,
-                `${profile.summary}\n\n${profile.description}\n\n${profile.emphasized}`,
-              );
+              setNotice({
+                title: profile.name,
+                body: `${profile.summary}\n\n${profile.description}\n\n${profile.emphasized}`,
+              });
             }}
           />
           <IconRow
@@ -91,19 +94,25 @@ export function ProfileScreen() {
             title="goals"
             showChevron
             onPress={() => {
-              Alert.alert(
-                'goals',
-                goalLabels.length > 0
-                  ? goalLabels.join('\n')
-                  : 'no goals were saved from onboarding.',
-              );
+              setNotice({
+                title: 'goals',
+                body:
+                  goalLabels.length > 0
+                    ? goalLabels.join('\n')
+                    : 'no goals were saved from onboarding.',
+              });
             }}
           />
           <IconRow
             icon={<Ionicons name="options-outline" size={22} color={colors.text.primary} />}
             title="settings"
             showChevron
-            onPress={() => comingLater('settings')}
+            onPress={() =>
+              setNotice({
+                title: 'settings',
+                body: 'this part of Gently Reset is coming later.',
+              })
+            }
           />
           <IconRow
             icon={
@@ -111,10 +120,21 @@ export function ProfileScreen() {
             }
             title="help & support"
             showChevron
-            onPress={() => comingLater('help & support')}
+            onPress={() =>
+              setNotice({
+                title: 'help & support',
+                body: 'this part of Gently Reset is coming later.',
+              })
+            }
           />
         </View>
       </ScrollView>
+      <NoticeDialog
+        visible={notice !== null}
+        title={notice?.title ?? ''}
+        body={notice?.body ?? ''}
+        onClose={() => setNotice(null)}
+      />
     </Screen>
   );
 }
