@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { colors, radius } from '@/design-system';
+import { MOOD_LABELS } from '@/features/reflect/utils/journalHistory';
 
 type MoodFaceProps = {
   mood: 1 | 2 | 3 | 4 | 5;
@@ -51,7 +52,7 @@ export function MoodSelector({ value, onChange }: MoodSelectorProps) {
           <Pressable
             key={mood}
             accessibilityRole="button"
-            accessibilityLabel={`Mood ${mood}`}
+            accessibilityLabel={MOOD_LABELS[mood]}
             accessibilityState={{ selected }}
             onPress={() => onChange(mood)}
             style={styles.slot}

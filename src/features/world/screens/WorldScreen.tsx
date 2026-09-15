@@ -1,48 +1,47 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { AppText, IconRow, MainTabHeader, SceneHero, Screen } from '@/components/ui';
-import { colors, spacing } from '@/design-system';
+import { AppText, MainTabHeader, SceneHero, Screen } from '@/components/ui';
+import { colors, radius, spacing } from '@/design-system';
+import { FriendsSection } from '@/features/world/components/FriendsSection';
+import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
+import { useResetStore } from '@/features/reset/store/useResetStore';
+import { getWorldStage, worldCompanionLine } from '@/features/reset/utils/getWorldStage';
 
-const FRIENDS_TOGETHER = require('../../../../assets/images/app/friends-together.png');
+const WORLD_COTTAGE = require('../../../../assets/images/app/my-world-cottage.png');
 
 export function WorldScreen() {
+  useSyncResetDay();
+  const completedDays = useResetStore((state) => state.completedDays);
+  const personalization = useResetStore((state) => state.personalization);
+  const stage = getWorldStage(completedDays.length);
+  const grown = worldCompanionLine(stage, personalization.supportStyle, completedDays.length);
+
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-      <MainTabHeader title="friends" />
+      <MainTabHeader title="world" />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <AppText variant="body" color="secondary">
-          {"don't reset alone."}
-        </AppText>
-        <SceneHero
-          source={FRIENDS_TOGETHER}
-          accessibilityLabel="Two mascots sitting together in a meadow"
-          aspectRatio={1.18}
-        />
-        <View style={styles.actions}>
-          <IconRow
-            icon={<Ionicons name="add-circle" size={28} color={colors.accent.sage} />}
-            title="invite a friend"
-            subtitle="reset together is better"
-            onPress={() => undefined}
-          />
-          <IconRow
-            icon={<Ionicons name="heart" size={26} color={colors.accent.peach} />}
-            title="send encouragement"
-            subtitle="a little support goes a long way"
-            onPress={() => undefined}
-          />
-          <IconRow
-            icon={<Ionicons name="people" size={26} color={colors.text.primary} />}
-            title="view shared progress"
-            subtitle="see how you're both doing"
-            onPress={() => undefined}
+        <View style={styles.stageBlock}>
+          <AppText variant="label" color="helper">
+            {stage.name.toLowerCase()}
+            {completedDays.length > 0 ? ` · ${completedDays.length} days of showing up` : ''}
+          </AppText>
+          <AppText variant="body" color="secondary">
+            {grown}
+          </AppText>
+        </View>
+        <View style={[styles.scene, stage.id >= 3 ? styles.sceneWarm : null]}>
+          <SceneHero
+            source={WORLD_COTTAGE}
+            accessibilityLabel={`Gently Reset world, ${stage.name} stage. Mascot on a path toward a cottage.`}
+            aspectRatio={1.28}
+            borderRadius={radius.card}
           />
         </View>
+        <FriendsSection />
       </ScrollView>
     </Screen>
   );
@@ -56,9 +55,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.lg,
-    gap: spacing.md,
+    gap: spacing.lg,
   },
-  actions: {
-    gap: spacing.sm,
+  stageBlock: {
+    gap: spacing.xxs,
+  },
+  scene: {
+    borderRadius: radius.card,
+  },
+  sceneWarm: {
+    padding: spacing.xxs,
+    backgroundColor: colors.surface.choiceSelected,
   },
 });

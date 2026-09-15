@@ -1,12 +1,39 @@
-import { Image, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { AppText, IconRow, MainTabHeader, Screen } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
+import { getResetProfile } from '@/features/onboarding/data/mockResetProfile';
+import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { getOnboardingOptionLabel } from '@/features/onboarding/utils/getOnboardingOptionLabel';
+import { getMultiChoiceIds, getSingleChoiceId } from '@/features/onboarding/utils/answerReaders';
+import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
+import { useResetStore } from '@/features/reset/store/useResetStore';
+import { minutesFromCommitment } from '@/features/reset/utils/getTaskForDay';
 
 const PROFILE_MASCOT = require('../../../../assets/images/app/profile-mascot.png');
 
+function comingLater(title: string) {
+  Alert.alert(title, 'this part of Gently Reset is coming later.');
+}
+
 export function ProfileScreen() {
+  useSyncResetDay();
+  const currentDay = useResetStore((state) => state.currentDay);
+  const resetTypeId = useResetStore((state) => state.resetTypeId);
+  const personalization = useResetStore((state) => state.personalization);
+  const answers = useOnboardingStore((state) => state.answers);
+  const profile = getResetProfile(resetTypeId);
+  const minutes = minutesFromCommitment(personalization.dailyCommitment);
+  const identityId = getSingleChoiceId(answers, 'desiredIdentity');
+  const outcomeId = getMultiChoiceIds(answers, 'thirtyDayOutcome')[0];
+  const focus =
+    (identityId ? getOnboardingOptionLabel('desiredIdentity', identityId) : undefined) ??
+    (outcomeId ? getOnboardingOptionLabel('thirtyDayOutcome', outcomeId) : undefined);
+  const goalLabels = personalization.desiredFeelings
+    .map((id) => getOnboardingOptionLabel('desiredFeelings', id))
+    .filter((label): label is string => Boolean(label));
+
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
       <MainTabHeader title="you" />
@@ -19,37 +46,64 @@ export function ProfileScreen() {
           <View style={styles.avatar}>
             <Image
               source={PROFILE_MASCOT}
-              accessibilityLabel="Gently Reset mascot avatar"
+              accessibilityLabel={`${profile.name} artwork`}
               accessibilityIgnoresInvertColors
               resizeMode="cover"
               style={styles.avatarImage}
             />
           </View>
           <AppText variant="title" align="center">
-            gently resetter
+            {profile.name}
           </AppText>
           <AppText variant="caption" color="helper" align="center">
-            you@email.com
+            Day {currentDay} of your reset
+          </AppText>
+          <AppText variant="body" color="secondary" align="center">
+            {profile.summary}
           </AppText>
         </View>
+
+        <View style={styles.facts}>
+          {focus ? <Fact label="Focus" value={focus} /> : null}
+          {personalization.resetReason ? (
+            <Fact label="Reason" value={personalization.resetReason} />
+          ) : null}
+          {personalization.dailyCommitment ? (
+            <Fact label="Pace" value={`${minutes} minutes a day`} />
+          ) : null}
+          {goalLabels.length > 0 ? <Fact label="Goals" value={goalLabels.join(' · ')} /> : null}
+        </View>
+
         <View style={styles.rows}>
           <IconRow
             icon={<Ionicons name="people-outline" size={22} color={colors.text.primary} />}
             title="my reset type"
             showChevron
-            onPress={() => undefined}
+            onPress={() => {
+              Alert.alert(
+                profile.name,
+                `${profile.summary}\n\n${profile.description}\n\n${profile.emphasized}`,
+              );
+            }}
           />
           <IconRow
             icon={<Ionicons name="heart-outline" size={22} color={colors.text.primary} />}
             title="goals"
             showChevron
-            onPress={() => undefined}
+            onPress={() => {
+              Alert.alert(
+                'goals',
+                goalLabels.length > 0
+                  ? goalLabels.join('\n')
+                  : 'no goals were saved from onboarding.',
+              );
+            }}
           />
           <IconRow
             icon={<Ionicons name="options-outline" size={22} color={colors.text.primary} />}
             title="settings"
             showChevron
-            onPress={() => undefined}
+            onPress={() => comingLater('settings')}
           />
           <IconRow
             icon={
@@ -57,11 +111,22 @@ export function ProfileScreen() {
             }
             title="help & support"
             showChevron
-            onPress={() => undefined}
+            onPress={() => comingLater('help & support')}
           />
         </View>
       </ScrollView>
     </Screen>
+  );
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.fact}>
+      <AppText variant="label" color="helper">
+        {label}
+      </AppText>
+      <AppText variant="body">{value}</AppText>
+    </View>
   );
 }
 
@@ -90,6 +155,12 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: '100%',
     height: '100%',
+  },
+  facts: {
+    gap: spacing.md,
+  },
+  fact: {
+    gap: spacing.xxs,
   },
   rows: {
     gap: spacing.sm,

@@ -69,6 +69,15 @@ export const PLAN_DAY_COUNT = TOTAL_DAYS;
 
 export const PLAN_DAY_TITLES: readonly string[] = buildTitles();
 
+export const PLAN_WEEKS = [
+  { id: 'week-1', label: 'start smaller', startDay: 1, endDay: 7 },
+  { id: 'week-2', label: 'make it easier', startDay: 8, endDay: 14 },
+  { id: 'week-3', label: 'stay with it', startDay: 15, endDay: 21 },
+  { id: 'week-4', label: 'keep the promise', startDay: 22, endDay: 30 },
+] as const;
+
+export type PlanWeek = (typeof PLAN_WEEKS)[number];
+
 export function getPlanDayTitle(day: number): string {
   const clamped = Math.min(PLAN_DAY_COUNT, Math.max(1, day));
   return PLAN_DAY_TITLES[clamped - 1] ?? 'One small reset';

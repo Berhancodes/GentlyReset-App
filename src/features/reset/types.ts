@@ -15,6 +15,17 @@ export type TodayTask = {
   minutes: number;
 };
 
+export type JournalMood = 1 | 2 | 3 | 4 | 5;
+
+export type JournalEntry = {
+  day: number;
+  date: string;
+  mood: JournalMood;
+  prompt: string;
+  text: string;
+  savedAt: string;
+};
+
 export type ResetSnapshot = {
   currentDay: number;
   completedDays: number[];
@@ -28,4 +39,5 @@ export type ResetSnapshot = {
   missedYesterday: boolean;
   resetTypeId: string;
   personalization: ResetPersonalization;
+  reflections: JournalEntry[];
 };

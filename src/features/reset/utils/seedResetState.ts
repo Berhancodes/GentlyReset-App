@@ -61,5 +61,6 @@ export function createSeededResetState(
     missedYesterday: false,
     resetTypeId: profile.id,
     personalization,
+    reflections: [],
   };
 }

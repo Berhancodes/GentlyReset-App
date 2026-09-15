@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import type { OnboardingAnswer } from '@/features/onboarding/types/onboarding';
-import type { ResetSnapshot, TodayTask } from '@/features/reset/types';
+import type { JournalMood, ResetSnapshot, TodayTask } from '@/features/reset/types';
 import { PLAN_DAY_COUNT } from '@/features/reset/data/thirtyDayPlan';
 import { applyDateRollover } from '@/features/reset/utils/applyDateRollover';
 import { shiftDateKey, toLocalDateKey } from '@/features/reset/utils/calendar';
@@ -29,6 +29,7 @@ const initialSnapshot: ResetSnapshot = {
   missedYesterday: false,
   resetTypeId: '',
   personalization: emptyPersonalization,
+  reflections: [],
 };
 
 type ResetActions = {
@@ -37,6 +38,7 @@ type ResetActions = {
   applyCalendarDay: (now?: Date) => void;
   startToday: () => void;
   completeToday: (now?: Date) => void;
+  saveReflection: (input: { mood: JournalMood; text: string; prompt: string }, now?: Date) => void;
   clearReset: () => void;
 };
 
@@ -103,6 +105,32 @@ export const useResetStore = create<ResetSnapshot & ResetActions>()(
           todayTask: getTaskForDay(rolled.currentDay, rolled.personalization),
         });
       },
+      saveReflection: (input, now = new Date()) => {
+        const today = toLocalDateKey(now);
+        const rolled = applyDateRollover(get(), today);
+        const text = input.text.trim();
+        if (!text) {
+          set(rolled);
+          return;
+        }
+
+        const entry = {
+          day: rolled.currentDay,
+          date: today,
+          mood: input.mood,
+          prompt: input.prompt,
+          text,
+          savedAt: now.toISOString(),
+        };
+        const remaining = (rolled.reflections ?? []).filter(
+          (reflection) => reflection.day !== rolled.currentDay,
+        );
+
+        set({
+          ...rolled,
+          reflections: [...remaining, entry].sort((left, right) => left.day - right.day),
+        });
+      },
       clearReset: () => set(initialSnapshot),
     }),
     {
@@ -121,6 +149,7 @@ export const useResetStore = create<ResetSnapshot & ResetActions>()(
         missedYesterday: state.missedYesterday,
         resetTypeId: state.resetTypeId,
         personalization: state.personalization,
+        reflections: state.reflections ?? [],
       }),
     },
   ),

@@ -1,46 +1,64 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { useMemo, useState } from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 
-import { AppText, MainTabHeader, ProgressBar, SceneHero, Screen } from '@/components/ui';
-import { colors, radius, shadows, spacing } from '@/design-system';
-
-const WORLD_COTTAGE = require('../../../../assets/images/app/my-world-cottage.png');
-
-/** Placeholder until a real journey day exists. */
-const PREVIEW_DAY = 7;
-const PREVIEW_PROGRESS = 0.58;
+import { MainTabHeader, Screen } from '@/components/ui';
+import { spacing } from '@/design-system';
+import { DayProgressHeader } from '@/features/home/components/DayProgressHeader';
+import { JourneyPath } from '@/features/journey/components/JourneyPath';
+import { PLAN_DAY_COUNT } from '@/features/reset/data/thirtyDayPlan';
+import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
+import { useResetStore } from '@/features/reset/store/useResetStore';
+import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
+import type { TodayTask } from '@/features/reset/types';
 
 export function JourneyScreen() {
+  useSyncResetDay();
+  const router = useRouter();
+  const [expandedDay, setExpandedDay] = useState<number | null>(null);
+  const currentDay = useResetStore((state) => state.currentDay);
+  const completedDays = useResetStore((state) => state.completedDays);
+  const todayCompleted = useResetStore((state) => state.todayCompleted);
+  const personalization = useResetStore((state) => state.personalization);
+  const resetStartedOn = useResetStore((state) => state.resetStartedOn);
+
+  const tasksByDay = useMemo(() => {
+    const map = new Map<number, TodayTask>();
+    for (let day = 1; day <= PLAN_DAY_COUNT; day += 1) {
+      map.set(day, getTaskForDay(day, personalization));
+    }
+    return map;
+  }, [personalization]);
+
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-      <MainTabHeader title="my world" />
+      <MainTabHeader title="journey" />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <AppText variant="body" color="secondary">
-          your progress grows a brighter place.
-        </AppText>
-        <SceneHero
-          source={WORLD_COTTAGE}
-          accessibilityLabel="Mascot standing on a path toward a cottage"
-          aspectRatio={1.08}
-        />
-        <View style={styles.card}>
-          <View style={styles.dayRow}>
-            <AppText variant="optionTitle">day {PREVIEW_DAY}</AppText>
-            <Ionicons name="leaf" size={18} color={colors.accent.sage} />
-          </View>
-          <ProgressBar
-            progress={PREVIEW_PROGRESS}
-            fillColor={colors.accent.sage}
-            accessibilityLabel="World progress"
-          />
-          <AppText variant="caption" color="helper" align="right">
-            keep going!
-          </AppText>
-        </View>
+        {resetStartedOn ? (
+          <>
+            <DayProgressHeader currentDay={currentDay} completedCount={completedDays.length} />
+            <JourneyPath
+              currentDay={currentDay}
+              completedDays={completedDays}
+              todayCompleted={todayCompleted}
+              tasksByDay={tasksByDay}
+              expandedDay={expandedDay}
+              onPressDay={(day, kind) => {
+                if (kind === 'today') {
+                  router.navigate('/(app)/(tabs)/home');
+                  return;
+                }
+                if (kind === 'completed') {
+                  setExpandedDay((current) => (current === day ? null : day));
+                }
+              }}
+            />
+          </>
+        ) : null}
       </ScrollView>
     </Screen>
   );
@@ -54,22 +72,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.lg,
-    gap: spacing.md,
-  },
-  card: {
-    marginTop: -spacing.sm,
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    borderRadius: radius.card,
-    backgroundColor: colors.surface.raised,
-    borderWidth: 1,
-    borderColor: colors.border.subtle,
-    ...shadows.soft,
-  },
-  dayRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: spacing.lg,
   },
 });

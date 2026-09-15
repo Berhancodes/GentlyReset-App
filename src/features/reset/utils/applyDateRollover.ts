@@ -8,58 +8,63 @@ import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
  * Completing a day unlocks the next plan day on a later calendar date (once).
  */
 export function applyDateRollover(state: ResetSnapshot, today: string): ResetSnapshot {
-  if (!state.resetStartedOn) {
-    return state;
+  const snapshot: ResetSnapshot = {
+    ...state,
+    reflections: state.reflections ?? [],
+  };
+
+  if (!snapshot.resetStartedOn) {
+    return snapshot;
   }
 
-  const lastSeenOn = state.lastSeenOn ?? state.resetStartedOn;
+  const lastSeenOn = snapshot.lastSeenOn ?? snapshot.resetStartedOn;
   if (lastSeenOn === today) {
-    return state;
+    return snapshot;
   }
 
   const elapsed = calendarDaysBetween(lastSeenOn, today);
   if (elapsed <= 0) {
-    return { ...state, lastSeenOn: today };
+    return { ...snapshot, lastSeenOn: today };
   }
 
-  const completedOnLastSeenDay = state.todayCompleted && state.lastCompletedOn === lastSeenOn;
+  const completedOnLastSeenDay = snapshot.todayCompleted && snapshot.lastCompletedOn === lastSeenOn;
   const yesterday = shiftDateKey(today, -1);
-  const completedYesterday = state.lastCompletedOn === yesterday;
-  const streak = completedYesterday ? state.streak : 0;
+  const completedYesterday = snapshot.lastCompletedOn === yesterday;
+  const streak = completedYesterday ? snapshot.streak : 0;
 
-  if (completedOnLastSeenDay && state.currentDay >= PLAN_DAY_COUNT) {
+  if (completedOnLastSeenDay && snapshot.currentDay >= PLAN_DAY_COUNT) {
     return {
-      ...state,
+      ...snapshot,
       lastSeenOn: today,
       todayCompleted: true,
       todayStarted: true,
       missedYesterday: !completedYesterday && elapsed > 1,
       streak,
-      todayTask: getTaskForDay(PLAN_DAY_COUNT, state.personalization),
+      todayTask: getTaskForDay(PLAN_DAY_COUNT, snapshot.personalization),
     };
   }
 
   if (completedOnLastSeenDay) {
-    const nextDay = Math.min(PLAN_DAY_COUNT, state.currentDay + 1);
+    const nextDay = Math.min(PLAN_DAY_COUNT, snapshot.currentDay + 1);
     return {
-      ...state,
+      ...snapshot,
       lastSeenOn: today,
       currentDay: nextDay,
       todayCompleted: false,
       todayStarted: false,
       missedYesterday: !completedYesterday && elapsed > 1,
       streak,
-      todayTask: getTaskForDay(nextDay, state.personalization),
+      todayTask: getTaskForDay(nextDay, snapshot.personalization),
     };
   }
 
   return {
-    ...state,
+    ...snapshot,
     lastSeenOn: today,
     todayCompleted: false,
     todayStarted: false,
     missedYesterday: true,
     streak,
-    todayTask: getTaskForDay(state.currentDay, state.personalization),
+    todayTask: getTaskForDay(snapshot.currentDay, snapshot.personalization),
   };
 }
