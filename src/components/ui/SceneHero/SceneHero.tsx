@@ -1,10 +1,13 @@
 import { Image, type ImageSourcePropType, Platform, StyleSheet, View } from 'react-native';
 
+type SceneHeroCrop = 'center' | 'mascot';
+
 type SceneHeroProps = {
   source: ImageSourcePropType;
   accessibilityLabel: string;
   aspectRatio: number;
   borderRadius?: number;
+  crop?: SceneHeroCrop;
 };
 
 export function SceneHero({
@@ -12,6 +15,7 @@ export function SceneHero({
   accessibilityLabel,
   aspectRatio,
   borderRadius = 0,
+  crop = 'center',
 }: SceneHeroProps) {
   return (
     <View style={[styles.frame, { aspectRatio, borderRadius }]}>
@@ -20,7 +24,7 @@ export function SceneHero({
         accessibilityLabel={accessibilityLabel}
         accessibilityIgnoresInvertColors
         resizeMode="cover"
-        style={styles.image}
+        style={crop === 'mascot' ? styles.imageMascot : styles.image}
       />
     </View>
   );
@@ -37,6 +41,16 @@ const styles = StyleSheet.create({
     ...Platform.select({
       web: { objectPosition: 'center 58%' },
       default: {},
+    }),
+  },
+  imageMascot: {
+    width: '100%',
+    height: '100%',
+    ...Platform.select({
+      web: { objectPosition: 'center 66%' },
+      default: {
+        transform: [{ scale: 1.08 }, { translateY: -10 }],
+      },
     }),
   },
 });

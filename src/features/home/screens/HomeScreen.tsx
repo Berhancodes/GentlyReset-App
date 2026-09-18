@@ -56,7 +56,7 @@ export function HomeScreen() {
   if (!resetStartedOn) {
     return (
       <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-        <MainTabHeader title="home" />
+        <MainTabHeader title="home" showMascot={false} />
       </Screen>
     );
   }
@@ -69,19 +69,23 @@ export function HomeScreen() {
       : todayStarted
         ? 'started'
         : 'idle';
-  const companionMessage = getCompanionMessage(companionMoment, personalization, task.minutes);
+  const companionMessage = getCompanionMessage(companionMoment, personalization);
   const messageEntering = reduceMotion ? undefined : FadeIn.duration(320);
 
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-      <MainTabHeader title="home" />
+      <MainTabHeader title="home" showMascot={false} />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <DayProgressHeader currentDay={currentDay} completedCount={completedDays.length} />
+        <DayProgressHeader
+          currentDay={currentDay}
+          completedCount={completedDays.length}
+          showCount={false}
+        />
         <Animated.View key={companionMoment} entering={messageEntering}>
           <AppText variant="body" color="secondary">
             {companionMessage}
@@ -94,7 +98,6 @@ export function HomeScreen() {
           onStart={startToday}
           onComplete={completeToday}
         />
-        <HomeScene completed={todayCompleted} />
         {todayCompleted ? (
           <Pressable
             accessibilityRole="button"
@@ -113,6 +116,7 @@ export function HomeScreen() {
             </AppText>
           </Pressable>
         ) : null}
+        <HomeScene completed={todayCompleted} />
       </ScrollView>
     </Screen>
   );
@@ -125,7 +129,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.xl,
     gap: spacing.md,
   },
   reflection: {

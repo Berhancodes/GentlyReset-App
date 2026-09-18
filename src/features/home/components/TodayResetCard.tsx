@@ -14,6 +14,8 @@ type TodayResetCardProps = {
   onComplete: () => void;
 };
 
+const CARD_PADDING = spacing.md + spacing.xxs;
+
 export function TodayResetCard({
   task,
   started,
@@ -23,17 +25,18 @@ export function TodayResetCard({
 }: TodayResetCardProps) {
   const reduceMotion = useReducedMotion();
   const entering = reduceMotion ? undefined : FadeIn.duration(280);
+  const filled = started || completed;
 
   return (
     <View
-      style={styles.card}
+      style={[styles.card, filled ? styles.cardFilled : null]}
       accessibilityLabel={
         completed
           ? `Today's reset complete. ${task.title}. Done for today.`
           : `Today's reset. ${task.title}. ${formatMinutesLabel(task.minutes)}.`
       }
     >
-      <View style={styles.heading}>
+      <View style={styles.eyebrow}>
         {completed ? (
           <Animated.View entering={entering} style={styles.doneLabel}>
             <View accessibilityElementsHidden importantForAccessibility="no" style={styles.check}>
@@ -50,6 +53,11 @@ export function TodayResetCard({
             {"today's reset"}
           </AppText>
         )}
+        {completed ? null : (
+          <AppText variant="label" color="helper">
+            {formatMinutesLabel(task.minutes)}
+          </AppText>
+        )}
       </View>
 
       <AppText variant="title">{task.title}</AppText>
@@ -60,11 +68,8 @@ export function TodayResetCard({
         </AppText>
       ) : (
         <>
-          <AppText variant="body" color="secondary">
+          <AppText variant="body" color="secondary" numberOfLines={1}>
             {task.description}
-          </AppText>
-          <AppText variant="caption" color="helper">
-            {formatMinutesLabel(task.minutes)}
           </AppText>
           {started ? (
             <PrimaryButton
@@ -89,14 +94,22 @@ export function TodayResetCard({
 const styles = StyleSheet.create({
   card: {
     gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingHorizontal: CARD_PADDING,
+    paddingVertical: CARD_PADDING,
     borderRadius: radius.card,
     backgroundColor: colors.surface.raised,
     borderWidth: 1,
     borderColor: colors.border.subtle,
   },
-  heading: {
+  cardFilled: {
+    backgroundColor: colors.surface.choiceSelected,
+    borderColor: colors.accent.gold,
+  },
+  eyebrow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
     minHeight: spacing.md,
   },
   doneLabel: {

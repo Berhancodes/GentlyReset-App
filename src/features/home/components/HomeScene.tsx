@@ -5,7 +5,7 @@ import { colors, radius, spacing } from '@/design-system';
 
 const HOME_MORNING_SCENE = require('../../../../assets/images/app/home-morning-scene.png');
 
-const COMPACT_ASPECT = 2.35;
+const COMPACT_ASPECT = 1.9;
 
 type HomeSceneProps = {
   completed: boolean;
@@ -23,6 +23,7 @@ export function HomeScene({ completed }: HomeSceneProps) {
         }
         aspectRatio={COMPACT_ASPECT}
         borderRadius={radius.card}
+        crop="mascot"
       />
     </View>
   );
@@ -31,9 +32,10 @@ export function HomeScene({ completed }: HomeSceneProps) {
 const styles = StyleSheet.create({
   frame: {
     borderRadius: radius.card,
+    overflow: 'hidden',
   },
   frameCompleted: {
     padding: spacing.xxs,
-    backgroundColor: colors.surface.choiceSelected,
+    backgroundColor: colors.accent.gold,
   },
 });

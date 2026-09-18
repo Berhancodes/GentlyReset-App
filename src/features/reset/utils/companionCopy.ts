@@ -22,7 +22,6 @@ export type CompanionMoment = 'idle' | 'started' | 'completed' | 'missed';
 export function getCompanionMessage(
   moment: CompanionMoment,
   personalization: ResetPersonalization,
-  minutes: number,
 ): string {
   if (moment === 'completed') {
     return "that's a real day. I'm proud of you.";
@@ -37,10 +36,6 @@ export function getCompanionMessage(
 
   if (moment === 'started') {
     return 'take it slowly. I will be right here.';
-  }
-
-  if (minutes <= 5 && personalization.supportStyle !== 'accountable') {
-    return "five minutes. that's it.";
   }
 
   const support = personalization.supportStyle

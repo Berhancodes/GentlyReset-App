@@ -20,28 +20,12 @@ export function formatMinutesLabel(minutes: number): string {
   return `${minutes} min`;
 }
 
-function minutesPhrase(minutes: number): string {
-  if (minutes <= 5) {
-    return 'five minutes';
-  }
-  if (minutes <= 10) {
-    return 'ten minutes';
-  }
-  if (minutes <= 20) {
-    return 'twenty minutes';
-  }
-  return 'thirty minutes';
-}
-
-function supportingDescription(day: number, minutes: number, obstacle?: string): string {
+function supportingDescription(day: number, obstacle?: string): string {
   if (day === 1) {
     if (obstacle === 'too-much' || obstacle === 'overthink') {
-      return `You don't need to fix everything. Just give yourself ${minutesPhrase(minutes)}.`;
+      return "You don't need to fix everything. Just begin.";
     }
-    if (obstacle === 'no-energy' || obstacle === 'put-off') {
-      return `You don't need momentum. Just give yourself ${minutesPhrase(minutes)}.`;
-    }
-    return `You don't need momentum. Just give yourself ${minutesPhrase(minutes)}.`;
+    return "You don't need momentum. Just begin.";
   }
 
   if (obstacle === 'too-much') {
@@ -51,7 +35,7 @@ function supportingDescription(day: number, minutes: number, obstacle?: string):
     return 'Showing up once still counts.';
   }
 
-  return 'One honest reset. That is enough for today.';
+  return 'One honest reset. That is enough.';
 }
 
 export function getTaskForDay(day: number, personalization: ResetPersonalization): TodayTask {
@@ -62,7 +46,7 @@ export function getTaskForDay(day: number, personalization: ResetPersonalization
     id: `day-${clamped}`,
     day: clamped,
     title: getPlanDayTitle(clamped),
-    description: supportingDescription(clamped, minutes, personalization.primaryObstacle),
+    description: supportingDescription(clamped, personalization.primaryObstacle),
     minutes,
   };
 }
