@@ -5,7 +5,7 @@ import { colors, radius, spacing } from '@/design-system';
 
 const HOME_MORNING_SCENE = require('../../../../assets/images/app/home-morning-scene.png');
 
-const COMPACT_ASPECT = 1.9;
+const COMPACT_ASPECT = 1.85;
 
 type HomeSceneProps = {
   completed: boolean;
