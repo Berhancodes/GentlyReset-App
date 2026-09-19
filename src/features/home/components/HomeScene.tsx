@@ -1,11 +1,11 @@
 import { StyleSheet, View } from 'react-native';
 
 import { SceneHero } from '@/components/ui';
-import { colors, radius, spacing } from '@/design-system';
+import { radius } from '@/design-system';
 
 const HOME_MORNING_SCENE = require('../../../../assets/images/app/home-morning-scene.png');
 
-const COMPACT_ASPECT = 1.85;
+const SCENE_ASPECT = 1.12;
 
 type HomeSceneProps = {
   completed: boolean;
@@ -13,7 +13,7 @@ type HomeSceneProps = {
 
 export function HomeScene({ completed }: HomeSceneProps) {
   return (
-    <View style={[styles.frame, completed ? styles.frameCompleted : null]}>
+    <View style={styles.frame}>
       <SceneHero
         source={HOME_MORNING_SCENE}
         accessibilityLabel={
@@ -21,8 +21,8 @@ export function HomeScene({ completed }: HomeSceneProps) {
             ? 'Mascot in the morning scene after today’s reset'
             : 'Mascot sipping tea on a log at sunrise'
         }
-        aspectRatio={COMPACT_ASPECT}
-        borderRadius={radius.card}
+        aspectRatio={SCENE_ASPECT}
+        borderRadius={radius.xl}
         crop="mascot"
       />
     </View>
@@ -31,11 +31,7 @@ export function HomeScene({ completed }: HomeSceneProps) {
 
 const styles = StyleSheet.create({
   frame: {
-    borderRadius: radius.card,
+    borderRadius: radius.xl,
     overflow: 'hidden',
-  },
-  frameCompleted: {
-    padding: spacing.xxs,
-    backgroundColor: colors.accent.gold,
   },
 });

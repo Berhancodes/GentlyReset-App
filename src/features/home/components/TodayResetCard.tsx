@@ -1,128 +1,101 @@
-import { StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, useReducedMotion } from 'react-native-reanimated';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import { AppText, PrimaryButton } from '@/components/ui';
-import { colors, radius, spacing } from '@/design-system';
-import { formatMinutesLabel } from '@/features/reset/utils/getTaskForDay';
-import type { TodayTask } from '@/features/reset/types';
+import { AppText } from '@/components/ui';
+import { colors, radius, shadows, spacing } from '@/design-system';
+import { HOME_TASK_DESCRIPTION, getHomeTaskTitle } from '@/features/home/utils/homeCopy';
+import { hapticSuccess } from '@/utils/haptics';
 
 type TodayResetCardProps = {
-  task: TodayTask;
-  started: boolean;
+  minutes: number;
   completed: boolean;
-  onStart: () => void;
   onComplete: () => void;
 };
 
-const CARD_PADDING = spacing.md + spacing.xxs;
-
-export function TodayResetCard({
-  task,
-  started,
-  completed,
-  onStart,
-  onComplete,
-}: TodayResetCardProps) {
-  const reduceMotion = useReducedMotion();
-  const entering = reduceMotion ? undefined : FadeIn.duration(280);
-  const filled = started || completed;
+export function TodayResetCard({ minutes, completed, onComplete }: TodayResetCardProps) {
+  const title = getHomeTaskTitle(minutes);
 
   return (
-    <View
-      style={[styles.card, filled ? styles.cardFilled : null]}
-      accessibilityLabel={
-        completed
-          ? `Today's reset complete. ${task.title}. Done for today.`
-          : `Today's reset. ${task.title}. ${formatMinutesLabel(task.minutes)}.`
-      }
+    <Pressable
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: completed, disabled: completed }}
+      accessibilityLabel={`Today's reset. ${title}. ${
+        completed ? 'Done for today.' : HOME_TASK_DESCRIPTION
+      }`}
+      accessibilityHint={completed ? undefined : "Marks today's reset as done"}
+      disabled={completed}
+      onPress={() => {
+        void hapticSuccess();
+        onComplete();
+      }}
+      style={({ pressed }) => [styles.card, pressed && !completed ? styles.pressed : null]}
     >
-      <View style={styles.eyebrow}>
-        {completed ? (
-          <Animated.View entering={entering} style={styles.doneLabel}>
-            <View accessibilityElementsHidden importantForAccessibility="no" style={styles.check}>
-              <AppText variant="caption" color="inverse" align="center">
-                ✓
-              </AppText>
-            </View>
-            <AppText variant="label" color="helper">
-              {"today's reset"}
+      <AppText variant="label" color="helper">
+        {"today's reset"}
+      </AppText>
+
+      <View style={styles.taskRow}>
+        <View
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+          style={[styles.checkbox, completed ? styles.checkboxComplete : null]}
+        >
+          {completed ? (
+            <AppText variant="caption" color="inverse" align="center">
+              ✓
             </AppText>
-          </Animated.View>
-        ) : (
-          <AppText variant="label" color="helper">
-            {"today's reset"}
+          ) : null}
+        </View>
+
+        <View style={styles.copy}>
+          <AppText variant="optionTitle">{title}</AppText>
+          <AppText variant="optionSubtitle" color="secondary">
+            {completed ? 'done for today' : HOME_TASK_DESCRIPTION}
           </AppText>
-        )}
-        {completed ? null : (
-          <AppText variant="label" color="helper">
-            {formatMinutesLabel(task.minutes)}
-          </AppText>
-        )}
+        </View>
       </View>
-
-      <AppText variant="title">{task.title}</AppText>
-
-      {completed ? (
-        <AppText variant="body" color="secondary">
-          done for today
-        </AppText>
-      ) : (
-        <>
-          <AppText variant="body" color="secondary" numberOfLines={1}>
-            {task.description}
-          </AppText>
-          {started ? (
-            <PrimaryButton
-              label="mark as complete"
-              accessibilityHint="Marks today's reset as done"
-              haptic="success"
-              onPress={onComplete}
-            />
-          ) : (
-            <PrimaryButton
-              label="start my reset"
-              accessibilityHint="Begins today's reset"
-              onPress={onStart}
-            />
-          )}
-        </>
-      )}
-    </View>
+    </Pressable>
   );
 }
+
+const CHECKBOX_SIZE = spacing.lg;
 
 const styles = StyleSheet.create({
   card: {
     gap: spacing.sm,
-    paddingHorizontal: CARD_PADDING,
-    paddingVertical: CARD_PADDING,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
     borderRadius: radius.card,
     backgroundColor: colors.surface.raised,
     borderWidth: 1,
     borderColor: colors.border.subtle,
+    ...shadows.soft,
   },
-  cardFilled: {
-    backgroundColor: colors.surface.choiceSelected,
-    borderColor: colors.accent.gold,
+  pressed: {
+    opacity: 0.88,
   },
-  eyebrow: {
+  taskRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     gap: spacing.sm,
-    minHeight: spacing.md,
   },
-  doneLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  check: {
-    width: 22,
-    height: 22,
+  checkbox: {
+    width: CHECKBOX_SIZE,
+    height: CHECKBOX_SIZE,
+    marginTop: 2,
     borderRadius: radius.pill,
-    backgroundColor: colors.action.primaryBackground,
+    borderWidth: 2,
+    borderColor: colors.text.primary,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxComplete: {
+    backgroundColor: colors.action.primaryBackground,
+    borderColor: colors.action.primaryBackground,
+  },
+  copy: {
+    flex: 1,
+    gap: spacing.xxs,
+    minHeight: 44,
     justifyContent: 'center',
   },
 });

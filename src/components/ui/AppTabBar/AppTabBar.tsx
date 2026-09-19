@@ -19,7 +19,7 @@ const TABS = {
     active: require('../../../../assets/icons/tab-journey-active.png'),
   },
   reflect: {
-    label: 'journal',
+    label: 'reflect',
     idle: require('../../../../assets/icons/tab-reflect.png'),
     active: require('../../../../assets/icons/tab-reflect-active.png'),
   },

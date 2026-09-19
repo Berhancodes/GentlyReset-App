@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useLayoutEffect } from 'react';
-import { AppState, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { AppState, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, useReducedMotion } from 'react-native-reanimated';
 
 import { AppText, getTabBarScenePadding, MainTabHeader, Screen } from '@/components/ui';
 import { spacing } from '@/design-system';
-import { DayProgressHeader } from '@/features/home/components/DayProgressHeader';
 import { HomeScene } from '@/features/home/components/HomeScene';
 import { TodayResetCard } from '@/features/home/components/TodayResetCard';
+import { getHomeGreeting, HOME_IDLE_SUBTITLE } from '@/features/home/utils/homeCopy';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { getCompanionMessage } from '@/features/reset/utils/companionCopy';
@@ -23,7 +23,6 @@ export function HomeScreen() {
   const answers = useOnboardingStore((state) => state.answers);
   const resetStartedOn = useResetStore((state) => state.resetStartedOn);
   const currentDay = useResetStore((state) => state.currentDay);
-  const completedDays = useResetStore((state) => state.completedDays);
   const todayCompleted = useResetStore((state) => state.todayCompleted);
   const todayStarted = useResetStore((state) => state.todayStarted);
   const missedYesterday = useResetStore((state) => state.missedYesterday);
@@ -57,10 +56,17 @@ export function HomeScreen() {
     return () => subscription.remove();
   }, [syncDay]);
 
+  const completeReset = useCallback(() => {
+    if (!todayStarted) {
+      startToday();
+    }
+    completeToday();
+  }, [completeToday, startToday, todayStarted]);
+
   if (!resetStartedOn) {
     return (
       <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-        <MainTabHeader title="home" showMascot={false} />
+        <MainTabHeader title="home" />
       </Screen>
     );
   }
@@ -73,12 +79,15 @@ export function HomeScreen() {
       : todayStarted
         ? 'started'
         : 'idle';
-  const companionMessage = getCompanionMessage(companionMoment, personalization);
+  const subtitle =
+    companionMoment === 'idle' || companionMoment === 'started'
+      ? HOME_IDLE_SUBTITLE
+      : getCompanionMessage(companionMoment, personalization);
   const messageEntering = reduceMotion ? undefined : FadeIn.duration(320);
 
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-      <MainTabHeader title="home" showMascot={false} />
+      <MainTabHeader title="home" />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[
@@ -88,22 +97,19 @@ export function HomeScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <DayProgressHeader
-          currentDay={currentDay}
-          completedCount={completedDays.length}
-          showCount={false}
-        />
-        <Animated.View key={companionMoment} entering={messageEntering}>
-          <AppText variant="body" color="secondary">
-            {companionMessage}
-          </AppText>
-        </Animated.View>
+        <View style={styles.greeting}>
+          <AppText variant="title">{getHomeGreeting()}</AppText>
+          <Animated.View key={companionMoment} entering={messageEntering}>
+            <AppText variant="body" color="secondary">
+              {subtitle}
+            </AppText>
+          </Animated.View>
+        </View>
+        <HomeScene completed={todayCompleted} />
         <TodayResetCard
-          task={task}
-          started={todayStarted}
+          minutes={task.minutes}
           completed={todayCompleted}
-          onStart={startToday}
-          onComplete={completeToday}
+          onComplete={completeReset}
         />
         {todayCompleted ? (
           <Pressable
@@ -123,7 +129,6 @@ export function HomeScreen() {
             </AppText>
           </Pressable>
         ) : null}
-        <HomeScene completed={todayCompleted} />
       </ScrollView>
     </Screen>
   );
@@ -138,8 +143,11 @@ const styles = StyleSheet.create({
     maxWidth: HOME_COLUMN_MAX_WIDTH,
     alignSelf: 'center',
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.xs,
     gap: spacing.md,
+  },
+  greeting: {
+    gap: spacing.xxs,
   },
   reflection: {
     minHeight: 44,
