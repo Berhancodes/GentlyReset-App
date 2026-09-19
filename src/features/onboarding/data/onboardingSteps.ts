@@ -502,7 +502,8 @@ export const ONBOARDING_STEPS = [
   {
     id: 'resetReveal',
     type: 'result',
-    title: 'The Overloaded Dreamer',
+    // Title/profileId are unused at render; ResultScreen classifies from answers.
+    title: 'your reset type',
     profileId: 'overloaded-dreamer',
     ctaLabel: 'this is so me',
     secondaryCtaLabel: 'continue',
@@ -515,6 +516,7 @@ export const ONBOARDING_STEPS = [
     id: 'noticedDetails',
     type: 'resultDetails',
     title: "here's what I noticed.",
+    // profileId unused at render; ResultDetailsScreen classifies from answers.
     profileId: 'overloaded-dreamer',
     ctaLabel: 'continue',
     hideProgress: true,
@@ -539,6 +541,7 @@ export const ONBOARDING_STEPS = [
     id: 'sharePreview',
     type: 'sharePreview',
     title: 'this is your reset.',
+    // profileId unused at render; SharePreviewScreen classifies from answers.
     profileId: 'overloaded-dreamer',
     shareCtaLabel: 'share my reset',
     continueCtaLabel: 'continue',

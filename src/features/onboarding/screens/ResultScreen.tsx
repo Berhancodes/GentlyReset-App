@@ -4,11 +4,11 @@ import { AppText, PrimaryButton } from '@/components/ui';
 import { spacing } from '@/design-system';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { OnboardingTextButton } from '@/features/onboarding/components/OnboardingTextButton';
-import { getResetProfile } from '@/features/onboarding/data/mockResetProfile';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { ResultStep } from '@/features/onboarding/types/onboarding';
 import { deriveResetApproach } from '@/features/onboarding/utils/deriveResetApproach';
+import { getResetProfileForAnswers } from '@/features/reset/data/resetProfiles';
 
 type ResultScreenProps = {
   step: ResultStep;
@@ -17,7 +17,7 @@ type ResultScreenProps = {
 export function ResultScreen({ step }: ResultScreenProps) {
   const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
   const answers = useOnboardingStore((state) => state.answers);
-  const profile = getResetProfile(step.profileId);
+  const profile = getResetProfileForAnswers(answers);
   const approach = deriveResetApproach(answers);
   const approachLines = [approach.time, approach.support, approach.length].filter(
     (value): value is string => Boolean(value),

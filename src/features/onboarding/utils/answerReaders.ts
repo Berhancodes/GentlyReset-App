@@ -1,4 +1,4 @@
-import type { OnboardingAnswer } from '@/features/onboarding/types/onboarding';
+import type { OnboardingAnswer } from '../types/onboarding';
 
 export function getSingleChoiceId(
   answers: Record<string, OnboardingAnswer>,

@@ -3,9 +3,10 @@ import { StyleSheet, View } from 'react-native';
 import { AppText, PrimaryButton } from '@/components/ui';
 import { colors, radius, shadows, spacing } from '@/design-system';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
-import { getResetProfile } from '@/features/onboarding/data/mockResetProfile';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
+import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { ResultDetailsStep } from '@/features/onboarding/types/onboarding';
+import { getResetProfileForAnswers } from '@/features/reset/data/resetProfiles';
 
 type ResultDetailsScreenProps = {
   step: ResultDetailsStep;
@@ -13,7 +14,8 @@ type ResultDetailsScreenProps = {
 
 export function ResultDetailsScreen({ step }: ResultDetailsScreenProps) {
   const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
-  const profile = getResetProfile(step.profileId);
+  const answers = useOnboardingStore((state) => state.answers);
+  const profile = getResetProfileForAnswers(answers);
 
   return (
     <OnboardingScreenLayout

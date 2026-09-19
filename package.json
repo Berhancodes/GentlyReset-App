@@ -10,7 +10,9 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
+    "test": "npm run test:layout && npm run test:reset-type",
     "test:layout": "tsc --pretty false --ignoreConfig --rootDir src/features/home/layout --outDir /tmp/gently-reset-layout-tests --module commonjs --target es2020 --esModuleInterop --skipLibCheck --strict src/features/home/layout/homeSceneLayout.ts src/features/home/layout/homeSceneLayout.test.ts && node /tmp/gently-reset-layout-tests/homeSceneLayout.test.js",
+    "test:reset-type": "tsc --pretty false --ignoreConfig --rootDir src --outDir /tmp/gently-reset-type-tests --module commonjs --target es2020 --esModuleInterop --skipLibCheck --strict --noUncheckedIndexedAccess src/features/reset/types.ts src/features/onboarding/utils/answerReaders.ts src/features/reset/utils/deriveResetType.ts src/features/reset/utils/deriveResetType.test.ts && node /tmp/gently-reset-type-tests/features/reset/utils/deriveResetType.test.js",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

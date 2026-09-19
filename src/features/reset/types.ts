@@ -1,3 +1,34 @@
+export const RESET_TYPE_IDS = [
+  'overloaded-dreamer',
+  'soft-restarter',
+  'almost-starter',
+  'fading-flame',
+] as const;
+
+export type ResetTypeId = (typeof RESET_TYPE_IDS)[number];
+
+export const RESET_TYPE_NAMES: Record<ResetTypeId, string> = {
+  'overloaded-dreamer': 'The Overloaded Dreamer',
+  'soft-restarter': 'The Soft Restarter',
+  'almost-starter': 'The Almost Starter',
+  'fading-flame': 'The Fading Flame',
+};
+
+/**
+ * When top scores are equal (including all-zero sparse answers), prefer this
+ * order. Restarter and Almost Starter have the cleanest single-question
+ * diagnostics; Dreamer is the broad leftover cluster — not first just because
+ * it was the old mock.
+ */
+export const RESET_TYPE_TIE_PRIORITY: readonly ResetTypeId[] = [
+  'soft-restarter',
+  'almost-starter',
+  'fading-flame',
+  'overloaded-dreamer',
+];
+
+export type ResetTypeScores = Record<ResetTypeId, number>;
+
 export type ResetPersonalization = {
   dailyCommitment?: string;
   supportStyle?: string;
@@ -38,6 +69,12 @@ export type ResetSnapshot = {
   streak: number;
   missedYesterday: boolean;
   resetTypeId: string;
+  /**
+   * Onboarding `profileAccuracy` option id (`scarily-accurate` | `mostly` |
+   * `not-really`). Feedback only — never used to reclassify. Optional for
+   * snapshots saved before this field existed.
+   */
+  profileAccuracy?: string;
   personalization: ResetPersonalization;
   reflections: JournalEntry[];
 };

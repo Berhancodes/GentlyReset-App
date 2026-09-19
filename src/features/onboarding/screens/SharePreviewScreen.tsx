@@ -5,10 +5,11 @@ import { colors, radius, shadows, spacing } from '@/design-system';
 import { IllustrationPlaceholder } from '@/features/onboarding/components/IllustrationPlaceholder';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { OnboardingTextButton } from '@/features/onboarding/components/OnboardingTextButton';
-import { getResetProfile } from '@/features/onboarding/data/mockResetProfile';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
+import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { SharePreviewStep } from '@/features/onboarding/types/onboarding';
 import { shareReset } from '@/features/onboarding/utils/shareReset';
+import { getResetProfileForAnswers } from '@/features/reset/data/resetProfiles';
 
 type SharePreviewScreenProps = {
   step: SharePreviewStep;
@@ -16,7 +17,8 @@ type SharePreviewScreenProps = {
 
 export function SharePreviewScreen({ step }: SharePreviewScreenProps) {
   const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
-  const profile = getResetProfile(step.profileId);
+  const answers = useOnboardingStore((state) => state.answers);
+  const profile = getResetProfileForAnswers(answers);
 
   return (
     <OnboardingScreenLayout

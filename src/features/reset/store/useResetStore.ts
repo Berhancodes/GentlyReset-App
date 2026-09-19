@@ -2,10 +2,12 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import type { OnboardingAnswer } from '@/features/onboarding/types/onboarding';
+import { getSingleChoiceId } from '@/features/onboarding/utils/answerReaders';
 import type { JournalMood, ResetSnapshot, TodayTask } from '@/features/reset/types';
 import { PLAN_DAY_COUNT } from '@/features/reset/data/thirtyDayPlan';
 import { applyDateRollover } from '@/features/reset/utils/applyDateRollover';
 import { shiftDateKey, toLocalDateKey } from '@/features/reset/utils/calendar';
+import { resolveStoredResetTypeId } from '@/features/reset/utils/deriveResetType';
 import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
 import { createSeededResetState } from '@/features/reset/utils/seedResetState';
 import { asyncPersistStorage } from '@/utils/persistStorage';
@@ -52,6 +54,13 @@ export const useResetStore = create<ResetSnapshot & ResetActions>()(
       ensureSeeded: (answers, now = new Date()) => {
         if (get().resetStartedOn) {
           get().applyCalendarDay(now);
+          const current = get();
+          const resetTypeId = resolveStoredResetTypeId(current.resetTypeId, answers);
+          const profileAccuracy =
+            current.profileAccuracy ?? getSingleChoiceId(answers, 'profileAccuracy');
+          if (resetTypeId !== current.resetTypeId || profileAccuracy !== current.profileAccuracy) {
+            set({ resetTypeId, profileAccuracy });
+          }
           return;
         }
         set(createSeededResetState(answers, now));
@@ -136,6 +145,18 @@ export const useResetStore = create<ResetSnapshot & ResetActions>()(
     {
       name: 'gently-reset-daily',
       storage: asyncPersistStorage,
+      version: 1,
+      migrate: (persistedState) => {
+        const state = persistedState as Partial<ResetSnapshot>;
+        return {
+          ...state,
+          reflections: state.reflections ?? [],
+          profileAccuracy:
+            typeof state.profileAccuracy === 'string' ? state.profileAccuracy : undefined,
+          // Unknown/missing resetTypeId is resolved once in ensureSeeded when
+          // onboarding answers are available — never reclassified on migrate.
+        };
+      },
       partialize: (state) => ({
         currentDay: state.currentDay,
         completedDays: state.completedDays,
@@ -148,6 +169,7 @@ export const useResetStore = create<ResetSnapshot & ResetActions>()(
         streak: state.streak,
         missedYesterday: state.missedYesterday,
         resetTypeId: state.resetTypeId,
+        profileAccuracy: state.profileAccuracy,
         personalization: state.personalization,
         reflections: state.reflections ?? [],
       }),

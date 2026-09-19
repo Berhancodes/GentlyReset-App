@@ -78,7 +78,7 @@ Onboarding is a list of typed steps in `src/features/onboarding/data/onboardingS
 
 The production questionnaire lives in `src/features/onboarding/data/onboardingSteps.ts`. There are exactly 21 core personalization questions across four chapters (4 / 4 / 5 / 8). `profileAccuracy` is a question-style screen after the Reset Type reveal and is not counted in those 21.
 
-Reset profile copy is mocked in `src/features/onboarding/data/mockResetProfile.ts` until personalization is real. Share is stubbed. Loading is timer-based. The final Pro paywall is visual only — both CTAs still enter the app, with no IAP, AI, or backend yet.
+Reset type is classified from onboarding answers in `src/features/reset/utils/deriveResetType.ts`, with copy in `src/features/reset/data/resetProfiles.ts`. Share is stubbed. Loading is timer-based. The final Pro paywall is visual only — both CTAs still enter the app, with no IAP, AI, or backend yet.
 
 `successStatement` includes a "something else..." option as a selectable choice. A follow-up text field can be added later without changing the step id.
 

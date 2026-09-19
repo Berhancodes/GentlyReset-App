@@ -1,9 +1,13 @@
-import { getResetProfile, MOCK_RESET_PROFILE } from '@/features/onboarding/data/mockResetProfile';
+import {
+  getSingleChoiceId,
+  getMultiChoiceIds,
+  getTextInputValue,
+} from '@/features/onboarding/utils/answerReaders';
 import type { OnboardingAnswer } from '@/features/onboarding/types/onboarding';
-import { getMultiChoiceIds, getTextInputValue } from '@/features/onboarding/utils/answerReaders';
 import { deriveResetApproach } from '@/features/onboarding/utils/deriveResetApproach';
 import { deriveRetentionProfile } from '@/features/onboarding/utils/deriveRetentionProfile';
 import { toLocalDateKey } from '@/features/reset/utils/calendar';
+import { deriveResetType } from '@/features/reset/utils/deriveResetType';
 import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
 import type { ResetPersonalization, ResetSnapshot } from '@/features/reset/types';
 
@@ -46,7 +50,7 @@ export function createSeededResetState(
 ): ResetSnapshot {
   const today = toLocalDateKey(now);
   const personalization = personalizationFromAnswers(answers);
-  const profile = getResetProfile(MOCK_RESET_PROFILE.id);
+  const classification = deriveResetType(answers);
 
   return {
     currentDay: 1,
@@ -59,7 +63,8 @@ export function createSeededResetState(
     lastCompletedOn: null,
     streak: 0,
     missedYesterday: false,
-    resetTypeId: profile.id,
+    resetTypeId: classification.id,
+    profileAccuracy: getSingleChoiceId(answers, 'profileAccuracy'),
     personalization,
     reflections: [],
   };

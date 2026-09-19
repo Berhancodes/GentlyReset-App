@@ -16,6 +16,7 @@ import {
   HOME_IDLE_SUBTITLE,
 } from '@/features/home/utils/homeCopy';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
 
@@ -33,6 +34,7 @@ export function HomeScreen() {
   const todayCompleted = useResetStore((state) => state.todayCompleted);
   const todayStarted = useResetStore((state) => state.todayStarted);
   const personalization = useResetStore((state) => state.personalization);
+  const resetTypeId = useResetStore((state) => state.resetTypeId);
   const ensureSeeded = useResetStore((state) => state.ensureSeeded);
   const applyCalendarDay = useResetStore((state) => state.applyCalendarDay);
   const startToday = useResetStore((state) => state.startToday);
@@ -112,7 +114,11 @@ export function HomeScreen() {
         />
         <TodayResetCard
           title={getHomeTaskTitle(task.minutes)}
-          description={getHomeSupportLine(personalization.primaryObstacle)}
+          description={
+            resetTypeId
+              ? getResetProfile(resetTypeId).homeSupportLine
+              : getHomeSupportLine(personalization.primaryObstacle)
+          }
           minutes={task.minutes}
           started={todayStarted}
           completed={todayCompleted}

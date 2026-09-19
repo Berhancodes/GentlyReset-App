@@ -4,7 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { AppText, IconRow, MainTabHeader, NoticeDialog, Screen } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
-import { getResetProfile } from '@/features/onboarding/data/mockResetProfile';
+import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { getOnboardingOptionLabel } from '@/features/onboarding/utils/getOnboardingOptionLabel';
 import { getMultiChoiceIds, getSingleChoiceId } from '@/features/onboarding/utils/answerReaders';

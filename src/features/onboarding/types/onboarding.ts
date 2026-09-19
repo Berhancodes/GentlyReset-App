@@ -25,11 +25,17 @@ export type ResetProfile = {
   id: string;
   name: string;
   summary: string;
+  shortSummary: string;
   description: string;
   advice: string;
   emphasized: string;
   biggestPattern: string;
   whatUsuallyHelps: string;
+  strength: string;
+  pattern: string;
+  resetApproach: string;
+  homeSupportLine: string;
+  missedDayLine: string;
   strengths: readonly string[];
   challenges: readonly string[];
   shareQuote: string;
