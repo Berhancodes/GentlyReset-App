@@ -36,7 +36,7 @@ export function WorldScreen() {
           compact ? styles.overlayCompact : null,
           {
             paddingBottom:
-              getTabBarScenePadding(insets.bottom) + (compact ? spacing.xl : spacing.xxl),
+              getTabBarScenePadding(insets.bottom) + (compact ? spacing.md : spacing.lg),
           },
         ]}
       >
