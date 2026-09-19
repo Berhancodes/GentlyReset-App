@@ -1,6 +1,9 @@
-import { Image, Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-const HOME_MORNING_BACKGROUND = require('../../../../assets/images/app/home-morning-background.png');
+import { SceneHero } from '@/components/ui';
+import { radius } from '@/design-system';
+
+const HOME_MORNING_SCENE = require('../../../../assets/images/app/home-morning-scene.png');
 
 type HomeSceneProps = {
   completed: boolean;
@@ -9,16 +12,15 @@ type HomeSceneProps = {
 export function HomeScene({ completed }: HomeSceneProps) {
   return (
     <View style={styles.frame}>
-      <Image
-        source={HOME_MORNING_BACKGROUND}
+      <SceneHero
+        source={HOME_MORNING_SCENE}
         accessibilityLabel={
           completed
             ? 'Mascot in the morning scene after today’s reset'
             : 'Mascot sipping tea on a log at sunrise'
         }
-        accessibilityIgnoresInvertColors
-        resizeMode="cover"
-        style={styles.image}
+        borderRadius={radius.xl}
+        crop="mascot"
       />
     </View>
   );
@@ -26,18 +28,10 @@ export function HomeScene({ completed }: HomeSceneProps) {
 
 const styles = StyleSheet.create({
   frame: {
-    ...StyleSheet.absoluteFill,
+    flex: 1,
+    minHeight: 0,
+    alignSelf: 'stretch',
+    borderRadius: radius.xl,
     overflow: 'hidden',
-    pointerEvents: 'none',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    ...Platform.select({
-      web: { objectPosition: '40% 68%' },
-      default: {
-        transform: [{ scale: 1.08 }, { translateY: 12 }],
-      },
-    }),
   },
 });

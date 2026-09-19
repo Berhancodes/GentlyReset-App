@@ -18,16 +18,7 @@ export default function TabsLayout() {
         },
       }}
     >
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: 'Home',
-          sceneStyle: {
-            backgroundColor: colors.background.primary,
-            paddingBottom: 0,
-          },
-        }}
-      />
+      <Tabs.Screen name="home" options={{ title: 'Home' }} />
       <Tabs.Screen name="journey" options={{ title: 'Journey' }} />
       <Tabs.Screen name="reflect" options={{ title: 'Journal' }} />
       <Tabs.Screen name="world" options={{ title: 'World' }} />

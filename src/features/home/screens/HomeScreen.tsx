@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect } from 'react';
-import { AppState, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { AppState, Pressable, StyleSheet, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, useReducedMotion } from 'react-native-reanimated';
 
-import { AppText, getTabBarScenePadding, MainTabHeader, Screen } from '@/components/ui';
+import { AppText, MainTabHeader, Screen } from '@/components/ui';
 import { spacing } from '@/design-system';
 import { HomeScene } from '@/features/home/components/HomeScene';
 import { TodayResetCard } from '@/features/home/components/TodayResetCard';
@@ -18,7 +17,6 @@ const HOME_COLUMN_MAX_WIDTH = 430;
 
 export function HomeScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
   const answers = useOnboardingStore((state) => state.answers);
   const resetStartedOn = useResetStore((state) => state.resetStartedOn);
@@ -65,14 +63,8 @@ export function HomeScreen() {
 
   if (!resetStartedOn) {
     return (
-      <Screen
-        includeTopSafeArea={false}
-        includeBottomSafeArea={false}
-        padded={false}
-        backgroundColor="transparent"
-      >
-        <HomeScene completed={false} />
-        <MainTabHeader title="home" transparent />
+      <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
+        <MainTabHeader title="home" />
       </Screen>
     );
   }
@@ -92,25 +84,9 @@ export function HomeScreen() {
   const messageEntering = reduceMotion ? undefined : FadeIn.duration(320);
 
   return (
-    <Screen
-      includeTopSafeArea={false}
-      includeBottomSafeArea={false}
-      padded={false}
-      backgroundColor="transparent"
-    >
-      <HomeScene completed={todayCompleted} />
-      <MainTabHeader title="home" transparent />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: getTabBarScenePadding(insets.bottom) },
-        ]}
-        showsVerticalScrollIndicator={false}
-        bounces={false}
-        overScrollMode="never"
-        keyboardShouldPersistTaps="handled"
-      >
+    <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
+      <MainTabHeader title="home" />
+      <View style={styles.content}>
         <View style={styles.greeting}>
           <AppText variant="title">{getHomeGreeting()}</AppText>
           <Animated.View key={companionMoment} entering={messageEntering}>
@@ -119,6 +95,7 @@ export function HomeScreen() {
             </AppText>
           </Animated.View>
         </View>
+        <HomeScene completed={todayCompleted} />
         <TodayResetCard
           minutes={task.minutes}
           completed={todayCompleted}
@@ -142,28 +119,29 @@ export function HomeScreen() {
             </AppText>
           </Pressable>
         ) : null}
-      </ScrollView>
+      </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-  },
   content: {
+    flex: 1,
     width: '100%',
     maxWidth: HOME_COLUMN_MAX_WIDTH,
     alignSelf: 'center',
     paddingHorizontal: spacing.md,
     paddingTop: spacing.xs,
+    paddingBottom: spacing.md,
     gap: spacing.md,
+    overflow: 'hidden',
   },
   greeting: {
     flexShrink: 0,
     gap: spacing.xxs,
   },
   reflection: {
+    flexShrink: 0,
     minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
