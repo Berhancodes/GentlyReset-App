@@ -50,9 +50,9 @@ export const JOURNAL_NOTEBOOK_CONTENT = {
 
 /** Seated mascot, relative to the notebook box. */
 export const JOURNAL_MASCOT_LAYOUT = {
-  width: 0.26,
-  right: -0.03,
-  bottom: -0.07,
+  width: 0.24,
+  right: -0.055,
+  bottom: -0.1,
 } as const;
 
 /** Bottom-left flora, relative to the notebook box. */

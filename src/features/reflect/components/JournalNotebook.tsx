@@ -45,7 +45,7 @@ export function JournalNotebook({
   const [notebookSize, setNotebookSize] = useState({ width: 0, height: 0 });
   const lineHeight = notebookSize.height > 0 ? getNotebookLineHeight(notebookSize.height) : 16;
   const fontSize = getNotebookWritingFontSize(lineHeight);
-  const saveClearance = notebookSize.width * JOURNAL_MASCOT_LAYOUT.width * 0.55;
+  const saveClearance = notebookSize.width * JOURNAL_MASCOT_LAYOUT.width * 0.85;
 
   return (
     <View style={styles.scene}>
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     overflow: 'visible',
-    paddingBottom: spacing.md,
+    paddingBottom: spacing.lg,
   },
   notebook: {
     width: '100%',
