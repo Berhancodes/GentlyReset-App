@@ -14,7 +14,7 @@ export default function Root({ children }: PropsWithChildren) {
         <ScrollViewStyleReset />
         <style
           dangerouslySetInnerHTML={{
-            __html: `html, body, #root { height: 100%; overflow: hidden; }`,
+            __html: `html, body, #root { height: 100%; overflow: hidden; } * { scrollbar-width: none; } *::-webkit-scrollbar { width: 0; height: 0; }`,
           }}
         />
       </head>
