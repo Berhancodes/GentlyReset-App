@@ -1,55 +1,10 @@
 import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { colors } from '@/design-system';
+import { HomeMascot } from '@/features/home/components/HomeMascot';
+import { getHomeCoverLayout } from '@/features/home/layout/homeSceneLayout';
 
-const HOME_MORNING_BACKGROUND = require('../../../../assets/images/app/home-morning-background.png');
-
-/** Intrinsic size of `home-morning-background.png`. */
-const ART_WIDTH = 474;
-const ART_HEIGHT = 1024;
-const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
-
-/**
- * Cover-crop focal point (0–1 in image space).
- * Horizontal: keep the mascot and cottage when side-cropping.
- * Vertical: keep sky behind the greeting; crop meadow edges first.
- */
-const FOCUS_X = 0.48;
-const FOCUS_Y = 0.38;
-
-type CoverLayout = {
-  width: number;
-  height: number;
-  left: number;
-  top: number;
-};
-
-function getCoverLayout(viewWidth: number, viewHeight: number): CoverLayout {
-  const safeHeight = Math.max(viewHeight, 1);
-  const viewAspect = viewWidth / safeHeight;
-
-  if (viewAspect > ART_ASPECT) {
-    const width = viewWidth;
-    const height = viewWidth / ART_ASPECT;
-    const extra = Math.max(0, height - safeHeight);
-    return {
-      width,
-      height,
-      left: 0,
-      top: -extra * FOCUS_Y,
-    };
-  }
-
-  const height = safeHeight;
-  const width = safeHeight * ART_ASPECT;
-  const extra = Math.max(0, width - viewWidth);
-  return {
-    width,
-    height,
-    left: -extra * FOCUS_X,
-    top: 0,
-  };
-}
+const HOME_MORNING_ENVIRONMENT = require('../../../../assets/images/app/home-morning-environment.png');
 
 type HomeSceneProps = {
   completed: boolean;
@@ -57,21 +12,29 @@ type HomeSceneProps = {
 
 export function HomeScene({ completed }: HomeSceneProps) {
   const { width, height } = useWindowDimensions();
-  const layout = getCoverLayout(width, height);
+  const layout = getHomeCoverLayout(width, height);
 
   return (
-    <View style={styles.frame}>
+    <View
+      style={styles.frame}
+      accessible
+      accessibilityLabel={
+        completed
+          ? 'Mascot in the morning scene after today’s reset'
+          : 'Mascot sipping tea on a log at sunrise'
+      }
+    >
       <Image
-        source={HOME_MORNING_BACKGROUND}
-        accessibilityLabel={
-          completed
-            ? 'Mascot in the morning scene after today’s reset'
-            : 'Mascot sipping tea on a log at sunrise'
-        }
+        source={HOME_MORNING_ENVIRONMENT}
+        accessibilityElementsHidden
+        importantForAccessibility="no"
         accessibilityIgnoresInvertColors
         resizeMode="cover"
         style={[styles.image, layout]}
       />
+      <View style={[styles.sceneSpace, layout]}>
+        <HomeMascot />
+      </View>
     </View>
   );
 }
@@ -85,5 +48,9 @@ const styles = StyleSheet.create({
   },
   image: {
     position: 'absolute',
+  },
+  sceneSpace: {
+    position: 'absolute',
+    overflow: 'visible',
   },
 });

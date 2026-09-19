@@ -10,6 +10,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
+    "test:layout": "tsc --pretty false --ignoreConfig --rootDir src/features/home/layout --outDir /tmp/gently-reset-layout-tests --module commonjs --target es2020 --esModuleInterop --skipLibCheck --strict src/features/home/layout/homeSceneLayout.ts src/features/home/layout/homeSceneLayout.test.ts && node /tmp/gently-reset-layout-tests/homeSceneLayout.test.js",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
