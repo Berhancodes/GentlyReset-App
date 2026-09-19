@@ -34,7 +34,10 @@ export function WorldScreen() {
         style={[
           styles.overlay,
           compact ? styles.overlayCompact : null,
-          { paddingBottom: getTabBarScenePadding(insets.bottom) },
+          {
+            paddingBottom:
+              getTabBarScenePadding(insets.bottom) + (compact ? spacing.xl : spacing.xxl),
+          },
         ]}
       >
         <AppText variant="body" color="secondary" align="center">
@@ -52,10 +55,10 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.xxs,
-    gap: spacing.md,
+    gap: spacing.xs,
   },
   overlayCompact: {
-    gap: spacing.sm,
+    gap: spacing.xxs,
   },
   landscape: {
     flex: 1,
