@@ -1,72 +1,64 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText, MainTabHeader, SceneHero, Screen } from '@/components/ui';
-import { colors, radius, spacing } from '@/design-system';
+import { AppText, getTabBarScenePadding, MainTabHeader, Screen } from '@/components/ui';
+import { spacing } from '@/design-system';
 import { FriendsSection } from '@/features/world/components/FriendsSection';
+import { WorldBackground } from '@/features/world/components/WorldBackground';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
-import { getWorldStage, worldCompanionLine } from '@/features/reset/utils/getWorldStage';
+import { getWorldStage } from '@/features/reset/utils/getWorldStage';
 
-const WORLD_COTTAGE = require('../../../../assets/images/app/my-world-cottage.png');
+const COMPACT_HEIGHT = 740;
 
 export function WorldScreen() {
   useSyncResetDay();
+  const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
+  const compact = height < COMPACT_HEIGHT;
   const completedDays = useResetStore((state) => state.completedDays);
-  const personalization = useResetStore((state) => state.personalization);
   const stage = getWorldStage(completedDays.length);
-  const grown = worldCompanionLine(stage, personalization.supportStyle, completedDays.length);
 
   return (
-    <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-      <MainTabHeader title="world" />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
+    <Screen
+      includeTopSafeArea={false}
+      includeBottomSafeArea={false}
+      padded={false}
+      backgroundColor="transparent"
+    >
+      <WorldBackground
+        accessibilityLabel={`Gently Reset world, ${stage.name} stage. Two mascots sitting together by a lake at sunset.`}
+      />
+      <MainTabHeader title="world" transparent />
+      <View
+        style={[
+          styles.overlay,
+          compact ? styles.overlayCompact : null,
+          { paddingBottom: getTabBarScenePadding(insets.bottom) },
+        ]}
       >
-        <View style={styles.stageBlock}>
-          <AppText variant="label" color="helper">
-            {stage.name.toLowerCase()}
-            {completedDays.length > 0
-              ? ` · ${completedDays.length} ${completedDays.length === 1 ? 'day' : 'days'} of showing up`
-              : ''}
-          </AppText>
-          <AppText variant="body" color="secondary">
-            {grown}
-          </AppText>
-        </View>
-        <View style={[styles.scene, stage.id >= 3 ? styles.sceneWarm : null]}>
-          <SceneHero
-            source={WORLD_COTTAGE}
-            accessibilityLabel={`Gently Reset world, ${stage.name} stage. Mascot on a path toward a cottage.`}
-            aspectRatio={1.28}
-            borderRadius={radius.card}
-          />
-        </View>
-        <FriendsSection />
-      </ScrollView>
+        <AppText variant="body" color="secondary" align="center">
+          {"don't reset alone."}
+        </AppText>
+        <View style={styles.landscape} />
+        <FriendsSection compact={compact} />
+      </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
+  overlay: {
     flex: 1,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xxs,
+    gap: spacing.md,
   },
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.lg,
-    gap: spacing.lg,
+  overlayCompact: {
+    gap: spacing.sm,
   },
-  stageBlock: {
-    gap: spacing.xxs,
-  },
-  scene: {
-    borderRadius: radius.card,
-  },
-  sceneWarm: {
-    padding: spacing.xxs,
-    backgroundColor: colors.surface.choiceSelected,
+  landscape: {
+    flex: 1,
+    minHeight: spacing.xl,
   },
 });
