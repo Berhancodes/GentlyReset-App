@@ -28,6 +28,7 @@ function createShadow(
 
 export const shadows = {
   none: {} satisfies ViewStyle,
+  whisper: createShadow(2, 0.07, 8, 2),
   soft: createShadow(6, 0.08, 16, 3),
   medium: createShadow(8, 0.12, 20, 5),
 } as const;

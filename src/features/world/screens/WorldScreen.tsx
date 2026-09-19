@@ -1,7 +1,7 @@
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText, getTabBarScenePadding, MainTabHeader, Screen } from '@/components/ui';
+import { getTabBarScenePadding, MainTabHeader, Screen } from '@/components/ui';
 import { spacing } from '@/design-system';
 import { FriendsSection } from '@/features/world/components/FriendsSection';
 import { WorldBackground } from '@/features/world/components/WorldBackground';
@@ -29,7 +29,7 @@ export function WorldScreen() {
       <WorldBackground
         accessibilityLabel={`Gently Reset world, ${stage.name} stage. Two mascots sitting together by a lake at sunset.`}
       />
-      <MainTabHeader title="world" transparent />
+      <MainTabHeader title="world" subtitle="don't reset alone." transparent fade />
       <View
         style={[
           styles.overlay,
@@ -40,9 +40,6 @@ export function WorldScreen() {
           },
         ]}
       >
-        <AppText variant="body" color="secondary" align="center">
-          {"don't reset alone."}
-        </AppText>
         <View style={styles.landscape} />
         <FriendsSection compact={compact} />
       </View>

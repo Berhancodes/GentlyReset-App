@@ -71,7 +71,7 @@ export function HomeScreen() {
         backgroundColor="transparent"
       >
         <HomeScene completed={false} />
-        <MainTabHeader title="home" transparent />
+        <MainTabHeader title="home" transparent fade />
       </Screen>
     );
   }
@@ -86,7 +86,7 @@ export function HomeScreen() {
       backgroundColor="transparent"
     >
       <HomeScene completed={todayCompleted} />
-      <MainTabHeader title="home" transparent />
+      <MainTabHeader title="home" transparent fade />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[

@@ -44,6 +44,7 @@ export const colors = {
   text: {
     primary: palette.brown,
     secondary: palette.brownSecondary,
+    secondaryStrong: 'rgba(58, 33, 18, 0.82)',
     muted: palette.blue,
     inverse: palette.cream,
     helper: 'rgba(74, 44, 24, 0.64)',
@@ -73,6 +74,9 @@ export const colors = {
   },
   overlay: {
     scrim: 'rgba(74, 44, 24, 0.35)',
+    headerFadeStart: 'rgba(255, 253, 248, 0.62)',
+    headerFadeMid: 'rgba(255, 248, 234, 0.36)',
+    headerFadeEnd: 'rgba(255, 248, 234, 0)',
   },
 } as const;
 

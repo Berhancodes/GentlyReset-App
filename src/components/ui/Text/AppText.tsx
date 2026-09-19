@@ -6,6 +6,7 @@ import { colors, textVariants, type TextVariant } from '@/design-system';
 const colorMap = {
   primary: colors.text.primary,
   secondary: colors.text.secondary,
+  secondaryStrong: colors.text.secondaryStrong,
   muted: colors.text.muted,
   inverse: colors.text.inverse,
   gold: colors.accent.gold,
