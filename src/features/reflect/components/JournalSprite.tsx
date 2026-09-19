@@ -28,7 +28,6 @@ export function JournalSprite({
 }: JournalSpriteProps) {
   return (
     <View
-      pointerEvents="none"
       accessibilityElementsHidden
       importantForAccessibility="no"
       style={{
@@ -42,6 +41,7 @@ export function JournalSprite({
         bottom,
         zIndex,
         opacity,
+        pointerEvents: 'none',
       }}
     >
       <Image

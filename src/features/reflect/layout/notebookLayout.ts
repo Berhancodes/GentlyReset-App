@@ -50,16 +50,16 @@ export const JOURNAL_NOTEBOOK_CONTENT = {
 
 /** Seated mascot, relative to the notebook box. */
 export const JOURNAL_MASCOT_LAYOUT = {
-  width: 0.28,
-  right: -0.04,
-  bottom: -0.16,
+  width: 0.26,
+  right: -0.03,
+  bottom: -0.07,
 } as const;
 
 /** Bottom-left flora, relative to the notebook box. */
 export const JOURNAL_FLORA_LAYOUT = {
-  width: 0.34,
-  left: -0.08,
-  bottom: -0.08,
+  width: 0.3,
+  left: -0.07,
+  bottom: -0.05,
 } as const;
 
 /** Hanging leaves, relative to the Journal screen width. */

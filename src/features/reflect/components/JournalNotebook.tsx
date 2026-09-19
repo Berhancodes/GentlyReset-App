@@ -49,15 +49,6 @@ export function JournalNotebook({
 
   return (
     <View style={styles.scene}>
-      <JournalSprite
-        source={FLORA_ART}
-        width={toPercent(JOURNAL_FLORA_LAYOUT.width)}
-        aspectRatio={JOURNAL_FLORA_ASPECT}
-        left={toPercent(JOURNAL_FLORA_LAYOUT.left)}
-        bottom={toPercent(JOURNAL_FLORA_LAYOUT.bottom)}
-        zIndex={0}
-      />
-
       <View
         style={styles.notebook}
         onLayout={(event) => {
@@ -67,6 +58,15 @@ export function JournalNotebook({
           });
         }}
       >
+        <JournalSprite
+          source={FLORA_ART}
+          width={toPercent(JOURNAL_FLORA_LAYOUT.width)}
+          aspectRatio={JOURNAL_FLORA_ASPECT}
+          left={toPercent(JOURNAL_FLORA_LAYOUT.left)}
+          bottom={toPercent(JOURNAL_FLORA_LAYOUT.bottom)}
+          zIndex={0}
+        />
+
         <Image
           source={NOTEBOOK_ART}
           resizeMode="contain"
@@ -144,16 +144,16 @@ export function JournalNotebook({
             )}
           </View>
         </View>
-      </View>
 
-      <JournalSprite
-        source={MASCOT_ART}
-        width={toPercent(JOURNAL_MASCOT_LAYOUT.width)}
-        aspectRatio={JOURNAL_MASCOT_ASPECT}
-        right={toPercent(JOURNAL_MASCOT_LAYOUT.right)}
-        bottom={toPercent(JOURNAL_MASCOT_LAYOUT.bottom)}
-        zIndex={2}
-      />
+        <JournalSprite
+          source={MASCOT_ART}
+          width={toPercent(JOURNAL_MASCOT_LAYOUT.width)}
+          aspectRatio={JOURNAL_MASCOT_ASPECT}
+          right={toPercent(JOURNAL_MASCOT_LAYOUT.right)}
+          bottom={toPercent(JOURNAL_MASCOT_LAYOUT.bottom)}
+          zIndex={3}
+        />
+      </View>
     </View>
   );
 }
@@ -163,21 +163,24 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     overflow: 'visible',
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.md,
   },
   notebook: {
     width: '100%',
     aspectRatio: JOURNAL_NOTEBOOK_ASPECT,
+    overflow: 'visible',
     zIndex: 1,
   },
   notebookArt: {
     ...StyleSheet.absoluteFill,
     width: '100%',
     height: '100%',
+    zIndex: 1,
   },
   overlay: {
     position: 'absolute',
     justifyContent: 'flex-start',
+    zIndex: 2,
   },
   headingBlock: {
     gap: spacing.xxs,
