@@ -18,6 +18,7 @@ const palette = {
   sandTrack: '#EAD9C4',
   white: '#FFFFFF',
   night: '#152347',
+  sky: '#C4D6E4',
 } as const;
 
 /**
@@ -30,6 +31,7 @@ export const colors = {
     secondary: palette.creamSoft,
     inverse: palette.brown,
     night: palette.night,
+    sky: palette.sky,
   },
   surface: {
     primary: palette.creamSoft,
@@ -66,6 +68,7 @@ export const colors = {
   },
   progress: {
     track: palette.sandSubtle,
+    trackStrong: palette.sand,
     fill: palette.brown,
   },
   overlay: {

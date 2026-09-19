@@ -35,7 +35,7 @@ export function TodayResetCard({
         <AppText variant="label" color="helper">
           {"today's reset"}
         </AppText>
-        <View style={styles.completeRow}>
+        <View style={styles.completeRow} accessibilityElementsHidden importantForAccessibility="no">
           <View style={styles.completeBadge}>
             <AppText variant="caption" color="inverse" align="center">
               ✓

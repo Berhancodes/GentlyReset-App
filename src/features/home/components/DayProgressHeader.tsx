@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppText, ProgressBar } from '@/components/ui';
 import { PLAN_DAY_COUNT } from '@/features/reset/data/thirtyDayPlan';
-import { spacing } from '@/design-system';
+import { colors, spacing } from '@/design-system';
 
 type DayProgressHeaderProps = {
   currentDay: number;
@@ -38,6 +38,7 @@ export function DayProgressHeader({
           progress={progress}
           accessibilityLabel="30-day reset progress"
           thickness={inline ? spacing.xxs : undefined}
+          trackColor={inline ? colors.progress.trackStrong : undefined}
         />
       </View>
     </View>

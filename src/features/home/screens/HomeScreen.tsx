@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect } from 'react';
-import { AppState, StyleSheet, View } from 'react-native';
+import { AppState, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -20,9 +20,12 @@ import { useResetStore } from '@/features/reset/store/useResetStore';
 import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
 
 const HOME_COLUMN_MAX_WIDTH = 430;
+const COMPACT_HEIGHT = 740;
 
 export function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
+  const compact = height < COMPACT_HEIGHT;
   const answers = useOnboardingStore((state) => state.answers);
   const resetStartedOn = useResetStore((state) => state.resetStartedOn);
   const currentDay = useResetStore((state) => state.currentDay);
@@ -84,9 +87,19 @@ export function HomeScreen() {
     >
       <HomeScene completed={todayCompleted} />
       <MainTabHeader title="home" transparent />
-      <View style={[styles.content, { paddingBottom: getTabBarScenePadding(insets.bottom) }]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.content,
+          compact ? styles.contentCompact : null,
+          { paddingBottom: getTabBarScenePadding(insets.bottom) },
+        ]}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+        overScrollMode="never"
+      >
         <View style={styles.greeting}>
-          <AppText variant="title">{getHomeGreeting()}</AppText>
+          <AppText variant="display">{getHomeGreeting()}</AppText>
           <AppText variant="body" color="primary">
             {HOME_IDLE_SUBTITLE}
           </AppText>
@@ -108,20 +121,27 @@ export function HomeScreen() {
           onComplete={completeToday}
         />
         <View style={styles.landscape} />
-      </View>
+      </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
+  scroll: {
     flex: 1,
+  },
+  content: {
+    flexGrow: 1,
     width: '100%',
     maxWidth: HOME_COLUMN_MAX_WIDTH,
     alignSelf: 'center',
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.xs,
+    paddingTop: spacing.sm,
     gap: spacing.sm,
+  },
+  contentCompact: {
+    paddingTop: spacing.xxs,
+    gap: spacing.xs,
   },
   greeting: {
     flexShrink: 0,

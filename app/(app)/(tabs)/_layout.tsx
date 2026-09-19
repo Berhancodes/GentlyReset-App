@@ -23,7 +23,7 @@ export default function TabsLayout() {
         options={{
           title: 'Home',
           sceneStyle: {
-            backgroundColor: colors.background.primary,
+            backgroundColor: colors.background.sky,
             paddingBottom: 0,
           },
         }}
