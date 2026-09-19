@@ -1,4 +1,4 @@
-import type { OnboardingStep } from '@/features/onboarding/types/onboarding';
+import type { OnboardingStep } from '../types/onboarding';
 
 /**
  * The 21 core personalization questions. Feedback after the Reset Type

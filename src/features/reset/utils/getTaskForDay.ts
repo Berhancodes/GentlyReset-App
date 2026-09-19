@@ -1,5 +1,5 @@
-import { getPlanDayTitle, PLAN_DAY_COUNT } from '@/features/reset/data/thirtyDayPlan';
-import type { ResetPersonalization, TodayTask } from '@/features/reset/types';
+import { getPlanDayTitle, PLAN_DAY_COUNT } from '../data/thirtyDayPlan';
+import type { ResetPersonalization, TodayTask } from '../types';
 
 const MINUTES_BY_COMMITMENT: Record<string, number> = {
   five: 5,

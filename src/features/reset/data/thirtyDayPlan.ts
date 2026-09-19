@@ -1,4 +1,4 @@
-import { ONBOARDING_STEPS } from '@/features/onboarding/data/onboardingSteps';
+import { ONBOARDING_STEPS } from '../../onboarding/data/onboardingSteps';
 
 const TOTAL_DAYS = 30;
 

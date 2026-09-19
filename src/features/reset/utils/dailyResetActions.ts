@@ -1,8 +1,8 @@
-import type { JournalMood, ResetSnapshot } from '@/features/reset/types';
-import { PLAN_DAY_COUNT } from '@/features/reset/data/thirtyDayPlan';
-import { applyDateRollover } from '@/features/reset/utils/applyDateRollover';
-import { shiftDateKey, toLocalDateKey } from '@/features/reset/utils/calendar';
-import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
+import type { JournalMood, ResetSnapshot } from '../types';
+import { PLAN_DAY_COUNT } from '../data/thirtyDayPlan';
+import { applyDateRollover } from './applyDateRollover';
+import { shiftDateKey, toLocalDateKey } from './calendar';
+import { getTaskForDay } from './getTaskForDay';
 
 export function applyStartToday(state: ResetSnapshot): ResetSnapshot {
   if (!state.resetStartedOn || state.todayCompleted) {

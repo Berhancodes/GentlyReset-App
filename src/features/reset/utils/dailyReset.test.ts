@@ -16,9 +16,7 @@ function check(label: string, condition: boolean, detail?: string) {
   console.error(`fail  ${label}${detail ? ` — ${detail}` : ''}`);
 }
 
-function personalization(
-  overrides: Partial<ResetPersonalization> = {},
-): ResetPersonalization {
+function personalization(overrides: Partial<ResetPersonalization> = {}): ResetPersonalization {
   return {
     desiredFeelings: [],
     ...overrides,
@@ -68,10 +66,7 @@ const journeyDay1 = getTaskForDay(1, defaultPersonalization);
 check('day 1 Home and Journey resolve identical task', tasksMatch(homeDay1, journeyDay1));
 check('day 1 title is the plan title, not journal copy', homeDay1.title === getPlanDayTitle(1));
 check('day 1 default minutes are 5', homeDay1.minutes === 5);
-check(
-  'day 1 default description',
-  homeDay1.description === "You don't need momentum. Just begin.",
-);
+check('day 1 default description', homeDay1.description === "You don't need momentum. Just begin.");
 
 const fiveMinutes = personalization({ dailyCommitment: 'five' });
 const twentyMinutes = personalization({ dailyCommitment: 'twenty' });
@@ -114,13 +109,22 @@ check('start does not add a completed day', started.completedDays.length === 0);
 check('start does not change currentDay', started.currentDay === idle.currentDay);
 
 const startedAgain = applyStartToday(started);
-check('starting twice stays started and incomplete', startedAgain.todayStarted && !startedAgain.todayCompleted);
+check(
+  'starting twice stays started and incomplete',
+  startedAgain.todayStarted && !startedAgain.todayCompleted,
+);
 
 const completed = applyCompleteToday(started, dateOn('2026-09-19'));
 check('complete marks todayCompleted', completed.todayCompleted === true);
 check('complete records the current day once', completed.completedDays.join(',') === '1');
 check('complete does not advance currentDay', completed.currentDay === 1);
-check('complete keeps the same task', tasksMatch(getTaskForDay(1, defaultPersonalization), getTaskForDay(completed.currentDay, completed.personalization)));
+check(
+  'complete keeps the same task',
+  tasksMatch(
+    getTaskForDay(1, defaultPersonalization),
+    getTaskForDay(completed.currentDay, completed.personalization),
+  ),
+);
 
 const completedAgain = applyCompleteToday(completed, dateOn('2026-09-19'));
 check(
@@ -159,7 +163,8 @@ check(
   tasksMatch(
     getTaskForDay(nextMorning.currentDay, nextMorning.personalization),
     getTaskForDay(2, defaultPersonalization),
-  ) && getTaskForDay(nextMorning.currentDay, nextMorning.personalization).title === getPlanDayTitle(2),
+  ) &&
+    getTaskForDay(nextMorning.currentDay, nextMorning.personalization).title === getPlanDayTitle(2),
 );
 
 const missed = applyDateRollover(started, '2026-09-20');
@@ -181,7 +186,10 @@ const day30 = snapshot({
 });
 const day30Completed = applyCompleteToday(day30, dateOn('2026-09-19'));
 check('day 30 complete stays on day 30', day30Completed.currentDay === 30);
-check('day 30 complete records day 30 once', day30Completed.completedDays.filter((day) => day === 30).length === 1);
+check(
+  'day 30 complete records day 30 once',
+  day30Completed.completedDays.filter((day) => day === 30).length === 1,
+);
 
 const day30Next = applyDateRollover(day30Completed, '2026-09-20');
 check('day 30 stays current after a later calendar day', day30Next.currentDay === 30);

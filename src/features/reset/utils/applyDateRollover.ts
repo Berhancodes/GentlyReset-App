@@ -1,7 +1,7 @@
-import { PLAN_DAY_COUNT } from '@/features/reset/data/thirtyDayPlan';
-import type { ResetSnapshot } from '@/features/reset/types';
-import { calendarDaysBetween, shiftDateKey } from '@/features/reset/utils/calendar';
-import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
+import { PLAN_DAY_COUNT } from '../data/thirtyDayPlan';
+import type { ResetSnapshot } from '../types';
+import { calendarDaysBetween, shiftDateKey } from './calendar';
+import { getTaskForDay } from './getTaskForDay';
 
 /**
  * Advances calendar-aware Home state without skipping unfinished plan days.
