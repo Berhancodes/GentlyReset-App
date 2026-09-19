@@ -5,8 +5,6 @@ import { radius } from '@/design-system';
 
 const HOME_MORNING_SCENE = require('../../../../assets/images/app/home-morning-scene.png');
 
-const SCENE_ASPECT = 1.22;
-
 type HomeSceneProps = {
   completed: boolean;
 };
@@ -21,7 +19,6 @@ export function HomeScene({ completed }: HomeSceneProps) {
             ? 'Mascot in the morning scene after today’s reset'
             : 'Mascot sipping tea on a log at sunrise'
         }
-        aspectRatio={SCENE_ASPECT}
         borderRadius={radius.xl}
         crop="mascot"
       />
@@ -31,6 +28,9 @@ export function HomeScene({ completed }: HomeSceneProps) {
 
 const styles = StyleSheet.create({
   frame: {
+    flex: 1,
+    minHeight: 0,
+    alignSelf: 'stretch',
     borderRadius: radius.xl,
     overflow: 'hidden',
   },

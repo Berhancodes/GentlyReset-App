@@ -5,7 +5,7 @@ type SceneHeroCrop = 'center' | 'mascot';
 type SceneHeroProps = {
   source: ImageSourcePropType;
   accessibilityLabel: string;
-  aspectRatio: number;
+  aspectRatio?: number;
   borderRadius?: number;
   crop?: SceneHeroCrop;
 };
@@ -18,7 +18,13 @@ export function SceneHero({
   crop = 'center',
 }: SceneHeroProps) {
   return (
-    <View style={[styles.frame, { aspectRatio, borderRadius }]}>
+    <View
+      style={[
+        styles.frame,
+        aspectRatio != null ? { aspectRatio } : styles.frameFill,
+        { borderRadius },
+      ]}
+    >
       <Image
         source={source}
         accessibilityLabel={accessibilityLabel}
@@ -35,6 +41,10 @@ const styles = StyleSheet.create({
     width: '100%',
     overflow: 'hidden',
   },
+  frameFill: {
+    flex: 1,
+    minHeight: 0,
+  },
   image: {
     width: '100%',
     height: '100%',
@@ -47,9 +57,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     ...Platform.select({
-      web: { objectPosition: 'center 68%' },
+      web: {
+        objectPosition: 'center 62%',
+        transform: [{ scale: 1.16 }],
+      },
       default: {
-        transform: [{ scale: 1.04 }, { translateY: -8 }],
+        transform: [{ scale: 1.16 }, { translateY: -10 }],
       },
     }),
   },

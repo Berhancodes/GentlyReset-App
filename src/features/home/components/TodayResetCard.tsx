@@ -61,6 +61,7 @@ const CHECKBOX_SIZE = spacing.lg;
 
 const styles = StyleSheet.create({
   card: {
+    flexShrink: 0,
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
@@ -75,13 +76,12 @@ const styles = StyleSheet.create({
   },
   taskRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: spacing.sm,
   },
   checkbox: {
     width: CHECKBOX_SIZE,
     height: CHECKBOX_SIZE,
-    marginTop: 2,
     borderRadius: radius.pill,
     borderWidth: 2,
     borderColor: colors.accent.sage,
@@ -95,7 +95,6 @@ const styles = StyleSheet.create({
   copy: {
     flex: 1,
     gap: spacing.xxs,
-    minHeight: 44,
     justifyContent: 'center',
   },
 });
