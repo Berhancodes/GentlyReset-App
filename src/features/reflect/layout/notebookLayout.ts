@@ -50,24 +50,36 @@ export const JOURNAL_NOTEBOOK_CONTENT = {
 
 /** Seated mascot, relative to the notebook box. */
 export const JOURNAL_MASCOT_LAYOUT = {
-  width: 0.22,
-  right: -0.015,
-  bottom: -0.11,
+  width: 0.28,
+  right: -0.04,
+  bottom: -0.16,
 } as const;
 
 /** Bottom-left flora, relative to the notebook box. */
 export const JOURNAL_FLORA_LAYOUT = {
-  width: 0.3,
-  left: -0.055,
-  bottom: -0.07,
+  width: 0.34,
+  left: -0.08,
+  bottom: -0.08,
 } as const;
 
-/** Hanging leaves, relative to the Journal screen. */
+/** Hanging leaves, relative to the Journal screen width. */
 export const JOURNAL_LEAVES_LAYOUT = {
-  width: 0.3,
-  top: -0.012,
-  right: -0.06,
+  width: 0.4,
+  right: -0.08,
+  top: 0,
 } as const;
+
+export const JOURNAL_MASCOT_ASPECT = JOURNAL_MASCOT_ART.width / JOURNAL_MASCOT_ART.height;
+export const JOURNAL_FLORA_ASPECT = JOURNAL_FLORA_ART.width / JOURNAL_FLORA_ART.height;
+export const JOURNAL_LEAVES_ASPECT = JOURNAL_LEAVES_ART.width / JOURNAL_LEAVES_ART.height;
+
+export function getJournalLeavesSize(screenWidth: number): { width: number; height: number } {
+  const width = screenWidth * JOURNAL_LEAVES_LAYOUT.width;
+  return {
+    width,
+    height: width / JOURNAL_LEAVES_ASPECT,
+  };
+}
 
 export function toPercent(value: number): `${number}%` {
   return `${value * 100}%` as `${number}%`;

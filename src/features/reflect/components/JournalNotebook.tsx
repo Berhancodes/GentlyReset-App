@@ -3,12 +3,13 @@ import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 
 import { AppText } from '@/components/ui';
 import { colors, radius, spacing, textVariants } from '@/design-system';
+import { JournalSprite } from '@/features/reflect/components/JournalSprite';
 import {
   getNotebookLineHeight,
   getNotebookWritingFontSize,
-  JOURNAL_FLORA_ART,
+  JOURNAL_FLORA_ASPECT,
   JOURNAL_FLORA_LAYOUT,
-  JOURNAL_MASCOT_ART,
+  JOURNAL_MASCOT_ASPECT,
   JOURNAL_MASCOT_LAYOUT,
   JOURNAL_NOTEBOOK_ASPECT,
   JOURNAL_NOTEBOOK_CONTENT,
@@ -41,33 +42,29 @@ export function JournalNotebook({
   showSaved,
   onSave,
 }: JournalNotebookProps) {
-  const [notebookHeight, setNotebookHeight] = useState(0);
-  const lineHeight = notebookHeight > 0 ? getNotebookLineHeight(notebookHeight) : 16;
+  const [notebookSize, setNotebookSize] = useState({ width: 0, height: 0 });
+  const lineHeight = notebookSize.height > 0 ? getNotebookLineHeight(notebookSize.height) : 16;
   const fontSize = getNotebookWritingFontSize(lineHeight);
+  const saveClearance = notebookSize.width * JOURNAL_MASCOT_LAYOUT.width * 0.55;
 
   return (
     <View style={styles.scene}>
-      <Image
+      <JournalSprite
         source={FLORA_ART}
-        resizeMode="contain"
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-        accessibilityIgnoresInvertColors
-        style={[
-          styles.flora,
-          {
-            width: toPercent(JOURNAL_FLORA_LAYOUT.width),
-            left: toPercent(JOURNAL_FLORA_LAYOUT.left),
-            bottom: toPercent(JOURNAL_FLORA_LAYOUT.bottom),
-            aspectRatio: JOURNAL_FLORA_ART.width / JOURNAL_FLORA_ART.height,
-          },
-        ]}
+        width={toPercent(JOURNAL_FLORA_LAYOUT.width)}
+        aspectRatio={JOURNAL_FLORA_ASPECT}
+        left={toPercent(JOURNAL_FLORA_LAYOUT.left)}
+        bottom={toPercent(JOURNAL_FLORA_LAYOUT.bottom)}
+        zIndex={0}
       />
 
       <View
         style={styles.notebook}
         onLayout={(event) => {
-          setNotebookHeight(event.nativeEvent.layout.height);
+          setNotebookSize({
+            width: event.nativeEvent.layout.width,
+            height: event.nativeEvent.layout.height,
+          });
         }}
       >
         <Image
@@ -117,7 +114,7 @@ export function JournalNotebook({
             style={[styles.input, { fontSize, lineHeight }]}
           />
 
-          <View style={styles.saveRow}>
+          <View style={[styles.saveRow, { paddingRight: saveClearance }]}>
             {showSaved ? (
               <View style={styles.savedState} accessibilityRole="text" accessibilityLabel="saved">
                 <AppText variant="journalSave" color="primary">
@@ -149,21 +146,13 @@ export function JournalNotebook({
         </View>
       </View>
 
-      <Image
+      <JournalSprite
         source={MASCOT_ART}
-        resizeMode="contain"
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-        accessibilityIgnoresInvertColors
-        style={[
-          styles.mascot,
-          {
-            width: toPercent(JOURNAL_MASCOT_LAYOUT.width),
-            right: toPercent(JOURNAL_MASCOT_LAYOUT.right),
-            bottom: toPercent(JOURNAL_MASCOT_LAYOUT.bottom),
-            aspectRatio: JOURNAL_MASCOT_ART.width / JOURNAL_MASCOT_ART.height,
-          },
-        ]}
+        width={toPercent(JOURNAL_MASCOT_LAYOUT.width)}
+        aspectRatio={JOURNAL_MASCOT_ASPECT}
+        right={toPercent(JOURNAL_MASCOT_LAYOUT.right)}
+        bottom={toPercent(JOURNAL_MASCOT_LAYOUT.bottom)}
+        zIndex={2}
       />
     </View>
   );
@@ -173,11 +162,13 @@ const styles = StyleSheet.create({
   scene: {
     position: 'relative',
     width: '100%',
-    paddingBottom: spacing.lg,
+    overflow: 'visible',
+    paddingBottom: spacing.xl,
   },
   notebook: {
     width: '100%',
     aspectRatio: JOURNAL_NOTEBOOK_ASPECT,
+    zIndex: 1,
   },
   notebookArt: {
     ...StyleSheet.absoluteFill,
@@ -235,15 +226,5 @@ const styles = StyleSheet.create({
     minHeight: spacing.hitTarget,
     justifyContent: 'center',
     paddingHorizontal: spacing.xs,
-  },
-  flora: {
-    position: 'absolute',
-    zIndex: 0,
-    pointerEvents: 'none',
-  },
-  mascot: {
-    position: 'absolute',
-    zIndex: 2,
-    pointerEvents: 'none',
   },
 });

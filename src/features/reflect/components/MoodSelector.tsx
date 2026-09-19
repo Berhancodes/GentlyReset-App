@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xxs,
-    borderWidth: 1.5,
+    borderWidth: 2,
   },
   faceIdle: {
     backgroundColor: colors.background.secondary,

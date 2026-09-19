@@ -1,16 +1,24 @@
 import { useMemo, useState } from 'react';
-import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 
 import { AppText, MainTabHeader, Screen } from '@/components/ui';
 import { spacing } from '@/design-system';
 import { JournalNotebook } from '@/features/reflect/components/JournalNotebook';
+import { JournalSprite } from '@/features/reflect/components/JournalSprite';
 import { MoodSelector } from '@/features/reflect/components/MoodSelector';
 import { RecentReflectionList } from '@/features/reflect/components/RecentReflectionList';
 import { WeekMoodRow } from '@/features/reflect/components/WeekMoodRow';
 import {
-  JOURNAL_LEAVES_ART,
+  getJournalLeavesSize,
+  JOURNAL_LEAVES_ASPECT,
   JOURNAL_LEAVES_LAYOUT,
-  toPercent,
 } from '@/features/reflect/layout/notebookLayout';
 import {
   formatJournalHeadingDate,
@@ -27,6 +35,8 @@ const LEAVES_ART = require('../../../../assets/images/app/journal-leaves.png');
 
 export function ReflectScreen() {
   useSyncResetDay();
+  const { width: screenWidth } = useWindowDimensions();
+  const leavesSize = getJournalLeavesSize(screenWidth);
   const currentDay = useResetStore((state) => state.currentDay);
   const personalization = useResetStore((state) => state.personalization);
   const todayTask = useResetStore((state) => state.todayTask);
@@ -39,21 +49,15 @@ export function ReflectScreen() {
 
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-      <Image
+      <JournalSprite
         source={LEAVES_ART}
-        resizeMode="contain"
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-        accessibilityIgnoresInvertColors
-        style={[
-          styles.leaves,
-          {
-            width: toPercent(JOURNAL_LEAVES_LAYOUT.width),
-            top: toPercent(JOURNAL_LEAVES_LAYOUT.top),
-            right: toPercent(JOURNAL_LEAVES_LAYOUT.right),
-            aspectRatio: JOURNAL_LEAVES_ART.width / JOURNAL_LEAVES_ART.height,
-          },
-        ]}
+        width={leavesSize.width}
+        height={leavesSize.height}
+        aspectRatio={JOURNAL_LEAVES_ASPECT}
+        top={JOURNAL_LEAVES_LAYOUT.top}
+        right={screenWidth * JOURNAL_LEAVES_LAYOUT.right}
+        zIndex={2}
+        opacity={0.92}
       />
       <MainTabHeader title="journal" subtitle="a calmer you, one entry at a time." />
       <KeyboardAvoidingView
@@ -61,6 +65,7 @@ export function ReflectScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
+          testID="journal-scroll"
           style={styles.scroll}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
@@ -156,11 +161,5 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: spacing.sm,
-  },
-  leaves: {
-    position: 'absolute',
-    zIndex: 2,
-    opacity: 0.92,
-    pointerEvents: 'none',
   },
 });
