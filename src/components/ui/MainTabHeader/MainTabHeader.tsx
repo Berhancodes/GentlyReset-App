@@ -14,21 +14,13 @@ type MainTabHeaderProps = {
   title: string;
   showMascot?: boolean;
   rightAction?: ReactNode;
-  transparent?: boolean;
 };
 
-export function MainTabHeader({
-  title,
-  showMascot = true,
-  rightAction,
-  transparent = false,
-}: MainTabHeaderProps) {
+export function MainTabHeader({ title, showMascot = true, rightAction }: MainTabHeaderProps) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View
-      style={[styles.root, { paddingTop: insets.top }, transparent ? styles.transparent : null]}
-    >
+    <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.row}>
         {showMascot ? (
           <Image
@@ -56,9 +48,6 @@ export function MainTabHeader({
 const styles = StyleSheet.create({
   root: {
     backgroundColor: colors.background.primary,
-  },
-  transparent: {
-    backgroundColor: 'transparent',
   },
   row: {
     height: HEADER_ROW_HEIGHT,
