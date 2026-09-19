@@ -6,7 +6,7 @@ type WorldBackgroundProps = {
 
 export function WorldBackground({ accessibilityLabel }: WorldBackgroundProps) {
   return (
-    <View style={styles.frame} pointerEvents="none">
+    <View style={styles.frame}>
       <Image
         source={require('../../../../assets/images/app/world-friends-background.png')}
         accessibilityLabel={accessibilityLabel}
@@ -22,6 +22,7 @@ const styles = StyleSheet.create({
   frame: {
     ...StyleSheet.absoluteFill,
     overflow: 'hidden',
+    pointerEvents: 'none',
   },
   image: {
     width: '100%',
