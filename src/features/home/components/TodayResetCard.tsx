@@ -1,63 +1,102 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { AppText } from '@/components/ui';
+import { AppText, PrimaryButton } from '@/components/ui';
 import { colors, radius, shadows, spacing } from '@/design-system';
-import { HOME_TASK_DESCRIPTION, getHomeTaskTitle } from '@/features/home/utils/homeCopy';
-import { hapticSuccess } from '@/utils/haptics';
+import { formatMinutesLabel } from '@/features/reset/utils/getTaskForDay';
 
 type TodayResetCardProps = {
+  title: string;
+  description: string;
   minutes: number;
+  started: boolean;
   completed: boolean;
+  completionMessage: string;
+  onStart: () => void;
   onComplete: () => void;
 };
 
-export function TodayResetCard({ minutes, completed, onComplete }: TodayResetCardProps) {
-  const title = getHomeTaskTitle(minutes);
-
-  return (
-    <Pressable
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked: completed, disabled: completed }}
-      accessibilityLabel={`Today's reset. ${title}. ${
-        completed ? 'Done for today.' : HOME_TASK_DESCRIPTION
-      }`}
-      accessibilityHint={completed ? undefined : "Marks today's reset as done"}
-      disabled={completed}
-      onPress={() => {
-        void hapticSuccess();
-        onComplete();
-      }}
-      style={({ pressed }) => [styles.card, pressed && !completed ? styles.pressed : null]}
-    >
-      <AppText variant="label" color="helper">
-        {"today's reset"}
-      </AppText>
-
-      <View style={styles.taskRow}>
-        <View
-          accessibilityElementsHidden
-          importantForAccessibility="no"
-          style={[styles.checkbox, completed ? styles.checkboxComplete : null]}
-        >
-          {completed ? (
+export function TodayResetCard({
+  title,
+  description,
+  minutes,
+  started,
+  completed,
+  completionMessage,
+  onStart,
+  onComplete,
+}: TodayResetCardProps) {
+  if (completed) {
+    return (
+      <View
+        style={[styles.card, styles.cardComplete]}
+        accessibilityLabel={`Today's reset complete. ${title}. ${completionMessage}`}
+      >
+        <AppText variant="label" color="helper">
+          {"today's reset"}
+        </AppText>
+        <View style={styles.completeRow}>
+          <View style={styles.completeBadge}>
             <AppText variant="caption" color="inverse" align="center">
               ✓
             </AppText>
-          ) : null}
+          </View>
+          <AppText variant="optionTitle">complete</AppText>
         </View>
+        <AppText variant="optionTitle">{title}</AppText>
+        <AppText variant="optionSubtitle" color="secondary">
+          {completionMessage}
+        </AppText>
+      </View>
+    );
+  }
 
-        <View style={styles.copy}>
-          <AppText variant="optionTitle">{title}</AppText>
-          <AppText variant="optionSubtitle" color="secondary">
-            {completed ? 'done for today' : HOME_TASK_DESCRIPTION}
+  return (
+    <View
+      style={styles.card}
+      accessibilityLabel={`Today's reset. ${title}. ${formatMinutesLabel(minutes)}.`}
+    >
+      <View style={styles.eyebrow}>
+        <AppText variant="label" color="helper">
+          {"today's reset"}
+        </AppText>
+        <View style={styles.duration}>
+          <Ionicons name="time-outline" size={14} color={colors.text.helper} />
+          <AppText variant="label" color="helper">
+            {formatMinutesLabel(minutes)}
           </AppText>
         </View>
       </View>
-    </Pressable>
+
+      <View style={styles.taskRow}>
+        <View style={styles.taskIcon} accessibilityElementsHidden importantForAccessibility="no">
+          <Ionicons name="book-outline" size={18} color={colors.text.primary} />
+        </View>
+        <View style={styles.copy}>
+          <AppText variant="optionTitle">{title}</AppText>
+          <AppText variant="optionSubtitle" color="secondary">
+            {description}
+          </AppText>
+        </View>
+      </View>
+
+      {started ? (
+        <PrimaryButton
+          label="mark as complete"
+          accessibilityHint="Marks today's reset as done"
+          haptic="success"
+          onPress={onComplete}
+        />
+      ) : (
+        <PrimaryButton
+          label="start my reset →"
+          accessibilityHint="Begins today's reset"
+          onPress={onStart}
+        />
+      )}
+    </View>
   );
 }
-
-const CHECKBOX_SIZE = spacing.lg;
 
 const styles = StyleSheet.create({
   card: {
@@ -65,36 +104,55 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-    borderRadius: radius.card,
-    backgroundColor: colors.surface.raised,
+    borderRadius: radius.xl,
+    backgroundColor: colors.surface.primary,
     borderWidth: 1,
     borderColor: colors.border.subtle,
     ...shadows.soft,
   },
-  pressed: {
-    opacity: 0.88,
+  cardComplete: {
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+  },
+  eyebrow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  duration: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxs,
   },
   taskRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
   },
-  checkbox: {
-    width: CHECKBOX_SIZE,
-    height: CHECKBOX_SIZE,
-    borderRadius: radius.pill,
-    borderWidth: 2,
-    borderColor: colors.accent.sage,
+  taskIcon: {
+    width: spacing.xl,
+    height: spacing.xl,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface.selected,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  checkboxComplete: {
-    backgroundColor: colors.action.primaryBackground,
-    borderColor: colors.action.primaryBackground,
   },
   copy: {
     flex: 1,
     gap: spacing.xxs,
+  },
+  completeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  completeBadge: {
+    width: spacing.md + spacing.xxs,
+    height: spacing.md + spacing.xxs,
+    borderRadius: radius.pill,
+    backgroundColor: colors.action.primaryBackground,
+    alignItems: 'center',
     justifyContent: 'center',
   },
 });

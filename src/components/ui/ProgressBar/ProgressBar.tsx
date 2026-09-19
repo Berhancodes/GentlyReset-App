@@ -21,6 +21,7 @@ type ProgressBarProps = {
   initialProgress?: number;
   accessibilityLabel?: string;
   fillColor?: string;
+  thickness?: number;
 };
 
 export function ProgressBar({
@@ -28,6 +29,7 @@ export function ProgressBar({
   initialProgress = 0,
   accessibilityLabel = 'Onboarding progress',
   fillColor = colors.progress.fill,
+  thickness,
 }: ProgressBarProps) {
   const clamped = Math.min(1, Math.max(0, progress));
   const clampedInitial = Math.min(1, Math.max(0, initialProgress));
@@ -68,7 +70,7 @@ export function ProgressBar({
       onLayout={(event) => {
         setTrackWidth(event.nativeEvent.layout.width);
       }}
-      style={styles.track}
+      style={[styles.track, thickness ? { height: thickness } : null]}
     >
       <Animated.View style={[styles.fill, { backgroundColor: fillColor }, fillStyle]} />
     </View>
