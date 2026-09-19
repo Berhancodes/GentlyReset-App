@@ -11,7 +11,6 @@ import { TodayResetCard } from '@/features/home/components/TodayResetCard';
 import {
   getHomeGreeting,
   getHomeSupportLine,
-  getHomeTaskTitle,
   HOME_COMPLETION_MESSAGE,
   HOME_IDLE_SUBTITLE,
 } from '@/features/home/utils/homeCopy';
@@ -78,7 +77,11 @@ export function HomeScreen() {
     );
   }
 
+  // Always resolve from the plan — do not render persisted todayTask.
   const task = getTaskForDay(currentDay, personalization);
+  const supportLine = resetTypeId
+    ? getResetProfile(resetTypeId).homeSupportLine
+    : getHomeSupportLine(personalization.primaryObstacle);
 
   return (
     <Screen
@@ -113,12 +116,9 @@ export function HomeScreen() {
           layout="inline"
         />
         <TodayResetCard
-          title={getHomeTaskTitle(task.minutes)}
-          description={
-            resetTypeId
-              ? getResetProfile(resetTypeId).homeSupportLine
-              : getHomeSupportLine(personalization.primaryObstacle)
-          }
+          title={task.title}
+          description={task.description}
+          supportLine={supportLine}
           minutes={task.minutes}
           started={todayStarted}
           completed={todayCompleted}

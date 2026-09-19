@@ -12,11 +12,6 @@ export function getHomeGreeting(now = new Date()): string {
   return 'good evening';
 }
 
-export function getHomeTaskTitle(minutes: number): string {
-  const unit = minutes === 1 ? 'minute' : 'minutes';
-  return `journal for ${minutes} ${unit}`;
-}
-
 export function getHomeSupportLine(obstacle?: string): string {
   if (obstacle === 'too-much' || obstacle === 'overthink') {
     return "you don't need to fix everything today.";

@@ -25,6 +25,7 @@ export function JourneyScreen() {
   const tasksByDay = useMemo(() => {
     const map = new Map<number, TodayTask>();
     for (let day = 1; day <= PLAN_DAY_COUNT; day += 1) {
+      // Same source as Home: getTaskForDay(currentDay, personalization).
       map.set(day, getTaskForDay(day, personalization));
     }
     return map;

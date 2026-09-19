@@ -8,6 +8,7 @@ import { formatMinutesLabel } from '@/features/reset/utils/getTaskForDay';
 type TodayResetCardProps = {
   title: string;
   description: string;
+  supportLine?: string;
   minutes: number;
   started: boolean;
   completed: boolean;
@@ -19,6 +20,7 @@ type TodayResetCardProps = {
 export function TodayResetCard({
   title,
   description,
+  supportLine,
   minutes,
   started,
   completed,
@@ -54,7 +56,9 @@ export function TodayResetCard({
   return (
     <View
       style={styles.card}
-      accessibilityLabel={`Today's reset. ${title}. ${formatMinutesLabel(minutes)}.`}
+      accessibilityLabel={`Today's reset. ${title}. ${formatMinutesLabel(minutes)}. ${description}${
+        supportLine ? ` ${supportLine}` : ''
+      }`}
     >
       <View style={styles.eyebrow}>
         <AppText variant="label" color="helper">
@@ -77,6 +81,11 @@ export function TodayResetCard({
           <AppText variant="optionSubtitle" color="secondary">
             {description}
           </AppText>
+          {supportLine ? (
+            <AppText variant="caption" color="helper">
+              {supportLine}
+            </AppText>
+          ) : null}
         </View>
       </View>
 

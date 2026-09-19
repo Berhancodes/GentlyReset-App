@@ -4,9 +4,13 @@ import { persist } from 'zustand/middleware';
 import type { OnboardingAnswer } from '@/features/onboarding/types/onboarding';
 import { getSingleChoiceId } from '@/features/onboarding/utils/answerReaders';
 import type { JournalMood, ResetSnapshot, TodayTask } from '@/features/reset/types';
-import { PLAN_DAY_COUNT } from '@/features/reset/data/thirtyDayPlan';
 import { applyDateRollover } from '@/features/reset/utils/applyDateRollover';
-import { shiftDateKey, toLocalDateKey } from '@/features/reset/utils/calendar';
+import { toLocalDateKey } from '@/features/reset/utils/calendar';
+import {
+  applyCompleteToday,
+  applySaveReflection,
+  applyStartToday,
+} from '@/features/reset/utils/dailyResetActions';
 import { resolveStoredResetTypeId } from '@/features/reset/utils/deriveResetType';
 import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
 import { createSeededResetState } from '@/features/reset/utils/seedResetState';
@@ -18,6 +22,7 @@ const emptyPersonalization = {
 
 const fallbackTask: TodayTask = getTaskForDay(1, emptyPersonalization);
 
+/** todayTask is persist/journal compat only. Home and Journey render via getTaskForDay. */
 const initialSnapshot: ResetSnapshot = {
   currentDay: 1,
   completedDays: [],
@@ -73,72 +78,13 @@ export const useResetStore = create<ResetSnapshot & ResetActions>()(
         set(applyDateRollover(current, toLocalDateKey(now)));
       },
       startToday: () => {
-        const current = get();
-        if (!current.resetStartedOn || current.todayCompleted) {
-          return;
-        }
-        set({ todayStarted: true });
+        set(applyStartToday(get()));
       },
       completeToday: (now = new Date()) => {
-        const today = toLocalDateKey(now);
-        const rolled = applyDateRollover(get(), today);
-        if (rolled.todayCompleted) {
-          set(rolled);
-          return;
-        }
-        if (rolled.completedDays.includes(rolled.currentDay)) {
-          set({
-            ...rolled,
-            todayCompleted: true,
-            todayStarted: true,
-          });
-          return;
-        }
-
-        const yesterday = shiftDateKey(today, -1);
-        const streak =
-          rolled.lastCompletedOn === yesterday
-            ? rolled.streak + 1
-            : rolled.lastCompletedOn === today
-              ? rolled.streak
-              : 1;
-
-        set({
-          ...rolled,
-          todayCompleted: true,
-          todayStarted: true,
-          completedDays: [...rolled.completedDays, rolled.currentDay],
-          lastCompletedOn: today,
-          streak: Math.min(PLAN_DAY_COUNT, streak),
-          missedYesterday: false,
-          todayTask: getTaskForDay(rolled.currentDay, rolled.personalization),
-        });
+        set(applyCompleteToday(get(), now));
       },
       saveReflection: (input, now = new Date()) => {
-        const today = toLocalDateKey(now);
-        const rolled = applyDateRollover(get(), today);
-        const text = input.text.trim();
-        if (!text) {
-          set(rolled);
-          return;
-        }
-
-        const entry = {
-          day: rolled.currentDay,
-          date: today,
-          mood: input.mood,
-          prompt: input.prompt,
-          text,
-          savedAt: now.toISOString(),
-        };
-        const remaining = (rolled.reflections ?? []).filter(
-          (reflection) => reflection.day !== rolled.currentDay,
-        );
-
-        set({
-          ...rolled,
-          reflections: [...remaining, entry].sort((left, right) => left.day - right.day),
-        });
+        set(applySaveReflection(get(), input, now));
       },
       clearReset: () => set(initialSnapshot),
     }),
