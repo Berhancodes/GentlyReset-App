@@ -147,6 +147,43 @@ export const textVariants = {
     lineHeight: lineHeights.sm,
     fontWeight: fontWeights.regular,
   },
+  moodLabel: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.tab,
+    lineHeight: lineHeights.tab,
+    fontWeight: fontWeights.medium,
+  },
+  moodLabelSelected: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.tab,
+    lineHeight: lineHeights.tab,
+    fontWeight: fontWeights.bold,
+  },
+  notebookDate: {
+    fontFamily: fontFamilies.sans,
+    fontSize: fontSizes.xs,
+    lineHeight: lineHeights.xs,
+    fontWeight: fontWeights.medium,
+  },
+  notebookHeading: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.md,
+    lineHeight: lineHeights.md,
+    fontWeight: fontWeights.semibold,
+    letterSpacing: -0.2,
+  },
+  notebookPrompt: {
+    fontFamily: fontFamilies.sans,
+    fontSize: fontSizes.sm,
+    lineHeight: lineHeights.sm,
+    fontWeight: fontWeights.regular,
+  },
+  journalSave: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.sm,
+    lineHeight: lineHeights.sm,
+    fontWeight: fontWeights.semibold,
+  },
 } as const satisfies Record<string, TextStyle>;
 
 export type TextVariant = keyof typeof textVariants;

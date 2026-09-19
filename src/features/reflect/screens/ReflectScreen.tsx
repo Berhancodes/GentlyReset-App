@@ -1,209 +1,166 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
-import { AppText, MainTabHeader, PrimaryButton, Screen } from '@/components/ui';
-import { colors, radius, spacing, textVariants } from '@/design-system';
+import { AppText, MainTabHeader, Screen } from '@/components/ui';
+import { spacing } from '@/design-system';
+import { JournalNotebook } from '@/features/reflect/components/JournalNotebook';
 import { MoodSelector } from '@/features/reflect/components/MoodSelector';
+import { RecentReflectionList } from '@/features/reflect/components/RecentReflectionList';
+import { WeekMoodRow } from '@/features/reflect/components/WeekMoodRow';
 import {
-  MOOD_LABELS,
+  JOURNAL_LEAVES_ART,
+  JOURNAL_LEAVES_LAYOUT,
+  toPercent,
+} from '@/features/reflect/layout/notebookLayout';
+import {
+  formatJournalHeadingDate,
   moodForDate,
   recentReflections,
   thisWeekDates,
-  weekdayLetter,
 } from '@/features/reflect/utils/journalHistory';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
-import { toLocalDateKey } from '@/features/reset/utils/calendar';
 import { getJournalPrompt } from '@/features/reset/utils/journalPrompt';
-import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
 import type { JournalEntry, JournalMood } from '@/features/reset/types';
+
+const LEAVES_ART = require('../../../../assets/images/app/journal-leaves.png');
 
 export function ReflectScreen() {
   useSyncResetDay();
   const currentDay = useResetStore((state) => state.currentDay);
   const personalization = useResetStore((state) => state.personalization);
+  const todayTask = useResetStore((state) => state.todayTask);
   const reflections = useResetStore((state) => state.reflections);
   const saveReflection = useResetStore((state) => state.saveReflection);
-  const task = getTaskForDay(currentDay, personalization);
-  const prompt = getJournalPrompt(task.title, personalization);
+  const prompt = getJournalPrompt(todayTask.title, personalization);
   const savedToday = reflections.find((entry) => entry.day === currentDay);
   const week = useMemo(() => thisWeekDates(), []);
   const recent = useMemo(() => recentReflections(reflections), [reflections]);
 
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-      <MainTabHeader title="journal" />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      <Image
+        source={LEAVES_ART}
+        resizeMode="contain"
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+        accessibilityIgnoresInvertColors
+        style={[
+          styles.leaves,
+          {
+            width: toPercent(JOURNAL_LEAVES_LAYOUT.width),
+            top: toPercent(JOURNAL_LEAVES_LAYOUT.top),
+            right: toPercent(JOURNAL_LEAVES_LAYOUT.right),
+            aspectRatio: JOURNAL_LEAVES_ART.width / JOURNAL_LEAVES_ART.height,
+          },
+        ]}
+      />
+      <MainTabHeader title="journal" subtitle="a calmer you, one entry at a time." />
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <TodayComposer
-          key={`${currentDay}-${savedToday?.savedAt ?? 'new'}`}
-          prompt={prompt}
-          saved={savedToday}
-          onSave={(mood, text) => saveReflection({ mood, text, prompt })}
-        />
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          automaticallyAdjustKeyboardInsets
+          showsVerticalScrollIndicator={false}
+        >
+          <TodayComposer
+            key={`${currentDay}-${savedToday?.savedAt ?? 'new'}`}
+            dateLabel={formatJournalHeadingDate()}
+            prompt={prompt}
+            saved={savedToday}
+            onSave={(mood, text) => saveReflection({ mood, text, prompt })}
+          />
 
-        <View style={styles.section}>
-          <AppText variant="optionTitle">this week</AppText>
-          <View style={styles.weekRow}>
-            {week.map((dateKey) => {
-              const weekMood = moodForDate(reflections, dateKey);
-              const isToday = dateKey === toLocalDateKey(new Date());
-              return (
-                <View key={dateKey} style={styles.weekSlot}>
-                  <AppText variant="label" color={isToday ? 'primary' : 'helper'} align="center">
-                    {weekdayLetter(dateKey)}
-                  </AppText>
-                  <View
-                    style={[styles.weekDot, weekMood ? styles.weekDotFilled : null]}
-                    accessibilityLabel={
-                      weekMood
-                        ? `${weekdayLetter(dateKey)}, ${MOOD_LABELS[weekMood]}`
-                        : `${weekdayLetter(dateKey)}, no reflection`
-                    }
-                  />
-                </View>
-              );
-            })}
+          <View style={styles.section}>
+            <AppText variant="optionTitle">your week</AppText>
+            <WeekMoodRow week={week} moodForDate={(dateKey) => moodForDate(reflections, dateKey)} />
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <AppText variant="optionTitle">recent</AppText>
-          {recent.length === 0 ? (
-            <AppText variant="caption" color="helper">
-              saved reflections will show up here.
-            </AppText>
-          ) : (
-            recent.map((item) => (
-              <View key={`${item.day}-${item.savedAt}`} style={styles.recentRow}>
-                <AppText variant="label" color="helper">
-                  {`day ${item.day} · ${MOOD_LABELS[item.mood]}`}
-                </AppText>
-                <AppText variant="body" numberOfLines={2}>
-                  {item.text}
-                </AppText>
-              </View>
-            ))
-          )}
-        </View>
-      </ScrollView>
+          <View style={styles.section}>
+            <AppText variant="optionTitle">recent reflections</AppText>
+            <RecentReflectionList entries={recent} />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }
 
 function TodayComposer({
+  dateLabel,
   prompt,
   saved,
   onSave,
 }: {
+  dateLabel: string;
   prompt: string;
   saved: JournalEntry | undefined;
   onSave: (mood: JournalMood, text: string) => void;
 }) {
   const [mood, setMood] = useState<JournalMood | undefined>(saved?.mood);
   const [entry, setEntry] = useState(saved?.text ?? '');
-  const canSave = Boolean(mood) && entry.trim().length > 0;
+  const trimmed = entry.trim();
+  const isUnchanged = saved != null && mood === saved.mood && trimmed === saved.text;
+  const canSave = Boolean(mood) && trimmed.length > 0 && !isUnchanged;
+  const showSaved = saved != null && isUnchanged;
 
   return (
-    <>
-      <View style={styles.card}>
-        <AppText variant="optionTitle">how are you feeling?</AppText>
+    <View style={styles.composer}>
+      <View style={styles.moodBlock}>
+        <AppText variant="optionTitle">how are you feeling today?</AppText>
         <MoodSelector value={mood} onChange={setMood} />
       </View>
 
-      <View style={styles.card}>
-        <AppText variant="label" color="helper">
-          {"today's prompt"}
-        </AppText>
-        <AppText variant="body" color="secondary">
-          {prompt}
-        </AppText>
-        <TextInput
-          accessibilityLabel="Journal entry"
-          placeholder="write anything..."
-          placeholderTextColor={colors.text.helper}
-          value={entry}
-          onChangeText={setEntry}
-          multiline
-          textAlignVertical="top"
-          style={styles.composer}
-        />
-      </View>
-
-      <PrimaryButton
-        label={saved ? 'update reflection' : 'save reflection'}
-        disabled={!canSave}
-        onPress={() => {
+      <JournalNotebook
+        dateLabel={dateLabel}
+        heading="today's thought"
+        prompt={prompt}
+        value={entry}
+        onChangeText={setEntry}
+        canSave={canSave}
+        showSaved={showSaved}
+        onSave={() => {
           if (!mood) {
             return;
           }
           onSave(mood, entry);
         }}
       />
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
   scroll: {
     flex: 1,
   },
   content: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.lg,
-    gap: spacing.lg,
-  },
-  card: {
-    gap: spacing.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    borderRadius: radius.card,
-    backgroundColor: colors.surface.raised,
-    borderWidth: 1,
-    borderColor: colors.border.subtle,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xl,
+    gap: spacing.xl,
   },
   composer: {
-    minHeight: 140,
-    borderRadius: radius.lg,
-    backgroundColor: colors.background.primary,
-    borderWidth: 1,
-    borderColor: colors.border.subtle,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    color: colors.text.primary,
-    ...textVariants.body,
+    gap: spacing.lg,
+  },
+  moodBlock: {
+    gap: spacing.sm,
   },
   section: {
     gap: spacing.sm,
   },
-  weekRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  weekSlot: {
-    alignItems: 'center',
-    gap: spacing.xxs,
-    minWidth: 28,
-  },
-  weekDot: {
-    width: 12,
-    height: 12,
-    borderRadius: radius.pill,
-    borderWidth: 1.5,
-    borderColor: colors.border.default,
-    backgroundColor: colors.surface.choice,
-  },
-  weekDotFilled: {
-    backgroundColor: colors.action.primaryBackground,
-    borderColor: colors.action.primaryBackground,
-  },
-  recentRow: {
-    gap: spacing.xxs,
-    paddingVertical: spacing.xs,
+  leaves: {
+    position: 'absolute',
+    zIndex: 2,
+    opacity: 0.92,
+    pointerEvents: 'none',
   },
 });

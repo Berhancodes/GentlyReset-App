@@ -10,6 +10,7 @@ const palette = {
   brownDisabled: '#C4A88F',
   gold: '#E6B84A',
   goldSoft: '#F4E4A8',
+  goldDeep: '#C99A32',
   peach: '#EFAE82',
   sage: '#8E9B63',
   blue: '#8799A0',
@@ -40,6 +41,7 @@ export const colors = {
     disabled: palette.creamMuted,
     choice: palette.creamSoft,
     choiceSelected: palette.goldSoft,
+    gold: palette.gold,
   },
   text: {
     primary: palette.brown,
@@ -59,6 +61,7 @@ export const colors = {
     default: palette.sand,
     selected: palette.brown,
     subtle: palette.sandSubtle,
+    gold: palette.gold,
   },
   action: {
     primaryBackground: palette.brown,
@@ -66,6 +69,9 @@ export const colors = {
     primaryBackgroundDisabled: palette.brownDisabled,
     primaryText: palette.cream,
     primaryTextDisabled: palette.creamDisabledText,
+    saveBackground: palette.gold,
+    saveBackgroundPressed: palette.goldDeep,
+    saveText: palette.brown,
   },
   progress: {
     track: palette.sandSubtle,
@@ -77,6 +83,7 @@ export const colors = {
     headerFadeStart: 'rgba(255, 253, 248, 0.62)',
     headerFadeMid: 'rgba(255, 248, 234, 0.36)',
     headerFadeEnd: 'rgba(255, 248, 234, 0)',
+    clear: 'rgba(255, 253, 248, 0)',
   },
 } as const;
 
