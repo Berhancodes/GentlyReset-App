@@ -5,7 +5,7 @@ import { radius } from '@/design-system';
 
 const HOME_MORNING_SCENE = require('../../../../assets/images/app/home-morning-scene.png');
 
-const SCENE_ASPECT = 1.12;
+const SCENE_ASPECT = 1.22;
 
 type HomeSceneProps = {
   completed: boolean;

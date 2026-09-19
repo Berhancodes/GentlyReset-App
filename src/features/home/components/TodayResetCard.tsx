@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
     borderRadius: radius.pill,
     borderWidth: 2,
-    borderColor: colors.text.primary,
+    borderColor: colors.accent.sage,
     alignItems: 'center',
     justifyContent: 'center',
   },

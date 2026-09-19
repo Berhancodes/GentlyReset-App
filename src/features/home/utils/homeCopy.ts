@@ -17,5 +17,5 @@ export function getHomeTaskTitle(minutes: number): string {
   return `journal for ${minutes} ${unit}`;
 }
 
-export const HOME_IDLE_SUBTITLE = 'small steps still move you forward.';
+export const HOME_IDLE_SUBTITLE = 'small steps still move\nyou forward.';
 export const HOME_TASK_DESCRIPTION = 'a calmer mind starts here.';

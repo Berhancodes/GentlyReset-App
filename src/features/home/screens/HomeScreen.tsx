@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: HOME_COLUMN_MAX_WIDTH,
     alignSelf: 'center',
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
     paddingTop: spacing.xs,
     gap: spacing.md,
   },
