@@ -59,7 +59,6 @@ const styles = StyleSheet.create({
     ...Platform.select({
       web: {
         objectPosition: 'center 62%',
-        transform: [{ scale: 1.16 }],
       },
       default: {
         transform: [{ scale: 1.16 }, { translateY: -10 }],

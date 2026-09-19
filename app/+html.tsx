@@ -12,6 +12,11 @@ export default function Root({ children }: PropsWithChildren) {
           content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
         />
         <ScrollViewStyleReset />
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `html, body, #root { height: 100%; overflow: hidden; }`,
+          }}
+        />
       </head>
       <body>{children}</body>
     </html>

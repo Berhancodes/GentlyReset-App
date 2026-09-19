@@ -48,6 +48,7 @@ export function Screen({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    overflow: 'hidden',
     backgroundColor: colors.background.primary,
   },
   padded: {
