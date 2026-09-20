@@ -27,8 +27,8 @@ export function WorldHeroMessage() {
 const styles = StyleSheet.create({
   root: {
     position: 'absolute',
-    left: '26%',
-    top: '24%',
-    transform: [{ rotate: '-8deg' }],
+    left: '34%',
+    top: '20%',
+    transform: [{ rotate: '-7deg' }],
   },
 });

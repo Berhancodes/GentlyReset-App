@@ -70,7 +70,7 @@ export function WorldScreen() {
           style={styles.sheet}
           contentContainerStyle={[
             styles.sheetContent,
-            { paddingBottom: getTabBarScenePadding(insets.bottom) },
+            { paddingBottom: getTabBarScenePadding(insets.bottom) + spacing.sm },
           ]}
           showsVerticalScrollIndicator={false}
           bounces
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     maxWidth: WORLD_COLUMN_MAX_WIDTH,
     alignSelf: 'center',
     paddingHorizontal: spacing.md,
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   statsAnchor: {
     marginTop: -WORLD_STATS_OVERLAP,

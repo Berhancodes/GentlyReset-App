@@ -49,7 +49,7 @@ export function WorldActionCard({
 
 const styles = StyleSheet.create({
   card: {
-    minHeight: spacing.xxl + spacing.sm,
+    minHeight: spacing.xxl,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,

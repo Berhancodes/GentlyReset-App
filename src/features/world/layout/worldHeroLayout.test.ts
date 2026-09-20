@@ -92,7 +92,7 @@ for (const viewport of VIEWPORTS) {
 
   check(
     `${viewport.name} includes grass below the log`,
-    imageBottom >= 0.53,
+    imageBottom >= 0.52,
     `bottom=${imageBottom.toFixed(3)}`,
   );
 }

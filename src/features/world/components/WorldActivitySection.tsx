@@ -65,16 +65,18 @@ function ActivityRow({ item, onPress }: { item: WorldActivityItem; onPress: () =
         />
       </View>
       <View style={styles.copy}>
-        <AppText variant="optionTitle" numberOfLines={1}>
+        <AppText variant="optionTitle" numberOfLines={2}>
           {item.title}
         </AppText>
         <AppText variant="caption" color="helper" numberOfLines={1}>
           {item.subtitle}
         </AppText>
       </View>
-      <AppText variant="caption" color="helper">
-        {item.timeLabel}
-      </AppText>
+      <View style={styles.time}>
+        <AppText variant="caption" color="helper">
+          {item.timeLabel}
+        </AppText>
+      </View>
     </Pressable>
   );
 }
@@ -101,7 +103,7 @@ const styles = StyleSheet.create({
     ...shadows.soft,
   },
   row: {
-    minHeight: spacing.xxl + spacing.xs,
+    minHeight: spacing.xxl,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
@@ -134,5 +136,8 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     gap: spacing.xxs,
+  },
+  time: {
+    flexShrink: 0,
   },
 });

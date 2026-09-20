@@ -13,7 +13,7 @@ export const WORLD_HERO_ART_ASPECT = WORLD_HERO_ART.width / WORLD_HERO_ART.heigh
  * Hero share of the usable screen. Landscape is cover-cropped into this band;
  * the cream sheet sits below. Keep in 0.36–0.40 so cards remain reachable.
  */
-export const WORLD_HERO_FLEX = 0.4;
+export const WORLD_HERO_FLEX = 0.36;
 
 /** How far the stats pill sits up onto the hero grass. Matches `spacing.lg`. */
 export const WORLD_STATS_OVERLAP = 24;
@@ -27,7 +27,7 @@ export const WORLD_COLUMN_MAX_WIDTH = 430;
  * Horizontal: unused on current phones (view is wider than the art).
  */
 export const WORLD_COVER_FOCUS = {
-  x: 0.48,
+  x: 0.46,
   y: 0.27,
 } as const;
 
