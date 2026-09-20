@@ -1,0 +1,131 @@
+export const RESET_TYPE_IDS = [
+  'overloaded-dreamer',
+  'soft-restarter',
+  'almost-starter',
+  'fading-flame',
+] as const;
+
+export type ResetTypeId = (typeof RESET_TYPE_IDS)[number];
+
+export const RESET_TYPE_NAMES: Record<ResetTypeId, string> = {
+  'overloaded-dreamer': 'The Overloaded Dreamer',
+  'soft-restarter': 'The Soft Restarter',
+  'almost-starter': 'The Almost Starter',
+  'fading-flame': 'The Fading Flame',
+};
+
+/**
+ * When top scores are equal (including all-zero sparse answers), prefer this
+ * order. Restarter and Almost Starter have the cleanest single-question
+ * diagnostics; Dreamer is the broad leftover cluster — not first just because
+ * it was the old mock.
+ */
+export const RESET_TYPE_TIE_PRIORITY: readonly ResetTypeId[] = [
+  'soft-restarter',
+  'almost-starter',
+  'fading-flame',
+  'overloaded-dreamer',
+];
+
+export type ResetTypeScores = Record<ResetTypeId, number>;
+
+/** Legacy fallback for old snapshots with an unknown/missing id and no answers. */
+export const LEGACY_FALLBACK_RESET_TYPE_ID: ResetTypeId = 'overloaded-dreamer';
+
+export function isResetTypeId(value: string): value is ResetTypeId {
+  return (RESET_TYPE_IDS as readonly string[]).includes(value);
+}
+
+export type ResetPersonalization = {
+  dailyCommitment?: string;
+  supportStyle?: string;
+  primaryObstacle?: string;
+  resetReason?: string;
+  desiredFeelings: readonly string[];
+  missedDayResponse?: string;
+};
+
+export type TodayTask = {
+  id: string;
+  day: number;
+  title: string;
+  description: string;
+  minutes: number;
+};
+
+/**
+ * Snapshot fields the domain adapter reads. Structurally compatible with the
+ * persisted ResetSnapshot. Domain does not own persist.
+ */
+export type ResetSnapshotSource = {
+  currentDay: number;
+  completedDays: readonly number[];
+  todayStarted: boolean;
+  resetStartedOn: string | null;
+  resetTypeId: string;
+  personalization: ResetPersonalization;
+};
+
+export type ResetCycleStatus = 'active' | 'completed';
+
+/**
+ * Explicit in-progress (or later completed) 30-day cycle.
+ * Phase 2A maps today's single snapshot to sequence 1 and always 'active'.
+ * `completedAt` is never fabricated. `currentDay` is LOCAL 1–30.
+ */
+export type ResetCycle = {
+  id: string;
+  sequence: number;
+  planId: string;
+  planVersion: number;
+  currentDay: number;
+  completedDays: readonly number[];
+  resetTypeId: string;
+  startedAt: string | null;
+  completedAt: string | null;
+  status: ResetCycleStatus;
+  personalization: ResetPersonalization;
+  todayStarted: boolean;
+};
+
+export type ResetPlan = {
+  id: string;
+  version: number;
+  length: number;
+};
+
+export type ResetDayStatus = 'completed' | 'current' | 'future';
+
+/**
+ * Derived day view. Not persisted. `dayNumber` is LOCAL to the cycle.
+ * `overallDayNumber` is display/analytics only.
+ */
+export type ResetDay = {
+  cycleId: string;
+  dayNumber: number;
+  overallDayNumber: number;
+  task: TodayTask;
+  status: ResetDayStatus;
+  started?: boolean;
+};
+
+export type ResetProfile = {
+  id: ResetTypeId;
+  name: string;
+  summary: string;
+  shortSummary: string;
+  description: string;
+  advice: string;
+  emphasized: string;
+  biggestPattern: string;
+  whatUsuallyHelps: string;
+  strength: string;
+  pattern: string;
+  resetApproach: string;
+  homeSupportLine: string;
+  missedDayLine: string;
+  strengths: readonly string[];
+  challenges: readonly string[];
+  shareQuote: string;
+  illustrationKey: 'overloadedDreamer';
+};

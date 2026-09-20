@@ -4,8 +4,17 @@ import {
   getSingleChoiceId,
   getTextInputValue,
 } from '../../onboarding/utils/answerReaders';
-import type { ResetTypeId, ResetTypeScores } from '../types';
-import { RESET_TYPE_IDS, RESET_TYPE_NAMES, RESET_TYPE_TIE_PRIORITY } from '../types';
+import {
+  isResetTypeId,
+  LEGACY_FALLBACK_RESET_TYPE_ID,
+  RESET_TYPE_IDS,
+  RESET_TYPE_NAMES,
+  RESET_TYPE_TIE_PRIORITY,
+  type ResetTypeId,
+  type ResetTypeScores,
+} from '../types';
+
+export { isResetTypeId, LEGACY_FALLBACK_RESET_TYPE_ID } from '../types';
 
 export type ScoredQuestionId =
   | 'changePattern'
@@ -197,13 +206,6 @@ const RESET_REASON_KEYWORD_RULES: readonly {
     ],
   },
 ];
-
-/** Legacy fallback for old snapshots with an unknown/missing id and no answers. */
-export const LEGACY_FALLBACK_RESET_TYPE_ID: ResetTypeId = 'overloaded-dreamer';
-
-export function isResetTypeId(value: string): value is ResetTypeId {
-  return (RESET_TYPE_IDS as readonly string[]).includes(value);
-}
 
 export function emptyResetTypeScores(): ResetTypeScores {
   return {

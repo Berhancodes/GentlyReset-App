@@ -1,61 +1,21 @@
-export const RESET_TYPE_IDS = [
-  'overloaded-dreamer',
-  'soft-restarter',
-  'almost-starter',
-  'fading-flame',
-] as const;
+import type { JournalEntry } from '../../domain/journal/types';
+import type { ResetPersonalization, TodayTask } from '../../domain/reset/types';
 
-export type ResetTypeId = (typeof RESET_TYPE_IDS)[number];
+export {
+  LEGACY_FALLBACK_RESET_TYPE_ID,
+  RESET_TYPE_IDS,
+  RESET_TYPE_NAMES,
+  RESET_TYPE_TIE_PRIORITY,
+  isResetTypeId,
+} from '../../domain/reset/types';
+export type {
+  ResetPersonalization,
+  ResetTypeId,
+  ResetTypeScores,
+  TodayTask,
+} from '../../domain/reset/types';
 
-export const RESET_TYPE_NAMES: Record<ResetTypeId, string> = {
-  'overloaded-dreamer': 'The Overloaded Dreamer',
-  'soft-restarter': 'The Soft Restarter',
-  'almost-starter': 'The Almost Starter',
-  'fading-flame': 'The Fading Flame',
-};
-
-/**
- * When top scores are equal (including all-zero sparse answers), prefer this
- * order. Restarter and Almost Starter have the cleanest single-question
- * diagnostics; Dreamer is the broad leftover cluster — not first just because
- * it was the old mock.
- */
-export const RESET_TYPE_TIE_PRIORITY: readonly ResetTypeId[] = [
-  'soft-restarter',
-  'almost-starter',
-  'fading-flame',
-  'overloaded-dreamer',
-];
-
-export type ResetTypeScores = Record<ResetTypeId, number>;
-
-export type ResetPersonalization = {
-  dailyCommitment?: string;
-  supportStyle?: string;
-  primaryObstacle?: string;
-  resetReason?: string;
-  desiredFeelings: readonly string[];
-  missedDayResponse?: string;
-};
-
-export type TodayTask = {
-  id: string;
-  day: number;
-  title: string;
-  description: string;
-  minutes: number;
-};
-
-export type JournalMood = 1 | 2 | 3 | 4 | 5;
-
-export type JournalEntry = {
-  day: number;
-  date: string;
-  mood: JournalMood;
-  prompt: string;
-  text: string;
-  savedAt: string;
-};
+export type { JournalEntry, JournalMood } from '../../domain/journal/types';
 
 export type ResetSnapshot = {
   currentDay: number;
