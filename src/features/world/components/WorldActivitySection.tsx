@@ -65,7 +65,7 @@ function ActivityRow({ item, onPress }: { item: WorldActivityItem; onPress: () =
         />
       </View>
       <View style={styles.copy}>
-        <AppText variant="optionTitle" numberOfLines={1}>
+        <AppText variant="optionTitle" numberOfLines={2}>
           {item.title}
         </AppText>
         <AppText variant="caption" color="helper" numberOfLines={1}>
