@@ -23,21 +23,10 @@ export function WorldStatsCard() {
           <View style={styles.stat}>
             <WorldStatIcon glyph={stat.glyph} />
             <View style={styles.copy}>
-              <AppText
-                variant="worldStatValue"
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.85}
-              >
+              <AppText variant="worldStatValue" align="center" numberOfLines={1}>
                 {stat.value}
               </AppText>
-              <AppText
-                variant="worldStatLabel"
-                color="helper"
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.85}
-              >
+              <AppText variant="worldStatLabel" color="helper" align="center" numberOfLines={1}>
                 {stat.label}
               </AppText>
             </View>
@@ -54,7 +43,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderRadius: radius.statsPanel,
     backgroundColor: colors.surface.quote,
@@ -65,11 +54,11 @@ const styles = StyleSheet.create({
     ...shadows.whisper,
   },
   stat: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xs,
-    flexShrink: 1,
+    flex: 1,
     minWidth: 0,
     overflow: 'visible',
   },
@@ -79,11 +68,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border.subtle,
     alignSelf: 'center',
     flexShrink: 0,
-    marginHorizontal: spacing.xs,
   },
   copy: {
-    minWidth: 0,
-    flexShrink: 1,
+    alignItems: 'center',
     justifyContent: 'center',
     gap: 0,
   },
