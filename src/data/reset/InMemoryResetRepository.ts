@@ -6,7 +6,7 @@ import {
 import type { ResetSnapshot } from '../../features/reset/types';
 
 /**
- * Test-only ResetRepository. Not a production persistence source.
+ * Test/development adapter. Not a production persistence source.
  * Holds one cloned ResetSnapshot in memory — no AsyncStorage, no Zustand.
  */
 export function createInMemoryResetRepository(initialSnapshot: ResetSnapshot): ResetRepository {
@@ -17,21 +17,4 @@ export function createInMemoryResetRepository(initialSnapshot: ResetSnapshot): R
       snapshot = pickResetSnapshot(next);
     },
   );
-}
-
-/** Class form of the test adapter. Prefer `createInMemoryResetRepository`. */
-export class InMemoryResetRepository implements ResetRepository {
-  private readonly repository: ResetRepository;
-
-  constructor(initialSnapshot: ResetSnapshot) {
-    this.repository = createInMemoryResetRepository(initialSnapshot);
-  }
-
-  getSnapshot(): ResetSnapshot {
-    return this.repository.getSnapshot();
-  }
-
-  saveSnapshot(snapshot: ResetSnapshot): void {
-    this.repository.saveSnapshot(snapshot);
-  }
 }
