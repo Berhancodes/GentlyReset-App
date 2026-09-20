@@ -7,8 +7,8 @@ import type { JourneyLabelSide } from '@/features/journey/layout/journeyChapterL
 import type { JourneyDayState } from '@/features/journey/utils/getJourneyDayState';
 import { isJourneyDayVisuallyComplete } from '@/features/journey/utils/getJourneyDayState';
 
-const SIGN_WIDTH = 78;
-const SIGN_HEIGHT = 70;
+const SIGN_WIDTH = 92;
+const SIGN_HEIGHT = 82;
 
 type JourneyCheckpointNodeProps = {
   state: JourneyDayState;
@@ -103,10 +103,10 @@ const styles = StyleSheet.create({
   },
   board: {
     position: 'absolute',
-    top: 6,
-    left: 10,
-    right: 10,
-    height: 28,
+    top: 8,
+    left: 12,
+    right: 12,
+    height: 34,
     alignItems: 'center',
     justifyContent: 'center',
   },

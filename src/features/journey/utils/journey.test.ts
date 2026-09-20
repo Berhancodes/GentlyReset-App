@@ -5,7 +5,11 @@ import {
   JOURNEY_CHAPTERS,
 } from '../data/journeyChapters';
 import { JOURNEY_CHAPTER_LAYOUTS } from '../layout/journeyChapterLayouts';
-import { getJourneyArtLayout, mapJourneySourcePoint } from '../layout/journeySceneLayout';
+import {
+  getJourneyArtLayout,
+  mapJourneyArtPoint,
+  mapJourneySourcePoint,
+} from '../layout/journeySceneLayout';
 import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
 import { PLAN_DAY_COUNT, getPlanDayTitle } from '../../reset/data/thirtyDayPlan';
 import { applyStartToday } from '../../reset/utils/dailyResetActions';
@@ -315,13 +319,21 @@ check(
 
 const layout = getJourneyArtLayout(390, 600, 798, 1972);
 const mapped = mapJourneySourcePoint(layout, { x: 0.5, y: 0.5 });
+const local = mapJourneyArtPoint(layout, { x: 0.5, y: 0.5 });
 check(
   'art layout preserves aspect and maps source points onto the image',
   Math.abs(layout.width / layout.height - 798 / 1972) < 1e-9 &&
     mapped.x > layout.left &&
     mapped.x < layout.left + layout.width &&
     mapped.y > layout.top &&
-    mapped.y < layout.top + layout.height,
+    mapped.y < layout.top + layout.height &&
+    Math.abs(local.x - layout.width * 0.5) < 1e-9 &&
+    Math.abs(local.y - layout.height * 0.5) < 1e-9 &&
+    Math.abs(mapped.x - (layout.left + local.x)) < 1e-9,
+);
+check(
+  'wide chapter cover-crops vertically instead of letterboxing',
+  layout.width === 390 && layout.top < 0 && layout.height > 600,
 );
 
 const nodesOnUnitSquare = Object.values(JOURNEY_CHAPTER_LAYOUTS).every((nodes) =>

@@ -121,9 +121,9 @@ const styles = StyleSheet.create({
     ...shadows.soft,
   },
   nodeFuture: {
-    borderColor: colors.border.subtle,
+    borderColor: colors.border.default,
     backgroundColor: colors.background.secondary,
-    opacity: 0.86,
+    opacity: 1,
   },
   currentDot: {
     width: spacing.xs,
@@ -133,9 +133,14 @@ const styles = StyleSheet.create({
   },
   currentCopy: {
     position: 'absolute',
-    top: spacing.hitTarget,
+    top: 0,
     width: 148,
     gap: 2,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.xxs,
+    borderRadius: radius.md,
+    backgroundColor: colors.background.secondary,
+    ...shadows.whisper,
   },
   copyLeft: {
     right: spacing.hitTarget - spacing.xs,
