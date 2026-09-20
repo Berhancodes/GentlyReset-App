@@ -21,10 +21,10 @@ const styles = StyleSheet.create({
   card: {
     alignSelf: 'stretch',
     marginHorizontal: spacing.xl,
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
     paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.xl,
+    paddingVertical: spacing.lg,
     borderRadius: radius.quote,
     backgroundColor: colors.surface.quote,
   },
