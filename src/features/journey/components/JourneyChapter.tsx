@@ -2,7 +2,11 @@ import { Image, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
 import { colors, radius, spacing } from '@/design-system';
-import { JourneyCheckpointNode } from '@/features/journey/components/JourneyCheckpointNode';
+import {
+  JourneyCheckpointNode,
+  SIGN_HEIGHT,
+  SIGN_WIDTH,
+} from '@/features/journey/components/JourneyCheckpointNode';
 import {
   getJourneyMascotPose,
   JourneyCurrentMascot,
@@ -73,15 +77,15 @@ export function JourneyChapter({
             const task = tasksByDay.get(node.day);
             const isCurrent = state.kind === 'current';
             const mascotOffset = node.mascotOffset ?? {
-              x: node.labelSide === 'left' ? -0.12 : 0.12,
-              y: -0.03,
+              x: node.labelSide === 'left' ? 0.11 : -0.11,
+              y: -0.02,
             };
             const mascotPoint = mapJourneyArtPoint(art, {
               x: node.x + mascotOffset.x,
               y: node.y + mascotOffset.y,
             });
-            const nodeWidth = node.checkpoint ? 92 : 44;
-            const nodeHeight = node.checkpoint ? 82 : 44;
+            const nodeWidth = node.checkpoint ? SIGN_WIDTH : 44;
+            const nodeHeight = node.checkpoint ? SIGN_HEIGHT : 44;
 
             return (
               <View key={node.day} style={styles.marker} pointerEvents="box-none">
@@ -106,7 +110,7 @@ export function JourneyChapter({
                     styles.node,
                     {
                       left: point.x - nodeWidth / 2,
-                      top: point.y - nodeHeight / 2,
+                      top: node.checkpoint ? point.y - nodeHeight + 12 : point.y - nodeHeight / 2,
                     },
                   ]}
                 >

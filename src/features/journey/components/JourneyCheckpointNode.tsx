@@ -7,8 +7,8 @@ import type { JourneyLabelSide } from '@/features/journey/layout/journeyChapterL
 import type { JourneyDayState } from '@/features/journey/utils/getJourneyDayState';
 import { isJourneyDayVisuallyComplete } from '@/features/journey/utils/getJourneyDayState';
 
-const SIGN_WIDTH = 92;
-const SIGN_HEIGHT = 82;
+export const SIGN_WIDTH = 92;
+export const SIGN_HEIGHT = 82;
 
 type JourneyCheckpointNodeProps = {
   state: JourneyDayState;
