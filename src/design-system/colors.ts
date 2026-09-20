@@ -12,8 +12,11 @@ const palette = {
   goldSoft: '#F4E4A8',
   goldDeep: '#C99A32',
   peach: '#EFAE82',
+  peachSoft: '#F8E0D0',
   sage: '#8E9B63',
+  sageSoft: '#E8EDD8',
   blue: '#8799A0',
+  blueSoft: '#E4ECF0',
   sand: '#E8D7C3',
   sandSubtle: '#F0E4D4',
   sandTrack: '#EAD9C4',
@@ -57,6 +60,12 @@ export const colors = {
     sage: palette.sage,
     blue: palette.blue,
   },
+  tint: {
+    gold: palette.goldSoft,
+    peach: palette.peachSoft,
+    sage: palette.sageSoft,
+    blue: palette.blueSoft,
+  },
   border: {
     default: palette.sand,
     selected: palette.brown,
@@ -77,6 +86,7 @@ export const colors = {
     track: palette.sandSubtle,
     trackStrong: palette.sand,
     fill: palette.brown,
+    fillGold: palette.gold,
   },
   overlay: {
     scrim: 'rgba(74, 44, 24, 0.35)',

@@ -1,9 +1,14 @@
 import { useState } from 'react';
-import { Image, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { AppText, IconRow, MainTabHeader, NoticeDialog, Screen } from '@/components/ui';
+import { MainTabHeader, NoticeDialog, Screen } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
+import { AboutResetTypeCard } from '@/features/profile/components/AboutResetTypeCard';
+import { MyResetCard } from '@/features/profile/components/MyResetCard';
+import { ProfileHero } from '@/features/profile/components/ProfileHero';
+import { ProfileLinkRows } from '@/features/profile/components/ProfileLinkRows';
+import { WorkingTowardCard } from '@/features/profile/components/WorkingTowardCard';
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { getOnboardingOptionLabel } from '@/features/onboarding/utils/getOnboardingOptionLabel';
@@ -12,7 +17,8 @@ import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { minutesFromCommitment } from '@/features/reset/utils/getTaskForDay';
 
-const PROFILE_MASCOT = require('../../../../assets/images/app/profile-mascot.png');
+const PROFILE_COLUMN_MAX_WIDTH = 430;
+const EMPTY_VALUE = 'not set yet';
 
 type Notice = {
   title: string;
@@ -23,6 +29,7 @@ export function ProfileScreen() {
   useSyncResetDay();
   const [notice, setNotice] = useState<Notice | null>(null);
   const currentDay = useResetStore((state) => state.currentDay);
+  const completedDays = useResetStore((state) => state.completedDays);
   const resetTypeId = useResetStore((state) => state.resetTypeId);
   const personalization = useResetStore((state) => state.personalization);
   const answers = useOnboardingStore((state) => state.answers);
@@ -30,104 +37,134 @@ export function ProfileScreen() {
   const minutes = minutesFromCommitment(personalization.dailyCommitment);
   const identityId = getSingleChoiceId(answers, 'desiredIdentity');
   const outcomeId = getMultiChoiceIds(answers, 'thirtyDayOutcome')[0];
+  const identityLabel = identityId
+    ? getOnboardingOptionLabel('desiredIdentity', identityId)
+    : undefined;
   const focus =
-    (identityId ? getOnboardingOptionLabel('desiredIdentity', identityId) : undefined) ??
+    identityLabel ??
     (outcomeId ? getOnboardingOptionLabel('thirtyDayOutcome', outcomeId) : undefined);
   const goalLabels = personalization.desiredFeelings
     .map((id) => getOnboardingOptionLabel('desiredFeelings', id))
     .filter((label): label is string => Boolean(label));
+  const identityQuote = formatIdentityQuote(identityLabel);
+  const resetApproach =
+    profile.resetApproach.trim().length > 0 ? profile.resetApproach : profile.whatUsuallyHelps;
+
+  const openTypeNotice = () => {
+    setNotice({
+      title: profile.name,
+      body: `${profile.summary}\n\n${profile.description}\n\n${profile.emphasized}`,
+    });
+  };
+
+  const openGoalsNotice = () => {
+    setNotice({
+      title: 'goals',
+      body: goalLabels.length > 0 ? goalLabels.join('\n') : 'no goals were saved from onboarding.',
+    });
+  };
+
+  const openSettingsNotice = () => {
+    setNotice({
+      title: 'settings',
+      body: 'this part of Gently Reset is coming later.',
+    });
+  };
+
+  const openHelpNotice = () => {
+    setNotice({
+      title: 'help & support',
+      body: 'this part of Gently Reset is coming later.',
+    });
+  };
 
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-      <MainTabHeader title="you" />
+      <MainTabHeader
+        title="you"
+        rightAction={
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="settings"
+            onPress={openSettingsNotice}
+            style={styles.headerGear}
+          >
+            <Ionicons name="settings-outline" size={22} color={colors.text.secondary} />
+          </Pressable>
+        }
+      />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.identity}>
-          <View style={styles.avatar}>
-            <Image
-              source={PROFILE_MASCOT}
-              accessibilityLabel={`${profile.name} artwork`}
-              accessibilityIgnoresInvertColors
-              resizeMode="cover"
-              style={styles.avatarImage}
-            />
-          </View>
-          <AppText variant="title" align="center">
-            {profile.name}
-          </AppText>
-          <AppText variant="caption" color="helper" align="center">
-            Day {currentDay} of your reset
-          </AppText>
-          <AppText variant="body" color="secondary" align="center">
-            {profile.summary}
-          </AppText>
-        </View>
-
-        <View style={styles.facts}>
-          {focus ? <Fact label="Focus" value={focus} /> : null}
-          {personalization.resetReason ? (
-            <Fact label="Reason" value={personalization.resetReason} />
-          ) : null}
-          {personalization.dailyCommitment ? (
-            <Fact label="Pace" value={`${minutes} minutes a day`} />
-          ) : null}
-          {goalLabels.length > 0 ? <Fact label="Goals" value={goalLabels.join(' · ')} /> : null}
-        </View>
-
-        <View style={styles.rows}>
-          <IconRow
-            icon={<Ionicons name="people-outline" size={22} color={colors.text.primary} />}
-            title="my reset type"
-            showChevron
-            onPress={() => {
-              setNotice({
-                title: profile.name,
-                body: `${profile.summary}\n\n${profile.description}\n\n${profile.emphasized}`,
-              });
-            }}
-          />
-          <IconRow
-            icon={<Ionicons name="heart-outline" size={22} color={colors.text.primary} />}
-            title="goals"
-            showChevron
-            onPress={() => {
-              setNotice({
-                title: 'goals',
-                body:
-                  goalLabels.length > 0
-                    ? goalLabels.join('\n')
-                    : 'no goals were saved from onboarding.',
-              });
-            }}
-          />
-          <IconRow
-            icon={<Ionicons name="options-outline" size={22} color={colors.text.primary} />}
-            title="settings"
-            showChevron
-            onPress={() =>
-              setNotice({
-                title: 'settings',
-                body: 'this part of Gently Reset is coming later.',
-              })
-            }
-          />
-          <IconRow
-            icon={
-              <Ionicons name="information-circle-outline" size={22} color={colors.text.primary} />
-            }
-            title="help & support"
-            showChevron
-            onPress={() =>
-              setNotice({
-                title: 'help & support',
-                body: 'this part of Gently Reset is coming later.',
-              })
-            }
-          />
-        </View>
+        <ProfileHero
+          name={profile.name}
+          shortSummary={profile.shortSummary}
+          resetApproach={resetApproach}
+          currentDay={currentDay}
+          completedCount={completedDays.length}
+        />
+        <MyResetCard
+          onOpenType={openTypeNotice}
+          facts={[
+            {
+              icon: 'person-outline',
+              tint: 'gold',
+              label: 'reset type',
+              value: profile.name,
+              onPress: openTypeNotice,
+            },
+            {
+              icon: 'locate-outline',
+              tint: 'peach',
+              label: 'main goal',
+              value: focus ?? EMPTY_VALUE,
+              onPress: openGoalsNotice,
+            },
+            {
+              icon: 'time-outline',
+              tint: 'blue',
+              label: 'daily commitment',
+              value: personalization.dailyCommitment ? `${minutes} minutes a day` : EMPTY_VALUE,
+            },
+            ...(personalization.resetReason
+              ? [
+                  {
+                    icon: 'heart-outline' as const,
+                    tint: 'peach' as const,
+                    label: 'reason',
+                    value: personalization.resetReason,
+                  },
+                ]
+              : []),
+          ]}
+        />
+        <WorkingTowardCard
+          goalLabels={goalLabels}
+          identityQuote={identityQuote}
+          onEdit={openGoalsNotice}
+        />
+        <AboutResetTypeCard
+          strength={profile.strength}
+          pattern={profile.pattern || profile.biggestPattern}
+          approach={profile.resetApproach}
+          onPress={openTypeNotice}
+        />
+        <ProfileLinkRows
+          links={[
+            {
+              icon: <Ionicons name="settings-outline" size={22} color={colors.text.primary} />,
+              title: 'settings',
+              onPress: openSettingsNotice,
+            },
+            {
+              icon: <Ionicons name="help-circle-outline" size={22} color={colors.text.primary} />,
+              title: 'help & support',
+              onPress: openHelpNotice,
+            },
+          ]}
+        />
       </ScrollView>
       <NoticeDialog
         visible={notice !== null}
@@ -139,15 +176,14 @@ export function ProfileScreen() {
   );
 }
 
-function Fact({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.fact}>
-      <AppText variant="label" color="helper">
-        {label}
-      </AppText>
-      <AppText variant="body">{value}</AppText>
-    </View>
-  );
+function formatIdentityQuote(label: string | undefined): string | undefined {
+  if (!label) {
+    return undefined;
+  }
+  if (label.startsWith('someone')) {
+    return `I want to become ${label}.`;
+  }
+  return label;
 }
 
 const styles = StyleSheet.create({
@@ -155,34 +191,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
+    width: '100%',
+    maxWidth: PROFILE_COLUMN_MAX_WIDTH,
+    alignSelf: 'center',
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.lg,
-    gap: spacing.xl,
-  },
-  identity: {
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  avatar: {
-    width: 148,
-    height: 148,
-    borderRadius: 74,
-    overflow: 'hidden',
-    marginBottom: spacing.sm,
-    backgroundColor: colors.surface.choice,
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-  },
-  facts: {
+    paddingBottom: spacing.xl,
     gap: spacing.md,
   },
-  fact: {
-    gap: spacing.xxs,
-  },
-  rows: {
-    gap: spacing.sm,
+  headerGear: {
+    width: spacing.hitTarget,
+    height: spacing.hitTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
