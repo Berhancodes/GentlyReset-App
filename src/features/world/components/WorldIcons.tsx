@@ -10,9 +10,9 @@ export type WorldActionGlyph = 'plus' | 'heart' | 'group';
 const ICON_GROUP_FILLED = require('../../../../assets/images/app/world/icon-group-filled.png');
 
 /** People mark sits inside a larger pale-yellow circle. Globe/heart stay bare. */
-const WORLD_STAT_PEOPLE_CIRCLE_SIZE = 44;
-const WORLD_STAT_PEOPLE_GLYPH_SIZE = 24;
-const WORLD_STAT_OUTLINE_SIZE = 30;
+const WORLD_STAT_PEOPLE_CIRCLE_SIZE = 36;
+const WORLD_STAT_PEOPLE_GLYPH_SIZE = 20;
+const WORLD_STAT_OUTLINE_SIZE = 26;
 
 const WORLD_STAT_OUTLINE_NAME = {
   globe: 'globe-outline',

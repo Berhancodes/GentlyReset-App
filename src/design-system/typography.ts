@@ -222,8 +222,8 @@ export const textVariants = {
   },
   worldStatValue: {
     fontFamily: fontFamilies.rounded,
-    fontSize: fontSizes.lg,
-    lineHeight: 22,
+    fontSize: fontSizes.statValue,
+    lineHeight: lineHeights.statValue,
     fontWeight: fontWeights.bold,
     letterSpacing: -0.3,
   },

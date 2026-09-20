@@ -23,10 +23,10 @@ export function WorldStatsCard() {
           <View style={styles.stat}>
             <WorldStatIcon glyph={stat.glyph} />
             <View style={styles.copy}>
-              <AppText variant="worldStatValue" align="center" numberOfLines={1}>
+              <AppText variant="worldStatValue" numberOfLines={1}>
                 {stat.value}
               </AppText>
-              <AppText variant="worldStatLabel" color="helper" align="center" numberOfLines={1}>
+              <AppText variant="worldStatLabel" color="helper" numberOfLines={1}>
                 {stat.label}
               </AppText>
             </View>
@@ -39,12 +39,11 @@ export function WorldStatsCard() {
 
 const styles = StyleSheet.create({
   card: {
-    minHeight: WORLD_STATS_CARD_HEIGHT,
+    height: WORLD_STATS_CARD_HEIGHT,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
     borderRadius: radius.statsPanel,
     backgroundColor: colors.surface.quote,
     borderWidth: StyleSheet.hairlineWidth,
@@ -54,23 +53,18 @@ const styles = StyleSheet.create({
     ...shadows.whisper,
   },
   stat: {
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     gap: spacing.xs,
-    flex: 1,
-    minWidth: 0,
-    overflow: 'visible',
+    flexShrink: 0,
   },
   separator: {
     width: StyleSheet.hairlineWidth,
     height: spacing.xl,
     backgroundColor: colors.border.subtle,
-    alignSelf: 'center',
     flexShrink: 0,
   },
   copy: {
-    alignItems: 'center',
     justifyContent: 'center',
     gap: 0,
   },
