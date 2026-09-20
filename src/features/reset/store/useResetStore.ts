@@ -87,8 +87,8 @@ export const useResetStore = create<ResetSnapshot & ResetActions>()(
       name: RESET_PERSIST_KEY,
       storage: asyncPersistStorage,
       version: RESET_PERSIST_VERSION,
-      migrate: migrateResetPersistState,
-      partialize: partializeResetState,
+      migrate: (persistedState) => migrateResetPersistState(persistedState),
+      partialize: (state) => partializeResetState(state),
     },
   ),
 );
