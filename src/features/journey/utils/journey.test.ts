@@ -2,14 +2,16 @@ import {
   getJourneyChapterDays,
   getJourneyChapterForDay,
   getJourneyChapterIndexForDay,
+  getJourneyWeekLabel,
   JOURNEY_CHAPTERS,
 } from '../data/journeyChapters';
-import { JOURNEY_CHAPTER_LAYOUTS } from '../layout/journeyChapterLayouts';
+import { getJourneyQuote, getJourneySignLine } from '../data/journeyCopy';
 import {
-  getJourneyArtLayout,
-  mapJourneyArtPoint,
-  mapJourneySourcePoint,
-} from '../layout/journeySceneLayout';
+  getJourneyPathScrollIndex,
+  getJourneyPathWindow,
+  getJourneyPlanDays,
+  getJourneyVisibleCount,
+} from '../layout/journeyPathLayout';
 import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
 import { PLAN_DAY_COUNT, getPlanDayTitle } from '../../reset/data/thirtyDayPlan';
 import { applyStartToday } from '../../reset/utils/dailyResetActions';
@@ -121,10 +123,9 @@ check(
 );
 
 check(
-  '8. unseen later days are future and stay visible in the chapter',
+  '8. unseen later days are future and stay in the week data',
   getJourneyDayState(7, 2, [1], false).kind === 'future' &&
-    getJourneyChapterDays(JOURNEY_CHAPTERS[0]!).length === 7 &&
-    JOURNEY_CHAPTER_LAYOUTS['week-1'].some((node) => node.day === 7),
+    getJourneyChapterDays(JOURNEY_CHAPTERS[0]!).length === 7,
 );
 
 check(
@@ -274,33 +275,67 @@ check(
 
 const overflowTask = getTaskForDay(31, defaultPersonalization);
 const finishDays = getJourneyChapterDays(getJourneyChapterForDay(30) ?? JOURNEY_CHAPTERS[4]!);
-const finishNodes = JOURNEY_CHAPTER_LAYOUTS.finish;
+const pathDays = getJourneyPlanDays();
 check(
   '17. day 30 does not exceed the 30-day plan',
   overflowTask.day === PLAN_DAY_COUNT &&
     overflowTask.title === getPlanDayTitle(30) &&
     getJourneyChapterForDay(31)?.endDay === 30 &&
     finishDays.join(',') === '29,30' &&
-    finishNodes.every((node) => node.day <= PLAN_DAY_COUNT) &&
-    finishNodes.length === 2,
+    pathDays.length === PLAN_DAY_COUNT &&
+    pathDays[pathDays.length - 1] === PLAN_DAY_COUNT,
+);
+
+const windowDay1Narrow = getJourneyPathWindow(1, 2);
+const windowDay2Narrow = getJourneyPathWindow(2, 2);
+const windowDay15 = getJourneyPathWindow(15, 3);
+const windowDay30Wide = getJourneyPathWindow(30, 4);
+const windowDay1Wide = getJourneyPathWindow(1, 4);
+check(
+  'window focuses current day and previous neighbor',
+  windowDay1Narrow.join(',') === '1,2' &&
+    windowDay1Narrow.includes(1) &&
+    windowDay2Narrow.join(',') === '1,2' &&
+    windowDay2Narrow.includes(2) &&
+    windowDay15.join(',') === '14,15,16' &&
+    windowDay15.includes(15) &&
+    getJourneyPathScrollIndex(1, 2) === 0 &&
+    getJourneyPathScrollIndex(2, 2) === 0 &&
+    getJourneyPathScrollIndex(15, 3) === 13,
 );
 
 check(
-  'weeks 1–4 each have exactly 7 nodes; finish has 2',
-  JOURNEY_CHAPTER_LAYOUTS['week-1'].length === 7 &&
-    JOURNEY_CHAPTER_LAYOUTS['week-2'].length === 7 &&
-    JOURNEY_CHAPTER_LAYOUTS['week-3'].length === 7 &&
-    JOURNEY_CHAPTER_LAYOUTS['week-4'].length === 7 &&
-    JOURNEY_CHAPTER_LAYOUTS.finish.length === 2,
+  'window at day 30 stays inside the plan',
+  windowDay30Wide.join(',') === '27,28,29,30' &&
+    windowDay30Wide.every((day) => day <= PLAN_DAY_COUNT) &&
+    windowDay1Wide.join(',') === '1,2,3,4' &&
+    getJourneyPathScrollIndex(30, 4) === 26,
 );
 
 check(
-  'checkpoints are days 7, 14, 21, 28 only',
-  JOURNEY_CHAPTER_LAYOUTS['week-1'].some((node) => node.day === 7 && node.checkpoint) &&
-    JOURNEY_CHAPTER_LAYOUTS['week-2'].some((node) => node.day === 14 && node.checkpoint) &&
-    JOURNEY_CHAPTER_LAYOUTS['week-3'].some((node) => node.day === 21 && node.checkpoint) &&
-    JOURNEY_CHAPTER_LAYOUTS['week-4'].some((node) => node.day === 28 && node.checkpoint) &&
-    !JOURNEY_CHAPTER_LAYOUTS.finish.some((node) => node.checkpoint),
+  'visible count is 2 at 390 and 4 at 430',
+  getJourneyVisibleCount(390) === 2 &&
+    getJourneyVisibleCount(430) === 4 &&
+    getJourneyVisibleCount(410) === 3,
+);
+
+const beforeWindowDay = 12;
+const windowForTwelve = getJourneyPathWindow(beforeWindowDay, 3);
+check(
+  'building a path window does not change currentDay',
+  beforeWindowDay === 12 &&
+    windowForTwelve.includes(12) &&
+    !windowForTwelve.includes(31) &&
+    journeyPressMutates() === false,
+);
+
+check(
+  'weeks 1–4 each have 7 days; finish has 2',
+  getJourneyChapterDays(JOURNEY_CHAPTERS[0]!).length === 7 &&
+    getJourneyChapterDays(JOURNEY_CHAPTERS[1]!).length === 7 &&
+    getJourneyChapterDays(JOURNEY_CHAPTERS[2]!).length === 7 &&
+    getJourneyChapterDays(JOURNEY_CHAPTERS[3]!).length === 7 &&
+    getJourneyChapterDays(JOURNEY_CHAPTERS[4]!).length === 2,
 );
 
 const idleModel = getJourneySheetModel({
@@ -317,29 +352,20 @@ check(
   idleModel.cta === 'start' && idleModel.ctaLabel === "start today's reset →",
 );
 
-const layout = getJourneyArtLayout(390, 600, 798, 1972);
-const mapped = mapJourneySourcePoint(layout, { x: 0.5, y: 0.5 });
-const local = mapJourneyArtPoint(layout, { x: 0.5, y: 0.5 });
 check(
-  'art layout preserves aspect and maps source points onto the image',
-  Math.abs(layout.width / layout.height - 798 / 1972) < 1e-9 &&
-    mapped.x > layout.left &&
-    mapped.x < layout.left + layout.width &&
-    mapped.y > layout.top &&
-    mapped.y < layout.top + layout.height &&
-    Math.abs(local.x - layout.width * 0.5) < 1e-9 &&
-    Math.abs(local.y - layout.height * 0.5) < 1e-9 &&
-    Math.abs(mapped.x - (layout.left + local.x)) < 1e-9,
-);
-check(
-  'wide chapter cover-crops vertically instead of letterboxing',
-  layout.width === 390 && layout.top < 0 && layout.height > 600,
+  'sheet week label comes from chapter metadata',
+  idleModel.weekLabel === 'week 1 · start smaller' &&
+    getJourneyWeekLabel(JOURNEY_CHAPTERS[0]!) === 'week 1 · start smaller' &&
+    futureModel.weekLabel === 'week 2 · make it easier',
 );
 
-const nodesOnUnitSquare = Object.values(JOURNEY_CHAPTER_LAYOUTS).every((nodes) =>
-  nodes.every((node) => node.x > 0 && node.x < 1 && node.y > 0 && node.y < 1),
+check(
+  'sign copy is a short native phrase, not a baked Dreamer reminder',
+  getJourneySignLine('week-1') === 'you can do this' &&
+    getJourneySignLine('week-2') === 'keep going' &&
+    getJourneySignLine('week-1') !== DREAMER_LINE &&
+    getJourneyQuote('week-1') === 'One small step can change everything.',
 );
-check('every node uses normalized source-space coordinates', nodesOnUnitSquare);
 
 if (failed > 0) {
   throw new Error(`${failed} journey check(s) failed`);

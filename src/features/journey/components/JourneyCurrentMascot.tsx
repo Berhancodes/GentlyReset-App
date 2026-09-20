@@ -1,36 +1,60 @@
 import { Image, StyleSheet, View } from 'react-native';
 
 import { JOURNEY_SPRITES } from '@/features/journey/data/journeyChapterImages';
+import { PLAN_DAY_COUNT } from '@/features/reset/data/thirtyDayPlan';
 
-const MASCOT_SIZE = 54;
+export type JourneyMascotPose = 'idle' | 'walk' | 'look' | 'cheer' | 'sit' | 'think' | 'wave';
+
+const PATH_MASCOT_SIZE = 48;
+const SHEET_MASCOT_SIZE = 56;
 const CELEBRATE_SIZE = 62;
-
-type JourneyMascotPose = 'walk' | 'idle' | 'sit' | 'celebrate';
 
 type JourneyCurrentMascotProps = {
   pose: JourneyMascotPose;
+  size?: 'path' | 'sheet';
 };
 
-export function getJourneyMascotPose(day: number, checkpoint: boolean): JourneyMascotPose {
-  if (day === 30) {
-    return 'celebrate';
+const POSE_SOURCE = {
+  idle: JOURNEY_SPRITES.mascotIdle,
+  walk: JOURNEY_SPRITES.mascotWalk,
+  look: JOURNEY_SPRITES.mascotLook,
+  cheer: JOURNEY_SPRITES.mascotCheer,
+  sit: JOURNEY_SPRITES.mascotSit,
+  think: JOURNEY_SPRITES.mascotThink,
+  wave: JOURNEY_SPRITES.mascotWave,
+} as const;
+
+export function getJourneyPathMascotPose(day: number): JourneyMascotPose {
+  if (day === PLAN_DAY_COUNT) {
+    return 'cheer';
   }
-  if (checkpoint) {
-    return 'sit';
-  }
-  return 'walk';
+  return 'idle';
 }
 
-export function JourneyCurrentMascot({ pose }: JourneyCurrentMascotProps) {
-  const source =
-    pose === 'celebrate'
-      ? JOURNEY_SPRITES.mascotCelebrate
-      : pose === 'sit'
-        ? JOURNEY_SPRITES.mascotSit
-        : pose === 'idle'
-          ? JOURNEY_SPRITES.mascotIdle
-          : JOURNEY_SPRITES.mascotWalk;
-  const size = pose === 'celebrate' ? CELEBRATE_SIZE : MASCOT_SIZE;
+export function getJourneySheetMascotPose(
+  day: number,
+  kind: 'current' | 'completed' | 'future',
+): JourneyMascotPose {
+  if (day === PLAN_DAY_COUNT) {
+    return 'cheer';
+  }
+  if (kind === 'current') {
+    return 'idle';
+  }
+  if (kind === 'completed') {
+    return 'sit';
+  }
+  return 'look';
+}
+
+export function JourneyCurrentMascot({ pose, size = 'path' }: JourneyCurrentMascotProps) {
+  const source = POSE_SOURCE[pose];
+  const dimension =
+    pose === 'cheer' && size === 'sheet'
+      ? CELEBRATE_SIZE
+      : size === 'sheet'
+        ? SHEET_MASCOT_SIZE
+        : PATH_MASCOT_SIZE;
 
   return (
     <View
@@ -38,7 +62,7 @@ export function JourneyCurrentMascot({ pose }: JourneyCurrentMascotProps) {
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       pointerEvents="none"
-      style={[styles.wrap, { width: size, height: size }]}
+      style={[styles.wrap, { width: dimension, height: dimension }]}
     >
       <Image
         source={source}

@@ -91,3 +91,7 @@ export function getJourneyChapterDays(chapter: JourneyChapterDefinition): readon
   }
   return days;
 }
+
+export function getJourneyWeekLabel(chapter: JourneyChapterDefinition): string {
+  return `${chapter.subtitle} · ${chapter.title}`;
+}

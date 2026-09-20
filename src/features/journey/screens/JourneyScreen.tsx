@@ -1,31 +1,27 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { MainTabHeader, Screen } from '@/components/ui';
+import { AppText, MainTabHeader, Screen } from '@/components/ui';
 import { spacing } from '@/design-system';
 import { DayProgressHeader } from '@/features/home/components/DayProgressHeader';
-import { JourneyChapter } from '@/features/journey/components/JourneyChapter';
 import { JourneyDaySheet } from '@/features/journey/components/JourneyDaySheet';
-import {
-  getJourneyChapterIndexForDay,
-  JOURNEY_CHAPTERS,
-  type JourneyChapterDefinition,
-} from '@/features/journey/data/journeyChapters';
+import { JourneyGroundDecor } from '@/features/journey/components/JourneyGroundDecor';
+import { JourneyPath } from '@/features/journey/components/JourneyPath';
+import { JourneyQuoteCard } from '@/features/journey/components/JourneyQuoteCard';
+import { JourneySceneDecor } from '@/features/journey/components/JourneySceneDecor';
+import { getJourneyChapterForDay } from '@/features/journey/data/journeyChapters';
+import { getJourneyQuote } from '@/features/journey/data/journeyCopy';
 import { getJourneySheetModel } from '@/features/journey/utils/getJourneySheetModel';
-import { PLAN_DAY_COUNT } from '@/features/reset/data/thirtyDayPlan';
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
-import type { TodayTask } from '@/features/reset/types';
 
 export function JourneyScreen() {
   useSyncResetDay();
   const router = useRouter();
-  const listRef = useRef<FlatList<JourneyChapterDefinition>>(null);
-  const didHonorInitialChapter = useRef(false);
-  const [chapterSize, setChapterSize] = useState({ width: 0, height: 0 });
+  const [canvasWidth, setCanvasWidth] = useState(0);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   const currentDay = useResetStore((state) => state.currentDay);
@@ -38,15 +34,8 @@ export function JourneyScreen() {
   const startToday = useResetStore((state) => state.startToday);
 
   const rememberLine = getResetProfile(resetTypeId).homeSupportLine;
-  const initialChapterIndex = getJourneyChapterIndexForDay(currentDay);
-
-  const tasksByDay = useMemo(() => {
-    const map = new Map<number, TodayTask>();
-    for (let day = 1; day <= PLAN_DAY_COUNT; day += 1) {
-      map.set(day, getTaskForDay(day, personalization));
-    }
-    return map;
-  }, [personalization]);
+  const chapter = getJourneyChapterForDay(currentDay);
+  const currentTask = getTaskForDay(currentDay, personalization);
 
   const sheetModel =
     selectedDay === null
@@ -60,17 +49,6 @@ export function JourneyScreen() {
           personalization,
           rememberLine,
         });
-
-  useEffect(() => {
-    if (chapterSize.height <= 0 || didHonorInitialChapter.current) {
-      return;
-    }
-    listRef.current?.scrollToOffset({
-      offset: initialChapterIndex * chapterSize.height,
-      animated: false,
-    });
-    didHonorInitialChapter.current = true;
-  }, [chapterSize.height, initialChapterIndex]);
 
   const onPressDay = useCallback((day: number) => {
     setSelectedDay(day);
@@ -105,43 +83,34 @@ export function JourneyScreen() {
             <DayProgressHeader currentDay={currentDay} completedCount={completedDays.length} />
           </View>
           <View
-            style={styles.listWrap}
+            style={styles.canvas}
             onLayout={(event) => {
-              const { width, height } = event.nativeEvent.layout;
-              if (width !== chapterSize.width || height !== chapterSize.height) {
-                setChapterSize({ width, height });
+              const nextWidth = event.nativeEvent.layout.width;
+              if (nextWidth !== canvasWidth) {
+                setCanvasWidth(nextWidth);
               }
             }}
           >
-            {chapterSize.height > 0 ? (
-              <FlatList
-                ref={listRef}
-                data={[...JOURNEY_CHAPTERS]}
-                keyExtractor={(chapter) => chapter.id}
-                renderItem={({ item }) => (
-                  <JourneyChapter
-                    chapter={item}
-                    width={chapterSize.width}
-                    height={chapterSize.height}
-                    currentDay={currentDay}
-                    completedDays={completedDays}
-                    todayCompleted={todayCompleted}
-                    tasksByDay={tasksByDay}
-                    onPressDay={onPressDay}
-                  />
-                )}
-                getItemLayout={(_data, index) => ({
-                  length: chapterSize.height,
-                  offset: chapterSize.height * index,
-                  index,
-                })}
-                showsVerticalScrollIndicator={false}
-                snapToInterval={chapterSize.height}
-                snapToAlignment="start"
-                decelerationRate="fast"
-                disableIntervalMomentum
+            <JourneySceneDecor />
+            <View style={styles.titleBlock}>
+              <AppText variant="display">{`day ${currentDay}`}</AppText>
+              <AppText variant="optionTitle" color="secondary" numberOfLines={2}>
+                {currentTask.title}
+              </AppText>
+            </View>
+            <View style={styles.spacer} />
+            {canvasWidth > 0 && chapter ? (
+              <JourneyPath
+                width={canvasWidth}
+                currentDay={currentDay}
+                completedDays={completedDays}
+                todayCompleted={todayCompleted}
+                chapterId={chapter.id}
+                onPressDay={onPressDay}
               />
             ) : null}
+            {chapter ? <JourneyQuoteCard quote={getJourneyQuote(chapter.id)} /> : null}
+            <JourneyGroundDecor width={canvasWidth} />
           </View>
           <JourneyDaySheet
             visible={sheetModel !== null}
@@ -161,7 +130,16 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: spacing.xs,
   },
-  listWrap: {
+  canvas: {
+    flex: 1,
+  },
+  titleBlock: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    gap: spacing.xxs,
+    maxWidth: 280,
+  },
+  spacer: {
     flex: 1,
   },
 });

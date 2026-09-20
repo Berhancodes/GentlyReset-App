@@ -1,4 +1,8 @@
-import { getJourneyChapterDays, getJourneyChapterForDay } from '../data/journeyChapters';
+import {
+  getJourneyChapterDays,
+  getJourneyChapterForDay,
+  getJourneyWeekLabel,
+} from '../data/journeyChapters';
 import { getJourneyDayState, type JourneyDayKind } from './getJourneyDayState';
 import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
 import { applyStartToday } from '../../reset/utils/dailyResetActions';
@@ -23,6 +27,7 @@ export type JourneySheetModel = {
   completeLabel: string | null;
   cta: JourneySheetCta;
   ctaLabel: string | null;
+  weekLabel: string | null;
   weekDots: readonly JourneySheetDot[];
 };
 
@@ -57,6 +62,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
           ).kind,
         }))
       : [];
+  const weekLabel = chapter ? getJourneyWeekLabel(chapter) : null;
 
   if (state.kind === 'future') {
     return {
@@ -71,6 +77,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
       completeLabel: null,
       cta: 'none',
       ctaLabel: null,
+      weekLabel,
       weekDots,
     };
   }
@@ -88,6 +95,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
       completeLabel: state.kind === 'current' ? '✓ reset complete' : '✓ complete',
       cta: 'none',
       ctaLabel: null,
+      weekLabel,
       weekDots,
     };
   }
@@ -105,6 +113,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
     completeLabel: null,
     cta: started ? 'continue' : 'start',
     ctaLabel: started ? "continue today's reset →" : "start today's reset →",
+    weekLabel,
     weekDots,
   };
 }

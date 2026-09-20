@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Image, Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
@@ -13,11 +14,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/ui';
 import { colors, radius, shadows, spacing } from '@/design-system';
-import { JOURNEY_SPRITES } from '@/features/journey/data/journeyChapterImages';
+import {
+  getJourneySheetMascotPose,
+  JourneyCurrentMascot,
+} from '@/features/journey/components/JourneyCurrentMascot';
 import type { JourneySheetModel } from '@/features/journey/utils/getJourneySheetModel';
 
 const SHEET_SPRING_MS = 280;
 const DISMISS_DISTANCE = 120;
+const WEEK_DOT_SIZE = spacing.lg;
 
 type JourneyDaySheetProps = {
   visible: boolean;
@@ -79,12 +84,7 @@ export function JourneyDaySheet({ visible, model, onClose, onPrimary }: JourneyD
     return null;
   }
 
-  const mascot =
-    model.day === 30
-      ? JOURNEY_SPRITES.mascotCelebrate
-      : model.kind === 'current'
-        ? JOURNEY_SPRITES.mascotWalk
-        : JOURNEY_SPRITES.mascotIdle;
+  const weekStart = model.weekDots[0]?.day ?? model.day;
 
   return (
     <Modal
@@ -114,41 +114,46 @@ export function JourneyDaySheet({ visible, model, onClose, onPrimary }: JourneyD
             <View style={styles.handleWrap} accessibilityElementsHidden>
               <View style={styles.handle} />
             </View>
-            <View
-              style={styles.mascotWrap}
-              accessibilityElementsHidden
-              importantForAccessibility="no"
-            >
-              <Image
-                source={mascot}
-                resizeMode="contain"
+            <View style={styles.headerRow}>
+              <View style={styles.headerCopy}>
+                <AppText variant="label" color="helper">
+                  {`day ${model.day}`}
+                </AppText>
+                {model.completeLabel ? (
+                  <AppText variant="optionTitle" color="gold">
+                    {model.completeLabel}
+                  </AppText>
+                ) : null}
+                <AppText variant="title">{model.title}</AppText>
+                <View style={styles.minutesRow}>
+                  <Ionicons name="time-outline" size={14} color={colors.text.helper} />
+                  <AppText variant="caption" color="secondary">
+                    {model.minutesLabel}
+                  </AppText>
+                </View>
+              </View>
+              <View
+                style={styles.mascotWrap}
                 accessibilityElementsHidden
                 importantForAccessibility="no"
-                style={styles.mascot}
-              />
+              >
+                <JourneyCurrentMascot
+                  pose={getJourneySheetMascotPose(model.day, model.kind)}
+                  size="sheet"
+                />
+              </View>
             </View>
-            <AppText variant="label" color="helper">
-              {`day ${model.day}`}
-            </AppText>
-            {model.completeLabel ? (
-              <AppText variant="optionTitle" color="gold">
-                {model.completeLabel}
-              </AppText>
-            ) : model.kind === 'current' ? (
-              <AppText variant="optionTitle">{`Day ${model.day} · you are here`}</AppText>
-            ) : null}
-            <AppText variant="title">{model.title}</AppText>
-            <AppText variant="caption" color="secondary">
-              {model.minutesLabel}
-            </AppText>
             <AppText variant="body" color="secondary">
               {model.description}
             </AppText>
             {model.rememberLine ? (
               <View style={styles.remember}>
-                <AppText variant="label" color="helper">
-                  remember
-                </AppText>
+                <View style={styles.rememberEyebrow}>
+                  <Ionicons name="sparkles-outline" size={14} color={colors.accent.gold} />
+                  <AppText variant="label" color="helper">
+                    remember
+                  </AppText>
+                </View>
                 <AppText variant="caption" color="secondary">
                   {model.rememberLine}
                 </AppText>
@@ -159,21 +164,6 @@ export function JourneyDaySheet({ visible, model, onClose, onPrimary }: JourneyD
                 {model.footnote}
               </AppText>
             ) : null}
-            <View style={styles.dots} accessibilityRole="none" accessibilityLabel="Week progress">
-              {model.weekDots.map((dot) => (
-                <View
-                  key={dot.day}
-                  accessibilityLabel={`Day ${dot.day} ${dot.kind}`}
-                  style={[
-                    styles.dot,
-                    dot.kind === 'completed' ? styles.dotComplete : null,
-                    dot.kind === 'current' ? styles.dotCurrent : null,
-                    dot.kind === 'future' ? styles.dotFuture : null,
-                    dot.day === model.day ? styles.dotSelected : null,
-                  ]}
-                />
-              ))}
-            </View>
             {model.cta !== 'none' && model.ctaLabel ? (
               <Pressable
                 accessibilityRole="button"
@@ -190,18 +180,55 @@ export function JourneyDaySheet({ visible, model, onClose, onPrimary }: JourneyD
                   {model.ctaLabel}
                 </AppText>
               </Pressable>
-            ) : (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Close"
-                onPress={onClose}
-                style={({ pressed }) => [styles.close, pressed ? styles.ctaPressed : null]}
-              >
-                <AppText variant="optionTitle" color="secondary" align="center">
-                  close
+            ) : null}
+            <View style={styles.progressBlock}>
+              <AppText variant="label" color="helper">
+                your progress
+              </AppText>
+              <View style={styles.dots} accessibilityRole="none" accessibilityLabel="Week progress">
+                {model.weekDots.map((dot) => {
+                  const weekNumber = dot.day - weekStart + 1;
+                  return (
+                    <View
+                      key={dot.day}
+                      accessibilityLabel={`Day ${dot.day} ${dot.kind}`}
+                      style={[
+                        styles.dot,
+                        dot.kind === 'completed' ? styles.dotComplete : null,
+                        dot.kind === 'current' ? styles.dotCurrent : null,
+                        dot.kind === 'future' ? styles.dotFuture : null,
+                        dot.day === model.day ? styles.dotSelected : null,
+                      ]}
+                    >
+                      <AppText
+                        variant="moodLabel"
+                        color={
+                          dot.kind === 'completed' || dot.kind === 'current' ? 'primary' : 'helper'
+                        }
+                        align="center"
+                      >
+                        {dot.kind === 'completed' ? '✓' : weekNumber}
+                      </AppText>
+                    </View>
+                  );
+                })}
+              </View>
+              {model.weekLabel ? (
+                <AppText variant="caption" color="helper" align="center">
+                  {model.weekLabel}
                 </AppText>
-              </Pressable>
-            )}
+              ) : null}
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+              onPress={onClose}
+              style={({ pressed }) => [styles.close, pressed ? styles.ctaPressed : null]}
+            >
+              <AppText variant="optionTitle" color="secondary" align="center">
+                close
+              </AppText>
+            </Pressable>
           </Animated.View>
         </GestureDetector>
       </View>
@@ -232,21 +259,46 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   handle: {
-    width: 44,
+    width: spacing.hitTarget,
     height: 5,
     borderRadius: radius.pill,
     backgroundColor: colors.border.default,
   },
-  mascotWrap: {
-    alignItems: 'center',
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
   },
-  mascot: {
-    width: 56,
-    height: 56,
+  headerCopy: {
+    flex: 1,
+    gap: spacing.xxs,
+  },
+  minutesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxs,
+    paddingTop: spacing.xxs,
+  },
+  mascotWrap: {
+    width: spacing.xxxl + spacing.xs,
+    height: spacing.xxxl + spacing.xs,
+    borderRadius: radius.pill,
+    backgroundColor: colors.background.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   remember: {
     gap: spacing.xxs,
     paddingVertical: spacing.xs,
+  },
+  rememberEyebrow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxs,
+  },
+  progressBlock: {
+    gap: spacing.xs,
+    paddingTop: spacing.xs,
   },
   dots: {
     flexDirection: 'row',
@@ -255,10 +307,12 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   dot: {
-    width: spacing.sm,
-    height: spacing.sm,
+    width: WEEK_DOT_SIZE,
+    height: WEEK_DOT_SIZE,
     borderRadius: radius.pill,
     borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dotComplete: {
     backgroundColor: colors.accent.gold,
@@ -273,7 +327,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border.subtle,
   },
   dotSelected: {
-    transform: [{ scale: 1.15 }],
+    transform: [{ scale: 1.08 }],
   },
   cta: {
     minHeight: spacing.hitTarget + spacing.xs,
@@ -284,8 +338,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   ctaPressed: {
-    backgroundColor: colors.action.saveBackgroundPressed,
-    transform: [{ scale: 0.98 }],
+    opacity: 0.86,
   },
   close: {
     minHeight: spacing.hitTarget,
