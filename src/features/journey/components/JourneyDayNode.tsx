@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   },
   currentCopy: {
     position: 'absolute',
-    top: 0,
+    bottom: spacing.hitTarget,
     width: 148,
     gap: 2,
     paddingHorizontal: spacing.xs,

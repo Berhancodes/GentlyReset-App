@@ -28,7 +28,7 @@ export type JourneyChapterId = 'week-1' | 'week-2' | 'week-3' | 'week-4' | 'fini
  */
 export const JOURNEY_CHAPTER_LAYOUTS: Record<JourneyChapterId, readonly JourneyNodeLayout[]> = {
   'week-1': [
-    { day: 1, x: 0.6, y: 0.77, labelSide: 'left', mascotOffset: { x: 0.1, y: -0.02 } },
+    { day: 1, x: 0.6, y: 0.74, labelSide: 'left', mascotOffset: { x: 0.1, y: -0.02 } },
     { day: 2, x: 0.6, y: 0.64, labelSide: 'left' },
     { day: 3, x: 0.52, y: 0.54, labelSide: 'right' },
     { day: 4, x: 0.61, y: 0.46, labelSide: 'left' },
@@ -36,8 +36,8 @@ export const JOURNEY_CHAPTER_LAYOUTS: Record<JourneyChapterId, readonly JourneyN
     { day: 6, x: 0.5, y: 0.365, labelSide: 'right' },
     {
       day: 7,
-      x: 0.5,
-      y: 0.34,
+      x: 0.52,
+      y: 0.348,
       labelSide: 'right',
       checkpoint: true,
       mascotOffset: { x: -0.12, y: 0.01 },
@@ -52,8 +52,8 @@ export const JOURNEY_CHAPTER_LAYOUTS: Record<JourneyChapterId, readonly JourneyN
     { day: 13, x: 0.47, y: 0.375, labelSide: 'right' },
     {
       day: 14,
-      x: 0.47,
-      y: 0.35,
+      x: 0.48,
+      y: 0.355,
       labelSide: 'right',
       checkpoint: true,
       mascotOffset: { x: -0.12, y: 0.01 },
@@ -84,8 +84,8 @@ export const JOURNEY_CHAPTER_LAYOUTS: Record<JourneyChapterId, readonly JourneyN
     { day: 27, x: 0.5, y: 0.36, labelSide: 'right' },
     {
       day: 28,
-      x: 0.48,
-      y: 0.34,
+      x: 0.5,
+      y: 0.345,
       labelSide: 'right',
       checkpoint: true,
       mascotOffset: { x: -0.12, y: 0.01 },
