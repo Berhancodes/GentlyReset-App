@@ -82,7 +82,7 @@ export function JourneyScreen() {
 
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-      <MainTabHeader title="journey" rightAction={<JourneyMapGlyph />} />
+      <MainTabHeader title="journey" contentSpacing="roomy" rightAction={<JourneyMapGlyph />} />
       {resetStartedOn ? (
         <>
           <View style={styles.progress}>
@@ -120,8 +120,8 @@ export function JourneyScreen() {
 const styles = StyleSheet.create({
   progress: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xs,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
   },
   mapButton: {
     minWidth: spacing.hitTarget,

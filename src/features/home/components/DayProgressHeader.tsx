@@ -62,6 +62,7 @@ export function DayProgressHeader({
                 width: markerSize,
                 height: markerSize,
                 borderRadius: markerSize / 2,
+                marginTop: -markerSize / 2,
                 backgroundColor: fillColor ?? colors.accent.gold,
               },
             ]}
@@ -74,7 +75,7 @@ export function DayProgressHeader({
 
 const styles = StyleSheet.create({
   root: {
-    gap: spacing.xs,
+    gap: spacing.xxs,
   },
   row: {
     flexDirection: 'row',
@@ -99,5 +100,6 @@ const styles = StyleSheet.create({
   startMarker: {
     position: 'absolute',
     left: 0,
+    top: '50%',
   },
 });

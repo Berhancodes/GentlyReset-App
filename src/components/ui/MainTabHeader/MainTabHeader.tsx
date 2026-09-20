@@ -29,6 +29,11 @@ type MainTabHeaderProps = {
   rightAction?: ReactNode;
   transparent?: boolean;
   fade?: boolean;
+  /**
+   * Extra top padding for cream tab screens (Journey) without shifting
+   * Home / World illustrated headers that sit on a cover image.
+   */
+  contentSpacing?: 'default' | 'roomy';
 };
 
 export function MainTabHeader({
@@ -38,14 +43,19 @@ export function MainTabHeader({
   rightAction,
   transparent = false,
   fade = false,
+  contentSpacing = 'default',
 }: MainTabHeaderProps) {
   const insets = useSafeAreaInsets();
+  const roomy = contentSpacing === 'roomy';
 
   return (
     <View
       style={[
         styles.root,
-        { paddingTop: insets.top + spacing.xxs },
+        {
+          paddingTop: insets.top + (roomy ? spacing.sm : spacing.xxs),
+          paddingBottom: roomy ? spacing.xs : spacing.none,
+        },
         transparent || fade ? styles.transparent : null,
       ]}
     >

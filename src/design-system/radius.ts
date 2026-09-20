@@ -2,11 +2,12 @@ export const radius = {
   sm: 8,
   md: 12,
   lg: 16,
-  tabItem: 18,
+  tabItem: 20,
   card: 20,
   xl: 24,
-  tabBar: 28,
+  tabBar: 40,
   xxl: 32,
+  quote: 36,
   pill: 999,
 } as const;
 

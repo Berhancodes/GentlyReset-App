@@ -1,6 +1,7 @@
 const palette = {
-  cream: '#FFF8EA',
-  creamSoft: '#FFFDF8',
+  cream: '#FCF6ED',
+  creamSoft: '#FFF9F1',
+  creamCard: '#FAF0DC',
   creamPeach: '#F8E6D4',
   creamMuted: '#F3E6D4',
   creamDisabledText: '#F6EDE2',
@@ -10,6 +11,7 @@ const palette = {
   brownDisabled: '#C4A88F',
   gold: '#E6B84A',
   goldSoft: '#F4E4A8',
+  goldPale: '#F7E9B0',
   goldDeep: '#C99A32',
   peach: '#EFAE82',
   peachSoft: '#F8E0D0',
@@ -44,6 +46,8 @@ export const colors = {
     disabled: palette.creamMuted,
     choice: palette.creamSoft,
     choiceSelected: palette.goldSoft,
+    quote: palette.creamCard,
+    tabSelected: palette.goldPale,
     gold: palette.gold,
   },
   text: {
@@ -90,10 +94,10 @@ export const colors = {
   },
   overlay: {
     scrim: 'rgba(74, 44, 24, 0.35)',
-    headerFadeStart: 'rgba(255, 253, 248, 0.62)',
-    headerFadeMid: 'rgba(255, 248, 234, 0.36)',
-    headerFadeEnd: 'rgba(255, 248, 234, 0)',
-    clear: 'rgba(255, 253, 248, 0)',
+    headerFadeStart: 'rgba(255, 249, 241, 0.62)',
+    headerFadeMid: 'rgba(252, 246, 237, 0.36)',
+    headerFadeEnd: 'rgba(252, 246, 237, 0)',
+    clear: 'rgba(255, 249, 241, 0)',
   },
 } as const;
 

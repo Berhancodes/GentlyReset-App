@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/Text';
 import { colors, radius, shadows, spacing } from '@/design-system';
 
-const TAB_ICON_SIZE = 22;
+const TAB_ICON_SIZE = 24;
 
 const TABS = {
   home: {
@@ -37,7 +37,7 @@ const TABS = {
 
 type TabRouteName = keyof typeof TABS;
 
-export const TAB_BAR_HEIGHT = 76;
+export const TAB_BAR_HEIGHT = 80;
 export const TAB_BAR_SIDE_INSET = spacing.md;
 export const TAB_BAR_BOTTOM_GAP = spacing.sm;
 
@@ -117,18 +117,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: radius.tabBar,
     backgroundColor: colors.surface.raised,
-    paddingHorizontal: spacing.xs,
-    ...shadows.soft,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xxs,
+    ...shadows.whisper,
   },
   slot: {
     flex: 1,
+    minHeight: spacing.hitTarget,
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
   item: {
-    width: 54,
-    minHeight: 58,
+    width: 58,
+    minWidth: spacing.hitTarget,
+    minHeight: 62,
     borderRadius: radius.tabItem,
     alignItems: 'center',
     justifyContent: 'center',
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   itemActive: {
-    backgroundColor: colors.surface.choiceSelected,
+    backgroundColor: colors.surface.tabSelected,
   },
   icon: {
     width: TAB_ICON_SIZE,

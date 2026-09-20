@@ -9,15 +9,16 @@ export const JOURNEY_DAY1_ANCHORS = {
   day1X: 0.44,
   day2X: 0.79,
   signX: 0.205,
+  bushLeftX: 0.09,
   bushX: 0.84,
-  sunX: 0.8,
-  sunY: 0.14,
-  cloudLeftX: 0.1,
-  cloudLeftY: 0.1,
-  cloudRightX: 0.9,
-  cloudRightY: 0.3,
-  cloudUpperRightX: 0.68,
-  cloudUpperRightY: 0.02,
+  sunX: 0.82,
+  sunY: 0.125,
+  cloudLeftX: 0.12,
+  cloudLeftY: 0.175,
+  cloudRightX: 0.92,
+  cloudRightY: 0.255,
+  cloudUpperRightX: 0.66,
+  cloudUpperRightY: 0.0,
   lineLeftX: 0.09,
   lineRightX: 0.93,
 } as const;
@@ -57,27 +58,30 @@ export const JOURNEY_SUN_ART = {
 
 /** Sprite sizes at a 390-wide stage, then scaled and clamped. */
 export const JOURNEY_STAGE_BASE = {
-  mascotHeight: 186,
-  mascotHeightMin: 158,
-  mascotHeightMax: 210,
-  signWidth: 212,
-  signWidthMin: 176,
-  signWidthMax: 236,
-  bushWidth: 168,
-  bushWidthMin: 140,
-  bushWidthMax: 196,
-  nodeSize: 32,
-  nodeSizeMin: 28,
-  nodeSizeMax: 36,
-  sunSize: 120,
-  sunSizeMin: 100,
-  sunSizeMax: 136,
-  cloudMain: 136,
-  cloudMainMin: 110,
-  cloudMainMax: 154,
-  cloudSmall: 96,
-  cloudSmallMin: 78,
-  cloudSmallMax: 110,
+  mascotHeight: 200,
+  mascotHeightMin: 172,
+  mascotHeightMax: 224,
+  signWidth: 220,
+  signWidthMin: 184,
+  signWidthMax: 244,
+  bushWidth: 172,
+  bushWidthMin: 144,
+  bushWidthMax: 200,
+  bushLeftWidth: 124,
+  bushLeftWidthMin: 104,
+  bushLeftWidthMax: 144,
+  nodeSize: 34,
+  nodeSizeMin: 30,
+  nodeSizeMax: 38,
+  sunSize: 132,
+  sunSizeMin: 108,
+  sunSizeMax: 148,
+  cloudMain: 128,
+  cloudMainMin: 104,
+  cloudMainMax: 144,
+  cloudSmall: 88,
+  cloudSmallMin: 72,
+  cloudSmallMax: 102,
 } as const;
 
 export type JourneyRect = {
@@ -101,6 +105,7 @@ export type JourneyStageLayout = {
   mascot: JourneyRect;
   sign: JourneyRect;
   bush: JourneyRect;
+  bushLeft: JourneyRect;
   sun: JourneyRect;
   clouds: readonly JourneyRect[];
 };
@@ -173,6 +178,12 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
     JOURNEY_STAGE_BASE.bushWidthMax,
   );
   const bushHeight = bushWidth * (JOURNEY_BUSH_ART.height / JOURNEY_BUSH_ART.width);
+  const bushLeftWidth = clampLayout(
+    JOURNEY_STAGE_BASE.bushLeftWidth * scale,
+    JOURNEY_STAGE_BASE.bushLeftWidthMin,
+    JOURNEY_STAGE_BASE.bushLeftWidthMax,
+  );
+  const bushLeftHeight = bushLeftWidth * (JOURNEY_BUSH_ART.height / JOURNEY_BUSH_ART.width);
   const nodeSize = clampLayout(
     JOURNEY_STAGE_BASE.nodeSize * scale,
     JOURNEY_STAGE_BASE.nodeSizeMin,
@@ -196,8 +207,8 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
   const cloudMainHeight = cloudMain * (JOURNEY_CLOUD_ART.height / JOURNEY_CLOUD_ART.width);
   const cloudSmallHeight = cloudSmall * (JOURNEY_CLOUD_ART.height / JOURNEY_CLOUD_ART.width);
 
-  const labelBlock = compact ? 20 : 26;
-  const pathBottomPad = compact ? 4 : 8;
+  const labelBlock = compact ? 22 : 28;
+  const pathBottomPad = compact ? 6 : 10;
   const lineThickness = 2;
   const day1X = JOURNEY_DAY1_ANCHORS.day1X * safeWidth;
   const day2X = JOURNEY_DAY1_ANCHORS.day2X * safeWidth;
@@ -207,9 +218,10 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
   const standingFromMascotTop = mascotHeight * JOURNEY_MASCOT_ART.standingY;
   const lineFromMascotTop = standingFromMascotTop + nodeSize * 0.22;
   const sceneHeight = lineFromMascotTop + nodeSize / 2 + labelBlock + pathBottomPad;
-  const illustratedMin = clampLayout(safeHeight * 0.52, compact ? 200 : 236, 340);
-  const pathHeight = Math.max(sceneHeight, illustratedMin);
-  const originY = pathHeight - sceneHeight;
+  // Hug the illustrated characters so leftover stage height becomes sky
+  // between the hero copy and the path, not a gap under the feet.
+  const pathHeight = sceneHeight;
+  const originY = 0;
 
   const lineY = originY + lineFromMascotTop;
   const mascotLeft = day1X - mascotWidth * JOURNEY_MASCOT_ART.bodyCenterX;
@@ -238,25 +250,46 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
     height: bushHeight,
   };
 
-  const sunTop = clampLayout(safeHeight * JOURNEY_DAY1_ANCHORS.sunY, compact ? 40 : 52, 78);
+  const bushLeftCenterX = JOURNEY_DAY1_ANCHORS.bushLeftX * safeWidth;
+  const bushLeftVisualBottom = bushLeftHeight * JOURNEY_BUSH_ART.visualBottom;
+  const bushLeft: JourneyRect = {
+    left: bushLeftCenterX - bushLeftWidth / 2,
+    top: lineY - bushLeftVisualBottom,
+    width: bushLeftWidth,
+    height: bushLeftHeight,
+  };
+
+  const sunTop = clampLayout(
+    safeHeight * JOURNEY_DAY1_ANCHORS.sunY,
+    compact ? 36 : 48,
+    compact ? 68 : 96,
+  );
   const sun = centerBox(JOURNEY_DAY1_ANCHORS.sunX * safeWidth, sunTop, sunSize, sunSize);
 
   const clouds: JourneyRect[] = [
     centerBox(
       JOURNEY_DAY1_ANCHORS.cloudLeftX * safeWidth,
-      clampLayout(safeHeight * JOURNEY_DAY1_ANCHORS.cloudLeftY, 8, 48),
+      clampLayout(
+        safeHeight * JOURNEY_DAY1_ANCHORS.cloudLeftY,
+        compact ? 40 : 56,
+        compact ? 88 : 120,
+      ),
       cloudMain,
       cloudMainHeight,
     ),
     centerBox(
       JOURNEY_DAY1_ANCHORS.cloudUpperRightX * safeWidth,
-      clampLayout(safeHeight * JOURNEY_DAY1_ANCHORS.cloudUpperRightY, 0, 20),
+      clampLayout(safeHeight * JOURNEY_DAY1_ANCHORS.cloudUpperRightY, 0, compact ? 12 : 18),
       cloudSmall,
       cloudSmallHeight,
     ),
     centerBox(
       JOURNEY_DAY1_ANCHORS.cloudRightX * safeWidth,
-      clampLayout(safeHeight * JOURNEY_DAY1_ANCHORS.cloudRightY, 72, 120),
+      clampLayout(
+        safeHeight * JOURNEY_DAY1_ANCHORS.cloudRightY,
+        compact ? 80 : 100,
+        compact ? 128 : 160,
+      ),
       cloudSmall,
       cloudSmallHeight,
     ),
@@ -279,6 +312,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
     mascot,
     sign,
     bush,
+    bushLeft,
     sun,
     clouds,
   };

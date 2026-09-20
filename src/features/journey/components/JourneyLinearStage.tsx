@@ -81,9 +81,9 @@ export function JourneyLinearStage({
         <AppText variant="journeyDay" color="primary" align="center">
           {`day ${currentDay}`}
         </AppText>
-        <View>
+        <View style={styles.titleLines}>
           {titleLines.map((line) => (
-            <AppText key={line} variant="optionTitle" color="primary" align="center">
+            <AppText key={line} variant="journeyTask" color="primary" align="center">
               {line}
             </AppText>
           ))}
@@ -147,6 +147,13 @@ function JourneyPathBand({
 
   return (
     <View style={[styles.pathBand, { height: layout.pathHeight }]}>
+      <Image
+        source={JOURNEY_SPRITES.bush}
+        resizeMode="contain"
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+        style={[styles.vegetationLayer, rectStyle(layout.bushLeft)]}
+      />
       <Image
         source={JOURNEY_SPRITES.bush}
         resizeMode="contain"
@@ -243,14 +250,17 @@ const styles = StyleSheet.create({
   },
   titleBlock: {
     alignItems: 'center',
-    paddingTop: spacing.sm,
+    paddingTop: spacing.md,
     paddingHorizontal: spacing.lg,
-    gap: spacing.xxs,
+    gap: spacing.sm,
     zIndex: 2,
+  },
+  titleLines: {
+    alignItems: 'center',
   },
   midStage: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
   },
   pathBand: {
     position: 'relative',
