@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: spacing.md,
     paddingHorizontal: spacing.lg,
-    gap: spacing.sm,
+    gap: spacing.md,
     zIndex: 2,
   },
   titleLines: {

@@ -9,7 +9,7 @@ export const JOURNEY_DAY1_ANCHORS = {
   day1X: 0.44,
   day2X: 0.79,
   signX: 0.205,
-  bushLeftX: 0.09,
+  bushLeftX: 0.055,
   bushX: 0.84,
   sunX: 0.82,
   sunY: 0.125,
@@ -58,24 +58,24 @@ export const JOURNEY_SUN_ART = {
 
 /** Sprite sizes at a 390-wide stage, then scaled and clamped. */
 export const JOURNEY_STAGE_BASE = {
-  mascotHeight: 200,
-  mascotHeightMin: 172,
-  mascotHeightMax: 224,
+  mascotHeight: 210,
+  mascotHeightMin: 180,
+  mascotHeightMax: 232,
   signWidth: 220,
   signWidthMin: 184,
   signWidthMax: 244,
   bushWidth: 172,
   bushWidthMin: 144,
   bushWidthMax: 200,
-  bushLeftWidth: 124,
-  bushLeftWidthMin: 104,
-  bushLeftWidthMax: 144,
+  bushLeftWidth: 132,
+  bushLeftWidthMin: 110,
+  bushLeftWidthMax: 152,
   nodeSize: 34,
   nodeSizeMin: 30,
   nodeSizeMax: 38,
-  sunSize: 132,
+  sunSize: 128,
   sunSizeMin: 108,
-  sunSizeMax: 148,
+  sunSizeMax: 144,
   cloudMain: 128,
   cloudMainMin: 104,
   cloudMainMax: 144,
@@ -216,7 +216,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
   // Line through the standing plane so the gold node tucks under the body
   // and the toes rest on the circle. Using toe-tips alone leaves a float gap.
   const standingFromMascotTop = mascotHeight * JOURNEY_MASCOT_ART.standingY;
-  const lineFromMascotTop = standingFromMascotTop + nodeSize * 0.22;
+  const lineFromMascotTop = standingFromMascotTop + nodeSize * 0.38;
   const sceneHeight = lineFromMascotTop + nodeSize / 2 + labelBlock + pathBottomPad;
   // Hug the illustrated characters so leftover stage height becomes sky
   // between the hero copy and the path, not a gap under the feet.

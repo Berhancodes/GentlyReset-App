@@ -24,7 +24,7 @@ export const fontSizes = {
   xl: 28,
   question: 30,
   display: 34,
-  hero: 48,
+  hero: 52,
 } as const;
 
 export const lineHeights = {
@@ -37,7 +37,7 @@ export const lineHeights = {
   xl: 34,
   question: 36,
   display: 40,
-  hero: 54,
+  hero: 58,
 } as const;
 
 export const fontWeights = {
