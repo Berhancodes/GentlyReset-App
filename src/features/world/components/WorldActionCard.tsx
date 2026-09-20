@@ -3,10 +3,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { AppText } from '@/components/ui';
 import { colors, radius, shadows, spacing } from '@/design-system';
-import {
-  WorldActionIcon,
-  type WorldActionGlyph,
-} from '@/features/world/components/WorldIcons';
+import { WorldActionIcon, type WorldActionGlyph } from '@/features/world/components/WorldIcons';
 
 type WorldActionCardProps = {
   glyph: WorldActionGlyph;

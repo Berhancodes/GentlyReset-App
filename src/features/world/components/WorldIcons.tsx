@@ -255,7 +255,11 @@ export function WorldActionIcon({ glyph }: { glyph: WorldActionGlyph }) {
   if (glyph === 'heart') {
     return (
       <CircleIcon size={WORLD_ACTION_CIRCLE_SIZE} backgroundColor={colors.world.actionHeart}>
-        <Ionicons name="heart" size={WORLD_ACTION_GLYPH_SIZE} color={colors.world.actionHeartGlyph} />
+        <Ionicons
+          name="heart"
+          size={WORLD_ACTION_GLYPH_SIZE}
+          color={colors.world.actionHeartGlyph}
+        />
       </CircleIcon>
     );
   }
