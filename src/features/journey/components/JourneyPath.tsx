@@ -21,7 +21,8 @@ import { PLAN_DAY_COUNT } from '@/features/reset/data/thirtyDayPlan';
 
 const PATH_HEIGHT = 168;
 const LINE_THICKNESS = 3;
-const NODE_CENTER_Y = 88;
+const LINE_BOTTOM = spacing.xs + spacing.md + spacing.xxs + spacing.sm;
+const MASCOT_BOTTOM = LINE_BOTTOM + spacing.sm;
 
 type JourneyPathProps = {
   width: number;
@@ -67,6 +68,9 @@ export function JourneyPath({
 
   return (
     <View style={[styles.root, { width }]}>
+      <View style={styles.signDock}>
+        <JourneySign line={signLine} />
+      </View>
       <ScrollView
         ref={scrollRef}
         horizontal
@@ -77,13 +81,11 @@ export function JourneyPath({
       >
         <View style={[styles.track, { width: contentWidth }]}>
           <View
-            pointerEvents="none"
             style={[
               styles.line,
               {
                 left: slotWidth / 2,
                 width: lineWidth,
-                top: NODE_CENTER_Y,
               },
             ]}
           >
@@ -95,17 +97,10 @@ export function JourneyPath({
             return (
               <View key={day} style={[styles.slot, { width: slotWidth }]}>
                 {isCurrent ? (
-                  <View style={styles.currentArt} pointerEvents="none">
-                    <View style={styles.sign}>
-                      <JourneySign line={signLine} />
-                    </View>
-                    <View style={styles.mascot}>
-                      <JourneyCurrentMascot pose={getJourneyPathMascotPose(day)} size="path" />
-                    </View>
+                  <View style={styles.mascot}>
+                    <JourneyCurrentMascot pose={getJourneyPathMascotPose(day)} size="path" />
                   </View>
-                ) : (
-                  <View style={styles.currentArt} />
-                )}
+                ) : null}
                 <JourneyDayNode state={state} onPress={() => onPressDay(day)} />
               </View>
             );
@@ -120,6 +115,13 @@ const styles = StyleSheet.create({
   root: {
     height: PATH_HEIGHT,
   },
+  signDock: {
+    position: 'absolute',
+    left: spacing.md,
+    top: spacing.xs,
+    zIndex: 4,
+    pointerEvents: 'none',
+  },
   track: {
     minHeight: PATH_HEIGHT,
     flexDirection: 'row',
@@ -127,10 +129,12 @@ const styles = StyleSheet.create({
   },
   line: {
     position: 'absolute',
+    bottom: LINE_BOTTOM,
     height: LINE_THICKNESS,
     borderRadius: LINE_THICKNESS,
     backgroundColor: colors.border.default,
     overflow: 'hidden',
+    pointerEvents: 'none',
   },
   lineFill: {
     height: '100%',
@@ -142,18 +146,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     paddingBottom: spacing.xs,
   },
-  currentArt: {
-    minHeight: spacing.xxxl + spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    marginBottom: -spacing.sm,
-  },
-  sign: {
-    marginRight: -spacing.xs,
-    marginBottom: spacing.sm,
-  },
   mascot: {
-    marginLeft: -spacing.xs,
+    position: 'absolute',
+    bottom: MASCOT_BOTTOM,
+    alignItems: 'center',
+    pointerEvents: 'none',
   },
 });

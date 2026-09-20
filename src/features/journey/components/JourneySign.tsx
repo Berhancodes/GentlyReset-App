@@ -13,13 +13,7 @@ type JourneySignProps = {
 
 export function JourneySign({ line }: JourneySignProps) {
   return (
-    <View
-      accessible
-      accessibilityRole="text"
-      accessibilityLabel={line}
-      style={styles.wrap}
-      pointerEvents="none"
-    >
+    <View accessible accessibilityRole="text" accessibilityLabel={line} style={styles.wrap}>
       <Image
         source={JOURNEY_SPRITES.sign}
         resizeMode="contain"
@@ -27,8 +21,8 @@ export function JourneySign({ line }: JourneySignProps) {
         importantForAccessibility="no"
         style={styles.sign}
       />
-      <View style={styles.board} pointerEvents="none">
-        <AppText variant="label" color="primary" align="center" numberOfLines={3}>
+      <View style={styles.board}>
+        <AppText variant="moodLabel" color="primary" align="center" numberOfLines={3}>
           {line}
         </AppText>
       </View>
@@ -41,6 +35,7 @@ const styles = StyleSheet.create({
     width: SIGN_WIDTH,
     height: SIGN_HEIGHT,
     alignItems: 'center',
+    pointerEvents: 'none',
   },
   sign: {
     width: SIGN_WIDTH,
@@ -48,12 +43,11 @@ const styles = StyleSheet.create({
   },
   board: {
     position: 'absolute',
-    top: spacing.xs + 2,
-    left: spacing.sm,
-    right: spacing.sm,
-    height: spacing.xxl - spacing.xxs,
+    top: spacing.xs,
+    left: spacing.xs,
+    right: spacing.xs,
+    height: spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: spacing.xxs,
   },
 });

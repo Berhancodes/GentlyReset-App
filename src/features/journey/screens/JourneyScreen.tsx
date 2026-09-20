@@ -110,7 +110,7 @@ export function JourneyScreen() {
               />
             ) : null}
             {chapter ? <JourneyQuoteCard quote={getJourneyQuote(chapter.id)} /> : null}
-            <JourneyGroundDecor width={canvasWidth} />
+            <JourneyGroundDecor />
           </View>
           <JourneyDaySheet
             visible={sheetModel !== null}

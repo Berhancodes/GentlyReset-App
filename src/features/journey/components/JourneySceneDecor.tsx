@@ -10,7 +10,7 @@ const BUTTERFLY_SIZE = spacing.xl - spacing.xxs;
 
 export function JourneySceneDecor() {
   return (
-    <View pointerEvents="none" style={styles.root} accessibilityElementsHidden>
+    <View style={styles.root} accessibilityElementsHidden>
       <Image source={JOURNEY_SPRITES.sun} resizeMode="contain" style={styles.sun} />
       <Image source={JOURNEY_SPRITES.cloud} resizeMode="contain" style={styles.cloudLeft} />
       <Image source={JOURNEY_SPRITES.clouds} resizeMode="contain" style={styles.cloudRight} />
@@ -22,6 +22,7 @@ export function JourneySceneDecor() {
 const styles = StyleSheet.create({
   root: {
     ...StyleSheet.absoluteFill,
+    pointerEvents: 'none',
   },
   sun: {
     position: 'absolute',
