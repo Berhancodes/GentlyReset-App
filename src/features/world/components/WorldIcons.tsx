@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View, type ImageSourcePropType } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { colors, radius } from '@/design-system';
@@ -7,10 +7,12 @@ import type { WorldStatGlyph } from '@/features/world/data/worldStats';
 
 export type WorldActionGlyph = 'plus' | 'heart' | 'group';
 
+const ICON_PEOPLE = require('../../../../assets/images/app/world/icon-people.png');
+const ICON_GROUP_FILLED = require('../../../../assets/images/app/world/icon-group-filled.png');
+
 /** Pale yellow stats badges — small enough that 1,200+ / people here stay unclipped. */
 const WORLD_STAT_CIRCLE_SIZE = 26;
-const WORLD_STAT_GLYPH_SIZE = 14;
-const WORLD_STAT_PEOPLE_SIZE = 16;
+const WORLD_STAT_GLYPH_SIZE = 15;
 
 /** Action-row circles match the 44pt hit target, with modest glyphs inside. */
 const WORLD_ACTION_CIRCLE_SIZE = 44;
@@ -23,6 +25,19 @@ type CircleIconProps = {
   backgroundColor: string;
   children: ReactNode;
 };
+
+function SheetIcon({ source, size }: { source: ImageSourcePropType; size: number }) {
+  return (
+    <Image
+      source={source}
+      resizeMode="contain"
+      accessibilityIgnoresInvertColors
+      accessibilityElementsHidden
+      importantForAccessibility="no"
+      style={{ width: size, height: size, flexShrink: 0 }}
+    />
+  );
+}
 
 function CircleIcon({ size, backgroundColor, children }: CircleIconProps) {
   return (
@@ -39,159 +54,6 @@ function CircleIcon({ size, backgroundColor, children }: CircleIconProps) {
       ]}
     >
       {children}
-    </View>
-  );
-}
-
-function PeopleThreeGlyph({ color, size }: { color: string; size: number }) {
-  const sideHead = size * 0.28;
-  const centerHead = size * 0.36;
-  const sideBodyWidth = size * 0.34;
-  const centerBodyWidth = size * 0.5;
-  const sideBodyHeight = size * 0.22;
-  const centerBodyHeight = size * 0.28;
-
-  return (
-    <View style={{ width: size, height: size }}>
-      <View
-        style={[
-          styles.mark,
-          {
-            width: sideHead,
-            height: sideHead,
-            borderRadius: sideHead / 2,
-            left: size * 0.04,
-            top: size * 0.22,
-            backgroundColor: color,
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.mark,
-          {
-            width: sideHead,
-            height: sideHead,
-            borderRadius: sideHead / 2,
-            right: size * 0.04,
-            top: size * 0.22,
-            backgroundColor: color,
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.mark,
-          bodyMark(sideBodyWidth, sideBodyHeight, color),
-          {
-            left: size * 0.02,
-            bottom: 0,
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.mark,
-          bodyMark(sideBodyWidth, sideBodyHeight, color),
-          {
-            right: size * 0.02,
-            bottom: 0,
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.mark,
-          {
-            width: centerHead,
-            height: centerHead,
-            borderRadius: centerHead / 2,
-            left: (size - centerHead) / 2,
-            top: size * 0.1,
-            backgroundColor: color,
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.mark,
-          bodyMark(centerBodyWidth, centerBodyHeight, color),
-          {
-            left: (size - centerBodyWidth) / 2,
-            bottom: 0,
-          },
-        ]}
-      />
-    </View>
-  );
-}
-
-function bodyMark(width: number, height: number, color: string) {
-  return {
-    width,
-    height,
-    backgroundColor: color,
-    borderBottomLeftRadius: width / 2,
-    borderBottomRightRadius: width / 2,
-  };
-}
-
-function PeopleTwoGlyph({ color, size }: { color: string; size: number }) {
-  const leftHead = size * 0.3;
-  const rightHead = size * 0.34;
-  const leftBodyWidth = size * 0.4;
-  const rightBodyWidth = size * 0.5;
-  const leftBodyHeight = size * 0.24;
-  const rightBodyHeight = size * 0.3;
-
-  return (
-    <View style={{ width: size, height: size }}>
-      <View
-        style={[
-          styles.mark,
-          {
-            width: leftHead,
-            height: leftHead,
-            borderRadius: leftHead / 2,
-            left: size * 0.06,
-            top: size * 0.18,
-            backgroundColor: color,
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.mark,
-          bodyMark(leftBodyWidth, leftBodyHeight, color),
-          {
-            left: size * 0.02,
-            bottom: 0,
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.mark,
-          {
-            width: rightHead,
-            height: rightHead,
-            borderRadius: rightHead / 2,
-            right: size * 0.04,
-            top: size * 0.12,
-            backgroundColor: color,
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.mark,
-          bodyMark(rightBodyWidth, rightBodyHeight, color),
-          {
-            right: 0,
-            bottom: 0,
-          },
-        ]}
-      />
     </View>
   );
 }
@@ -224,17 +86,17 @@ function PlusGlyph({ color, size, thickness }: { color: string; size: number; th
 }
 
 export function WorldStatIcon({ glyph }: { glyph: WorldStatGlyph }) {
+  if (glyph === 'people') {
+    return <SheetIcon source={ICON_PEOPLE} size={WORLD_STAT_CIRCLE_SIZE} />;
+  }
+
   return (
     <CircleIcon size={WORLD_STAT_CIRCLE_SIZE} backgroundColor={colors.world.statCircle}>
-      {glyph === 'people' ? (
-        <PeopleThreeGlyph color={colors.world.glyph} size={WORLD_STAT_PEOPLE_SIZE} />
-      ) : (
-        <Ionicons
-          name={glyph === 'globe' ? 'globe-outline' : 'heart-outline'}
-          size={WORLD_STAT_GLYPH_SIZE}
-          color={colors.world.glyph}
-        />
-      )}
+      <Ionicons
+        name={glyph === 'globe' ? 'globe-outline' : 'heart-outline'}
+        size={WORLD_STAT_GLYPH_SIZE}
+        color={colors.world.glyph}
+      />
     </CircleIcon>
   );
 }
@@ -264,11 +126,7 @@ export function WorldActionIcon({ glyph }: { glyph: WorldActionGlyph }) {
     );
   }
 
-  return (
-    <CircleIcon size={WORLD_ACTION_CIRCLE_SIZE} backgroundColor={colors.world.actionGroup}>
-      <PeopleTwoGlyph color={colors.world.glyph} size={WORLD_ACTION_GLYPH_SIZE} />
-    </CircleIcon>
-  );
+  return <SheetIcon source={ICON_GROUP_FILLED} size={WORLD_ACTION_CIRCLE_SIZE} />;
 }
 
 const styles = StyleSheet.create({
@@ -277,8 +135,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-  },
-  mark: {
-    position: 'absolute',
   },
 });

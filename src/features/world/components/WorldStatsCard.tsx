@@ -24,7 +24,7 @@ export function WorldStatsCard() {
               <AppText variant="optionTitle" numberOfLines={1}>
                 {stat.value}
               </AppText>
-              <AppText variant="label" color="helper" numberOfLines={2}>
+              <AppText variant="tabHeaderSubtitle" color="helper" numberOfLines={1}>
                 {stat.label}
               </AppText>
             </View>
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: spacing.xxxl,
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.xs,
     paddingVertical: spacing.md,
     borderRadius: radius.pill,
     backgroundColor: colors.surface.raised,
@@ -55,7 +55,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.xxs,
     minWidth: 0,
-    paddingHorizontal: spacing.xxs,
   },
   separator: {
     width: StyleSheet.hairlineWidth,

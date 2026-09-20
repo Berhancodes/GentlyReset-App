@@ -23,7 +23,7 @@ export function WorldActionCard({ glyph, title, subtitle, onPress }: WorldAction
       <WorldActionIcon glyph={glyph} />
       <View style={styles.copy}>
         <AppText variant="optionTitle">{title}</AppText>
-        <AppText variant="caption" color="helper">
+        <AppText variant="caption" color="helper" numberOfLines={1}>
           {subtitle}
         </AppText>
       </View>
