@@ -28,7 +28,7 @@ export function WorldActivitySection({ onNotice }: WorldActivitySectionProps) {
           accessibilityRole="button"
           accessibilityLabel="see all activity"
           onPress={openSeeAll}
-          hitSlop={spacing.xs}
+          hitSlop={spacing.md}
           style={styles.seeAll}
         >
           <AppText variant="caption" color="secondary">
@@ -65,7 +65,7 @@ function ActivityRow({ item, onPress }: { item: WorldActivityItem; onPress: () =
         />
       </View>
       <View style={styles.copy}>
-        <AppText variant="optionTitle" numberOfLines={2}>
+        <AppText variant="optionTitle" numberOfLines={1}>
           {item.title}
         </AppText>
         <AppText variant="caption" color="helper" numberOfLines={1}>
@@ -93,8 +93,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xxs,
   },
   seeAll: {
-    minHeight: spacing.hitTarget,
+    minHeight: spacing.hitTarget / 2,
     justifyContent: 'center',
+    paddingVertical: spacing.xxs,
   },
   card: {
     borderRadius: radius.xxl,
