@@ -26,10 +26,13 @@ export const WORLD_HERO_MIN_HEIGHT = 420;
 export const WORLD_COVER_BOTTOM = 0.59;
 
 /**
- * How far the stats pill sits up onto the hero grass. Stay inside the
+ * How far the stats panel sits up onto the hero grass. Stay inside the
  * grass band so faces and the log stay clear.
  */
-export const WORLD_STATS_OVERLAP = 28;
+export const WORLD_STATS_OVERLAP = 40;
+
+/** Tall rounded rectangle — not a 50pt capsule. */
+export const WORLD_STATS_CARD_HEIGHT = 100;
 
 export const WORLD_COLUMN_MAX_WIDTH = 430;
 

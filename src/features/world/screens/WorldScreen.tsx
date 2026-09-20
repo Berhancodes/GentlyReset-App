@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     width: '100%',
+    overflow: 'visible',
   },
   hero: {
     width: '100%',

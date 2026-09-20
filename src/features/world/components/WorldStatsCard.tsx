@@ -5,10 +5,12 @@ import { AppText } from '@/components/ui';
 import { colors, radius, shadows, spacing } from '@/design-system';
 import { WorldStatIcon } from '@/features/world/components/WorldIcons';
 import { WORLD_COMMUNITY_STATS } from '@/features/world/data/worldStats';
+import { WORLD_STATS_CARD_HEIGHT } from '@/features/world/layout/worldHeroLayout';
 
 export function WorldStatsCard() {
   return (
     <View
+      testID="world-stats-card"
       accessibilityRole="text"
       accessibilityLabel={WORLD_COMMUNITY_STATS.map((stat) => `${stat.value} ${stat.label}`).join(
         '. ',
@@ -21,10 +23,10 @@ export function WorldStatsCard() {
           <View style={styles.stat}>
             <WorldStatIcon glyph={stat.glyph} />
             <View style={styles.copy}>
-              <AppText variant="optionTitle" numberOfLines={1}>
+              <AppText variant="worldStatValue" numberOfLines={1}>
                 {stat.value}
               </AppText>
-              <AppText variant="tabHeaderSubtitle" color="helper" numberOfLines={1}>
+              <AppText variant="worldStatLabel" color="helper" numberOfLines={1}>
                 {stat.label}
               </AppText>
             </View>
@@ -37,28 +39,32 @@ export function WorldStatsCard() {
 
 const styles = StyleSheet.create({
   card: {
+    minHeight: WORLD_STATS_CARD_HEIGHT,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xxs,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surface.raised,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: radius.quote,
+    backgroundColor: colors.surface.quote,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border.subtle,
     overflow: 'visible',
     zIndex: 3,
-    ...shadows.soft,
+    ...shadows.whisper,
   },
   stat: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xxs,
+    gap: spacing.sm,
     minWidth: 0,
     overflow: 'visible',
+    paddingHorizontal: spacing.xxs,
   },
   separator: {
     width: StyleSheet.hairlineWidth,
-    height: spacing.lg,
+    height: spacing.xl,
     backgroundColor: colors.border.subtle,
     alignSelf: 'center',
   },

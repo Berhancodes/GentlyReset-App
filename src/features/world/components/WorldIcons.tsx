@@ -9,14 +9,15 @@ export type WorldActionGlyph = 'plus' | 'heart' | 'group';
 
 const ICON_GROUP_FILLED = require('../../../../assets/images/app/world/icon-group-filled.png');
 
-/** Bare chocolate glyphs — no circular badge. Matches the stats-pill crop. */
-const WORLD_STAT_GLYPH_SIZE = 20;
+/** People mark sits inside a larger pale-yellow circle. Globe/heart stay bare. */
+const WORLD_STAT_PEOPLE_CIRCLE_SIZE = 48;
+const WORLD_STAT_PEOPLE_GLYPH_SIZE = 26;
+const WORLD_STAT_OUTLINE_SIZE = 30;
 
-const WORLD_STAT_ICON_NAME = {
-  people: 'people',
+const WORLD_STAT_OUTLINE_NAME = {
   globe: 'globe-outline',
   heart: 'heart-outline',
-} as const satisfies Record<WorldStatGlyph, 'people' | 'globe-outline' | 'heart-outline'>;
+} as const satisfies Record<Exclude<WorldStatGlyph, 'people'>, 'globe-outline' | 'heart-outline'>;
 
 /** Action-row circles match the 44pt hit target, with modest glyphs inside. */
 const WORLD_ACTION_CIRCLE_SIZE = 44;
@@ -90,10 +91,24 @@ function PlusGlyph({ color, size, thickness }: { color: string; size: number; th
 }
 
 export function WorldStatIcon({ glyph }: { glyph: WorldStatGlyph }) {
+  if (glyph === 'people') {
+    return (
+      <CircleIcon size={WORLD_STAT_PEOPLE_CIRCLE_SIZE} backgroundColor={colors.world.statCircle}>
+        <Ionicons
+          name="people"
+          size={WORLD_STAT_PEOPLE_GLYPH_SIZE}
+          color={colors.world.glyph}
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+        />
+      </CircleIcon>
+    );
+  }
+
   return (
     <Ionicons
-      name={WORLD_STAT_ICON_NAME[glyph]}
-      size={WORLD_STAT_GLYPH_SIZE}
+      name={WORLD_STAT_OUTLINE_NAME[glyph]}
+      size={WORLD_STAT_OUTLINE_SIZE}
       color={colors.world.glyph}
       accessibilityElementsHidden
       importantForAccessibility="no"

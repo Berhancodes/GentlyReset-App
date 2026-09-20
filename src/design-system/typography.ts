@@ -216,6 +216,19 @@ export const textVariants = {
     fontWeight: fontWeights.semibold,
     letterSpacing: -0.2,
   },
+  worldStatValue: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.lg,
+    lineHeight: 22,
+    fontWeight: fontWeights.bold,
+    letterSpacing: -0.25,
+  },
+  worldStatLabel: {
+    fontFamily: fontFamilies.sans,
+    fontSize: fontSizes.sm,
+    lineHeight: 17,
+    fontWeight: fontWeights.medium,
+  },
 } as const satisfies Record<string, TextStyle>;
 
 export type TextVariant = keyof typeof textVariants;
