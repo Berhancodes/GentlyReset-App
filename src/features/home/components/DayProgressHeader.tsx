@@ -9,6 +9,10 @@ type DayProgressHeaderProps = {
   completedCount: number;
   showCount?: boolean;
   layout?: 'stacked' | 'inline';
+  thickness?: number;
+  fillColor?: string;
+  trackColor?: string;
+  startMarker?: boolean;
 };
 
 export function DayProgressHeader({
@@ -16,10 +20,17 @@ export function DayProgressHeader({
   completedCount,
   showCount = true,
   layout = 'stacked',
+  thickness,
+  fillColor,
+  trackColor,
+  startMarker = false,
 }: DayProgressHeaderProps) {
   const safeCompleted = Math.min(PLAN_DAY_COUNT, Math.max(0, completedCount));
   const progress = safeCompleted / PLAN_DAY_COUNT;
   const inline = layout === 'inline';
+  const trackThickness = thickness ?? (inline ? spacing.xxs : undefined);
+  const markerSize = (trackThickness ?? 7) + spacing.xxs;
+  const resolvedTrack = trackColor ?? (inline ? colors.progress.trackStrong : undefined);
 
   return (
     <View style={inline ? styles.inlineRoot : styles.root}>
@@ -33,13 +44,29 @@ export function DayProgressHeader({
           </AppText>
         ) : null}
       </View>
-      <View style={inline ? styles.inlineTrack : undefined}>
+      <View style={inline ? styles.inlineTrack : styles.trackWrap}>
         <ProgressBar
           progress={progress}
           accessibilityLabel="30-day reset progress"
-          thickness={inline ? spacing.xxs : undefined}
-          trackColor={inline ? colors.progress.trackStrong : undefined}
+          thickness={trackThickness}
+          fillColor={fillColor}
+          trackColor={resolvedTrack}
         />
+        {startMarker ? (
+          <View
+            pointerEvents="none"
+            accessibilityElementsHidden
+            style={[
+              styles.startMarker,
+              {
+                width: markerSize,
+                height: markerSize,
+                borderRadius: markerSize / 2,
+                backgroundColor: fillColor ?? colors.accent.gold,
+              },
+            ]}
+          />
+        ) : null}
       </View>
     </View>
   );
@@ -65,5 +92,12 @@ const styles = StyleSheet.create({
   },
   inlineTrack: {
     flex: 1,
+  },
+  trackWrap: {
+    justifyContent: 'center',
+  },
+  startMarker: {
+    position: 'absolute',
+    left: 0,
   },
 });

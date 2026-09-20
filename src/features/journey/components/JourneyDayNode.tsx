@@ -5,19 +5,16 @@ import { colors, shadows, spacing } from '@/design-system';
 import type { JourneyDayState } from '@/features/journey/utils/getJourneyDayState';
 import { isJourneyDayVisuallyComplete } from '@/features/journey/utils/getJourneyDayState';
 
-const NODE_SIZE = spacing.lg;
-const CURRENT_NODE_SIZE = spacing.lg + spacing.xxs;
-
 type JourneyDayNodeProps = {
   state: JourneyDayState;
+  size: number;
   onPress: () => void;
 };
 
-export function JourneyDayNode({ state, onPress }: JourneyDayNodeProps) {
+export function JourneyDayNode({ state, size, onPress }: JourneyDayNodeProps) {
   const complete = isJourneyDayVisuallyComplete(state);
   const current = state.kind === 'current';
   const future = state.kind === 'future';
-  const size = current ? CURRENT_NODE_SIZE : NODE_SIZE;
 
   const accessibilityLabel = current
     ? `Day ${state.day}. You are here.`
@@ -52,7 +49,7 @@ export function JourneyDayNode({ state, onPress }: JourneyDayNodeProps) {
         </View>
       </Pressable>
       <AppText
-        variant="label"
+        variant={current ? 'moodLabelSelected' : 'moodLabel'}
         color={current ? 'primary' : 'helper'}
         align="center"
         numberOfLines={1}
@@ -80,23 +77,23 @@ const styles = StyleSheet.create({
   },
   node: {
     borderWidth: 2,
-    borderColor: colors.border.gold,
+    borderColor: colors.border.default,
     backgroundColor: colors.surface.raised,
     alignItems: 'center',
     justifyContent: 'center',
     ...shadows.whisper,
   },
   nodeComplete: {
-    borderColor: colors.accent.gold,
+    borderColor: colors.text.primary,
     backgroundColor: colors.accent.gold,
   },
   nodeCurrent: {
-    borderColor: colors.accent.gold,
+    borderColor: colors.text.primary,
     backgroundColor: colors.accent.gold,
     ...shadows.soft,
   },
   nodeFuture: {
     borderColor: colors.border.default,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.surface.raised,
   },
 });

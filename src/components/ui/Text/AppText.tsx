@@ -24,6 +24,7 @@ type AppTextProps = Omit<TextProps, 'style'> & {
 
 const HEADER_VARIANTS: ReadonlySet<TextVariant> = new Set([
   'display',
+  'journeyDay',
   'title',
   'questionTitle',
   'navTitle',

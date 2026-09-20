@@ -1,15 +1,14 @@
 import { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { AppText, MainTabHeader, Screen } from '@/components/ui';
-import { spacing } from '@/design-system';
+import { MainTabHeader, Screen } from '@/components/ui';
+import { colors, spacing } from '@/design-system';
 import { DayProgressHeader } from '@/features/home/components/DayProgressHeader';
 import { JourneyDaySheet } from '@/features/journey/components/JourneyDaySheet';
-import { JourneyGroundDecor } from '@/features/journey/components/JourneyGroundDecor';
-import { JourneyPath } from '@/features/journey/components/JourneyPath';
+import { JourneyLinearStage } from '@/features/journey/components/JourneyLinearStage';
 import { JourneyQuoteCard } from '@/features/journey/components/JourneyQuoteCard';
-import { JourneySceneDecor } from '@/features/journey/components/JourneySceneDecor';
 import { getJourneyChapterForDay } from '@/features/journey/data/journeyChapters';
 import { getJourneyQuote } from '@/features/journey/data/journeyCopy';
 import { getJourneySheetModel } from '@/features/journey/utils/getJourneySheetModel';
@@ -18,10 +17,17 @@ import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
 
+function JourneyMapGlyph() {
+  return (
+    <View accessibilityElementsHidden importantForAccessibility="no" style={styles.mapButton}>
+      <Ionicons name="map-outline" size={24} color={colors.text.primary} />
+    </View>
+  );
+}
+
 export function JourneyScreen() {
   useSyncResetDay();
   const router = useRouter();
-  const [canvasWidth, setCanvasWidth] = useState(0);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   const currentDay = useResetStore((state) => state.currentDay);
@@ -76,42 +82,29 @@ export function JourneyScreen() {
 
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-      <MainTabHeader title="journey" />
+      <MainTabHeader title="journey" rightAction={<JourneyMapGlyph />} />
       {resetStartedOn ? (
         <>
           <View style={styles.progress}>
-            <DayProgressHeader currentDay={currentDay} completedCount={completedDays.length} />
+            <DayProgressHeader
+              currentDay={currentDay}
+              completedCount={completedDays.length}
+              thickness={spacing.xxs}
+              fillColor={colors.accent.gold}
+              trackColor={colors.progress.trackStrong}
+              startMarker
+            />
           </View>
-          <View
-            style={styles.canvas}
-            onLayout={(event) => {
-              const nextWidth = event.nativeEvent.layout.width;
-              if (nextWidth !== canvasWidth) {
-                setCanvasWidth(nextWidth);
-              }
-            }}
-          >
-            <JourneySceneDecor />
-            <View style={styles.titleBlock}>
-              <AppText variant="display">{`day ${currentDay}`}</AppText>
-              <AppText variant="optionTitle" color="secondary" numberOfLines={2}>
-                {currentTask.title}
-              </AppText>
-            </View>
-            <View style={styles.spacer} />
-            {canvasWidth > 0 && chapter ? (
-              <JourneyPath
-                width={canvasWidth}
-                currentDay={currentDay}
-                completedDays={completedDays}
-                todayCompleted={todayCompleted}
-                chapterId={chapter.id}
-                onPressDay={onPressDay}
-              />
-            ) : null}
-            {chapter ? <JourneyQuoteCard quote={getJourneyQuote(chapter.id)} /> : null}
-            <JourneyGroundDecor />
-          </View>
+          <JourneyLinearStage
+            currentDay={currentDay}
+            completedDays={completedDays}
+            todayCompleted={todayCompleted}
+            taskTitle={currentTask.title}
+            onPressDay={onPressDay}
+          />
+          <JourneyQuoteCard
+            quote={chapter ? getJourneyQuote(chapter.id) : 'One small step can change everything.'}
+          />
           <JourneyDaySheet
             visible={sheetModel !== null}
             model={sheetModel}
@@ -130,16 +123,10 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: spacing.xs,
   },
-  canvas: {
-    flex: 1,
-  },
-  titleBlock: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    gap: spacing.xxs,
-    maxWidth: 280,
-  },
-  spacer: {
-    flex: 1,
+  mapButton: {
+    minWidth: spacing.hitTarget,
+    minHeight: spacing.hitTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

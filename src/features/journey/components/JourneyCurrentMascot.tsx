@@ -24,13 +24,6 @@ const POSE_SOURCE = {
   wave: JOURNEY_SPRITES.mascotWave,
 } as const;
 
-export function getJourneyPathMascotPose(day: number): JourneyMascotPose {
-  if (day === PLAN_DAY_COUNT) {
-    return 'cheer';
-  }
-  return 'idle';
-}
-
 export function getJourneySheetMascotPose(
   day: number,
   kind: 'current' | 'completed' | 'future',

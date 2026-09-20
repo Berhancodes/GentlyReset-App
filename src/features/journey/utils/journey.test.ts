@@ -7,11 +7,12 @@ import {
 } from '../data/journeyChapters';
 import { getJourneyQuote, getJourneySignLine } from '../data/journeyCopy';
 import {
-  getJourneyPathScrollIndex,
-  getJourneyPathWindow,
-  getJourneyPlanDays,
-  getJourneyVisibleCount,
-} from '../layout/journeyPathLayout';
+  getJourneyStageLayout,
+  getJourneyVisibleDays,
+  JOURNEY_DAY1_ANCHORS,
+  JOURNEY_MASCOT_ART,
+  splitJourneyTaskTitle,
+} from '../layout/journeyStageLayout';
 import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
 import { PLAN_DAY_COUNT, getPlanDayTitle } from '../../reset/data/thirtyDayPlan';
 import { applyStartToday } from '../../reset/utils/dailyResetActions';
@@ -275,58 +276,55 @@ check(
 
 const overflowTask = getTaskForDay(31, defaultPersonalization);
 const finishDays = getJourneyChapterDays(getJourneyChapterForDay(30) ?? JOURNEY_CHAPTERS[4]!);
-const pathDays = getJourneyPlanDays();
+const day1Visible = getJourneyVisibleDays(1);
+const day30Visible = getJourneyVisibleDays(30);
 check(
   '17. day 30 does not exceed the 30-day plan',
   overflowTask.day === PLAN_DAY_COUNT &&
     overflowTask.title === getPlanDayTitle(30) &&
     getJourneyChapterForDay(31)?.endDay === 30 &&
     finishDays.join(',') === '29,30' &&
-    pathDays.length === PLAN_DAY_COUNT &&
-    pathDays[pathDays.length - 1] === PLAN_DAY_COUNT,
-);
-
-const windowDay1Narrow = getJourneyPathWindow(1, 2);
-const windowDay2Narrow = getJourneyPathWindow(2, 2);
-const windowDay15 = getJourneyPathWindow(15, 3);
-const windowDay30Wide = getJourneyPathWindow(30, 4);
-const windowDay1Wide = getJourneyPathWindow(1, 4);
-check(
-  'window focuses current day and previous neighbor',
-  windowDay1Narrow.join(',') === '1,2' &&
-    windowDay1Narrow.includes(1) &&
-    windowDay2Narrow.join(',') === '1,2' &&
-    windowDay2Narrow.includes(2) &&
-    windowDay15.join(',') === '14,15,16' &&
-    windowDay15.includes(15) &&
-    getJourneyPathScrollIndex(1, 2) === 0 &&
-    getJourneyPathScrollIndex(2, 2) === 0 &&
-    getJourneyPathScrollIndex(15, 3) === 13,
+    day30Visible.join(',') === '30' &&
+    day30Visible[0] === PLAN_DAY_COUNT,
 );
 
 check(
-  'window at day 30 stays inside the plan',
-  windowDay30Wide.join(',') === '27,28,29,30' &&
-    windowDay30Wide.every((day) => day <= PLAN_DAY_COUNT) &&
-    windowDay1Wide.join(',') === '1,2,3,4' &&
-    getJourneyPathScrollIndex(30, 4) === 26,
+  'Day 1 path shows only day 1 and day 2',
+  day1Visible.join(',') === '1,2' && !day1Visible.includes(3),
 );
 
 check(
-  'visible count is 2 at 390 and 4 at 430',
-  getJourneyVisibleCount(390) === 2 &&
-    getJourneyVisibleCount(430) === 4 &&
-    getJourneyVisibleCount(410) === 3,
+  'task title splits to the screenshot two-line copy',
+  splitJourneyTaskTitle('Start smaller than usual').join(' / ') === 'start smaller / than usual',
 );
 
-const beforeWindowDay = 12;
-const windowForTwelve = getJourneyPathWindow(beforeWindowDay, 3);
+const stage390 = getJourneyStageLayout(390, 520);
+const stage430 = getJourneyStageLayout(430, 600);
 check(
-  'building a path window does not change currentDay',
-  beforeWindowDay === 12 &&
-    windowForTwelve.includes(12) &&
-    !windowForTwelve.includes(31) &&
-    journeyPressMutates() === false,
+  'Day 1 node is at ~40% of stage width; Day 2 at 75–80%',
+  Math.abs(stage390.day1X / stage390.width - JOURNEY_DAY1_ANCHORS.day1X) < 1e-9 &&
+    stage390.day2X / stage390.width >= 0.75 &&
+    stage390.day2X / stage390.width <= 0.8,
+);
+
+check(
+  'mascot is grounded on the line above the Day 1 node',
+  Math.abs(
+    stage390.mascot.left + stage390.mascot.width * JOURNEY_MASCOT_ART.bodyCenterX - stage390.day1X,
+  ) < 0.5 &&
+    Math.abs(
+      stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.feetY - stage390.lineY,
+    ) < 0.5,
+);
+
+check(
+  'tall phones do not oversize the mascot',
+  stage430.mascot.height - stage390.mascot.height < 20,
+);
+
+check(
+  'building a Day 1 stage does not change currentDay',
+  getJourneyVisibleDays(1).join(',') === '1,2' && journeyPressMutates() === false,
 );
 
 check(

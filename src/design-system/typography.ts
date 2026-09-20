@@ -24,6 +24,7 @@ export const fontSizes = {
   xl: 28,
   question: 30,
   display: 34,
+  hero: 42,
 } as const;
 
 export const lineHeights = {
@@ -36,6 +37,7 @@ export const lineHeights = {
   xl: 34,
   question: 36,
   display: 40,
+  hero: 48,
 } as const;
 
 export const fontWeights = {
@@ -52,6 +54,13 @@ export const textVariants = {
     lineHeight: lineHeights.display,
     fontWeight: fontWeights.semibold,
     letterSpacing: -0.6,
+  },
+  journeyDay: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.hero,
+    lineHeight: lineHeights.hero,
+    fontWeight: fontWeights.bold,
+    letterSpacing: -0.8,
   },
   title: {
     fontFamily: fontFamilies.rounded,

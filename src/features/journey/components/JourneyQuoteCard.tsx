@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
-import { colors, radius, shadows, spacing } from '@/design-system';
+import { colors, radius, spacing } from '@/design-system';
 
 type JourneyQuoteCardProps = {
   quote: string;
@@ -10,7 +10,7 @@ type JourneyQuoteCardProps = {
 export function JourneyQuoteCard({ quote }: JourneyQuoteCardProps) {
   return (
     <View accessibilityRole="text" accessibilityLabel={quote} style={styles.card}>
-      <AppText variant="caption" color="secondary" align="center">
+      <AppText variant="body" color="secondary" align="center">
         {quote}
       </AppText>
     </View>
@@ -19,16 +19,13 @@ export function JourneyQuoteCard({ quote }: JourneyQuoteCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    alignSelf: 'center',
-    maxWidth: 280,
+    alignSelf: 'stretch',
     marginHorizontal: spacing.lg,
+    marginTop: spacing.sm,
     marginBottom: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.xl,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg,
+    borderRadius: radius.xxl,
     backgroundColor: colors.surface.primary,
-    borderWidth: 1,
-    borderColor: colors.border.subtle,
-    ...shadows.whisper,
   },
 });
