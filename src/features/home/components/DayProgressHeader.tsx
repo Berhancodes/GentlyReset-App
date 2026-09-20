@@ -7,6 +7,7 @@ import { colors, spacing } from '@/design-system';
 type DayProgressHeaderProps = {
   currentDay: number;
   completedCount: number;
+  progress: number;
   showCount?: boolean;
   layout?: 'stacked' | 'inline';
   thickness?: number;
@@ -18,6 +19,7 @@ type DayProgressHeaderProps = {
 export function DayProgressHeader({
   currentDay,
   completedCount,
+  progress,
   showCount = true,
   layout = 'stacked',
   thickness,
@@ -26,7 +28,6 @@ export function DayProgressHeader({
   startMarker = false,
 }: DayProgressHeaderProps) {
   const safeCompleted = Math.min(PLAN_DAY_COUNT, Math.max(0, completedCount));
-  const progress = safeCompleted / PLAN_DAY_COUNT;
   const inline = layout === 'inline';
   const trackThickness = thickness ?? (inline ? spacing.xxs : undefined);
   const markerSize = (trackThickness ?? 7) + spacing.xxs;

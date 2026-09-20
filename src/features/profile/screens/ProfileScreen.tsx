@@ -16,6 +16,7 @@ import { getMultiChoiceIds, getSingleChoiceId } from '@/features/onboarding/util
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { minutesFromCommitment } from '@/features/reset/utils/getTaskForDay';
+import { getCurrentPlanDay, getResetProgress } from '@/features/reset/utils/resetSelectors';
 
 const PROFILE_COLUMN_MAX_WIDTH = 430;
 const EMPTY_VALUE = 'not set yet';
@@ -102,8 +103,8 @@ export function ProfileScreen() {
           name={profile.name}
           shortSummary={profile.shortSummary}
           resetApproach={resetApproach}
-          currentDay={currentDay}
-          completedCount={completedDays.length}
+          currentDay={getCurrentPlanDay({ currentDay })}
+          progress={getResetProgress({ completedDays })}
         />
         <MyResetCard
           onOpenType={openTypeNotice}

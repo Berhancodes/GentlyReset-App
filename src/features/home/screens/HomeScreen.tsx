@@ -1,6 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect } from 'react';
-import { AppState, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText, getTabBarScenePadding, MainTabHeader, Screen } from '@/components/ui';
@@ -14,19 +12,24 @@ import {
   HOME_COMPLETION_MESSAGE,
   HOME_IDLE_SUBTITLE,
 } from '@/features/home/utils/homeCopy';
-import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
+import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
-import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
+import {
+  getCompletedDayCount,
+  getCurrentPlanDay,
+  getCurrentResetTask,
+  getResetProgress,
+} from '@/features/reset/utils/resetSelectors';
 
 const HOME_COLUMN_MAX_WIDTH = 430;
 const COMPACT_HEIGHT = 740;
 
 export function HomeScreen() {
+  useSyncResetDay();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const compact = height < COMPACT_HEIGHT;
-  const answers = useOnboardingStore((state) => state.answers);
   const resetStartedOn = useResetStore((state) => state.resetStartedOn);
   const currentDay = useResetStore((state) => state.currentDay);
   const completedDays = useResetStore((state) => state.completedDays);
@@ -34,34 +37,8 @@ export function HomeScreen() {
   const todayStarted = useResetStore((state) => state.todayStarted);
   const personalization = useResetStore((state) => state.personalization);
   const resetTypeId = useResetStore((state) => state.resetTypeId);
-  const ensureSeeded = useResetStore((state) => state.ensureSeeded);
-  const applyCalendarDay = useResetStore((state) => state.applyCalendarDay);
   const startToday = useResetStore((state) => state.startToday);
   const completeToday = useResetStore((state) => state.completeToday);
-
-  const syncDay = useCallback(() => {
-    ensureSeeded(answers);
-    applyCalendarDay();
-  }, [answers, applyCalendarDay, ensureSeeded]);
-
-  useLayoutEffect(() => {
-    syncDay();
-  }, [syncDay]);
-
-  useFocusEffect(
-    useCallback(() => {
-      syncDay();
-    }, [syncDay]),
-  );
-
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextState) => {
-      if (nextState === 'active') {
-        syncDay();
-      }
-    });
-    return () => subscription.remove();
-  }, [syncDay]);
 
   if (!resetStartedOn) {
     return (
@@ -77,8 +54,10 @@ export function HomeScreen() {
     );
   }
 
-  // Always resolve from the plan — do not render persisted todayTask.
-  const task = getTaskForDay(currentDay, personalization);
+  const task = getCurrentResetTask({ currentDay, personalization });
+  const planDay = getCurrentPlanDay({ currentDay });
+  const completedCount = getCompletedDayCount({ completedDays });
+  const progress = getResetProgress({ completedDays });
   const supportLine = resetTypeId
     ? getResetProfile(resetTypeId).homeSupportLine
     : getHomeSupportLine(personalization.primaryObstacle);
@@ -110,8 +89,9 @@ export function HomeScreen() {
           </AppText>
         </View>
         <DayProgressHeader
-          currentDay={currentDay}
-          completedCount={completedDays.length}
+          currentDay={planDay}
+          completedCount={completedCount}
+          progress={progress}
           showCount={false}
           layout="inline"
         />

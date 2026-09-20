@@ -1,9 +1,13 @@
+import type { OnboardingAnswer } from '../../onboarding/types/onboarding';
 import type { ResetPersonalization, ResetSnapshot } from '../types';
-import { applyDateRollover } from './applyDateRollover';
+import { applyDateRollover, processDateRollover } from './applyDateRollover';
 import { parseLocalDateKey } from './calendar';
 import { applyCompleteToday, applySaveReflection, applyStartToday } from './dailyResetActions';
-import { getPlanDayTitle } from '../data/thirtyDayPlan';
+import { getPlanDayTitle, PLAN_DAY_COUNT } from '../data/thirtyDayPlan';
+import { LEGACY_FALLBACK_RESET_TYPE_ID, resolveStoredResetTypeId } from './deriveResetType';
 import { getTaskForDay } from './getTaskForDay';
+import { getCurrentResetTask } from './resetSelectors';
+import { applyEnsureSeeded, createSeededResetState } from './seedResetState';
 
 let failed = 0;
 
@@ -47,6 +51,38 @@ function snapshot(overrides: Partial<ResetSnapshot> = {}): ResetSnapshot {
 function dateOn(key: string): Date {
   return parseLocalDateKey(key);
 }
+
+function single(optionId: string): OnboardingAnswer {
+  return { type: 'singleChoice', optionId };
+}
+
+function multi(optionIds: readonly string[]): OnboardingAnswer {
+  return { type: 'multiChoice', optionIds };
+}
+
+function text(value: string): OnboardingAnswer {
+  return { type: 'textInput', value };
+}
+
+const RESTARTER_ANSWERS: Record<string, OnboardingAnswer> = {
+  changePattern: single('bad-day-week'),
+  consistencyStage: single('restarting'),
+  dailyCommitment: single('ten'),
+  supportStyle: single('be-gentle'),
+  primaryObstacle: multi(['afraid-wont-stick']),
+  resetReason: text('I keep starting over after a bad day'),
+  desiredFeelings: multi(['calm', 'present']),
+  missedDayResponse: single('be-kind'),
+  profileAccuracy: single('mostly'),
+};
+
+const OVERLOADED_ANSWERS: Record<string, OnboardingAnswer> = {
+  changePattern: single('all-in-burn-out'),
+  primaryObstacle: multi(['too-much']),
+  recurringThought: single('further-ahead'),
+  outOfBalance: multi(['everything', 'direction']),
+  recentFeeling: single('overwhelmed'),
+};
 
 function tasksMatch(
   homeTask: ReturnType<typeof getTaskForDay>,
@@ -200,6 +236,187 @@ check(
     getTaskForDay(day30Next.currentDay, day30Next.personalization),
     getTaskForDay(30, defaultPersonalization),
   ) && getTaskForDay(30, defaultPersonalization).title === getPlanDayTitle(30),
+);
+
+const multiDayGap = applyDateRollover(completed, '2026-09-23');
+check(
+  'multi-day gap after a completed day advances at most one plan day',
+  multiDayGap.currentDay === 2 &&
+    multiDayGap.todayStarted === false &&
+    multiDayGap.todayCompleted === false,
+);
+check('multi-day gap after completion flags missedYesterday', multiDayGap.missedYesterday === true);
+check(
+  'processDateRollover matches applyDateRollover for a multi-day gap',
+  processDateRollover(completed, dateOn('2026-09-23')).currentDay === multiDayGap.currentDay &&
+    processDateRollover(completed, dateOn('2026-09-23')).missedYesterday ===
+      multiDayGap.missedYesterday,
+);
+
+const unfinishedGap = applyDateRollover(started, '2026-09-23');
+check(
+  'multi-day gap without completion keeps the same plan day',
+  unfinishedGap.currentDay === 1 && unfinishedGap.missedYesterday === true,
+);
+
+const firstNote = applySaveReflection(
+  idle,
+  { mood: 3, text: 'first calendar', prompt: 'how did it feel?' },
+  dateOn('2026-09-19'),
+);
+const sameDayNote = applySaveReflection(
+  firstNote,
+  { mood: 4, text: 'updated same day', prompt: 'how did it feel?' },
+  dateOn('2026-09-19'),
+);
+check(
+  'journal upserts by plan day on the same calendar date',
+  sameDayNote.reflections.length === 1,
+);
+check(
+  'journal upsert replaces the same plan-day entry',
+  sameDayNote.reflections[0]?.text === 'updated same day' && sameDayNote.reflections[0]?.mood === 4,
+);
+
+const stillDayOne = applyDateRollover(sameDayNote, '2026-09-20');
+const laterCalendarNote = applySaveReflection(
+  stillDayOne,
+  { mood: 5, text: 'second calendar', prompt: 'how did it feel?' },
+  dateOn('2026-09-20'),
+);
+check(
+  'same plan day across two calendar dates overwrites the prior reflection',
+  laterCalendarNote.reflections.length === 1 &&
+    laterCalendarNote.reflections[0]?.day === 1 &&
+    laterCalendarNote.reflections[0]?.date === '2026-09-20' &&
+    laterCalendarNote.reflections[0]?.text === 'second calendar',
+);
+check(
+  'journal overwrite does not complete or advance the plan day',
+  laterCalendarNote.todayCompleted === false && laterCalendarNote.currentDay === 1,
+);
+
+const alreadyListed = snapshot({
+  completedDays: [1],
+  todayCompleted: false,
+  todayStarted: false,
+});
+const completeWhenListed = applyCompleteToday(alreadyListed, dateOn('2026-09-19'));
+check(
+  'complete is idempotent if completedDays already contains currentDay',
+  completeWhenListed.completedDays.filter((day) => day === 1).length === 1 &&
+    completeWhenListed.todayCompleted === true &&
+    completeWhenListed.currentDay === 1,
+);
+
+check('day 30 currentDay stays capped at 30 after complete', day30Completed.currentDay === 30);
+check(
+  'day 30 rollover does not create day 31',
+  day30Next.currentDay === 30 && day30Next.currentDay <= PLAN_DAY_COUNT,
+);
+check(
+  'day 30 completedDays includes 30 once',
+  day30Completed.completedDays.filter((day) => day === 30).length === 1 &&
+    day30Completed.completedDays.includes(30),
+);
+
+const seeded = createSeededResetState(RESTARTER_ANSWERS, dateOn('2026-09-19'));
+check('seed starts on day 1', seeded.currentDay === 1);
+check('seed completedDays is empty', seeded.completedDays.length === 0);
+check('seed todayStarted is false', seeded.todayStarted === false);
+check('seed todayCompleted is false', seeded.todayCompleted === false);
+check('seed resetStartedOn is set', seeded.resetStartedOn === '2026-09-19');
+check('seed lastSeenOn matches start date', seeded.lastSeenOn === '2026-09-19');
+check('seed resetTypeId is derived', seeded.resetTypeId === 'soft-restarter');
+check(
+  'seed personalization preserves dailyCommitment',
+  seeded.personalization.dailyCommitment === 'ten',
+);
+check(
+  'seed personalization preserves supportStyle',
+  seeded.personalization.supportStyle === 'be-gentle',
+);
+check(
+  'seed personalization preserves desiredFeelings',
+  seeded.personalization.desiredFeelings.join(',') === 'calm,present',
+);
+check(
+  'seed writes todayTask as legacy compat for day 1',
+  seeded.todayTask.title === getCurrentResetTask(seeded).title && seeded.todayTask.day === 1,
+);
+
+const existingUser = snapshot({
+  currentDay: 4,
+  completedDays: [1, 2],
+  resetTypeId: 'fading-flame',
+  resetStartedOn: '2026-09-16',
+  lastSeenOn: '2026-09-19',
+  personalization: personalization({ dailyCommitment: 'twenty' }),
+});
+const keepStoredType = applyEnsureSeeded(existingUser, OVERLOADED_ANSWERS, dateOn('2026-09-19'));
+check(
+  'ensureSeeded keeps a valid stored resetTypeId',
+  keepStoredType.resetTypeId === 'fading-flame',
+);
+check(
+  'ensureSeeded does not silently reset an existing user',
+  keepStoredType.currentDay === 4 && keepStoredType.completedDays.join(',') === '1,2',
+);
+check(
+  'resolveStoredResetTypeId never reclassifies a valid stored type',
+  resolveStoredResetTypeId('fading-flame', OVERLOADED_ANSWERS) === 'fading-flame',
+);
+
+const deriveOnce = applyEnsureSeeded(
+  { ...existingUser, resetTypeId: 'unknown-old-type' },
+  OVERLOADED_ANSWERS,
+  dateOn('2026-09-19'),
+);
+check(
+  'ensureSeeded derives once when stored type is invalid and answers exist',
+  deriveOnce.resetTypeId === 'overloaded-dreamer' && deriveOnce.currentDay === 4,
+);
+
+const legacyFallback = applyEnsureSeeded(
+  { ...existingUser, resetTypeId: '' },
+  {},
+  dateOn('2026-09-19'),
+);
+check(
+  'ensureSeeded uses legacy overloaded-dreamer when type is missing and there are no answers',
+  legacyFallback.resetTypeId === LEGACY_FALLBACK_RESET_TYPE_ID && legacyFallback.currentDay === 4,
+);
+
+const freshSeed = applyEnsureSeeded(
+  snapshot({ resetStartedOn: null, lastSeenOn: null, resetTypeId: '' }),
+  RESTARTER_ANSWERS,
+  dateOn('2026-09-19'),
+);
+check(
+  'ensureSeeded seeds a new user from onboarding',
+  freshSeed.resetStartedOn === '2026-09-19' &&
+    freshSeed.currentDay === 1 &&
+    freshSeed.resetTypeId === 'soft-restarter',
+);
+
+check(
+  'complete writes todayTask as legacy compat',
+  completed.todayTask.title === getCurrentResetTask(completed).title,
+);
+check(
+  'rollover writes todayTask as legacy compat',
+  nextMorning.todayTask.title === getCurrentResetTask(nextMorning).title &&
+    nextMorning.todayTask.day === 2,
+);
+
+const staleTask = snapshot({
+  currentDay: 2,
+  todayTask: getTaskForDay(1, defaultPersonalization),
+});
+check(
+  'canonical task read ignores a stale persisted todayTask',
+  getCurrentResetTask(staleTask).title === getTaskForDay(2, defaultPersonalization).title &&
+    getCurrentResetTask(staleTask).title !== staleTask.todayTask.title,
 );
 
 if (failed > 0) {

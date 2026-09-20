@@ -1,15 +1,16 @@
+import type { OnboardingAnswer } from '../../onboarding/types/onboarding';
 import {
-  getSingleChoiceId,
   getMultiChoiceIds,
+  getSingleChoiceId,
   getTextInputValue,
-} from '@/features/onboarding/utils/answerReaders';
-import type { OnboardingAnswer } from '@/features/onboarding/types/onboarding';
-import { deriveResetApproach } from '@/features/onboarding/utils/deriveResetApproach';
-import { deriveRetentionProfile } from '@/features/onboarding/utils/deriveRetentionProfile';
-import { toLocalDateKey } from '@/features/reset/utils/calendar';
-import { deriveResetType } from '@/features/reset/utils/deriveResetType';
-import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
-import type { ResetPersonalization, ResetSnapshot } from '@/features/reset/types';
+} from '../../onboarding/utils/answerReaders';
+import { deriveResetApproach } from '../../onboarding/utils/deriveResetApproach';
+import { deriveRetentionProfile } from '../../onboarding/utils/deriveRetentionProfile';
+import type { ResetPersonalization, ResetSnapshot } from '../types';
+import { processDateRollover } from './applyDateRollover';
+import { toLocalDateKey } from './calendar';
+import { deriveResetType, resolveStoredResetTypeId } from './deriveResetType';
+import { getCurrentResetTask } from './resetSelectors';
 
 function commitmentIdFromApproachTime(time?: string): string | undefined {
   if (time === '5 minutes/day') {
@@ -57,7 +58,7 @@ export function createSeededResetState(
     completedDays: [],
     todayCompleted: false,
     todayStarted: false,
-    todayTask: getTaskForDay(1, personalization),
+    todayTask: getCurrentResetTask({ currentDay: 1, personalization }),
     resetStartedOn: today,
     lastSeenOn: today,
     lastCompletedOn: null,
@@ -68,4 +69,26 @@ export function createSeededResetState(
     personalization,
     reflections: [],
   };
+}
+
+/**
+ * Seed once. If a reset already exists, keep progress and only resolve a
+ * missing/invalid resetTypeId. Never reclassify a valid stored type.
+ */
+export function applyEnsureSeeded(
+  state: ResetSnapshot,
+  answers: Record<string, OnboardingAnswer>,
+  now: Date = new Date(),
+): ResetSnapshot {
+  if (state.resetStartedOn) {
+    const rolled = processDateRollover(state, now);
+    const resetTypeId = resolveStoredResetTypeId(rolled.resetTypeId, answers);
+    const profileAccuracy = rolled.profileAccuracy ?? getSingleChoiceId(answers, 'profileAccuracy');
+    if (resetTypeId !== rolled.resetTypeId || profileAccuracy !== rolled.profileAccuracy) {
+      return { ...rolled, resetTypeId, profileAccuracy };
+    }
+    return rolled;
+  }
+
+  return createSeededResetState(answers, now);
 }

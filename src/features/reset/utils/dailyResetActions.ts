@@ -1,8 +1,8 @@
 import type { JournalMood, ResetSnapshot } from '../types';
 import { PLAN_DAY_COUNT } from '../data/thirtyDayPlan';
-import { applyDateRollover } from './applyDateRollover';
+import { processDateRollover } from './applyDateRollover';
 import { shiftDateKey, toLocalDateKey } from './calendar';
-import { getTaskForDay } from './getTaskForDay';
+import { getCurrentResetTask } from './resetSelectors';
 
 export function applyStartToday(state: ResetSnapshot): ResetSnapshot {
   if (!state.resetStartedOn || state.todayCompleted) {
@@ -17,7 +17,7 @@ export function applyStartToday(state: ResetSnapshot): ResetSnapshot {
 
 export function applyCompleteToday(state: ResetSnapshot, now: Date): ResetSnapshot {
   const today = toLocalDateKey(now);
-  const rolled = applyDateRollover(state, today);
+  const rolled = processDateRollover(state, now);
   if (rolled.todayCompleted) {
     return rolled;
   }
@@ -45,7 +45,7 @@ export function applyCompleteToday(state: ResetSnapshot, now: Date): ResetSnapsh
     lastCompletedOn: today,
     streak: Math.min(PLAN_DAY_COUNT, streak),
     missedYesterday: false,
-    todayTask: getTaskForDay(rolled.currentDay, rolled.personalization),
+    todayTask: getCurrentResetTask(rolled),
   };
 }
 
@@ -55,7 +55,7 @@ export function applySaveReflection(
   now: Date,
 ): ResetSnapshot {
   const today = toLocalDateKey(now);
-  const rolled = applyDateRollover(state, today);
+  const rolled = processDateRollover(state, now);
   const text = input.text.trim();
   if (!text) {
     return rolled;

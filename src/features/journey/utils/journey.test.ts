@@ -17,6 +17,7 @@ import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
 import { PLAN_DAY_COUNT, getPlanDayTitle } from '../../reset/data/thirtyDayPlan';
 import { applyStartToday } from '../../reset/utils/dailyResetActions';
 import { getTaskForDay } from '../../reset/utils/getTaskForDay';
+import { getCurrentResetTask } from '../../reset/utils/resetSelectors';
 import { getJourneyDayState } from './getJourneyDayState';
 import {
   applyJourneySheetAction,
@@ -231,10 +232,10 @@ check(
     completedCurrentModel.ctaLabel === null,
 );
 
-const homeDay8 = getTaskForDay(8, defaultPersonalization);
-const journeyDay8 = getTaskForDay(8, defaultPersonalization);
-const homeDay30 = getTaskForDay(30, defaultPersonalization);
-const journeyDay30 = getTaskForDay(30, defaultPersonalization);
+const homeDay8 = getCurrentResetTask(snapshot({ currentDay: 8 }));
+const journeyDay8 = getCurrentResetTask(snapshot({ currentDay: 8 }));
+const homeDay30 = getCurrentResetTask(snapshot({ currentDay: 30 }));
+const journeyDay30 = getCurrentResetTask(snapshot({ currentDay: 30 }));
 check(
   '15. Home and Journey titles are identical for the same day',
   homeDay8.title === journeyDay8.title &&

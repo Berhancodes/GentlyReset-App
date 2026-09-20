@@ -1,5 +1,5 @@
-import { getSingleChoiceId } from '@/features/onboarding/utils/answerReaders';
-import type { OnboardingAnswer } from '@/features/onboarding/types/onboarding';
+import type { OnboardingAnswer } from '../types/onboarding';
+import { getSingleChoiceId } from './answerReaders';
 
 const TIME_LABEL: Record<string, string> = {
   five: '5 minutes/day',

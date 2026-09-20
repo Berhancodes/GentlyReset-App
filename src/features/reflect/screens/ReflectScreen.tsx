@@ -30,6 +30,7 @@ import { latestReflection } from '@/features/reflect/utils/journalHistory';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { getJournalPrompt } from '@/features/reset/utils/journalPrompt';
+import { getCurrentResetTask } from '@/features/reset/utils/resetSelectors';
 import type { JournalEntry, JournalMood } from '@/features/reset/types';
 
 export function ReflectScreen() {
@@ -42,9 +43,9 @@ export function ReflectScreen() {
 
   const currentDay = useResetStore((state) => state.currentDay);
   const personalization = useResetStore((state) => state.personalization);
-  const todayTask = useResetStore((state) => state.todayTask);
   const reflections = useResetStore((state) => state.reflections);
   const saveReflection = useResetStore((state) => state.saveReflection);
+  const todayTask = getCurrentResetTask({ currentDay, personalization });
   const prompt = getJournalPrompt(todayTask.title, personalization);
   const savedToday = reflections.find((entry) => entry.day === currentDay);
   const recent = useMemo(() => latestReflection(reflections), [reflections]);

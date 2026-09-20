@@ -12,7 +12,7 @@ type ProfileHeroProps = {
   shortSummary: string;
   resetApproach: string;
   currentDay: number;
-  completedCount: number;
+  progress: number;
 };
 
 export function ProfileHero({
@@ -20,11 +20,9 @@ export function ProfileHero({
   shortSummary,
   resetApproach,
   currentDay,
-  completedCount,
+  progress,
 }: ProfileHeroProps) {
   const safeDay = Math.min(PLAN_DAY_COUNT, Math.max(1, currentDay));
-  const safeCompleted = Math.min(PLAN_DAY_COUNT, Math.max(0, completedCount));
-  const progress = Math.max(safeDay, safeCompleted) / PLAN_DAY_COUNT;
   const approach = resetApproach.trim().length > 0 ? resetApproach : 'one thing at a time';
 
   return (

@@ -1,11 +1,11 @@
 import { PLAN_DAY_COUNT } from '../data/thirtyDayPlan';
 import type { ResetSnapshot } from '../types';
-import { calendarDaysBetween, shiftDateKey } from './calendar';
-import { getTaskForDay } from './getTaskForDay';
+import { calendarDaysBetween, shiftDateKey, toLocalDateKey } from './calendar';
+import { getCurrentResetTask } from './resetSelectors';
 
 /**
- * Advances calendar-aware Home state without skipping unfinished plan days.
- * Completing a day unlocks the next plan day on a later calendar date (once).
+ * The one date-rollover calculation. Tabs and actions go through
+ * processDateRollover; do not copy this logic into screens.
  */
 export function applyDateRollover(state: ResetSnapshot, today: string): ResetSnapshot {
   const snapshot: ResetSnapshot = {
@@ -40,7 +40,10 @@ export function applyDateRollover(state: ResetSnapshot, today: string): ResetSna
       todayStarted: true,
       missedYesterday: !completedYesterday && elapsed > 1,
       streak,
-      todayTask: getTaskForDay(PLAN_DAY_COUNT, snapshot.personalization),
+      todayTask: getCurrentResetTask({
+        currentDay: PLAN_DAY_COUNT,
+        personalization: snapshot.personalization,
+      }),
     };
   }
 
@@ -54,7 +57,10 @@ export function applyDateRollover(state: ResetSnapshot, today: string): ResetSna
       todayStarted: false,
       missedYesterday: !completedYesterday && elapsed > 1,
       streak,
-      todayTask: getTaskForDay(nextDay, snapshot.personalization),
+      todayTask: getCurrentResetTask({
+        currentDay: nextDay,
+        personalization: snapshot.personalization,
+      }),
     };
   }
 
@@ -65,6 +71,11 @@ export function applyDateRollover(state: ResetSnapshot, today: string): ResetSna
     todayStarted: false,
     missedYesterday: true,
     streak,
-    todayTask: getTaskForDay(snapshot.currentDay, snapshot.personalization),
+    todayTask: getCurrentResetTask(snapshot),
   };
+}
+
+/** Application entry for calendar sync. Calculation stays in applyDateRollover. */
+export function processDateRollover(state: ResetSnapshot, now: Date): ResetSnapshot {
+  return applyDateRollover(state, toLocalDateKey(now));
 }

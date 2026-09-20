@@ -15,7 +15,12 @@ import { getJourneySheetModel } from '@/features/journey/utils/getJourneySheetMo
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
-import { getTaskForDay } from '@/features/reset/utils/getTaskForDay';
+import {
+  getCompletedDayCount,
+  getCurrentPlanDay,
+  getCurrentResetTask,
+  getResetProgress,
+} from '@/features/reset/utils/resetSelectors';
 
 function JourneyMapGlyph() {
   return (
@@ -40,8 +45,11 @@ export function JourneyScreen() {
   const startToday = useResetStore((state) => state.startToday);
 
   const rememberLine = getResetProfile(resetTypeId).homeSupportLine;
-  const chapter = getJourneyChapterForDay(currentDay);
-  const currentTask = getTaskForDay(currentDay, personalization);
+  const planDay = getCurrentPlanDay({ currentDay });
+  const chapter = getJourneyChapterForDay(planDay);
+  const currentTask = getCurrentResetTask({ currentDay, personalization });
+  const completedCount = getCompletedDayCount({ completedDays });
+  const progress = getResetProgress({ completedDays });
 
   const sheetModel =
     selectedDay === null
@@ -87,8 +95,9 @@ export function JourneyScreen() {
         <>
           <View style={styles.progress}>
             <DayProgressHeader
-              currentDay={currentDay}
-              completedCount={completedDays.length}
+              currentDay={planDay}
+              completedCount={completedCount}
+              progress={progress}
               thickness={spacing.xxs}
               fillColor={colors.accent.gold}
               trackColor={colors.progress.track}
