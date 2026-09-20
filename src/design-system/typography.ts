@@ -17,7 +17,9 @@ export const fontFamilies = {
 export const fontSizes = {
   tab: 11,
   xs: 13,
+  statLabel: 14,
   sm: 15,
+  statValue: 18,
   md: 17,
   lg: 20,
   nav: 22,
@@ -31,7 +33,9 @@ export const fontSizes = {
 export const lineHeights = {
   tab: 14,
   xs: 18,
+  statLabel: 16,
   sm: 20,
+  statValue: 20,
   md: 24,
   lg: 28,
   nav: 28,
@@ -218,15 +222,15 @@ export const textVariants = {
   },
   worldStatValue: {
     fontFamily: fontFamilies.rounded,
-    fontSize: fontSizes.lg,
-    lineHeight: 22,
+    fontSize: fontSizes.statValue,
+    lineHeight: lineHeights.statValue,
     fontWeight: fontWeights.bold,
-    letterSpacing: -0.25,
+    letterSpacing: -0.3,
   },
   worldStatLabel: {
     fontFamily: fontFamilies.sans,
-    fontSize: fontSizes.sm,
-    lineHeight: 17,
+    fontSize: fontSizes.statLabel,
+    lineHeight: lineHeights.statLabel,
     fontWeight: fontWeights.medium,
   },
 } as const satisfies Record<string, TextStyle>;

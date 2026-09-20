@@ -7,6 +7,7 @@ export const radius = {
   xl: 24,
   tabBar: 40,
   xxl: 32,
+  statsPanel: 28,
   quote: 36,
   pill: 999,
 } as const;

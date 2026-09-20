@@ -32,7 +32,7 @@ export const WORLD_COVER_BOTTOM = 0.59;
 export const WORLD_STATS_OVERLAP = 40;
 
 /** Tall rounded rectangle — not a 50pt capsule. */
-export const WORLD_STATS_CARD_HEIGHT = 100;
+export const WORLD_STATS_CARD_HEIGHT = 104;
 
 export const WORLD_COLUMN_MAX_WIDTH = 430;
 

@@ -23,10 +23,21 @@ export function WorldStatsCard() {
           <View style={styles.stat}>
             <WorldStatIcon glyph={stat.glyph} />
             <View style={styles.copy}>
-              <AppText variant="worldStatValue" numberOfLines={1}>
+              <AppText
+                variant="worldStatValue"
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.85}
+              >
                 {stat.value}
               </AppText>
-              <AppText variant="worldStatLabel" color="helper" numberOfLines={1}>
+              <AppText
+                variant="worldStatLabel"
+                color="helper"
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.85}
+              >
                 {stat.label}
               </AppText>
             </View>
@@ -42,9 +53,10 @@ const styles = StyleSheet.create({
     minHeight: WORLD_STATS_CARD_HEIGHT,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-    borderRadius: radius.quote,
+    borderRadius: radius.statsPanel,
     backgroundColor: colors.surface.quote,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border.subtle,
@@ -53,20 +65,21 @@ const styles = StyleSheet.create({
     ...shadows.whisper,
   },
   stat: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
+    flexShrink: 1,
     minWidth: 0,
     overflow: 'visible',
-    paddingHorizontal: spacing.xxs,
   },
   separator: {
     width: StyleSheet.hairlineWidth,
     height: spacing.xl,
     backgroundColor: colors.border.subtle,
     alignSelf: 'center',
+    flexShrink: 0,
+    marginHorizontal: spacing.xs,
   },
   copy: {
     minWidth: 0,
