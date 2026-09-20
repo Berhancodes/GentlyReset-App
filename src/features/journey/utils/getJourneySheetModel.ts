@@ -1,12 +1,12 @@
+import { startResetDay } from '../../../application/reset/startResetDay';
+import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
+import { formatMinutesLabel, getTaskForDay } from '../../reset/utils/getTaskForDay';
 import {
   getJourneyChapterDays,
   getJourneyChapterForDay,
   getJourneyWeekLabel,
 } from '../data/journeyChapters';
 import { getJourneyDayState, type JourneyDayKind } from './getJourneyDayState';
-import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
-import { applyStartToday } from '../../reset/utils/dailyResetActions';
-import { formatMinutesLabel, getTaskForDay } from '../../reset/utils/getTaskForDay';
 
 export type JourneySheetCta = 'start' | 'continue' | 'none';
 
@@ -121,14 +121,14 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
 export type JourneySheetAction = 'open' | 'start' | 'continue' | 'close';
 
 /**
- * Journey never completes a reset. Only "start" mutates, via applyStartToday.
+ * Journey never completes a reset. Only "start" mutates, via startResetDay.
  */
 export function applyJourneySheetAction(
   snapshot: ResetSnapshot,
   action: JourneySheetAction,
 ): ResetSnapshot {
   if (action === 'start') {
-    return applyStartToday(snapshot);
+    return startResetDay(snapshot);
   }
   return snapshot;
 }

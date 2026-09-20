@@ -75,7 +75,7 @@ export function applyDateRollover(state: ResetSnapshot, today: string): ResetSna
   };
 }
 
-/** Application entry for calendar sync. Calculation stays in applyDateRollover. */
+/** Phase 1 calendar calculation. Application `processDateRollover` is the use-case entry. */
 export function processDateRollover(state: ResetSnapshot, now: Date): ResetSnapshot {
   return applyDateRollover(state, toLocalDateKey(now));
 }

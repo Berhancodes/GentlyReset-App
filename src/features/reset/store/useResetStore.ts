@@ -1,14 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+import { saveReflection as saveReflectionCommand } from '@/application/journal/saveReflection';
+import { completeResetDay } from '@/application/reset/completeResetDay';
+import { processDateRollover } from '@/application/reset/processDateRollover';
+import { ensureSeeded as ensureSeededCommand, startReset } from '@/application/reset/startReset';
+import { startResetDay } from '@/application/reset/startResetDay';
 import type { OnboardingAnswer } from '@/features/onboarding/types/onboarding';
 import type { JournalMood, ResetSnapshot } from '@/features/reset/types';
-import { processDateRollover } from '@/features/reset/utils/applyDateRollover';
-import {
-  applyCompleteToday,
-  applySaveReflection,
-  applyStartToday,
-} from '@/features/reset/utils/dailyResetActions';
 import {
   migrateResetPersistState,
   partializeResetState,
@@ -16,7 +15,6 @@ import {
   RESET_PERSIST_VERSION,
 } from '@/features/reset/utils/resetPersist';
 import { getCurrentResetTask } from '@/features/reset/utils/resetSelectors';
-import { applyEnsureSeeded, createSeededResetState } from '@/features/reset/utils/seedResetState';
 import { asyncPersistStorage } from '@/utils/persistStorage';
 
 const emptyPersonalization = {
@@ -56,10 +54,10 @@ export const useResetStore = create<ResetSnapshot & ResetActions>()(
     (set, get) => ({
       ...initialSnapshot,
       seedFromOnboarding: (answers, now = new Date()) => {
-        set(createSeededResetState(answers, now));
+        set(startReset(get(), answers, now));
       },
       ensureSeeded: (answers, now = new Date()) => {
-        set(applyEnsureSeeded(get(), answers, now));
+        set(ensureSeededCommand(get(), answers, now));
       },
       applyCalendarDay: (now = new Date()) => {
         const current = get();
@@ -73,13 +71,13 @@ export const useResetStore = create<ResetSnapshot & ResetActions>()(
         get().applyCalendarDay(now);
       },
       startToday: () => {
-        set(applyStartToday(get()));
+        set(startResetDay(get()));
       },
       completeToday: (now = new Date()) => {
-        set(applyCompleteToday(get(), now));
+        set(completeResetDay(get(), now));
       },
       saveReflection: (input, now = new Date()) => {
-        set(applySaveReflection(get(), input, now));
+        set(saveReflectionCommand(get(), input, now));
       },
       clearReset: () => set(initialSnapshot),
     }),

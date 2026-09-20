@@ -5,6 +5,7 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "paths": {
+      "@/application/*": ["./src/application/*"],
       "@/components/*": ["./src/components/*"],
       "@/domain/*": ["./src/domain/*"],
       "@/features/*": ["./src/features/*"],

@@ -11,6 +11,8 @@ const forbidden = [
   [/from\s+['"]@react-native-async-storage\//, 'AsyncStorage'],
   [/from\s+['"][^'"]*features\//, 'features'],
   [/from\s+['"]@\/features\//, '@/features'],
+  [/from\s+['"][^'"]*application\//, 'application'],
+  [/from\s+['"]@\/application\//, '@/application'],
   [/from\s+['"]@\/components\//, '@/components'],
   [/from\s+['"]@\/navigation\//, '@/navigation'],
 ];
