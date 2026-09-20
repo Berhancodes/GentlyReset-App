@@ -29,15 +29,15 @@ export const JOURNAL_SKY_COVER_FOCUS = {
 
 /** Writing mascot, relative to the writing card. */
 export const JOURNAL_MASCOT_WRITING_LAYOUT = {
-  width: 0.46,
-  right: 0,
+  width: 0.52,
+  right: 0.01,
   bottom: 0,
 } as const;
 
 export const JOURNAL_WRITING_CARD = {
   minHeightFloor: 260,
-  minHeightCeiling: 360,
-  heightRatio: 0.38,
+  minHeightCeiling: 340,
+  heightRatio: 0.34,
   lineGap: 28,
 } as const;
 

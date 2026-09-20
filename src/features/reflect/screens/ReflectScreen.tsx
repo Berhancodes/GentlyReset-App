@@ -80,7 +80,7 @@ export function ReflectScreen() {
           style={styles.scroll}
           contentContainerStyle={[
             styles.content,
-            { paddingBottom: getTabBarScenePadding(insets.bottom) + spacing.md },
+            { paddingBottom: getTabBarScenePadding(insets.bottom) + spacing.lg },
           ]}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
@@ -209,13 +209,12 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.xs,
+    paddingTop: spacing.xxs,
     gap: spacing.md,
   },
   hero: {
-    gap: spacing.xs,
+    gap: spacing.xxs,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xs,
     paddingBottom: spacing.xxs,
   },
   composer: {
@@ -223,7 +222,6 @@ const styles = StyleSheet.create({
   },
   recent: {
     gap: spacing.sm,
-    paddingTop: spacing.xs,
   },
   recentHeader: {
     flexDirection: 'row',

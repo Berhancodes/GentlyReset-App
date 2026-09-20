@@ -40,7 +40,7 @@ export function RecentEntryCard({ entry, onPress }: RecentEntryCardProps) {
       </View>
       <Ionicons
         name="chevron-forward"
-        size={18}
+        size={20}
         color={colors.text.helper}
         accessibilityElementsHidden
       />

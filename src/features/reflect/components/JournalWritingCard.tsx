@@ -14,7 +14,7 @@ import {
 
 const MASCOT_ART = require('../../../../assets/images/app/journal-mascot-writing.png');
 
-const ICON_SIZE = 26;
+const ICON_SIZE = 28;
 
 type JournalWritingCardProps = {
   value: string;
@@ -35,8 +35,8 @@ export function JournalWritingCard({
 }: JournalWritingCardProps) {
   const [cardHeight, setCardHeight] = useState(0);
   const lineGap = JOURNAL_WRITING_CARD.lineGap;
-  const firstLine = spacing.lg + spacing.md;
-  const footerReserve = spacing.xxxl;
+  const firstLine = spacing.md + lineGap;
+  const footerReserve = spacing.xxxl + spacing.sm;
   const lineCount =
     cardHeight > 0
       ? Math.max(4, Math.floor((cardHeight - firstLine - footerReserve) / lineGap))
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: spacing.md,
     right: spacing.md,
-    height: StyleSheet.hairlineWidth,
+    height: 1,
     backgroundColor: colors.border.notebook,
   },
   input: {
