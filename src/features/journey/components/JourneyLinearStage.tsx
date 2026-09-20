@@ -167,25 +167,23 @@ function JourneyPathBand({
           resizeMode="contain"
           accessibilityElementsHidden
           importantForAccessibility="no"
-          style={styles.fillImage}
+          style={[styles.fillImage, { width: layout.sign.width, height: layout.sign.height }]}
         />
       </View>
 
-      <View style={[styles.mascotLayer, rectStyle(layout.mascot)]} pointerEvents="box-none">
-        <Pressable
-          accessible={false}
-          onPress={() => onPressDay(currentDayValue)}
-          style={styles.mascotHit}
-        >
-          <Image
-            source={JOURNEY_SPRITES.mascotStand}
-            resizeMode="contain"
-            accessibilityElementsHidden
-            importantForAccessibility="no"
-            style={styles.fillImage}
-          />
-        </Pressable>
-      </View>
+      <Pressable
+        accessible={false}
+        onPress={() => onPressDay(currentDayValue)}
+        style={[styles.mascotLayer, rectStyle(layout.mascot)]}
+      >
+        <Image
+          source={JOURNEY_SPRITES.mascotStand}
+          resizeMode="contain"
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+          style={[styles.fillImage, { width: layout.mascot.width, height: layout.mascot.height }]}
+        />
+      </Pressable>
 
       <View
         pointerEvents="none"
@@ -281,10 +279,7 @@ const styles = StyleSheet.create({
   mascotLayer: {
     position: 'absolute',
     zIndex: 3,
-  },
-  mascotHit: {
-    flex: 1,
-    minHeight: spacing.hitTarget,
+    overflow: 'visible',
   },
   nodeSlot: {
     position: 'absolute',

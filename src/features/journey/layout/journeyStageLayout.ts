@@ -8,7 +8,7 @@ import { clampJourneyDay } from '../data/journeyChapters';
 export const JOURNEY_DAY1_ANCHORS = {
   day1X: 0.44,
   day2X: 0.79,
-  signX: 0.19,
+  signX: 0.205,
   bushX: 0.84,
   sunX: 0.8,
   sunY: 0.14,
@@ -201,7 +201,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
 
   // Feet sit on the line; the node intersects the line and nearly touches the feet.
   const feetFromMascotTop = mascotHeight * JOURNEY_MASCOT_ART.feetY;
-  const lineFromMascotTop = feetFromMascotTop + nodeSize * 0.06;
+  const lineFromMascotTop = feetFromMascotTop + 1;
   const sceneHeight = lineFromMascotTop + nodeSize / 2 + labelBlock + pathBottomPad;
   const illustratedMin = clampLayout(safeHeight * 0.52, compact ? 200 : 236, 340);
   const pathHeight = Math.max(sceneHeight, illustratedMin);
