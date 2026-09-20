@@ -154,6 +154,8 @@ const styles = StyleSheet.create({
     zIndex: 2,
     borderWidth: 0,
     includeFontPadding: false,
+    outlineWidth: 0,
+    outlineColor: colors.overlay.clear,
   },
   footer: {
     zIndex: 3,
