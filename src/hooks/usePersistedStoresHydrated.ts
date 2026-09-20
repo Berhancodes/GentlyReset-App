@@ -7,7 +7,20 @@ function bothHydrated(): boolean {
   return useOnboardingStore.persist.hasHydrated() && useResetStore.persist.hasHydrated();
 }
 
-/** Wait for persisted onboarding + daily reset before routing. */
+/**
+ * Wait for persisted onboarding + daily reset before routing.
+ *
+ * Hydration guarantees (Phase 2C):
+ * - `useResetStore` persist key is `gently-reset-daily` version 1.
+ * - In-memory defaults must not be written to persist before rehydrate.
+ *   The store and ResetRepository adapters do not `saveSnapshot` on
+ *   construction; the persist middleware loads AsyncStorage first.
+ * - Root layout renders no app screens until this hook is true, so
+ *   store mutations / repository writes cannot overwrite a stored
+ *   user with defaults.
+ * - Onboarding remains `gently-reset-onboarding`. ResetRepository
+ *   is not the onboarding store.
+ */
 export function usePersistedStoresHydrated(): boolean {
   const [hydrated, setHydrated] = useState(bothHydrated);
 

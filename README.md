@@ -50,6 +50,9 @@ app/                         # Expo Router entry points — keep these thin
   (app)/(tabs)/              # Home, Journey, Reflect, World, Profile
 
 src/
+  domain/                    # Reset/journal rules and models
+  application/               # Use cases + ResetRepository contract
+  data/                      # Local reset adapter (Zustand / AsyncStorage)
   design-system/             # Semantic color, space, type, radius, shadow tokens
   components/ui/             # Reusable primitives (Screen, AppText, buttons, …)
   features/                  # Feature modules (screens, data, hooks, store)

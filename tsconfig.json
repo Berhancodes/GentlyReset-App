@@ -7,6 +7,7 @@
     "paths": {
       "@/application/*": ["./src/application/*"],
       "@/components/*": ["./src/components/*"],
+      "@/data/*": ["./src/data/*"],
       "@/domain/*": ["./src/domain/*"],
       "@/features/*": ["./src/features/*"],
       "@/design-system": ["./src/design-system/index.ts"],

@@ -19,6 +19,9 @@ import {
  * Used by tab sync.
  *
  * Neither command changes onboarding answers or classification rules.
+ *
+ * ResetRepository is not the onboarding store. Seeding still uses these
+ * snapshot transitions (or `createResetApplication(repo).startReset`).
  */
 export function startReset(
   state: ResetSnapshot,

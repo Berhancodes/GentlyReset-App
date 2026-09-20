@@ -6,6 +6,8 @@ import { applyCompleteToday } from '../../features/reset/utils/dailyResetActions
  * Delegates to Phase 1 `applyCompleteToday` — the one complete implementation.
  *
  * This is not `completeResetCycle`. Day 30 stays Day 30. No Cycle 2, no Day 31.
+ *
+ * Snapshot-in/out (Phase 2B). Repo-backed: `createResetApplication(repo).completeResetDay()`.
  */
 export function completeResetDay(state: ResetSnapshot, now: Date = new Date()): ResetSnapshot {
   return applyCompleteToday(state, now);

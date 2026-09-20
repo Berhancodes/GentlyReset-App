@@ -13,6 +13,8 @@ const forbidden = [
   [/from\s+['"]@\/features\//, '@/features'],
   [/from\s+['"][^'"]*application\//, 'application'],
   [/from\s+['"]@\/application\//, '@/application'],
+  [/from\s+['"](?:@\/data\/|(?:\.\.\/)+data\/)/, 'data layer'],
+  [/from\s+['"]@\/data\//, '@/data'],
   [/from\s+['"]@\/components\//, '@/components'],
   [/from\s+['"]@\/navigation\//, '@/navigation'],
 ];

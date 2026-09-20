@@ -5,6 +5,8 @@ import { applyStartToday } from '../../features/reset/utils/dailyResetActions';
  * Mark today's local reset day as started.
  * Delegates to Phase 1 `applyStartToday` — the one start implementation.
  * No-op when not seeded or already completed. Does not complete or advance.
+ *
+ * Snapshot-in/out (Phase 2B). Repo-backed: `createResetApplication(repo).startResetDay()`.
  */
 export function startResetDay(state: ResetSnapshot): ResetSnapshot {
   return applyStartToday(state);

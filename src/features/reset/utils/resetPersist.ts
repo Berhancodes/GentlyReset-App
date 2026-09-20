@@ -1,5 +1,6 @@
 import type { ResetSnapshot } from '../types';
 
+/** One local persist key. Phase 2C repository writes through this store only. */
 export const RESET_PERSIST_KEY = 'gently-reset-daily';
 export const RESET_PERSIST_VERSION = 1;
 

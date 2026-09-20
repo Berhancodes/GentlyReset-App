@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { saveReflection as saveReflectionCommand } from '@/application/journal/saveReflection';
-import { completeResetDay } from '@/application/reset/completeResetDay';
-import { processDateRollover } from '@/application/reset/processDateRollover';
-import { ensureSeeded as ensureSeededCommand, startReset } from '@/application/reset/startReset';
-import { startResetDay } from '@/application/reset/startResetDay';
+import { createResetApplication } from '@/application/createResetApplication';
+import {
+  createResetRepositoryFromAccessors,
+  type ResetRepository,
+} from '@/application/reset/ResetRepository';
 import type { OnboardingAnswer } from '@/features/onboarding/types/onboarding';
 import type { JournalMood, ResetSnapshot } from '@/features/reset/types';
 import {
@@ -49,38 +49,59 @@ type ResetActions = {
   clearReset: () => void;
 };
 
+/**
+ * After Phase 2C this store is the reactive UI cache and the persist
+ * bridge (`gently-reset-daily` v1). Business rules live in application
+ * commands; this file only binds get/set to ResetRepository.
+ *
+ * Hydration: persist middleware loads AsyncStorage before UI mounts
+ * (`usePersistedStoresHydrated`). This initializer does not write
+ * `initialSnapshot` to disk. Mutations go through application + repo
+ * after hydrate. ResetRepository is not the onboarding store.
+ */
+function storeResetRepository(
+  get: () => ResetSnapshot,
+  set: (snapshot: ResetSnapshot) => void,
+): ResetRepository {
+  return createResetRepositoryFromAccessors(get, set);
+}
+
 export const useResetStore = create<ResetSnapshot & ResetActions>()(
   persist(
-    (set, get) => ({
-      ...initialSnapshot,
-      seedFromOnboarding: (answers, now = new Date()) => {
-        set(startReset(get(), answers, now));
-      },
-      ensureSeeded: (answers, now = new Date()) => {
-        set(ensureSeededCommand(get(), answers, now));
-      },
-      applyCalendarDay: (now = new Date()) => {
-        const current = get();
-        if (!current.resetStartedOn) {
-          return;
-        }
-        set(processDateRollover(current, now));
-      },
-      syncResetDay: (answers, now = new Date()) => {
-        get().ensureSeeded(answers, now);
-        get().applyCalendarDay(now);
-      },
-      startToday: () => {
-        set(startResetDay(get()));
-      },
-      completeToday: (now = new Date()) => {
-        set(completeResetDay(get(), now));
-      },
-      saveReflection: (input, now = new Date()) => {
-        set(saveReflectionCommand(get(), input, now));
-      },
-      clearReset: () => set(initialSnapshot),
-    }),
+    (set, get) => {
+      const app = () =>
+        createResetApplication(storeResetRepository(get, (snapshot) => set(snapshot)));
+
+      return {
+        ...initialSnapshot,
+        seedFromOnboarding: (answers, now = new Date()) => {
+          app().startReset(answers, now);
+        },
+        ensureSeeded: (answers, now = new Date()) => {
+          app().ensureSeeded(answers, now);
+        },
+        applyCalendarDay: (now = new Date()) => {
+          if (!get().resetStartedOn) {
+            return;
+          }
+          app().processDateRollover(now);
+        },
+        syncResetDay: (answers, now = new Date()) => {
+          get().ensureSeeded(answers, now);
+          get().applyCalendarDay(now);
+        },
+        startToday: () => {
+          app().startResetDay();
+        },
+        completeToday: (now = new Date()) => {
+          app().completeResetDay(now);
+        },
+        saveReflection: (input, now = new Date()) => {
+          app().saveReflection(input, now);
+        },
+        clearReset: () => set(initialSnapshot),
+      };
+    },
     {
       name: RESET_PERSIST_KEY,
       storage: asyncPersistStorage,
