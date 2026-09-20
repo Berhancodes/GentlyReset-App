@@ -1,5 +1,5 @@
-import { parseLocalDateKey, shiftDateKey, toLocalDateKey } from '@/features/reset/utils/calendar';
-import type { JournalEntry, JournalMood } from '@/features/reset/types';
+import { parseLocalDateKey, shiftDateKey, toLocalDateKey } from '../../reset/utils/calendar';
+import type { JournalEntry, JournalMood } from '../../reset/types';
 
 export const MOOD_LABELS: Record<JournalMood, string> = {
   1: 'awful',
@@ -24,6 +24,21 @@ const MONTH_NAMES = [
   'december',
 ] as const;
 
+const SHORT_MONTH_NAMES = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+] as const;
+
 export function startOfLocalWeek(date: Date): Date {
   const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   start.setDate(start.getDate() - start.getDay());
@@ -46,10 +61,16 @@ export function moodForDate(
   return reflections.find((entry) => entry.date === dateKey)?.mood;
 }
 
+export function sortedReflections(reflections: readonly JournalEntry[]): JournalEntry[] {
+  return [...reflections].sort((left, right) => right.savedAt.localeCompare(left.savedAt));
+}
+
 export function recentReflections(reflections: readonly JournalEntry[], limit = 3): JournalEntry[] {
-  return [...reflections]
-    .sort((left, right) => right.savedAt.localeCompare(left.savedAt))
-    .slice(0, limit);
+  return sortedReflections(reflections).slice(0, limit);
+}
+
+export function latestReflection(reflections: readonly JournalEntry[]): JournalEntry | undefined {
+  return sortedReflections(reflections)[0];
 }
 
 export function weekdayLetter(dateKey: string): string {
@@ -83,4 +104,36 @@ export function formatReflectionListDate(dateKey: string, now: Date = new Date()
   }
 
   return `${monthName} ${date.getDate()}`;
+}
+
+export function formatRecentEntryDate(dateKey: string): string {
+  const date = parseLocalDateKey(dateKey);
+  const monthName = SHORT_MONTH_NAMES[date.getMonth()];
+  if (!monthName) {
+    return dateKey;
+  }
+
+  return `${monthName} ${date.getDate()}, ${date.getFullYear()}`;
+}
+
+const TITLE_MAX_LENGTH = 28;
+
+export function reflectionTitle(text: string): string {
+  const firstLine = text.trim().split('\n')[0] ?? '';
+  const sentence = firstLine.split(/[.!?]/)[0]?.trim() ?? '';
+  if (!sentence) {
+    return 'untitled';
+  }
+  if (sentence.length <= TITLE_MAX_LENGTH) {
+    return sentence;
+  }
+
+  const truncated = sentence.slice(0, TITLE_MAX_LENGTH).trimEnd();
+  const lastSpace = truncated.lastIndexOf(' ');
+  const clipped = lastSpace > 12 ? truncated.slice(0, lastSpace) : truncated;
+  return `${clipped}…`;
+}
+
+export function reflectionPreview(text: string): string {
+  return text.trim().replace(/\s+/g, ' ');
 }

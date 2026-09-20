@@ -23,6 +23,7 @@ export const fontSizes = {
   nav: 22,
   xl: 28,
   question: 30,
+  journalHero: 32,
   display: 34,
   hero: 52,
 } as const;
@@ -36,6 +37,7 @@ export const lineHeights = {
   nav: 28,
   xl: 34,
   question: 36,
+  journalHero: 36,
   display: 40,
   hero: 58,
 } as const;
@@ -138,6 +140,13 @@ export const textVariants = {
     lineHeight: lineHeights.question,
     fontWeight: fontWeights.bold,
     letterSpacing: -0.45,
+  },
+  journalHero: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.journalHero,
+    lineHeight: lineHeights.journalHero,
+    fontWeight: fontWeights.bold,
+    letterSpacing: -0.5,
   },
   questionHelper: {
     fontFamily: fontFamilies.sans,

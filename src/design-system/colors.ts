@@ -74,6 +74,7 @@ export const colors = {
     default: palette.sand,
     selected: palette.brown,
     subtle: palette.sandSubtle,
+    notebook: palette.sand,
     gold: palette.gold,
   },
   action: {
