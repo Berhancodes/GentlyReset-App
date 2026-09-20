@@ -209,6 +209,13 @@ export const textVariants = {
     lineHeight: lineHeights.sm,
     fontWeight: fontWeights.semibold,
   },
+  worldHeroQuote: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.lg,
+    lineHeight: 26,
+    fontWeight: fontWeights.semibold,
+    letterSpacing: -0.2,
+  },
 } as const satisfies Record<string, TextStyle>;
 
 export type TextVariant = keyof typeof textVariants;

@@ -1,90 +1,78 @@
-import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { IconRow, NoticeDialog } from '@/components/ui';
-import { colors, radius, spacing } from '@/design-system';
+import { colors, spacing } from '@/design-system';
+import { WorldActionCard } from '@/features/world/components/WorldActionCard';
 import { INVITE_MESSAGE, inviteFriend } from '@/features/world/utils/inviteFriend';
 
-type Notice = {
+export type WorldNotice = {
   title: string;
   body: string;
 };
 
 type FriendsSectionProps = {
-  compact?: boolean;
+  onNotice: (notice: WorldNotice) => void;
 };
 
-export function FriendsSection({ compact = false }: FriendsSectionProps) {
-  const [notice, setNotice] = useState<Notice | null>(null);
-  const iconSize = compact ? 18 : 20;
+export async function shareWorldInvite(): Promise<WorldNotice | null> {
+  try {
+    const result = await inviteFriend();
+    if (result === 'copied') {
+      return {
+        title: 'invite a friend',
+        body: 'invite text copied. paste it to someone you trust.',
+      };
+    }
+    return null;
+  } catch {
+    return {
+      title: 'invite a friend',
+      body: INVITE_MESSAGE,
+    };
+  }
+}
 
+export function FriendsSection({ onNotice }: FriendsSectionProps) {
   return (
-    <View style={[styles.root, compact ? styles.rootCompact : null]}>
-      <IconRow
-        icon={
-          <View style={[styles.badge, styles.inviteBadge]}>
-            <Ionicons name="add" size={iconSize} color={colors.action.primaryText} />
-          </View>
-        }
+    <View style={styles.root}>
+      <WorldActionCard
+        icon="add"
+        iconBackground={colors.action.primaryBackground}
+        iconColor={colors.action.primaryText}
         title="invite a friend"
         subtitle="reset together is better"
-        showChevron
         onPress={() => {
-          void inviteFriend()
-            .then((result) => {
-              if (result === 'copied') {
-                setNotice({
-                  title: 'invite a friend',
-                  body: 'invite text copied. paste it to someone you trust.',
-                });
-              }
-            })
-            .catch(() => {
-              setNotice({
-                title: 'invite a friend',
-                body: INVITE_MESSAGE,
-              });
-            });
+          void shareWorldInvite().then((notice) => {
+            if (notice) {
+              onNotice(notice);
+            }
+          });
         }}
       />
-      <IconRow
-        icon={
-          <View style={[styles.badge, styles.encourageBadge]}>
-            <Ionicons name="heart" size={iconSize} color={colors.accent.peach} />
-          </View>
-        }
+      <WorldActionCard
+        icon="heart"
+        iconBackground={colors.surface.selected}
+        iconColor={colors.text.primary}
         title="send encouragement"
         subtitle="a little support goes a long way"
-        showChevron
         onPress={() =>
-          setNotice({
+          onNotice({
             title: 'send encouragement',
             body: 'this will need friends on Gently Reset. coming later.',
           })
         }
       />
-      <IconRow
-        icon={
-          <View style={[styles.badge, styles.progressBadge]}>
-            <Ionicons name="people" size={iconSize} color={colors.text.primary} />
-          </View>
-        }
+      <WorldActionCard
+        icon="people"
+        iconBackground={colors.surface.tabSelected}
+        iconColor={colors.text.primary}
         title="view shared progress"
         subtitle="see how you're both doing"
-        showChevron
         onPress={() =>
-          setNotice({
+          onNotice({
             title: 'shared progress',
             body: 'this will need friends on Gently Reset. coming later.',
           })
         }
-      />
-      <NoticeDialog
-        visible={notice !== null}
-        title={notice?.title ?? ''}
-        body={notice?.body ?? ''}
-        onClose={() => setNotice(null)}
       />
     </View>
   );
@@ -93,24 +81,5 @@ export function FriendsSection({ compact = false }: FriendsSectionProps) {
 const styles = StyleSheet.create({
   root: {
     gap: spacing.sm,
-  },
-  rootCompact: {
-    gap: spacing.xs,
-  },
-  badge: {
-    width: spacing.xl,
-    height: spacing.xl,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  inviteBadge: {
-    backgroundColor: colors.action.primaryBackground,
-  },
-  encourageBadge: {
-    backgroundColor: colors.surface.selected,
-  },
-  progressBadge: {
-    backgroundColor: colors.surface.choiceSelected,
   },
 });
