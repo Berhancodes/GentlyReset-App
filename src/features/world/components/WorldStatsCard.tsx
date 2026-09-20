@@ -39,9 +39,8 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: spacing.xxxl,
     paddingHorizontal: spacing.xs,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.xs,
     borderRadius: radius.pill,
     backgroundColor: colors.surface.raised,
     overflow: 'visible',
@@ -55,16 +54,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.xxs,
     minWidth: 0,
+    overflow: 'visible',
   },
   separator: {
     width: StyleSheet.hairlineWidth,
-    height: spacing.xl,
+    height: spacing.lg,
     backgroundColor: colors.border.subtle,
     alignSelf: 'center',
   },
   copy: {
     minWidth: 0,
     flexShrink: 1,
-    gap: 2,
+    justifyContent: 'center',
+    gap: 1,
   },
 });

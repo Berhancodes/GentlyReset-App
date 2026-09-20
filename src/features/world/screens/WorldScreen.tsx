@@ -137,5 +137,6 @@ const styles = StyleSheet.create({
     marginTop: -(WORLD_STATS_OVERLAP + WORLD_STATS_OVERLAP),
     zIndex: 3,
     elevation: 6,
+    overflow: 'visible',
   },
 });
