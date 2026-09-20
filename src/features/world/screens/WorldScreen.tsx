@@ -118,10 +118,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   messageWell: {
-    paddingTop: spacing.xxl,
+    paddingTop: spacing.xl,
     paddingBottom: spacing.xl,
-    alignItems: 'flex-start',
-    paddingLeft: '22%',
+    alignItems: 'center',
+    width: '100%',
   },
   sheet: {
     width: '100%',

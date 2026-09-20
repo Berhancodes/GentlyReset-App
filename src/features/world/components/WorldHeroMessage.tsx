@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
+import { spacing } from '@/design-system';
 
 const HERO_MESSAGE = 'good\npeople\nbrighter\ndays';
 
@@ -26,6 +27,7 @@ export function WorldHeroMessage() {
 
 const styles = StyleSheet.create({
   root: {
+    marginLeft: -spacing.md,
     transform: [{ rotate: '-8deg' }],
   },
 });

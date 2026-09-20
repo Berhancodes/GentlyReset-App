@@ -23,7 +23,7 @@ export const WORLD_HERO_MIN_HEIGHT = 420;
  * Image-space y (0–1) where the hero frame ends: foreground grass just
  * beneath the log. Taller heroes reveal more sky; the bottom stays put.
  */
-export const WORLD_COVER_BOTTOM = 0.575;
+export const WORLD_COVER_BOTTOM = 0.59;
 
 /**
  * How far the stats pill sits up onto the hero grass. Stay inside the

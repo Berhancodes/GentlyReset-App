@@ -158,10 +158,10 @@ const styles = StyleSheet.create({
   },
   avatarFriendCrop: {
     position: 'absolute',
-    width: 108,
-    height: 144,
-    left: -10,
-    top: -48,
+    width: 176,
+    height: 234,
+    left: -34,
+    top: -108,
   },
   copy: {
     flex: 1,
