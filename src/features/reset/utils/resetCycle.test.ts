@@ -70,10 +70,7 @@ check(
   'foundation plan id is foundation-reset',
   thirtyDayPlan.planId === 'foundation-reset' && FOUNDATION_PLAN_ID === 'foundation-reset',
 );
-check(
-  'foundation plan version is 1',
-  thirtyDayPlan.version === 1 && FOUNDATION_PLAN_VERSION === 1,
-);
+check('foundation plan version is 1', thirtyDayPlan.version === 1 && FOUNDATION_PLAN_VERSION === 1);
 check(
   'foundation plan length is 30',
   thirtyDayPlan.length === 30 &&
