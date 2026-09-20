@@ -10,8 +10,8 @@ import {
 } from '@/features/world/data/worldActivity';
 import type { WorldNotice } from '@/features/world/components/FriendsSection';
 
-const MASCOT_HEAD = require('../../../../assets/images/mascot/mascot-head.png');
-const FRIENDS_TOGETHER = require('../../../../assets/images/app/friends-together.png');
+const AVATAR_HAT = require('../../../../assets/images/app/world/avatar-hat.png');
+const AVATAR_GREEN = require('../../../../assets/images/app/world/avatar-green.png');
 
 type WorldActivitySectionProps = {
   onNotice: (notice: WorldNotice) => void;
@@ -77,24 +77,11 @@ function ActivityRow({ item, onPress }: { item: WorldActivityItem; onPress: () =
 }
 
 function ActivityAvatar({ variant }: { variant: WorldActivityAvatar }) {
-  if (variant === 'greenHat') {
-    return (
-      <View style={styles.avatar} accessibilityElementsHidden importantForAccessibility="no">
-        <Image
-          source={FRIENDS_TOGETHER}
-          resizeMode="cover"
-          accessibilityIgnoresInvertColors
-          style={styles.avatarFriendCrop}
-        />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.avatar} accessibilityElementsHidden importantForAccessibility="no">
       <Image
-        source={MASCOT_HEAD}
-        resizeMode="contain"
+        source={variant === 'greenHat' ? AVATAR_GREEN : AVATAR_HAT}
+        resizeMode="cover"
         accessibilityIgnoresInvertColors
         style={styles.avatarArt}
       />
@@ -145,23 +132,12 @@ const styles = StyleSheet.create({
     width: spacing.hitTarget,
     height: spacing.hitTarget,
     borderRadius: radius.pill,
-    backgroundColor: colors.background.secondary,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border.subtle,
     overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexShrink: 0,
   },
   avatarArt: {
-    width: spacing.xl,
-    height: spacing.xl,
-  },
-  avatarFriendCrop: {
-    position: 'absolute',
-    width: 200,
-    height: 266,
-    left: -42,
-    top: -142,
+    width: '100%',
+    height: '100%',
   },
   copy: {
     flex: 1,

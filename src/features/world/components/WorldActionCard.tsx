@@ -3,24 +3,19 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { AppText } from '@/components/ui';
 import { colors, radius, shadows, spacing } from '@/design-system';
+import {
+  WorldActionIcon,
+  type WorldActionGlyph,
+} from '@/features/world/components/WorldIcons';
 
 type WorldActionCardProps = {
-  icon: keyof typeof Ionicons.glyphMap;
-  iconBackground: string;
-  iconColor: string;
+  glyph: WorldActionGlyph;
   title: string;
   subtitle: string;
   onPress: () => void;
 };
 
-export function WorldActionCard({
-  icon,
-  iconBackground,
-  iconColor,
-  title,
-  subtitle,
-  onPress,
-}: WorldActionCardProps) {
+export function WorldActionCard({ glyph, title, subtitle, onPress }: WorldActionCardProps) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -28,9 +23,7 @@ export function WorldActionCard({
       onPress={onPress}
       style={({ pressed }) => [styles.card, pressed ? styles.pressed : null]}
     >
-      <View style={[styles.badge, { backgroundColor: iconBackground }]}>
-        <Ionicons name={icon} size={20} color={iconColor} accessibilityElementsHidden />
-      </View>
+      <WorldActionIcon glyph={glyph} />
       <View style={styles.copy}>
         <AppText variant="optionTitle">{title}</AppText>
         <AppText variant="caption" color="helper">
@@ -42,6 +35,7 @@ export function WorldActionCard({
         size={18}
         color={colors.text.helper}
         accessibilityElementsHidden
+        style={styles.chevron}
       />
     </Pressable>
   );
@@ -62,15 +56,13 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.88,
   },
-  badge: {
-    width: spacing.hitTarget,
-    height: spacing.hitTarget,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   copy: {
     flex: 1,
-    gap: spacing.xs,
+    minWidth: 0,
+    justifyContent: 'center',
+    gap: spacing.xxs,
+  },
+  chevron: {
+    flexShrink: 0,
   },
 });

@@ -12,9 +12,12 @@ const palette = {
   gold: '#E6B84A',
   goldSoft: '#F4E4A8',
   goldPale: '#F7E9B0',
+  goldSun: '#F6E3A0',
   goldDeep: '#C99A32',
   peach: '#EFAE82',
   peachSoft: '#F8E0D0',
+  peachGlow: '#F6D4B8',
+  clay: '#BA6A34',
   sage: '#8E9B63',
   sageSoft: '#E8EDD8',
   blue: '#8799A0',
@@ -99,6 +102,15 @@ export const colors = {
     headerFadeMid: 'rgba(252, 246, 237, 0.36)',
     headerFadeEnd: 'rgba(252, 246, 237, 0)',
     clear: 'rgba(255, 249, 241, 0)',
+  },
+  world: {
+    statCircle: palette.goldSun,
+    actionPlus: palette.brown,
+    actionPlusGlyph: palette.cream,
+    actionHeart: palette.peachGlow,
+    actionHeartGlyph: palette.clay,
+    actionGroup: palette.goldSun,
+    glyph: palette.brown,
   },
 } as const;
 

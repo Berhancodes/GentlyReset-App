@@ -1,11 +1,8 @@
-import type { ComponentProps } from 'react';
-import type Ionicons from '@expo/vector-icons/Ionicons';
-
-type IoniconName = ComponentProps<typeof Ionicons>['name'];
+export type WorldStatGlyph = 'people' | 'globe' | 'heart';
 
 export type WorldStat = {
   id: string;
-  icon: IoniconName;
+  glyph: WorldStatGlyph;
   value: string;
   label: string;
 };
@@ -17,19 +14,19 @@ export type WorldStat = {
 export const WORLD_COMMUNITY_STATS: readonly WorldStat[] = [
   {
     id: 'people',
-    icon: 'people-outline',
+    glyph: 'people',
     value: '1,200+',
     label: 'people here',
   },
   {
     id: 'countries',
-    icon: 'globe-outline',
+    glyph: 'globe',
     value: '50+',
     label: 'countries',
   },
   {
     id: 'kindness',
-    icon: 'heart-outline',
+    glyph: 'heart',
     value: 'kinder',
     label: 'together',
   },

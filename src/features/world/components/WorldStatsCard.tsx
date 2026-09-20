@@ -1,11 +1,10 @@
+import { Fragment } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { AppText } from '@/components/ui';
 import { colors, radius, shadows, spacing } from '@/design-system';
+import { WorldStatIcon } from '@/features/world/components/WorldIcons';
 import { WORLD_COMMUNITY_STATS } from '@/features/world/data/worldStats';
-
-const STAT_ICON_SIZE = 18;
 
 export function WorldStatsCard() {
   return (
@@ -17,23 +16,20 @@ export function WorldStatsCard() {
       style={styles.card}
     >
       {WORLD_COMMUNITY_STATS.map((stat, index) => (
-        <View key={stat.id} style={styles.stat}>
+        <Fragment key={stat.id}>
           {index > 0 ? <View style={styles.separator} /> : null}
-          <View style={styles.cluster}>
-            <Ionicons
-              name={stat.icon}
-              size={STAT_ICON_SIZE}
-              color={colors.text.primary}
-              accessibilityElementsHidden
-            />
+          <View style={styles.stat}>
+            <WorldStatIcon glyph={stat.glyph} />
             <View style={styles.copy}>
-              <AppText variant="optionTitle">{stat.value}</AppText>
-              <AppText variant="caption" color="helper">
+              <AppText variant="optionTitle" numberOfLines={1}>
+                {stat.value}
+              </AppText>
+              <AppText variant="label" color="helper" numberOfLines={2}>
                 {stat.label}
               </AppText>
             </View>
           </View>
-        </View>
+        </Fragment>
       ))}
     </View>
   );
@@ -56,25 +52,20 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    minWidth: 0,
-  },
-  separator: {
-    width: StyleSheet.hairlineWidth,
-    height: spacing.xxl,
-    marginRight: spacing.xs,
-    backgroundColor: colors.border.subtle,
-  },
-  cluster: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
+    gap: spacing.xxs,
     minWidth: 0,
     paddingHorizontal: spacing.xxs,
   },
+  separator: {
+    width: StyleSheet.hairlineWidth,
+    height: spacing.xl,
+    backgroundColor: colors.border.subtle,
+    alignSelf: 'center',
+  },
   copy: {
     minWidth: 0,
+    flexShrink: 1,
     gap: 2,
   },
 });

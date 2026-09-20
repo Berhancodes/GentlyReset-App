@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { colors, spacing } from '@/design-system';
+import { spacing } from '@/design-system';
 import { WorldActionCard } from '@/features/world/components/WorldActionCard';
 import { INVITE_MESSAGE, inviteFriend } from '@/features/world/utils/inviteFriend';
 
@@ -35,9 +35,7 @@ export function FriendsSection({ onNotice }: FriendsSectionProps) {
   return (
     <View style={styles.root}>
       <WorldActionCard
-        icon="add"
-        iconBackground={colors.action.primaryBackground}
-        iconColor={colors.action.primaryText}
+        glyph="plus"
         title="invite a friend"
         subtitle="reset together is better"
         onPress={() => {
@@ -49,9 +47,7 @@ export function FriendsSection({ onNotice }: FriendsSectionProps) {
         }}
       />
       <WorldActionCard
-        icon="heart"
-        iconBackground={colors.surface.selected}
-        iconColor={colors.text.primary}
+        glyph="heart"
         title="send encouragement"
         subtitle="a little support goes a long way"
         onPress={() =>
@@ -62,9 +58,7 @@ export function FriendsSection({ onNotice }: FriendsSectionProps) {
         }
       />
       <WorldActionCard
-        icon="people"
-        iconBackground={colors.surface.tabSelected}
-        iconColor={colors.text.primary}
+        glyph="group"
         title="view shared progress"
         subtitle="see how you're both doing"
         onPress={() =>
