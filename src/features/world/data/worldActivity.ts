@@ -1,8 +1,11 @@
+export type WorldActivityAvatar = 'strawHat' | 'greenHat';
+
 export type WorldActivityItem = {
   id: string;
   title: string;
   subtitle: string;
   timeLabel: string;
+  avatar: WorldActivityAvatar;
 };
 
 /**
@@ -15,12 +18,14 @@ export const WORLD_RECENT_ACTIVITY: readonly WorldActivityItem[] = [
     title: 'a friend completed day 7!',
     subtitle: 'proud of you',
     timeLabel: '2h ago',
+    avatar: 'strawHat',
   },
   {
     id: 'encouragement',
     title: 'someone sent you encouragement',
     subtitle: '"you got this"',
     timeLabel: '5h ago',
+    avatar: 'greenHat',
   },
 ];
 

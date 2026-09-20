@@ -212,7 +212,7 @@ export const textVariants = {
   worldHeroQuote: {
     fontFamily: fontFamilies.rounded,
     fontSize: fontSizes.lg,
-    lineHeight: 26,
+    lineHeight: 28,
     fontWeight: fontWeights.semibold,
     letterSpacing: -0.2,
   },

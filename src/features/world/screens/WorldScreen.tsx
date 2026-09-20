@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -16,14 +16,16 @@ import { WorldHeroMessage } from '@/features/world/components/WorldHeroMessage';
 import { WorldStatsCard } from '@/features/world/components/WorldStatsCard';
 import {
   WORLD_COLUMN_MAX_WIDTH,
-  WORLD_HERO_FLEX,
   WORLD_STATS_OVERLAP,
+  getWorldHeroHeight,
 } from '@/features/world/layout/worldHeroLayout';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 
 export function WorldScreen() {
   useSyncResetDay();
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const heroHeight = getWorldHeroHeight(windowHeight);
   const [notice, setNotice] = useState<WorldNotice | null>(null);
 
   const openInvite = () => {
@@ -41,13 +43,23 @@ export function WorldScreen() {
       padded={false}
       backgroundColor={colors.background.primary}
     >
-      <View style={styles.root}>
-        <View style={styles.hero}>
+      <ScrollView
+        testID="world-scroll"
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: getTabBarScenePadding(insets.bottom) + spacing.md },
+        ]}
+        showsVerticalScrollIndicator={false}
+        bounces
+      >
+        <View style={[styles.hero, { height: heroHeight }]}>
           <WorldBackground accessibilityLabel="Two mascots sitting together on a log by a lake at sunset, with a tree on the left and a cabin on the right." />
           <MainTabHeader
             title="world"
             subtitle="don't reset alone."
             transparent
+            contentSpacing="roomy"
             rightAction={
               <Pressable
                 accessibilityRole="button"
@@ -64,25 +76,18 @@ export function WorldScreen() {
               </Pressable>
             }
           />
-          <WorldHeroMessage />
+          <View style={styles.messageWell} pointerEvents="none">
+            <WorldHeroMessage />
+          </View>
         </View>
-        <ScrollView
-          testID="world-scroll"
-          style={styles.sheet}
-          contentContainerStyle={[
-            styles.sheetContent,
-            { paddingBottom: getTabBarScenePadding(insets.bottom) + spacing.sm },
-          ]}
-          showsVerticalScrollIndicator={false}
-          bounces
-        >
+        <View style={styles.sheet}>
           <View style={styles.statsAnchor}>
             <WorldStatsCard />
           </View>
           <FriendsSection onNotice={setNotice} />
           <WorldActivitySection onNotice={setNotice} />
-        </ScrollView>
-      </View>
+        </View>
+      </ScrollView>
       <NoticeDialog
         visible={notice !== null}
         title={notice?.title ?? ''}
@@ -94,13 +99,16 @@ export function WorldScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: {
+  scroll: {
     flex: 1,
+    backgroundColor: colors.background.primary,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    width: '100%',
   },
   hero: {
-    flexGrow: 0,
-    flexShrink: 0,
-    flexBasis: `${WORLD_HERO_FLEX * 100}%`,
+    width: '100%',
     overflow: 'hidden',
   },
   addFriend: {
@@ -109,18 +117,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sheet: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
+  messageWell: {
+    paddingTop: spacing.xxl,
+    paddingBottom: spacing.xl,
+    alignItems: 'flex-start',
+    paddingLeft: '22%',
   },
-  sheetContent: {
+  sheet: {
     width: '100%',
     maxWidth: WORLD_COLUMN_MAX_WIDTH,
     alignSelf: 'center',
-    paddingHorizontal: spacing.md,
-    gap: spacing.xs,
+    backgroundColor: colors.background.primary,
+    paddingHorizontal: spacing.lg,
+    paddingTop: WORLD_STATS_OVERLAP,
+    gap: spacing.md,
+    overflow: 'visible',
   },
   statsAnchor: {
-    marginTop: -WORLD_STATS_OVERLAP,
+    marginTop: -(WORLD_STATS_OVERLAP + WORLD_STATS_OVERLAP),
+    zIndex: 3,
+    elevation: 6,
   },
 });

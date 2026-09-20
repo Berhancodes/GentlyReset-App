@@ -5,11 +5,13 @@ import { colors, radius, shadows, spacing } from '@/design-system';
 import {
   WORLD_ACTIVITY_SEE_ALL_NOTICE,
   WORLD_RECENT_ACTIVITY,
+  type WorldActivityAvatar,
   type WorldActivityItem,
 } from '@/features/world/data/worldActivity';
 import type { WorldNotice } from '@/features/world/components/FriendsSection';
 
 const MASCOT_HEAD = require('../../../../assets/images/mascot/mascot-head.png');
+const FRIENDS_TOGETHER = require('../../../../assets/images/app/friends-together.png');
 
 type WorldActivitySectionProps = {
   onNotice: (notice: WorldNotice) => void;
@@ -56,14 +58,7 @@ function ActivityRow({ item, onPress }: { item: WorldActivityItem; onPress: () =
       onPress={onPress}
       style={({ pressed }) => [styles.row, pressed ? styles.pressed : null]}
     >
-      <View style={styles.avatar} accessibilityElementsHidden importantForAccessibility="no">
-        <Image
-          source={MASCOT_HEAD}
-          resizeMode="contain"
-          accessibilityIgnoresInvertColors
-          style={styles.avatarArt}
-        />
-      </View>
+      <ActivityAvatar variant={item.avatar} />
       <View style={styles.copy}>
         <AppText variant="optionTitle" numberOfLines={2}>
           {item.title}
@@ -81,9 +76,36 @@ function ActivityRow({ item, onPress }: { item: WorldActivityItem; onPress: () =
   );
 }
 
+function ActivityAvatar({ variant }: { variant: WorldActivityAvatar }) {
+  if (variant === 'greenHat') {
+    return (
+      <View style={styles.avatar} accessibilityElementsHidden importantForAccessibility="no">
+        <Image
+          source={FRIENDS_TOGETHER}
+          resizeMode="cover"
+          accessibilityIgnoresInvertColors
+          style={styles.avatarFriendCrop}
+        />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.avatar} accessibilityElementsHidden importantForAccessibility="no">
+      <Image
+        source={MASCOT_HEAD}
+        resizeMode="contain"
+        accessibilityIgnoresInvertColors
+        style={styles.avatarArt}
+      />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   root: {
     gap: spacing.sm,
+    paddingTop: spacing.sm,
   },
   header: {
     flexDirection: 'row',
@@ -104,39 +126,47 @@ const styles = StyleSheet.create({
     ...shadows.soft,
   },
   row: {
-    minHeight: spacing.xxl,
+    minHeight: spacing.xxxl,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
   },
   pressed: {
     opacity: 0.88,
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    marginLeft: spacing.md + spacing.xl + spacing.sm,
+    marginLeft: spacing.md + spacing.hitTarget + spacing.sm,
     backgroundColor: colors.border.subtle,
   },
   avatar: {
-    width: spacing.xl,
-    height: spacing.xl,
+    width: spacing.hitTarget,
+    height: spacing.hitTarget,
     borderRadius: radius.pill,
     backgroundColor: colors.background.secondary,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border.subtle,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarArt: {
-    width: spacing.lg,
-    height: spacing.lg,
+    width: spacing.xl,
+    height: spacing.xl,
+  },
+  avatarFriendCrop: {
+    position: 'absolute',
+    width: 108,
+    height: 144,
+    left: -10,
+    top: -48,
   },
   copy: {
     flex: 1,
     minWidth: 0,
-    gap: spacing.xxs,
+    gap: spacing.xs,
   },
   time: {
     flexShrink: 0,

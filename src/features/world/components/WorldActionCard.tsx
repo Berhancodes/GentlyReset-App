@@ -29,7 +29,7 @@ export function WorldActionCard({
       style={({ pressed }) => [styles.card, pressed ? styles.pressed : null]}
     >
       <View style={[styles.badge, { backgroundColor: iconBackground }]}>
-        <Ionicons name={icon} size={18} color={iconColor} accessibilityElementsHidden />
+        <Ionicons name={icon} size={20} color={iconColor} accessibilityElementsHidden />
       </View>
       <View style={styles.copy}>
         <AppText variant="optionTitle">{title}</AppText>
@@ -49,13 +49,13 @@ export function WorldActionCard({
 
 const styles = StyleSheet.create({
   card: {
-    minHeight: spacing.xxl,
+    minHeight: spacing.xxxl,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.xxl,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: radius.pill,
     backgroundColor: colors.surface.raised,
     ...shadows.soft,
   },
@@ -63,14 +63,14 @@ const styles = StyleSheet.create({
     opacity: 0.88,
   },
   badge: {
-    width: spacing.xl,
-    height: spacing.xl,
+    width: spacing.hitTarget,
+    height: spacing.hitTarget,
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
   copy: {
     flex: 1,
-    gap: spacing.xxs,
+    gap: spacing.xs,
   },
 });

@@ -27,10 +27,8 @@ export function WorldStatsCard() {
               accessibilityElementsHidden
             />
             <View style={styles.copy}>
-              <AppText variant="optionTitle" numberOfLines={1}>
-                {stat.value}
-              </AppText>
-              <AppText variant="caption" color="helper" numberOfLines={1}>
+              <AppText variant="optionTitle">{stat.value}</AppText>
+              <AppText variant="caption" color="helper">
                 {stat.label}
               </AppText>
             </View>
@@ -45,11 +43,13 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: spacing.xxl,
+    minHeight: spacing.xxxl,
     paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
     borderRadius: radius.pill,
     backgroundColor: colors.surface.raised,
+    overflow: 'visible',
+    zIndex: 3,
     ...shadows.soft,
   },
   stat: {
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     width: StyleSheet.hairlineWidth,
-    height: spacing.xl,
+    height: spacing.xxl,
     marginRight: spacing.xs,
     backgroundColor: colors.border.subtle,
   },
@@ -75,6 +75,6 @@ const styles = StyleSheet.create({
   },
   copy: {
     minWidth: 0,
-    gap: 1,
+    gap: 2,
   },
 });

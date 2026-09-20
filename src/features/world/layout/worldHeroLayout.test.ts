@@ -2,9 +2,13 @@ import {
   getWorldCoverImageBottom,
   getWorldCoverImageTop,
   getWorldCoverLayout,
+  getWorldHeroHeight,
+  WORLD_COVER_BOTTOM,
   WORLD_COVER_FOCUS,
   WORLD_HERO_ART_ASPECT,
   WORLD_HERO_FLEX,
+  WORLD_HERO_MIN_HEIGHT,
+  WORLD_STATS_OVERLAP,
 } from './worldHeroLayout';
 
 const VIEWPORTS = [
@@ -29,9 +33,15 @@ function check(label: string, condition: boolean, detail?: string) {
 }
 
 check(
-  'hero flex stays in the 0.36–0.40 landscape band',
-  WORLD_HERO_FLEX >= 0.36 && WORLD_HERO_FLEX <= 0.4,
+  'hero flex stays in the 0.48–0.55 tall-phone band',
+  WORLD_HERO_FLEX >= 0.48 && WORLD_HERO_FLEX <= 0.55,
   `got ${WORLD_HERO_FLEX}`,
+);
+
+check(
+  'hero min height stays a large landscape band',
+  WORLD_HERO_MIN_HEIGHT >= 400 && WORLD_HERO_MIN_HEIGHT <= 480,
+  `got ${WORLD_HERO_MIN_HEIGHT}`,
 );
 
 check(
@@ -53,11 +63,17 @@ check(
 );
 
 for (const viewport of VIEWPORTS) {
-  const heroHeight = viewport.height * WORLD_HERO_FLEX;
+  const heroHeight = getWorldHeroHeight(viewport.height);
   const cover = getWorldCoverLayout(viewport.width, heroHeight);
   const aspect = cover.width / cover.height;
   const imageTop = getWorldCoverImageTop(viewport.width, heroHeight);
   const imageBottom = getWorldCoverImageBottom(viewport.width, heroHeight);
+
+  check(
+    `${viewport.name} hero is at least 48% of the phone`,
+    heroHeight / viewport.height >= 0.48,
+    `got ${(heroHeight / viewport.height).toFixed(3)} (${heroHeight}px)`,
+  );
 
   check(
     `${viewport.name} hero cover keeps art aspect`,
@@ -66,21 +82,19 @@ for (const viewport of VIEWPORTS) {
   );
 
   check(
-    `${viewport.name} is width-driven (vertical crop) with FOCUS_Y`,
+    `${viewport.name} is width-driven (vertical crop)`,
     cover.left === 0 && cover.top <= 0 && cover.width === viewport.width,
   );
 
-  const extra = cover.height - heroHeight;
-  if (extra > 0.5) {
-    check(
-      `${viewport.name} vertical crop uses FOCUS_Y`,
-      Math.abs(cover.top + extra * WORLD_COVER_FOCUS.y) < 0.01,
-    );
-  }
+  check(
+    `${viewport.name} crop bottom sits on the grass under the log`,
+    Math.abs(imageBottom - WORLD_COVER_BOTTOM) < 0.015,
+    `bottom=${imageBottom.toFixed(3)} target=${WORLD_COVER_BOTTOM}`,
+  );
 
   check(
-    `${viewport.name} keeps sky for the header (crop starts above 20%)`,
-    imageTop <= 0.2,
+    `${viewport.name} keeps sky for the header (crop starts above 12%)`,
+    imageTop <= 0.12,
     `top=${imageTop.toFixed(3)}`,
   );
 
@@ -92,10 +106,27 @@ for (const viewport of VIEWPORTS) {
 
   check(
     `${viewport.name} includes grass below the log`,
-    imageBottom >= 0.52,
+    imageBottom >= 0.55,
     `bottom=${imageBottom.toFixed(3)}`,
   );
+
+  const mascotBottomInView = (MASCOT_BAND_BOTTOM - imageTop) * cover.height;
+  const overlapStart = heroHeight - WORLD_STATS_OVERLAP;
+  check(
+    `${viewport.name} stats overlap stays on grass (below the log)`,
+    overlapStart >= mascotBottomInView - 1,
+    `overlapStart=${overlapStart.toFixed(1)} mascotBottom=${mascotBottomInView.toFixed(1)}`,
+  );
 }
+
+check(
+  'horizontal crop still uses FOCUS_X on a narrow frame',
+  (() => {
+    const layout = getWorldCoverLayout(200, 800);
+    const extra = layout.width - 200;
+    return extra > 0 && Math.abs(layout.left + extra * WORLD_COVER_FOCUS.x) < 0.01;
+  })(),
+);
 
 if (failed > 0) {
   throw new Error(`${failed} world hero layout check(s) failed`);

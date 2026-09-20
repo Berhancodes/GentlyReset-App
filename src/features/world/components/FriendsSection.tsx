@@ -80,6 +80,6 @@ export function FriendsSection({ onNotice }: FriendsSectionProps) {
 
 const styles = StyleSheet.create({
   root: {
-    gap: spacing.xs,
+    gap: spacing.md,
   },
 });
