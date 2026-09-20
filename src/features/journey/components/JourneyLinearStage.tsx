@@ -284,6 +284,6 @@ const styles = StyleSheet.create({
   nodeSlot: {
     position: 'absolute',
     alignItems: 'center',
-    zIndex: 5,
+    zIndex: 20,
   },
 });

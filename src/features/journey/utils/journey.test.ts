@@ -316,14 +316,16 @@ check(
     stage390.day2X - stage390.day1X > stage390.width * 0.3,
 );
 
+const mascotCenterX =
+  stage390.mascot.left + stage390.mascot.width * JOURNEY_MASCOT_ART.bodyCenterX;
+const bodySitY = stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.standingY;
+const toeY = stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.feetY;
 check(
   'mascot stands on the line above the Day 1 node',
-  Math.abs(
-    stage390.mascot.left + stage390.mascot.width * JOURNEY_MASCOT_ART.bodyCenterX - stage390.day1X,
-  ) < 0.5 &&
-    stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.feetY <= stage390.lineY &&
-    stage390.lineY - (stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.feetY) <
-      stage390.nodeSize * 0.2,
+  Math.abs(mascotCenterX - stage390.day1X) < 0.5 &&
+    bodySitY < stage390.lineY &&
+    stage390.lineY - bodySitY < stage390.nodeSize * 0.45 &&
+    Math.abs(toeY - stage390.lineY) < stage390.nodeSize * 0.45,
 );
 
 check(

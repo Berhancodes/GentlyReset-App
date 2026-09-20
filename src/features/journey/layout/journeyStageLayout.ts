@@ -27,7 +27,10 @@ export const JOURNEY_MASCOT_ART = {
   width: 1536,
   height: 1024,
   bodyCenterX: 0.49,
+  /** Lowest toe pixels. */
   feetY: 0.916,
+  /** Visual sit: oval bottom / between the feet, where the node should tuck. */
+  standingY: 0.828,
 } as const;
 
 export const JOURNEY_SIGN_ART = {
@@ -199,9 +202,10 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
   const day1X = JOURNEY_DAY1_ANCHORS.day1X * safeWidth;
   const day2X = JOURNEY_DAY1_ANCHORS.day2X * safeWidth;
 
-  // Feet sit on the line; the node intersects the line and nearly touches the feet.
-  const feetFromMascotTop = mascotHeight * JOURNEY_MASCOT_ART.feetY;
-  const lineFromMascotTop = feetFromMascotTop + 1;
+  // Line through the standing plane so the gold node tucks under the body
+  // and the toes rest on the circle. Using toe-tips alone leaves a float gap.
+  const standingFromMascotTop = mascotHeight * JOURNEY_MASCOT_ART.standingY;
+  const lineFromMascotTop = standingFromMascotTop + nodeSize * 0.22;
   const sceneHeight = lineFromMascotTop + nodeSize / 2 + labelBlock + pathBottomPad;
   const illustratedMin = clampLayout(safeHeight * 0.52, compact ? 200 : 236, 340);
   const pathHeight = Math.max(sceneHeight, illustratedMin);
