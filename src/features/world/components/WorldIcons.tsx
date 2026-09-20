@@ -12,7 +12,7 @@ const ICON_GROUP_FILLED = require('../../../../assets/images/app/world/icon-grou
 
 /** Pale yellow stats badges — small enough that 1,200+ / people here stay unclipped. */
 const WORLD_STAT_CIRCLE_SIZE = 26;
-const WORLD_STAT_GLYPH_SIZE = 15;
+const WORLD_STAT_GLYPH_SIZE = 16;
 
 /** Action-row circles match the 44pt hit target, with modest glyphs inside. */
 const WORLD_ACTION_CIRCLE_SIZE = 44;
