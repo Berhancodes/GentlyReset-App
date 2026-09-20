@@ -299,12 +299,21 @@ check(
 );
 
 const stage390 = getJourneyStageLayout(390, 520);
+const stage393 = getJourneyStageLayout(393, 530);
 const stage430 = getJourneyStageLayout(430, 600);
 check(
-  'Day 1 node is at ~40% of stage width; Day 2 at 75–80%',
-  Math.abs(stage390.day1X / stage390.width - JOURNEY_DAY1_ANCHORS.day1X) < 1e-9 &&
-    stage390.day2X / stage390.width >= 0.75 &&
+  'Day 1 node is at ~44% of stage width; Day 2 at 78–80%',
+  Math.abs(stage390.day1X / stage390.width - 0.44) < 1e-9 &&
+    Math.abs(stage390.day2X / stage390.width - 0.79) < 1e-9 &&
+    stage390.day2X / stage390.width >= 0.78 &&
     stage390.day2X / stage390.width <= 0.8,
+);
+
+check(
+  'track spans ~9–93% and is not evenly spaced',
+  Math.abs(stage390.lineLeft / stage390.width - 0.09) < 1e-9 &&
+    Math.abs((stage390.lineLeft + stage390.lineWidth) / stage390.width - 0.93) < 1e-9 &&
+    stage390.day2X - stage390.day1X > stage390.width * 0.3,
 );
 
 check(
@@ -314,12 +323,23 @@ check(
   ) < 0.5 &&
     stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.feetY <= stage390.lineY &&
     stage390.lineY - (stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.feetY) <
-      stage390.nodeSize,
+      stage390.nodeSize * 0.2,
 );
 
 check(
-  'tall phones do not oversize the mascot',
-  stage430.mascot.height - stage390.mascot.height < 20,
+  '390 / 393 / 430 keep the same stage fractions',
+  [stage393, stage430].every(
+    (stage) =>
+      Math.abs(stage.day1X / stage.width - JOURNEY_DAY1_ANCHORS.day1X) < 1e-9 &&
+      Math.abs(stage.day2X / stage.width - JOURNEY_DAY1_ANCHORS.day2X) < 1e-9 &&
+      Math.abs(stage.lineLeft / stage.width - JOURNEY_DAY1_ANCHORS.lineLeftX) < 1e-9,
+  ),
+);
+
+check(
+  'wide phones scale the mascot without changing the composition',
+  stage430.mascot.height > stage390.mascot.height &&
+    stage430.mascot.height - stage390.mascot.height < 28,
 );
 
 check(

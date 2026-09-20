@@ -3,12 +3,12 @@ import { clampJourneyDay } from '../data/journeyChapters';
 
 /**
  * Day 1 composition as fractions of the STAGE (not the window).
- * Node and mascot share day1X so the character stands on the current node.
+ * Mascot center X and Day 1 node X stay locked so the character stands on the node.
  */
 export const JOURNEY_DAY1_ANCHORS = {
-  day1X: 0.4,
-  day2X: 0.78,
-  signX: 0.18,
+  day1X: 0.44,
+  day2X: 0.79,
+  signX: 0.19,
   bushX: 0.84,
   sunX: 0.8,
   sunY: 0.14,
@@ -18,16 +18,16 @@ export const JOURNEY_DAY1_ANCHORS = {
   cloudRightY: 0.3,
   cloudUpperRightX: 0.68,
   cloudUpperRightY: 0.02,
-  lineLeftX: 0.22,
-  lineRightX: 0.96,
+  lineLeftX: 0.09,
+  lineRightX: 0.93,
 } as const;
 
 /** Intrinsic standing-mascot canvas, including sparkles to the right. */
 export const JOURNEY_MASCOT_ART = {
   width: 1536,
   height: 1024,
-  bodyCenterX: 0.493,
-  feetY: 0.905,
+  bodyCenterX: 0.49,
+  feetY: 0.916,
 } as const;
 
 export const JOURNEY_SIGN_ART = {
@@ -50,6 +50,31 @@ export const JOURNEY_CLOUD_ART = {
 export const JOURNEY_SUN_ART = {
   width: 1254,
   height: 1254,
+} as const;
+
+/** Sprite sizes at a 390-wide stage, then scaled and clamped. */
+export const JOURNEY_STAGE_BASE = {
+  mascotHeight: 186,
+  mascotHeightMin: 158,
+  mascotHeightMax: 210,
+  signWidth: 212,
+  signWidthMin: 176,
+  signWidthMax: 236,
+  bushWidth: 168,
+  bushWidthMin: 140,
+  bushWidthMax: 196,
+  nodeSize: 32,
+  nodeSizeMin: 28,
+  nodeSizeMax: 36,
+  sunSize: 120,
+  sunSizeMin: 100,
+  sunSizeMax: 136,
+  cloudMain: 136,
+  cloudMainMin: 110,
+  cloudMainMax: 154,
+  cloudSmall: 96,
+  cloudSmallMin: 78,
+  cloudSmallMax: 110,
 } as const;
 
 export type JourneyRect = {
@@ -117,9 +142,9 @@ function centerBox(centerX: number, top: number, width: number, height: number):
 }
 
 /**
- * Stage-relative layout. Art scales with WIDTH and is clamped so 430-wide
- * phones do not get oversized sprites. Extra HEIGHT becomes space between
- * the title and the path, not bigger art.
+ * Stage-relative layout. Art scales with WIDTH and is clamped so 390 / 393 / 430
+ * phones keep the same composition. The path is a tall illustrated world: the
+ * mascot stands on the Day 1 node, not in a thin floating strip.
  */
 export function getJourneyStageLayout(width: number, height: number): JourneyStageLayout {
   const safeWidth = Math.max(width, 1);
@@ -127,32 +152,66 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
   const scale = safeWidth / 390;
   const compact = safeHeight < 420;
 
-  const mascotHeight = clampLayout(150 * scale, 122, 162);
+  const mascotHeight = clampLayout(
+    JOURNEY_STAGE_BASE.mascotHeight * scale,
+    JOURNEY_STAGE_BASE.mascotHeightMin,
+    JOURNEY_STAGE_BASE.mascotHeightMax,
+  );
   const mascotWidth = mascotHeight * (JOURNEY_MASCOT_ART.width / JOURNEY_MASCOT_ART.height);
-  const signWidth = clampLayout(164 * scale, 136, 180);
+  const signWidth = clampLayout(
+    JOURNEY_STAGE_BASE.signWidth * scale,
+    JOURNEY_STAGE_BASE.signWidthMin,
+    JOURNEY_STAGE_BASE.signWidthMax,
+  );
   const signHeight = signWidth * (JOURNEY_SIGN_ART.height / JOURNEY_SIGN_ART.width);
-  const bushWidth = clampLayout(102 * scale, 82, 114);
+  const bushWidth = clampLayout(
+    JOURNEY_STAGE_BASE.bushWidth * scale,
+    JOURNEY_STAGE_BASE.bushWidthMin,
+    JOURNEY_STAGE_BASE.bushWidthMax,
+  );
   const bushHeight = bushWidth * (JOURNEY_BUSH_ART.height / JOURNEY_BUSH_ART.width);
-  const nodeSize = clampLayout(28 * scale, 24, 32);
-  const sunSize = clampLayout(120 * scale, 100, 136);
-  const cloudMain = clampLayout(136 * scale, 110, 154);
-  const cloudSmall = clampLayout(96 * scale, 78, 110);
+  const nodeSize = clampLayout(
+    JOURNEY_STAGE_BASE.nodeSize * scale,
+    JOURNEY_STAGE_BASE.nodeSizeMin,
+    JOURNEY_STAGE_BASE.nodeSizeMax,
+  );
+  const sunSize = clampLayout(
+    JOURNEY_STAGE_BASE.sunSize * scale,
+    JOURNEY_STAGE_BASE.sunSizeMin,
+    JOURNEY_STAGE_BASE.sunSizeMax,
+  );
+  const cloudMain = clampLayout(
+    JOURNEY_STAGE_BASE.cloudMain * scale,
+    JOURNEY_STAGE_BASE.cloudMainMin,
+    JOURNEY_STAGE_BASE.cloudMainMax,
+  );
+  const cloudSmall = clampLayout(
+    JOURNEY_STAGE_BASE.cloudSmall * scale,
+    JOURNEY_STAGE_BASE.cloudSmallMin,
+    JOURNEY_STAGE_BASE.cloudSmallMax,
+  );
   const cloudMainHeight = cloudMain * (JOURNEY_CLOUD_ART.height / JOURNEY_CLOUD_ART.width);
   const cloudSmallHeight = cloudSmall * (JOURNEY_CLOUD_ART.height / JOURNEY_CLOUD_ART.width);
 
-  const labelBlock = compact ? 20 : 24;
+  const labelBlock = compact ? 20 : 26;
   const pathBottomPad = compact ? 4 : 8;
   const lineThickness = 2;
-  const feetY = mascotHeight * JOURNEY_MASCOT_ART.feetY;
   const day1X = JOURNEY_DAY1_ANCHORS.day1X * safeWidth;
   const day2X = JOURNEY_DAY1_ANCHORS.day2X * safeWidth;
-  const lineY = feetY + nodeSize * 0.38;
-  const pathHeight = lineY + nodeSize / 2 + labelBlock + pathBottomPad;
 
+  // Feet sit on the line; the node intersects the line and nearly touches the feet.
+  const feetFromMascotTop = mascotHeight * JOURNEY_MASCOT_ART.feetY;
+  const lineFromMascotTop = feetFromMascotTop + nodeSize * 0.06;
+  const sceneHeight = lineFromMascotTop + nodeSize / 2 + labelBlock + pathBottomPad;
+  const illustratedMin = clampLayout(safeHeight * 0.52, compact ? 200 : 236, 340);
+  const pathHeight = Math.max(sceneHeight, illustratedMin);
+  const originY = pathHeight - sceneHeight;
+
+  const lineY = originY + lineFromMascotTop;
   const mascotLeft = day1X - mascotWidth * JOURNEY_MASCOT_ART.bodyCenterX;
   const mascot: JourneyRect = {
     left: mascotLeft,
-    top: 0,
+    top: originY,
     width: mascotWidth,
     height: mascotHeight,
   };

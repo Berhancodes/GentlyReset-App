@@ -147,12 +147,20 @@ function JourneyPathBand({
 
   return (
     <View style={[styles.pathBand, { height: layout.pathHeight }]}>
+      <Image
+        source={JOURNEY_SPRITES.bush}
+        resizeMode="contain"
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+        style={[styles.vegetationLayer, rectStyle(layout.bush)]}
+      />
+
       <View
         accessible
         accessibilityRole="text"
         accessibilityLabel={signLabel}
         pointerEvents="none"
-        style={[styles.placed, rectStyle(layout.sign)]}
+        style={[styles.signLayer, rectStyle(layout.sign)]}
       >
         <Image
           source={JOURNEY_SPRITES.signEncouragement}
@@ -162,27 +170,6 @@ function JourneyPathBand({
           style={styles.fillImage}
         />
       </View>
-
-      <Image
-        source={JOURNEY_SPRITES.bush}
-        resizeMode="contain"
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-        style={[styles.placed, rectStyle(layout.bush)]}
-      />
-
-      <View
-        pointerEvents="none"
-        style={[
-          styles.line,
-          {
-            left: layout.lineLeft,
-            top: layout.lineY - layout.lineThickness / 2,
-            width: layout.lineWidth,
-            height: layout.lineThickness,
-          },
-        ]}
-      />
 
       <View style={[styles.mascotLayer, rectStyle(layout.mascot)]} pointerEvents="box-none">
         <Pressable
@@ -199,6 +186,19 @@ function JourneyPathBand({
           />
         </Pressable>
       </View>
+
+      <View
+        pointerEvents="none"
+        style={[
+          styles.line,
+          {
+            left: layout.lineLeft,
+            top: layout.lineY - layout.lineThickness / 2,
+            width: layout.lineWidth,
+            height: layout.lineThickness,
+          },
+        ]}
+      />
 
       <View
         style={[
@@ -257,9 +257,6 @@ const styles = StyleSheet.create({
   pathBand: {
     position: 'relative',
   },
-  placed: {
-    position: 'absolute',
-  },
   decorImage: {
     position: 'absolute',
   },
@@ -267,11 +264,19 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  vegetationLayer: {
+    position: 'absolute',
+    zIndex: 1,
+  },
+  signLayer: {
+    position: 'absolute',
+    zIndex: 2,
+  },
   line: {
     position: 'absolute',
     backgroundColor: colors.text.primary,
     borderRadius: 1,
-    zIndex: 2,
+    zIndex: 4,
   },
   mascotLayer: {
     position: 'absolute',
@@ -284,6 +289,6 @@ const styles = StyleSheet.create({
   nodeSlot: {
     position: 'absolute',
     alignItems: 'center',
-    zIndex: 8,
+    zIndex: 5,
   },
 });
