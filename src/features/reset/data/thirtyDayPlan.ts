@@ -1,6 +1,21 @@
 import { ONBOARDING_STEPS } from '../../onboarding/data/onboardingSteps';
 
-const TOTAL_DAYS = 30;
+/** Canonical foundation plan identity. Titles and task copy stay in this module. */
+export const FOUNDATION_PLAN_ID = 'foundation-reset';
+export const FOUNDATION_PLAN_VERSION = 1;
+
+/**
+ * One canonical cycle/plan length. `PLAN_DAY_COUNT` aliases this so we do not
+ * keep a second magic 30.
+ */
+export const DEFAULT_CYCLE_LENGTH = 30;
+export const PLAN_DAY_COUNT = DEFAULT_CYCLE_LENGTH;
+
+export const thirtyDayPlan = {
+  planId: FOUNDATION_PLAN_ID,
+  version: FOUNDATION_PLAN_VERSION,
+  length: DEFAULT_CYCLE_LENGTH,
+} as const;
 
 const FALLBACK_EARLY_TITLES = [
   'Start smaller than usual',
@@ -52,20 +67,18 @@ function buildTitles(): readonly string[] {
   const titles = [...early];
 
   for (const title of LATER_TITLES) {
-    if (titles.length >= TOTAL_DAYS) {
+    if (titles.length >= PLAN_DAY_COUNT) {
       break;
     }
     titles.push(title);
   }
 
-  while (titles.length < TOTAL_DAYS) {
+  while (titles.length < PLAN_DAY_COUNT) {
     titles.push('One small reset');
   }
 
-  return titles.slice(0, TOTAL_DAYS);
+  return titles.slice(0, PLAN_DAY_COUNT);
 }
-
-export const PLAN_DAY_COUNT = TOTAL_DAYS;
 
 export const PLAN_DAY_TITLES: readonly string[] = buildTitles();
 
