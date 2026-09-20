@@ -67,6 +67,7 @@ export function WorldScreen() {
           <WorldHeroMessage />
         </View>
         <ScrollView
+          testID="world-scroll"
           style={styles.sheet}
           contentContainerStyle={[
             styles.sheetContent,
