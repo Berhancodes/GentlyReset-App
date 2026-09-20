@@ -146,7 +146,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
   const feetY = mascotHeight * JOURNEY_MASCOT_ART.feetY;
   const day1X = JOURNEY_DAY1_ANCHORS.day1X * safeWidth;
   const day2X = JOURNEY_DAY1_ANCHORS.day2X * safeWidth;
-  const lineY = feetY + nodeSize * 0.55;
+  const lineY = feetY + nodeSize * 0.38;
   const pathHeight = lineY + nodeSize / 2 + labelBlock + pathBottomPad;
 
   const mascotLeft = day1X - mascotWidth * JOURNEY_MASCOT_ART.bodyCenterX;
