@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     width: StyleSheet.hairlineWidth,
-    height: spacing.xl,
+    height: spacing.lg,
     backgroundColor: colors.border.subtle,
     flexShrink: 0,
   },
