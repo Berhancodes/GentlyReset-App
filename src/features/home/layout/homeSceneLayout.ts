@@ -1,8 +1,10 @@
 /**
  * Shared Home landscape layout.
  *
- * Environment and mascot live in the same cover-cropped image space so the
- * character stays locked to the log when phones crop the art.
+ * The environment PNG is cover-cropped (never stretched) so the baked mascot,
+ * path, and mountains stay in frame when phones crop the edges.
+ * Layered `HomeMascot` placement helpers remain for a later sip animation —
+ * Home does not composite those layers while the baked scene is the background.
  */
 
 /** Intrinsic size of `home-morning-environment.png` (baked mascot on the log). */
