@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.xs,
-    paddingVertical: spacing.xs,
+    paddingVertical: spacing.xxs,
     borderRadius: radius.pill,
     backgroundColor: colors.surface.raised,
     overflow: 'visible',
@@ -66,6 +66,6 @@ const styles = StyleSheet.create({
     minWidth: 0,
     flexShrink: 1,
     justifyContent: 'center',
-    gap: 1,
+    gap: 0,
   },
 });
