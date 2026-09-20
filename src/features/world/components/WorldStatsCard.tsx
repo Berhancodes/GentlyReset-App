@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.xs,
+    paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xxs,
     borderRadius: radius.pill,
     backgroundColor: colors.surface.raised,

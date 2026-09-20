@@ -7,12 +7,16 @@ import type { WorldStatGlyph } from '@/features/world/data/worldStats';
 
 export type WorldActionGlyph = 'plus' | 'heart' | 'group';
 
-const ICON_PEOPLE = require('../../../../assets/images/app/world/icon-people.png');
 const ICON_GROUP_FILLED = require('../../../../assets/images/app/world/icon-group-filled.png');
 
-/** Pale yellow stats badges — small enough that 1,200+ / people here stay unclipped. */
-const WORLD_STAT_CIRCLE_SIZE = 26;
-const WORLD_STAT_GLYPH_SIZE = 16;
+/** Bare chocolate glyphs — no circular badge. Matches the stats-pill crop. */
+const WORLD_STAT_GLYPH_SIZE = 20;
+
+const WORLD_STAT_ICON_NAME = {
+  people: 'people',
+  globe: 'globe-outline',
+  heart: 'heart-outline',
+} as const satisfies Record<WorldStatGlyph, 'people' | 'globe-outline' | 'heart-outline'>;
 
 /** Action-row circles match the 44pt hit target, with modest glyphs inside. */
 const WORLD_ACTION_CIRCLE_SIZE = 44;
@@ -86,18 +90,15 @@ function PlusGlyph({ color, size, thickness }: { color: string; size: number; th
 }
 
 export function WorldStatIcon({ glyph }: { glyph: WorldStatGlyph }) {
-  if (glyph === 'people') {
-    return <SheetIcon source={ICON_PEOPLE} size={WORLD_STAT_CIRCLE_SIZE} />;
-  }
-
   return (
-    <CircleIcon size={WORLD_STAT_CIRCLE_SIZE} backgroundColor={colors.world.statCircle}>
-      <Ionicons
-        name={glyph === 'globe' ? 'globe-outline' : 'heart-outline'}
-        size={WORLD_STAT_GLYPH_SIZE}
-        color={colors.world.glyph}
-      />
-    </CircleIcon>
+    <Ionicons
+      name={WORLD_STAT_ICON_NAME[glyph]}
+      size={WORLD_STAT_GLYPH_SIZE}
+      color={colors.world.glyph}
+      accessibilityElementsHidden
+      importantForAccessibility="no"
+      style={styles.statGlyph}
+    />
   );
 }
 
@@ -134,6 +135,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
+  },
+  statGlyph: {
     flexShrink: 0,
   },
 });
