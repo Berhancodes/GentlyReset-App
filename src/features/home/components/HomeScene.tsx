@@ -1,7 +1,5 @@
 import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
 
-import { colors } from '@/design-system';
-import { HomeMascot } from '@/features/home/components/HomeMascot';
 import { getHomeCoverLayout } from '@/features/home/layout/homeSceneLayout';
 
 const HOME_MORNING_ENVIRONMENT = require('../../../../assets/images/app/home-morning-environment.png');
@@ -10,6 +8,10 @@ type HomeSceneProps = {
   completed: boolean;
 };
 
+/**
+ * Full-bleed Home landscape. The environment PNG already includes the mascot
+ * on the log — do not composite `HomeMascot` here or the character doubles.
+ */
 export function HomeScene({ completed }: HomeSceneProps) {
   const { width, height } = useWindowDimensions();
   const layout = getHomeCoverLayout(width, height);
@@ -32,9 +34,6 @@ export function HomeScene({ completed }: HomeSceneProps) {
         resizeMode="cover"
         style={[styles.image, layout]}
       />
-      <View style={[styles.sceneSpace, layout]}>
-        <HomeMascot />
-      </View>
     </View>
   );
 }
@@ -44,13 +43,9 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     overflow: 'hidden',
     pointerEvents: 'none',
-    backgroundColor: colors.background.sky,
+    backgroundColor: 'transparent',
   },
   image: {
     position: 'absolute',
-  },
-  sceneSpace: {
-    position: 'absolute',
-    overflow: 'visible',
   },
 });

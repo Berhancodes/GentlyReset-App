@@ -5,22 +5,25 @@
  * character stays locked to the log when phones crop the art.
  */
 
-/** Intrinsic size of `home-morning-environment.png`. */
+/** Intrinsic size of `home-morning-environment.png` (baked mascot on the log). */
 export const HOME_ENVIRONMENT_ART = {
-  width: 853,
-  height: 1844,
+  width: 863,
+  height: 1822,
 } as const;
 
 export const HOME_ENVIRONMENT_ART_ASPECT = HOME_ENVIRONMENT_ART.width / HOME_ENVIRONMENT_ART.height;
 
 /**
  * Cover-crop focal point (0–1 in image space).
- * Horizontal: keep the mascot and cottage when side-cropping.
- * Vertical: keep sky behind the greeting; crop meadow edges first.
+ * Horizontal: keep the baked mascot on the log (left-center), path, and
+ * mountains / lake / sunset when phones crop the sides.
+ * Vertical: keep sky behind the greeting and the subject band; crop meadow
+ * and extra sky edges first. Never stretch — `getHomeCoverLayout` preserves
+ * the art aspect.
  */
 export const HOME_COVER_FOCUS = {
-  x: 0.48,
-  y: 0.38,
+  x: 0.4,
+  y: 0.36,
 } as const;
 
 /** Intrinsic size of `home-mascot-body.png` — the mascot group's coordinate space. */
