@@ -316,8 +316,7 @@ check(
     stage390.day2X - stage390.day1X > stage390.width * 0.3,
 );
 
-const mascotCenterX =
-  stage390.mascot.left + stage390.mascot.width * JOURNEY_MASCOT_ART.bodyCenterX;
+const mascotCenterX = stage390.mascot.left + stage390.mascot.width * JOURNEY_MASCOT_ART.bodyCenterX;
 const bodySitY = stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.standingY;
 const toeY = stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.feetY;
 check(
