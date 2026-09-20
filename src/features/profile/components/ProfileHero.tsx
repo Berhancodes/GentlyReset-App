@@ -22,8 +22,9 @@ export function ProfileHero({
   currentDay,
   completedCount,
 }: ProfileHeroProps) {
+  const safeDay = Math.min(PLAN_DAY_COUNT, Math.max(1, currentDay));
   const safeCompleted = Math.min(PLAN_DAY_COUNT, Math.max(0, completedCount));
-  const progress = safeCompleted / PLAN_DAY_COUNT;
+  const progress = Math.max(safeDay, safeCompleted) / PLAN_DAY_COUNT;
   const approach = resetApproach.trim().length > 0 ? resetApproach : 'one thing at a time';
 
   return (
@@ -40,7 +41,7 @@ export function ProfileHero({
       </AppText>
       <View style={styles.progressBlock}>
         <AppText variant="label" color="helper" align="center">
-          {`DAY ${currentDay} OF ${PLAN_DAY_COUNT}`}
+          {`DAY ${safeDay} OF ${PLAN_DAY_COUNT}`}
         </AppText>
         <ProgressBar
           progress={progress}
@@ -72,12 +73,13 @@ export function ProfileHero({
 const styles = StyleSheet.create({
   root: {
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   mascot: {
     width: '92%',
     aspectRatio: MASCOT_ASPECT_RATIO,
     maxHeight: spacing.xxxl * 4,
+    marginTop: -spacing.sm,
   },
   progressBlock: {
     width: '46%',
