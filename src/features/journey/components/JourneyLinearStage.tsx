@@ -90,19 +90,19 @@ export function JourneyLinearStage({
         </View>
       </View>
 
-      <View style={styles.breathingRoom} />
-
-      {layout ? (
-        <JourneyPathBand
-          layout={layout}
-          currentDay={currentDay}
-          completedDays={completedDays}
-          todayCompleted={todayCompleted}
-          visibleDays={visibleDays}
-          signLabel={signLabel}
-          onPressDay={onPressDay}
-        />
-      ) : null}
+      <View style={styles.midStage}>
+        {layout ? (
+          <JourneyPathBand
+            layout={layout}
+            currentDay={currentDay}
+            completedDays={completedDays}
+            todayCompleted={todayCompleted}
+            visibleDays={visibleDays}
+            signLabel={signLabel}
+            onPressDay={onPressDay}
+          />
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -250,8 +250,9 @@ const styles = StyleSheet.create({
     gap: spacing.xxs,
     zIndex: 2,
   },
-  breathingRoom: {
+  midStage: {
     flex: 1,
+    justifyContent: 'center',
   },
   pathBand: {
     position: 'relative',
@@ -283,6 +284,6 @@ const styles = StyleSheet.create({
   nodeSlot: {
     position: 'absolute',
     alignItems: 'center',
-    zIndex: 4,
+    zIndex: 8,
   },
 });

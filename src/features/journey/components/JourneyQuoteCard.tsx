@@ -19,7 +19,9 @@ export function JourneyQuoteCard({ quote }: JourneyQuoteCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    alignSelf: 'stretch',
+    alignSelf: 'center',
+    width: '100%',
+    maxWidth: 300,
     marginHorizontal: spacing.lg,
     marginTop: spacing.sm,
     marginBottom: spacing.sm,

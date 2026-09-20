@@ -10,8 +10,8 @@ export const JOURNEY_DAY1_ANCHORS = {
   day2X: 0.78,
   signX: 0.18,
   bushX: 0.84,
-  sunX: 0.86,
-  sunY: 0.18,
+  sunX: 0.8,
+  sunY: 0.14,
   cloudLeftX: 0.1,
   cloudLeftY: 0.1,
   cloudRightX: 0.9,
@@ -143,11 +143,11 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
   const labelBlock = compact ? 20 : 24;
   const pathBottomPad = compact ? 4 : 8;
   const lineThickness = 2;
-  const pathHeight = mascotHeight + nodeSize / 2 + labelBlock + pathBottomPad;
-
+  const feetY = mascotHeight * JOURNEY_MASCOT_ART.feetY;
   const day1X = JOURNEY_DAY1_ANCHORS.day1X * safeWidth;
   const day2X = JOURNEY_DAY1_ANCHORS.day2X * safeWidth;
-  const lineY = mascotHeight * JOURNEY_MASCOT_ART.feetY;
+  const lineY = feetY + nodeSize * 0.55;
+  const pathHeight = lineY + nodeSize / 2 + labelBlock + pathBottomPad;
 
   const mascotLeft = day1X - mascotWidth * JOURNEY_MASCOT_ART.bodyCenterX;
   const mascot: JourneyRect = {
@@ -175,7 +175,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
     height: bushHeight,
   };
 
-  const sunTop = clampLayout(safeHeight * JOURNEY_DAY1_ANCHORS.sunY, compact ? 48 : 58, 92);
+  const sunTop = clampLayout(safeHeight * JOURNEY_DAY1_ANCHORS.sunY, compact ? 40 : 52, 78);
   const sun = centerBox(JOURNEY_DAY1_ANCHORS.sunX * safeWidth, sunTop, sunSize, sunSize);
 
   const clouds: JourneyRect[] = [

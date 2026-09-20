@@ -91,7 +91,7 @@ export function JourneyScreen() {
               completedCount={completedDays.length}
               thickness={spacing.xxs}
               fillColor={colors.accent.gold}
-              trackColor={colors.progress.trackStrong}
+              trackColor={colors.progress.track}
               startMarker
             />
           </View>

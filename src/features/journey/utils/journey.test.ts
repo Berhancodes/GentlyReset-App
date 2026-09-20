@@ -308,13 +308,13 @@ check(
 );
 
 check(
-  'mascot is grounded on the line above the Day 1 node',
+  'mascot stands on the line above the Day 1 node',
   Math.abs(
     stage390.mascot.left + stage390.mascot.width * JOURNEY_MASCOT_ART.bodyCenterX - stage390.day1X,
   ) < 0.5 &&
-    Math.abs(
-      stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.feetY - stage390.lineY,
-    ) < 0.5,
+    stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.feetY <= stage390.lineY &&
+    stage390.lineY - (stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.feetY) <
+      stage390.nodeSize,
 );
 
 check(
