@@ -31,7 +31,7 @@ On a Mac with Xcode, that opens the iOS simulator. You can also run `npm start` 
 
 ```bash
 npm run start
-npm run web    # Expo web preview only
+npm run web    # Expo web on http://127.0.0.1:43147 (do not pass --localhost; that binds IPv6-only)
 ```
 
 ## Quality commands

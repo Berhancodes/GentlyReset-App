@@ -7,7 +7,7 @@
     "start": "expo start",
     "ios": "expo start --ios",
     "android": "expo start --android",
-    "web": "expo start --web",
+    "web": "expo start --web --port 43147 --host lan",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test": "npm run test:layout && npm run test:reset-type && npm run test:daily-reset && npm run test:reset-selectors && npm run test:reset-cycle && npm run test:reset-persist && npm run test:journey && npm run test:journal && npm run test:world && npm run test:domain && npm run test:application && npm run test:reset-repository",
