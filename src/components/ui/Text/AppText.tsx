@@ -27,6 +27,7 @@ const HEADER_VARIANTS: ReadonlySet<TextVariant> = new Set([
   'journeyDay',
   'title',
   'questionTitle',
+  'storyTitle',
   'journalHero',
   'navTitle',
 ]);

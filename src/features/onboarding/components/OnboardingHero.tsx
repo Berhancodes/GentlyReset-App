@@ -24,6 +24,10 @@ export function OnboardingHero({
 }: OnboardingHeroProps) {
   const isQuestion = tone === 'question';
 
+  if (!eyebrow && !showTitle && !subtitle) {
+    return null;
+  }
+
   return (
     <View style={[styles.copy, isQuestion ? styles.questionCopy : null]}>
       {eyebrow ? (

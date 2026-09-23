@@ -18,6 +18,12 @@ export const motion = {
       overshootClamping: true,
     },
   },
+  typewriter: {
+    charMs: 42,
+    commaPauseMs: 90,
+    sentencePauseMs: 200,
+    linePauseMs: 340,
+  },
 } as const;
 
 export type Motion = typeof motion;

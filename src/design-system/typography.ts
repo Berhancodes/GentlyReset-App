@@ -151,6 +151,20 @@ export const textVariants = {
     fontWeight: fontWeights.bold,
     letterSpacing: -0.45,
   },
+  storyTitle: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.display,
+    lineHeight: lineHeights.display,
+    fontWeight: fontWeights.bold,
+    letterSpacing: -0.55,
+  },
+  storySupporting: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.lg,
+    lineHeight: 28,
+    fontWeight: fontWeights.semibold,
+    letterSpacing: -0.2,
+  },
   journalHero: {
     fontFamily: fontFamilies.rounded,
     fontSize: fontSizes.journalHero,
