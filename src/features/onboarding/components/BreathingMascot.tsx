@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
   cancelAnimation,
   Easing,
   interpolate,
+  type SharedValue,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -14,33 +15,30 @@ import Animated, {
 import { AppText } from '@/components/ui';
 import { motion, spacing } from '@/design-system';
 
-const OPEN_EYES = require('../../../../assets/images/mascot/mascot-breathe-open.png');
-const CLOSED_EYES = require('../../../../assets/images/mascot/mascot-breathe-closed.png');
+const REST_FRAME = require('../../../../assets/images/mascot/mascot-breathe-rest.png');
+const INHALE_FRAME = require('../../../../assets/images/mascot/mascot-breathe-inhale.png');
+const HOLD_FRAME = require('../../../../assets/images/mascot/mascot-breathe-hold.png');
+const EXHALE_FRAME = require('../../../../assets/images/mascot/mascot-breathe-exhale.png');
 
-const ART_WIDTH = 804;
-const ART_HEIGHT = 843;
+const BREATH_FRAMES = [REST_FRAME, INHALE_FRAME, HOLD_FRAME, EXHALE_FRAME] as const;
+
+const ART_WIDTH = 389;
+const ART_HEIGHT = 423;
 const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 const MASCOT_MAX_WIDTH = 200;
 const MASCOT_LOWER_OFFSET_FRACTION = 0.1;
+const VARIATION_LOOPS = 8;
 
 const {
-  idleMs,
-  inhaleMs,
-  holdMs,
-  exhaleMs,
-  restMs,
-  eyeCrossfadeMs,
+  restHoldMs,
+  inhaleEndMs,
+  holdEndMs,
+  exhaleEndMs,
+  cycleMs,
   scaleX: peakScaleX,
   scaleY: peakScaleY,
   translateY: peakTranslateY,
 } = motion.breathing;
-
-const INHALE_END_MS = idleMs + inhaleMs;
-const HOLD_END_MS = INHALE_END_MS + holdMs;
-const EXHALE_END_MS = HOLD_END_MS + exhaleMs;
-const CYCLE_MS = EXHALE_END_MS + restMs;
-const EYE_CLOSE_START_MS = INHALE_END_MS - eyeCrossfadeMs;
-const EYE_OPEN_START_MS = EXHALE_END_MS - eyeCrossfadeMs;
 
 function easeInOutCosine(progress: number): number {
   'worklet';
@@ -48,47 +46,153 @@ function easeInOutCosine(progress: number): number {
   return -(Math.cos(Math.PI * clamped) - 1) / 2;
 }
 
-function breathAmount(cycleMs: number): number {
+function segmentProgress(timeMs: number, startMs: number, endMs: number): number {
   'worklet';
-  if (cycleMs < idleMs) {
+  if (endMs <= startMs) {
+    return timeMs >= endMs ? 1 : 0;
+  }
+  return easeInOutCosine((timeMs - startMs) / (endMs - startMs));
+}
+
+function cycleClock(elapsedMs: number): { timeMs: number; loopIndex: number } {
+  'worklet';
+  const loopIndex = Math.floor(elapsedMs / cycleMs);
+  return {
+    timeMs: elapsedMs - loopIndex * cycleMs,
+    loopIndex,
+  };
+}
+
+function blinkShiftMs(loopIndex: number): number {
+  'worklet';
+  return (((loopIndex * 13) % 7) - 3) * 40;
+}
+
+function frameOpacity(elapsedMs: number, frameIndex: number): number {
+  'worklet';
+  const { timeMs, loopIndex } = cycleClock(elapsedMs);
+  const shiftMs = blinkShiftMs(loopIndex);
+  const holdStartMs = inhaleEndMs + shiftMs;
+  const holdFinishMs = holdEndMs + shiftMs;
+  const inhaleFinishMs = Math.min(inhaleEndMs, holdStartMs);
+
+  if (timeMs < restHoldMs) {
+    return frameIndex === 0 ? 1 : 0;
+  }
+
+  if (timeMs < inhaleFinishMs) {
+    const progress = segmentProgress(timeMs, restHoldMs, inhaleFinishMs);
+    if (frameIndex === 0) {
+      return 1 - progress;
+    }
+    if (frameIndex === 1) {
+      return progress;
+    }
     return 0;
   }
-  if (cycleMs < INHALE_END_MS) {
-    return easeInOutCosine((cycleMs - idleMs) / inhaleMs);
+
+  if (timeMs < holdStartMs) {
+    return frameIndex === 1 ? 1 : 0;
   }
-  if (cycleMs < HOLD_END_MS) {
-    return 1;
+
+  if (timeMs < holdFinishMs) {
+    const progress = segmentProgress(timeMs, holdStartMs, holdFinishMs);
+    if (frameIndex === 1) {
+      return 1 - progress;
+    }
+    if (frameIndex === 2) {
+      return progress;
+    }
+    return 0;
   }
-  if (cycleMs < EXHALE_END_MS) {
-    return 1 - easeInOutCosine((cycleMs - HOLD_END_MS) / exhaleMs);
+
+  if (timeMs < exhaleEndMs) {
+    const progress = segmentProgress(timeMs, holdFinishMs, exhaleEndMs);
+    if (frameIndex === 2) {
+      return 1 - progress;
+    }
+    if (frameIndex === 3) {
+      return progress;
+    }
+    return 0;
+  }
+
+  const progress = segmentProgress(timeMs, exhaleEndMs, cycleMs);
+  if (frameIndex === 3) {
+    return 1 - progress;
+  }
+  if (frameIndex === 0) {
+    return progress;
   }
   return 0;
 }
 
-function eyeClosedAmount(cycleMs: number): number {
+function breathAmount(elapsedMs: number): number {
   'worklet';
-  if (cycleMs < EYE_CLOSE_START_MS) {
+  const { timeMs } = cycleClock(elapsedMs);
+  if (timeMs < restHoldMs) {
     return 0;
   }
-  if (cycleMs < INHALE_END_MS) {
-    return easeInOutCosine((cycleMs - EYE_CLOSE_START_MS) / eyeCrossfadeMs);
+  if (timeMs < inhaleEndMs) {
+    return segmentProgress(timeMs, restHoldMs, inhaleEndMs);
   }
-  if (cycleMs < EYE_OPEN_START_MS) {
+  if (timeMs < holdEndMs) {
     return 1;
   }
-  if (cycleMs < EXHALE_END_MS) {
-    return 1 - easeInOutCosine((cycleMs - EYE_OPEN_START_MS) / eyeCrossfadeMs);
+  if (timeMs < exhaleEndMs) {
+    return 1 - segmentProgress(timeMs, holdEndMs, exhaleEndMs);
   }
   return 0;
+}
+
+function preloadBreathFrames() {
+  BREATH_FRAMES.forEach((source) => {
+    const resolved = Image.resolveAssetSource(source);
+    if (resolved?.uri) {
+      void Image.prefetch(resolved.uri);
+    }
+  });
+}
+
+type BreathFrameLayerProps = {
+  source: (typeof BREATH_FRAMES)[number];
+  frameIndex: number;
+  elapsedMs: SharedValue<number>;
+  reduceMotion: boolean;
+  width: number;
+  height: number;
+};
+
+function BreathFrameLayer({
+  source,
+  frameIndex,
+  elapsedMs,
+  reduceMotion,
+  width,
+  height,
+}: BreathFrameLayerProps) {
+  const opacityStyle = useAnimatedStyle(() => ({
+    opacity: reduceMotion ? (frameIndex === 0 ? 1 : 0) : frameOpacity(elapsedMs.value, frameIndex),
+  }));
+
+  return (
+    <Animated.Image
+      source={source}
+      resizeMode="contain"
+      accessibilityElementsHidden
+      importantForAccessibility="no"
+      style={[styles.frame, opacityStyle, { width, height }]}
+    />
+  );
 }
 
 /**
- * Slow inhale / exhale loop for the first reminder screen.
- * Motion stays on the UI thread and yields to Reduce Motion.
+ * Four-pose breath loop for the first reminder screen.
+ * Artwork carries the inhale; transforms stay under 2%.
  */
 export function BreathingMascot() {
   const reduceMotion = useReducedMotion();
-  const cycleMs = useSharedValue(0);
+  const elapsedMs = useSharedValue(0);
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 
   const availableWidth = Math.round(windowWidth - spacing.lg * 2);
@@ -101,26 +205,33 @@ export function BreathingMascot() {
   const artHeight = Math.round(artWidth / ART_ASPECT);
 
   useEffect(() => {
+    preloadBreathFrames();
+  }, []);
+
+  useEffect(() => {
     if (reduceMotion) {
-      cancelAnimation(cycleMs);
-      cycleMs.value = 0;
+      cancelAnimation(elapsedMs);
+      elapsedMs.value = 0;
       return;
     }
 
-    cycleMs.value = 0;
-    cycleMs.value = withRepeat(
-      withTiming(CYCLE_MS, { duration: CYCLE_MS, easing: Easing.linear }),
+    elapsedMs.value = 0;
+    elapsedMs.value = withRepeat(
+      withTiming(cycleMs * VARIATION_LOOPS, {
+        duration: cycleMs * VARIATION_LOOPS,
+        easing: Easing.linear,
+      }),
       -1,
       false,
     );
 
     return () => {
-      cancelAnimation(cycleMs);
+      cancelAnimation(elapsedMs);
     };
-  }, [cycleMs, reduceMotion]);
+  }, [elapsedMs, reduceMotion]);
 
   const mascotMotionStyle = useAnimatedStyle(() => {
-    const breath = reduceMotion ? 0 : breathAmount(cycleMs.value);
+    const breath = reduceMotion ? 0 : breathAmount(elapsedMs.value);
     return {
       transform: [
         { translateY: interpolate(breath, [0, 1], [0, peakTranslateY]) },
@@ -129,14 +240,6 @@ export function BreathingMascot() {
       ],
     };
   });
-
-  const openEyesStyle = useAnimatedStyle(() => ({
-    opacity: reduceMotion ? 1 : 1 - eyeClosedAmount(cycleMs.value),
-  }));
-
-  const closedEyesStyle = useAnimatedStyle(() => ({
-    opacity: reduceMotion ? 0 : eyeClosedAmount(cycleMs.value),
-  }));
 
   return (
     <View
@@ -150,20 +253,17 @@ export function BreathingMascot() {
         importantForAccessibility="no"
         style={[styles.mascotStage, { width: artWidth, height: artHeight }, mascotMotionStyle]}
       >
-        <Animated.Image
-          source={OPEN_EYES}
-          resizeMode="contain"
-          accessibilityElementsHidden
-          importantForAccessibility="no"
-          style={[openEyesStyle, { width: artWidth, height: artHeight }]}
-        />
-        <Animated.Image
-          source={CLOSED_EYES}
-          resizeMode="contain"
-          accessibilityElementsHidden
-          importantForAccessibility="no"
-          style={[styles.closedFrame, closedEyesStyle, { width: artWidth, height: artHeight }]}
-        />
+        {BREATH_FRAMES.map((source, frameIndex) => (
+          <BreathFrameLayer
+            key={frameIndex}
+            source={source}
+            frameIndex={frameIndex}
+            elapsedMs={elapsedMs}
+            reduceMotion={Boolean(reduceMotion)}
+            width={artWidth}
+            height={artHeight}
+          />
+        ))}
       </Animated.View>
 
       <AppText variant="onboardingHelper" color="helper" align="center">
@@ -183,7 +283,7 @@ const styles = StyleSheet.create({
   mascotStage: {
     transformOrigin: '50% 100%',
   },
-  closedFrame: {
+  frame: {
     ...StyleSheet.absoluteFill,
   },
 });

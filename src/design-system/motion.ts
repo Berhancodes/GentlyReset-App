@@ -26,15 +26,14 @@ export const motion = {
     lineFadeMs: 220,
   },
   breathing: {
-    idleMs: 500,
-    inhaleMs: 2500,
-    holdMs: 400,
-    exhaleMs: 3000,
-    restMs: 700,
-    eyeCrossfadeMs: 450,
-    scaleX: 1.018,
-    scaleY: 1.03,
-    translateY: -3,
+    restHoldMs: 600,
+    inhaleEndMs: 3000,
+    holdEndMs: 3800,
+    exhaleEndMs: 6500,
+    cycleMs: 7500,
+    scaleX: 1.008,
+    scaleY: 1.015,
+    translateY: -1.5,
   },
 } as const;
 
