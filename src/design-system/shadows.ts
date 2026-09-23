@@ -31,6 +31,18 @@ export const shadows = {
   whisper: createShadow(2, 0.07, 8, 2),
   soft: createShadow(6, 0.08, 16, 3),
   medium: createShadow(8, 0.12, 20, 5),
+  mascotGlow:
+    Platform.OS === 'web'
+      ? ({
+          boxShadow: `0 0 36px 14px ${colors.overlay.mascotGlow}, 0 0 64px 22px ${colors.overlay.mascotGlowCore}`,
+        } satisfies ViewStyle)
+      : ({
+          shadowColor: colors.accent.gold,
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.5,
+          shadowRadius: 28,
+          elevation: 0,
+        } satisfies ViewStyle),
 } as const;
 
 export type Shadows = typeof shadows;

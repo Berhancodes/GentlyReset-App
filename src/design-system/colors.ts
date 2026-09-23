@@ -111,6 +111,8 @@ export const colors = {
     headerFadeMid: 'rgba(252, 246, 237, 0.36)',
     headerFadeEnd: 'rgba(252, 246, 237, 0)',
     clear: 'rgba(255, 249, 241, 0)',
+    mascotGlow: 'rgba(246, 227, 160, 0.55)',
+    mascotGlowCore: 'rgba(230, 184, 74, 0.38)',
   },
   world: {
     statCircle: palette.goldSun,
