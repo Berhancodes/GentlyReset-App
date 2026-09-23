@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
   cancelAnimation,
   Easing,
@@ -145,15 +145,6 @@ function breathAmount(elapsedMs: number): number {
   return 0;
 }
 
-function preloadBreathFrames() {
-  BREATH_FRAMES.forEach((source) => {
-    const resolved = Image.resolveAssetSource(source);
-    if (resolved?.uri) {
-      void Image.prefetch(resolved.uri);
-    }
-  });
-}
-
 type BreathFrameLayerProps = {
   source: (typeof BREATH_FRAMES)[number];
   frameIndex: number;
@@ -203,10 +194,6 @@ export function BreathingMascot() {
     Math.min(availableWidth, widthFromHeight, MASCOT_MAX_WIDTH),
   );
   const artHeight = Math.round(artWidth / ART_ASPECT);
-
-  useEffect(() => {
-    preloadBreathFrames();
-  }, []);
 
   useEffect(() => {
     if (reduceMotion) {
