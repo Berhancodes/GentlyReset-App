@@ -81,6 +81,8 @@ type BaseOnboardingStep = {
 export type WelcomeStep = BaseOnboardingStep & {
   type: 'welcome';
   ctaLabel: string;
+  signInPrompt?: string;
+  signInLabel?: string;
 };
 
 export type SingleChoiceStep = BaseOnboardingStep & {

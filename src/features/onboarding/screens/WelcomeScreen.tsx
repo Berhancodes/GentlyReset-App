@@ -1,36 +1,20 @@
-import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeIn, FadeInDown, useReducedMotion } from 'react-native-reanimated';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useState } from 'react';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import {
-  colors,
-  fontFamilies,
-  fontSizes,
-  fontWeights,
-  radius,
-  spacing,
-  textVariants,
-} from '@/design-system';
+import { NoticeDialog } from '@/components/ui';
+import { colors, spacing } from '@/design-system';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import type { WelcomeStep } from '@/features/onboarding/types/onboarding';
 import { hapticImpact } from '@/utils/haptics';
 
-const WELCOME_ART = require('../../../../assets/images/onboarding/welcome-sunset.png');
+const WELCOME_ART = require('../../../../assets/images/onboarding/welcome-first-screen.png');
 
-/** Breathing room between the CTA and the bottom safe-area inset. */
-const CTA_SAFE_AREA_GAP = 36;
-
-function readableTextShadow(blur: number) {
-  if (Platform.OS === 'web') {
-    return { textShadow: `0 1px ${blur}px ${colors.overlay.scrim}` };
-  }
-
-  return {
-    textShadowColor: colors.overlay.scrim,
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: blur,
-  };
-}
+const SIGN_IN_NOTICE = {
+  title: 'sign in',
+  body: 'accounts are not part of this build yet. begin a new reset to continue.',
+} as const;
 
 type WelcomeScreenProps = {
   step: WelcomeStep;
@@ -39,12 +23,14 @@ type WelcomeScreenProps = {
 export function WelcomeScreen({ step }: WelcomeScreenProps) {
   const { goToNext } = useOnboardingNavigation();
   const insets = useSafeAreaInsets();
-  const reduceMotion = useReducedMotion();
-  const copyEntering = reduceMotion ? undefined : FadeIn.duration(520);
-  const ctaEntering = reduceMotion ? undefined : FadeInDown.duration(480).delay(160);
+  const [signInOpen, setSignInOpen] = useState(false);
+  const signInPrompt = step.signInPrompt;
+  const signInLabel = step.signInLabel;
+  const spokenTitle = `${step.title.replace('\n', ' ')}. ${step.subtitle ?? ''}`;
 
   return (
-    <View style={styles.root}>
+    <View style={styles.root} accessible={false}>
+      <StatusBar style="dark" />
       <Image
         source={WELCOME_ART}
         resizeMode="cover"
@@ -52,47 +38,37 @@ export function WelcomeScreen({ step }: WelcomeScreenProps) {
         importantForAccessibility="no"
         style={styles.background}
       />
-      <View style={styles.bottomWash} />
-      <SafeAreaView edges={['top', 'right', 'left']} style={styles.safe}>
-        <Animated.View entering={copyEntering} style={styles.copy}>
-          <Text
-            accessibilityRole="header"
-            allowFontScaling
-            maxFontSizeMultiplier={1.25}
-            style={[styles.title, readableTextShadow(8)]}
-          >
-            {step.title}
-          </Text>
-          {step.subtitle ? (
-            <Text
-              allowFontScaling
-              maxFontSizeMultiplier={1.3}
-              style={[styles.subtitle, readableTextShadow(6)]}
-            >
-              {step.subtitle}
-            </Text>
-          ) : null}
-        </Animated.View>
-        <View style={styles.stage} />
-        <Animated.View
-          entering={ctaEntering}
-          style={{ paddingBottom: insets.bottom + CTA_SAFE_AREA_GAP }}
-        >
+      <View
+        accessible
+        accessibilityRole="header"
+        accessibilityLabel={spokenTitle}
+        style={styles.headerHit}
+      />
+      <View style={[styles.actions, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={step.ctaLabel}
+          onPress={() => {
+            void hapticImpact();
+            goToNext();
+          }}
+          style={styles.ctaHit}
+        />
+        {signInPrompt && signInLabel ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={step.ctaLabel}
-            onPress={() => {
-              void hapticImpact();
-              goToNext();
-            }}
-            style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
-          >
-            <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.ctaLabel}>
-              {step.ctaLabel}
-            </Text>
-          </Pressable>
-        </Animated.View>
-      </SafeAreaView>
+            accessibilityLabel={`${signInPrompt} ${signInLabel}`}
+            onPress={() => setSignInOpen(true)}
+            style={styles.signInHit}
+          />
+        ) : null}
+      </View>
+      <NoticeDialog
+        visible={signInOpen}
+        title={SIGN_IN_NOTICE.title}
+        body={SIGN_IN_NOTICE.body}
+        onClose={() => setSignInOpen(false)}
+      />
     </View>
   );
 }
@@ -107,62 +83,22 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  bottomWash: {
+  headerHit: {
+    ...StyleSheet.absoluteFill,
+    bottom: '32%',
+  },
+  actions: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    height: '22%',
-    backgroundColor: colors.background.inverse,
-    opacity: 0.12,
-    pointerEvents: 'none',
-  },
-  safe: {
-    flex: 1,
     paddingHorizontal: spacing.lg,
   },
-  copy: {
-    alignItems: 'center',
-    paddingTop: spacing.xl,
-    gap: spacing.md,
-  },
-  title: {
-    fontFamily: fontFamilies.rounded,
-    fontSize: fontSizes.display + 14,
-    lineHeight: fontSizes.display + 18,
-    fontWeight: fontWeights.bold,
-    color: colors.text.inverse,
-    textAlign: 'center',
-    letterSpacing: -0.8,
-  },
-  subtitle: {
-    ...textVariants.subtitle,
-    fontFamily: fontFamilies.rounded,
-    fontWeight: fontWeights.semibold,
-    color: colors.text.inverse,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  stage: {
-    flex: 1,
-  },
-  cta: {
+  ctaHit: {
     minHeight: 56,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.action.primaryBackground,
-    borderWidth: 1,
-    borderColor: colors.accent.gold,
+    borderRadius: 999,
   },
-  ctaPressed: {
-    backgroundColor: colors.action.primaryBackgroundPressed,
-    transform: [{ scale: 0.98 }],
-  },
-  ctaLabel: {
-    ...textVariants.button,
-    color: colors.action.primaryText,
+  signInHit: {
+    minHeight: spacing.hitTarget,
   },
 });
