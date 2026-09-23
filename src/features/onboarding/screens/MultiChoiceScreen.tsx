@@ -9,10 +9,7 @@ import { OptionGrid } from '@/features/onboarding/components/OptionGrid';
 import { OptionIcon } from '@/features/onboarding/components/OptionIcon';
 import { ThinkingLogMascot } from '@/features/onboarding/components/ThinkingLogMascot';
 import { getOptionIconSource } from '@/features/onboarding/data/onboardingAssets';
-import {
-  REASON_CTA_LABEL,
-  REASON_PROGRESS_CHROME,
-} from '@/features/onboarding/data/onboardingSteps';
+import { REASON_PROGRESS_CHROME } from '@/features/onboarding/data/onboardingSteps';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { MultiChoiceStep } from '@/features/onboarding/types/onboarding';
@@ -85,7 +82,8 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
       onBack={canGoBack ? goBack : undefined}
       footer={
         <PrimaryButton
-          label={isReasonStep ? REASON_CTA_LABEL : 'next'}
+          label="next"
+          showArrow
           disabled={!canProceed(step, answer)}
           onPress={goToNext}
         />

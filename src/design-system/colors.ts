@@ -10,6 +10,8 @@ const palette = {
   brownSecondary: '#8B5A32',
   brownDisabled: '#C4A88F',
   gold: '#E6B84A',
+  goldAmber: '#E9A82F',
+  goldWash: '#FFF1C9',
   goldSoft: '#F4E4A8',
   goldPale: '#F7E9B0',
   goldSun: '#F6E3A0',
@@ -48,7 +50,7 @@ export const colors = {
     selected: palette.creamPeach,
     disabled: palette.creamMuted,
     choice: palette.creamSoft,
-    choiceSelected: palette.goldSoft,
+    choiceSelected: palette.goldWash,
     quote: palette.creamCard,
     tabSelected: palette.goldPale,
     gold: palette.gold,
@@ -69,6 +71,7 @@ export const colors = {
   },
   tint: {
     gold: palette.goldSoft,
+    choiceBadge: palette.goldAmber,
     peach: palette.peachSoft,
     sage: palette.sageSoft,
     blue: palette.blueSoft,
@@ -76,9 +79,11 @@ export const colors = {
   border: {
     default: palette.sand,
     selected: palette.brown,
+    choiceSelected: palette.goldAmber,
     subtle: palette.sandSubtle,
     notebook: palette.sand,
     gold: palette.gold,
+    badge: palette.brown,
   },
   action: {
     primaryBackground: palette.brown,

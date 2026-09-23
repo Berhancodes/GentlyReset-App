@@ -74,7 +74,12 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
       hideProgress={step.hideProgress}
       onBack={canGoBack ? goBack : undefined}
       footer={
-        <PrimaryButton label="next" disabled={!canProceed(step, answer)} onPress={goToNext} />
+        <PrimaryButton
+          label="next"
+          showArrow
+          disabled={!canProceed(step, answer)}
+          onPress={goToNext}
+        />
       }
     >
       {illustratedGrid ? (

@@ -41,8 +41,6 @@ export const REASON_PROGRESS_CHROME = {
   progress: 1 / 12,
 } as const;
 
-export const REASON_CTA_LABEL = 'next →';
-
 export const ONBOARDING_STEPS = [
   {
     id: 'welcome',

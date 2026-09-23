@@ -1,8 +1,18 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, {
+  Easing,
+  interpolate,
+  interpolateColor,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { AppText } from '@/components/ui/Text';
-import { colors, radius, shadows, spacing } from '@/design-system';
+import { colors, motion, radius, shadows, spacing } from '@/design-system';
 import { hapticSelection, hapticSuccess } from '@/utils/haptics';
 
 export type ChoiceCardVariant = 'row' | 'tile' | 'illustrated';
@@ -14,10 +24,13 @@ export type ChoiceCardProps = {
   disabled?: boolean;
   variant?: ChoiceCardVariant;
   leading?: ReactNode;
-  showIndicator?: boolean;
   haptic?: 'selection' | 'success' | 'none';
   onPress: () => void;
 };
+
+const BADGE_SIZE = 20;
+const BORDER_WIDTH = 2;
+const CHECK_DURATION_MS = motion.duration.selection;
 
 export function ChoiceCard({
   label,
@@ -26,13 +39,77 @@ export function ChoiceCard({
   disabled = false,
   variant = 'row',
   leading,
-  showIndicator,
   haptic = 'selection',
   onPress,
 }: ChoiceCardProps) {
   const isTile = variant === 'tile';
   const isIllustrated = variant === 'illustrated';
-  const indicatorVisible = showIndicator ?? (!isTile && !isIllustrated);
+  const idleBackground = isIllustrated ? colors.surface.raised : colors.surface.choice;
+  const reduceMotion = useReducedMotion();
+  const selectedProgress = useSharedValue(selected ? 1 : 0);
+  const pressScale = useSharedValue(1);
+  const previousSelected = useRef(selected);
+  const [pressed, setPressed] = useState(false);
+
+  useEffect(() => {
+    selectedProgress.value = withTiming(selected ? 1 : 0, {
+      duration: reduceMotion ? 0 : CHECK_DURATION_MS,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [reduceMotion, selected, selectedProgress]);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      pressScale.value = withTiming(pressed ? motion.scale.press : 1, { duration: 0 });
+      return;
+    }
+
+    pressScale.value = pressed
+      ? withTiming(motion.scale.press, {
+          duration: motion.duration.press,
+          easing: Easing.out(Easing.quad),
+        })
+      : withSpring(1, motion.spring.release);
+  }, [pressScale, pressed, reduceMotion]);
+
+  useEffect(() => {
+    const becameSelected = selected && !previousSelected.current;
+    previousSelected.current = selected;
+
+    if (!becameSelected) {
+      return;
+    }
+
+    if (haptic === 'selection') {
+      void hapticSelection();
+    }
+    if (haptic === 'success') {
+      void hapticSuccess();
+    }
+  }, [haptic, selected]);
+
+  const cardMotionStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      selectedProgress.value,
+      [0, 1],
+      [idleBackground, colors.surface.choiceSelected],
+    ),
+    borderColor: interpolateColor(
+      selectedProgress.value,
+      [0, 1],
+      [colors.border.default, colors.border.choiceSelected],
+    ),
+    transform: [{ scale: pressScale.value }],
+  }));
+
+  const badgeMotionStyle = useAnimatedStyle(() => ({
+    opacity: selectedProgress.value,
+    transform: [
+      {
+        scale: interpolate(selectedProgress.value, [0, 1], [motion.scale.checkFrom, 1]),
+      },
+    ],
+  }));
 
   return (
     <Pressable
@@ -40,73 +117,68 @@ export function ChoiceCard({
       accessibilityLabel={description ? `${label}. ${description}` : label}
       accessibilityState={{ selected, disabled }}
       disabled={disabled}
-      onPress={() => {
-        if (haptic === 'selection') {
-          void hapticSelection();
+      onPressIn={() => {
+        if (!disabled) {
+          setPressed(true);
         }
-        if (haptic === 'success') {
-          void hapticSuccess();
-        }
-        onPress();
       }}
-      style={({ pressed }) => [
-        styles.card,
-        isIllustrated ? styles.illustrated : isTile ? styles.tile : styles.row,
-        selected
-          ? styles.selected
-          : isIllustrated
-            ? styles.illustratedIdle
-            : isTile
-              ? styles.idle
-              : styles.rowIdle,
-        isIllustrated ? shadows.whisper : !isTile ? shadows.soft : null,
-        disabled && styles.disabled,
-        pressed && !disabled && styles.pressed,
-      ]}
+      onPressOut={() => {
+        setPressed(false);
+      }}
+      onPress={onPress}
+      style={[styles.pressable, (isTile || isIllustrated) && styles.pressableFill]}
     >
-      {leading ? <View style={styles.leading}>{leading}</View> : null}
-      <View style={[styles.copy, (isTile || isIllustrated) && styles.copyTile]}>
-        <AppText
-          variant={
-            description ? 'optionTitle' : isTile || isIllustrated ? 'optionLabel' : 'optionTitle'
-          }
-          color={disabled ? 'muted' : 'primary'}
-          align={isTile || isIllustrated ? 'center' : 'left'}
-          numberOfLines={isIllustrated ? 3 : undefined}
-        >
-          {label}
-        </AppText>
-        {description ? (
-          <AppText variant="optionSubtitle" color="secondary" align={isTile ? 'center' : 'left'}>
-            {description}
+      <Animated.View
+        style={[
+          styles.card,
+          isIllustrated ? styles.illustrated : isTile ? styles.tile : styles.row,
+          isIllustrated ? shadows.whisper : !isTile ? shadows.soft : null,
+          disabled && styles.disabled,
+          cardMotionStyle,
+        ]}
+      >
+        {leading ? <View style={styles.leading}>{leading}</View> : null}
+        <View style={[styles.copy, (isTile || isIllustrated) && styles.copyTile]}>
+          <AppText
+            variant={
+              description ? 'optionTitle' : isTile || isIllustrated ? 'optionLabel' : 'optionTitle'
+            }
+            color={disabled ? 'muted' : 'primary'}
+            align={isTile || isIllustrated ? 'center' : 'left'}
+            numberOfLines={isIllustrated ? 3 : undefined}
+          >
+            {label}
           </AppText>
-        ) : null}
-      </View>
-      {indicatorVisible && selected ? (
-        <View
-          style={[styles.indicator, styles.indicatorSelected]}
-          accessibilityElementsHidden
-          importantForAccessibility="no"
-        >
-          <AppText variant="caption" color="inverse" align="center">
-            ✓
-          </AppText>
+          {description ? (
+            <AppText variant="optionSubtitle" color="secondary" align={isTile ? 'center' : 'left'}>
+              {description}
+            </AppText>
+          ) : null}
         </View>
-      ) : indicatorVisible ? (
-        <View
-          style={styles.indicatorSpacer}
+        <Animated.View
           accessibilityElementsHidden
           importantForAccessibility="no"
-        />
-      ) : null}
+          pointerEvents="none"
+          style={[styles.badge, badgeMotionStyle]}
+        >
+          <View style={styles.check} />
+        </Animated.View>
+      </Animated.View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  pressable: {
+    alignSelf: 'stretch',
+  },
+  pressableFill: {
+    flex: 1,
+  },
   card: {
     borderRadius: radius.card,
-    backgroundColor: colors.surface.choice,
+    borderWidth: BORDER_WIDTH,
+    overflow: 'visible',
   },
   row: {
     minHeight: 64,
@@ -134,27 +206,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     gap: spacing.xs,
-    backgroundColor: colors.surface.raised,
-  },
-  idle: {
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  rowIdle: {
-    borderWidth: 1,
-    borderColor: colors.border.default,
-  },
-  illustratedIdle: {
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  selected: {
-    backgroundColor: colors.surface.choiceSelected,
-    borderWidth: 1,
-    borderColor: colors.accent.gold,
-  },
-  pressed: {
-    transform: [{ scale: 0.985 }],
   },
   disabled: {
     opacity: 0.55,
@@ -173,18 +224,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
-  indicator: {
-    width: 22,
-    height: 22,
+  badge: {
+    position: 'absolute',
+    top: spacing.xs,
+    right: spacing.xs,
+    width: BADGE_SIZE,
+    height: BADGE_SIZE,
     borderRadius: radius.pill,
+    backgroundColor: colors.tint.choiceBadge,
+    borderWidth: 1.5,
+    borderColor: colors.border.badge,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  indicatorSelected: {
-    backgroundColor: colors.text.primary,
-  },
-  indicatorSpacer: {
-    width: 22,
-    height: 22,
+  check: {
+    width: 8,
+    height: 4,
+    marginTop: -1,
+    borderLeftWidth: 1.8,
+    borderBottomWidth: 1.8,
+    borderColor: colors.text.primary,
+    transform: [{ rotate: '-45deg' }],
   },
 });
