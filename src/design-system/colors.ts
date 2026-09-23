@@ -10,6 +10,7 @@ const palette = {
   brownSecondary: '#8B5A32',
   brownDisabled: '#C4A88F',
   gold: '#E6B84A',
+  goldBar: '#E9B34F',
   goldAmber: '#E9A82F',
   goldWash: '#FFF1C9',
   goldSoft: '#F4E4A8',
@@ -27,6 +28,7 @@ const palette = {
   sand: '#E8D7C3',
   sandSubtle: '#F0E4D4',
   sandTrack: '#EAD9C4',
+  beigeTrack: '#EDE3D2',
   white: '#FFFFFF',
   night: '#152347',
   sky: '#C4D6E4',
@@ -98,8 +100,10 @@ export const colors = {
   progress: {
     track: palette.sandSubtle,
     trackStrong: palette.sand,
+    trackOnboarding: palette.beigeTrack,
     fill: palette.brown,
     fillGold: palette.gold,
+    fillOnboarding: palette.goldBar,
   },
   overlay: {
     scrim: 'rgba(74, 44, 24, 0.35)',

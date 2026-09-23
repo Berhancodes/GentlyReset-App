@@ -36,8 +36,8 @@ export function OnboardingProgress({
         <ProgressBar
           initialProgress={initialProgress}
           progress={progress}
-          fillColor={fillColor}
-          trackColor={stretch ? colors.progress.trackStrong : undefined}
+          fillColor={fillColor ?? colors.progress.fillOnboarding}
+          trackColor={colors.progress.trackOnboarding}
           thickness={stretch ? QUESTION_BAR_THICKNESS : undefined}
         />
       </View>

@@ -72,7 +72,6 @@ export function OnboardingScreenLayout({
   const useBrandNav = isQuestion || isStory;
   const progress = showProgress ? (
     <OnboardingProgress
-      fillColor={progressChrome ? colors.progress.fillGold : undefined}
       stretch={Boolean(progressChrome)}
       progressOverride={progressChrome?.progress}
     />
