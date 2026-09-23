@@ -25,16 +25,6 @@ export const motion = {
     linePauseMs: 400,
     lineFadeMs: 220,
   },
-  breathing: {
-    restHoldMs: 600,
-    inhaleEndMs: 3000,
-    holdEndMs: 3800,
-    exhaleEndMs: 6500,
-    cycleMs: 7500,
-    scaleX: 1.008,
-    scaleY: 1.015,
-    translateY: -1.5,
-  },
 } as const;
 
 export type Motion = typeof motion;
