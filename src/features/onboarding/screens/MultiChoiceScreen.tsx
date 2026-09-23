@@ -79,12 +79,7 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
       hideProgress={step.hideProgress}
       onBack={canGoBack ? goBack : undefined}
       footer={
-        <PrimaryButton
-          label="next"
-          showArrow
-          disabled={!canProceed(step, answer)}
-          onPress={goToNext}
-        />
+        <PrimaryButton label="next" disabled={!canProceed(step, answer)} onPress={goToNext} />
       }
     >
       {isReasonStep ? (

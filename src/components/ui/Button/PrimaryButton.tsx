@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import Animated, {
   Easing,
-  interpolate,
   interpolateColor,
   useAnimatedStyle,
   useReducedMotion,
@@ -19,7 +18,6 @@ type PrimaryButtonProps = {
   disabled?: boolean;
   accessibilityHint?: string;
   haptic?: 'light' | 'success' | 'none';
-  showArrow?: boolean;
 };
 
 export function PrimaryButton({
@@ -28,7 +26,6 @@ export function PrimaryButton({
   disabled = false,
   accessibilityHint,
   haptic = 'light',
-  showArrow = false,
 }: PrimaryButtonProps) {
   const reduceMotion = useReducedMotion();
   const enabledProgress = useSharedValue(disabled ? 0 : 1);
@@ -56,19 +53,10 @@ export function PrimaryButton({
     ),
   }));
 
-  const arrowStyle = useAnimatedStyle(() => ({
-    opacity: enabledProgress.value,
-    transform: [
-      {
-        translateX: interpolate(enabledProgress.value, [0, 1], [-4, 0]),
-      },
-    ],
-  }));
-
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={showArrow ? `${label} →` : label}
+      accessibilityLabel={label}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
       disabled={disabled}
@@ -84,24 +72,13 @@ export function PrimaryButton({
       style={({ pressed }) => [styles.base, pressed && !disabled ? styles.pressed : null]}
     >
       <Animated.View style={[styles.fill, fillStyle]} />
-      <View style={styles.labelRow}>
-        <Animated.Text
-          allowFontScaling
-          maxFontSizeMultiplier={1.4}
-          style={[styles.label, labelStyle]}
-        >
-          {label}
-        </Animated.Text>
-        {showArrow ? (
-          <Animated.Text
-            allowFontScaling
-            maxFontSizeMultiplier={1.4}
-            style={[styles.label, styles.arrow, arrowStyle]}
-          >
-            →
-          </Animated.Text>
-        ) : null}
-      </View>
+      <Animated.Text
+        allowFontScaling
+        maxFontSizeMultiplier={1.4}
+        style={[styles.label, labelStyle]}
+      >
+        {label}
+      </Animated.Text>
     </Pressable>
   );
 }
@@ -121,19 +98,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.xxl,
     pointerEvents: 'none',
   },
-  labelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-  },
   pressed: {
     transform: [{ scale: 0.98 }],
   },
   label: {
     ...textVariants.button,
-  },
-  arrow: {
-    marginLeft: -spacing.xxs,
   },
 });

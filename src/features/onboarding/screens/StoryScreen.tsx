@@ -76,7 +76,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
       illustrationPlacement="end"
       hideProgress
       onBack={canGoBack ? goBack : undefined}
-      footer={<PrimaryButton label={step.ctaLabel} showArrow onPress={goToNext} />}
+      footer={<PrimaryButton label={step.ctaLabel} onPress={goToNext} />}
     >
       <StoryCopy lines={lines} />
     </OnboardingScreenLayout>
