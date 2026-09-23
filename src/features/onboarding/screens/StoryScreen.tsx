@@ -33,7 +33,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
       nextLines.push({
         id: 'eyebrow',
         text: step.eyebrow,
-        variant: 'onboardingHelper',
+        variant: 'storyEyebrow',
         color: 'helper',
       });
     }
@@ -59,7 +59,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
         id: 'body',
         text: step.body,
         variant: 'storySupporting',
-        color: 'secondaryStrong',
+        color: 'helper',
       });
     }
 
@@ -76,7 +76,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
       illustrationPlacement="end"
       hideProgress
       onBack={canGoBack ? goBack : undefined}
-      footer={<PrimaryButton label={step.ctaLabel} onPress={goToNext} />}
+      footer={<PrimaryButton label={step.ctaLabel} showArrow onPress={goToNext} />}
     >
       <StoryCopy lines={lines} />
     </OnboardingScreenLayout>

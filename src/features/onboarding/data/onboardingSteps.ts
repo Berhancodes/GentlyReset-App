@@ -120,7 +120,8 @@ export const ONBOARDING_STEPS = [
   {
     id: 'carryingStory',
     type: 'story',
-    title: "you've been carrying a lot.",
+    eyebrow: 'a quick reminder',
+    title: "you've been\ncarrying a lot.",
     subtitle: 'especially when more than one part of life feels off at once.',
     body: "we're not going to fix everything at once.",
     ctaLabel: 'keep going',
