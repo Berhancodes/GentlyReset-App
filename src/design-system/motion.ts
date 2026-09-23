@@ -19,11 +19,11 @@ export const motion = {
     },
   },
   typewriter: {
-    charMs: 26,
-    commaPauseMs: 70,
-    sentencePauseMs: 150,
-    linePauseMs: 220,
-    lineFadeMs: 180,
+    charMs: 52,
+    commaPauseMs: 120,
+    sentencePauseMs: 260,
+    linePauseMs: 400,
+    lineFadeMs: 220,
   },
 } as const;
 
