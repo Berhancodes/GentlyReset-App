@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     overflow: 'visible',
   },
   row: {
-    minHeight: 64,
+    minHeight: 74,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     flexDirection: 'row',
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   tile: {
-    minHeight: 112,
+    minHeight: 129,
     flex: 1,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.md,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   illustrated: {
-    minHeight: 108,
+    minHeight: 124,
     flex: 1,
     paddingTop: spacing.sm,
     paddingBottom: spacing.sm,
