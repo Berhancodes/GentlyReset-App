@@ -166,7 +166,6 @@ export function ChoiceCard({
         <Animated.View
           accessibilityElementsHidden
           importantForAccessibility="no"
-          pointerEvents="none"
           style={[styles.badge, badgeMotionStyle]}
         >
           <View style={styles.check} />
@@ -236,6 +235,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: spacing.xs,
     right: spacing.xs,
+    pointerEvents: 'none',
     width: BADGE_SIZE,
     height: BADGE_SIZE,
     borderRadius: radius.pill,

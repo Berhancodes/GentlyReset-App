@@ -83,7 +83,7 @@ export function PrimaryButton({
       }}
       style={({ pressed }) => [styles.base, pressed && !disabled ? styles.pressed : null]}
     >
-      <Animated.View pointerEvents="none" style={[styles.fill, fillStyle]} />
+      <Animated.View style={[styles.fill, fillStyle]} />
       <View style={styles.labelRow}>
         <Animated.Text
           allowFontScaling
@@ -119,6 +119,7 @@ const styles = StyleSheet.create({
   fill: {
     ...StyleSheet.absoluteFill,
     borderRadius: radius.xxl,
+    pointerEvents: 'none',
   },
   labelRow: {
     flexDirection: 'row',
