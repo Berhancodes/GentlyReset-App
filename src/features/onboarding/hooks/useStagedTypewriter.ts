@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useReducedMotion } from 'react-native-reanimated';
 
 import { motion } from '@/design-system';
@@ -8,7 +8,15 @@ export type TypewriterLine = {
   text: string;
 };
 
-function pauseForCharacter(character: string | undefined): number {
+type TypedSnapshot = {
+  lineIndex: number;
+  charCount: number;
+};
+
+function durationForCharacter(character: string): number {
+  if (character === ' ' || character === '\n') {
+    return Math.round(motion.typewriter.charMs * 0.55);
+  }
   if (character === '.' || character === '!' || character === '?' || character === '…') {
     return motion.typewriter.sentencePauseMs;
   }
@@ -18,61 +26,141 @@ function pauseForCharacter(character: string | undefined): number {
   return motion.typewriter.charMs;
 }
 
+function buildLineTimings(lines: readonly TypewriterLine[]): readonly (readonly number[])[] {
+  return lines.map((line) => {
+    const appearAt: number[] = [];
+    let elapsed = 0;
+
+    for (const character of line.text) {
+      elapsed += durationForCharacter(character);
+      appearAt.push(elapsed);
+    }
+
+    return appearAt;
+  });
+}
+
+function snapshotAt(
+  lines: readonly TypewriterLine[],
+  timings: readonly (readonly number[])[],
+  elapsed: number,
+): TypedSnapshot {
+  let consumed = 0;
+
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+    const line = lines[lineIndex];
+    const appearAt = timings[lineIndex];
+    if (!line || !appearAt) {
+      continue;
+    }
+
+    const lineDuration = appearAt[appearAt.length - 1] ?? 0;
+    if (elapsed < consumed + lineDuration) {
+      const local = elapsed - consumed;
+      let charCount = 0;
+      for (const at of appearAt) {
+        if (at <= local) {
+          charCount += 1;
+        } else {
+          break;
+        }
+      }
+      return { lineIndex, charCount };
+    }
+
+    consumed += lineDuration;
+    if (lineIndex < lines.length - 1) {
+      consumed += motion.typewriter.linePauseMs;
+      if (elapsed < consumed) {
+        return { lineIndex, charCount: line.text.length };
+      }
+    }
+  }
+
+  const lastIndex = Math.max(0, lines.length - 1);
+  return { lineIndex: lastIndex, charCount: lines[lastIndex]?.text.length ?? 0 };
+}
+
+function nowMs(): number {
+  return typeof performance !== 'undefined' ? performance.now() : Date.now();
+}
+
 export function useStagedTypewriter(lines: readonly TypewriterLine[]) {
   const reduceMotion = useReducedMotion();
-  const [lineIndex, setLineIndex] = useState(0);
-  const [charCount, setCharCount] = useState(0);
+  const timings = useMemo(() => buildLineTimings(lines), [lines]);
+  const [snapshot, setSnapshot] = useState<TypedSnapshot>({ lineIndex: 0, charCount: 0 });
+  const elapsedRef = useRef(0);
+  const startedAtRef = useRef(0);
 
   useEffect(() => {
     if (reduceMotion) {
       return;
     }
 
-    const line = lines[lineIndex];
-    if (!line) {
-      return;
-    }
+    startedAtRef.current = nowMs() - elapsedRef.current;
+    let frameId = 0;
 
-    if (charCount >= line.text.length) {
-      if (lineIndex >= lines.length - 1) {
-        return;
+    const tick = (frameTime: number) => {
+      const elapsed = frameTime - startedAtRef.current;
+      elapsedRef.current = elapsed;
+      const next = snapshotAt(lines, timings, elapsed);
+
+      setSnapshot((current) =>
+        current.lineIndex === next.lineIndex && current.charCount === next.charCount
+          ? current
+          : next,
+      );
+
+      const lastLine = lines[lines.length - 1];
+      const finished =
+        next.lineIndex >= lines.length - 1 && next.charCount >= (lastLine?.text.length ?? 0);
+
+      if (!finished) {
+        frameId = requestAnimationFrame(tick);
       }
+    };
 
-      const pause = setTimeout(() => {
-        setLineIndex((current) => current + 1);
-        setCharCount(0);
-      }, motion.typewriter.linePauseMs);
-
-      return () => {
-        clearTimeout(pause);
-      };
-    }
-
-    const typedCharacter = line.text[charCount];
-    const tick = setTimeout(() => {
-      setCharCount((current) => current + 1);
-    }, pauseForCharacter(typedCharacter));
+    frameId = requestAnimationFrame(tick);
 
     return () => {
-      clearTimeout(tick);
+      cancelAnimationFrame(frameId);
     };
-  }, [charCount, lineIndex, lines, reduceMotion]);
+  }, [lines, reduceMotion, timings]);
 
   const revealRemaining = useCallback(() => {
-    const line = lines[lineIndex];
-    if (!line) {
+    const line = lines[snapshot.lineIndex];
+    const appearAt = timings[snapshot.lineIndex];
+    if (!line || !appearAt) {
       return;
     }
 
-    if (charCount < line.text.length) {
-      setCharCount(line.text.length);
-      return;
+    let targetElapsed = 0;
+    for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+      const lineTimes = timings[lineIndex];
+      const duration = lineTimes?.[lineTimes.length - 1] ?? 0;
+      if (lineIndex < snapshot.lineIndex) {
+        targetElapsed += duration + motion.typewriter.linePauseMs;
+        continue;
+      }
+
+      if (snapshot.charCount < line.text.length) {
+        targetElapsed += duration;
+      } else {
+        for (let remaining = lineIndex; remaining < lines.length; remaining += 1) {
+          const remainingTimes = timings[remaining];
+          targetElapsed += remainingTimes?.[remainingTimes.length - 1] ?? 0;
+          if (remaining < lines.length - 1) {
+            targetElapsed += motion.typewriter.linePauseMs;
+          }
+        }
+      }
+      break;
     }
 
-    const lastIndex = Math.max(0, lines.length - 1);
-    setLineIndex(lastIndex);
-    setCharCount(lines[lastIndex]?.text.length ?? 0);
-  }, [charCount, lineIndex, lines]);
+    elapsedRef.current = targetElapsed;
+    startedAtRef.current = nowMs() - targetElapsed;
+    setSnapshot(snapshotAt(lines, timings, targetElapsed));
+  }, [lines, snapshot.charCount, snapshot.lineIndex, timings]);
 
   const visibleText = useCallback(
     (index: number) => {
@@ -80,18 +168,29 @@ export function useStagedTypewriter(lines: readonly TypewriterLine[]) {
       if (!line) {
         return '';
       }
-      if (reduceMotion || index < lineIndex) {
+      if (reduceMotion || index < snapshot.lineIndex) {
         return line.text;
       }
-      if (index > lineIndex) {
+      if (index > snapshot.lineIndex) {
         return '';
       }
-      return line.text.slice(0, charCount);
+      return line.text.slice(0, snapshot.charCount);
     },
-    [charCount, lineIndex, lines, reduceMotion],
+    [lines, reduceMotion, snapshot.charCount, snapshot.lineIndex],
+  );
+
+  const isLineActive = useCallback(
+    (index: number) => {
+      if (reduceMotion) {
+        return true;
+      }
+      return index < snapshot.lineIndex || (index === snapshot.lineIndex && snapshot.charCount > 0);
+    },
+    [reduceMotion, snapshot.charCount, snapshot.lineIndex],
   );
 
   return {
+    isLineActive,
     revealRemaining,
     visibleText,
   };

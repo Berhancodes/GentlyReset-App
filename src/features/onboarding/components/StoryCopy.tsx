@@ -1,8 +1,16 @@
+import { useEffect, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { AppText } from '@/components/ui';
 import type { AppTextColor } from '@/components/ui/Text';
-import { spacing, type TextVariant } from '@/design-system';
+import { motion, spacing, type TextVariant } from '@/design-system';
 import {
   type TypewriterLine,
   useStagedTypewriter,
@@ -17,6 +25,24 @@ type StoryCopyProps = {
   lines: readonly StoryCopyLine[];
 };
 
+function FadingLine({ active, children }: { active: boolean; children: ReactNode }) {
+  const reduceMotion = useReducedMotion();
+  const opacity = useSharedValue(active || reduceMotion ? 1 : 0);
+
+  useEffect(() => {
+    opacity.value = withTiming(active || reduceMotion ? 1 : 0, {
+      duration: reduceMotion ? 0 : motion.typewriter.lineFadeMs,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [active, opacity, reduceMotion]);
+
+  const fadeStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  return <Animated.View style={[styles.typed, fadeStyle]}>{children}</Animated.View>;
+}
+
 export function StoryCopy({ lines }: StoryCopyProps) {
   const signature = lines.map((line) => `${line.id}:${line.text}`).join('\n');
 
@@ -24,7 +50,7 @@ export function StoryCopy({ lines }: StoryCopyProps) {
 }
 
 function TypedStoryCopy({ lines }: StoryCopyProps) {
-  const { revealRemaining, visibleText } = useStagedTypewriter(lines);
+  const { isLineActive, revealRemaining, visibleText } = useStagedTypewriter(lines);
   const spoken = lines.map((line) => line.text).join(' ');
 
   return (
@@ -42,11 +68,11 @@ function TypedStoryCopy({ lines }: StoryCopyProps) {
                 {line.text}
               </AppText>
             </View>
-            <View accessibilityElementsHidden importantForAccessibility="no" style={styles.typed}>
+            <FadingLine active={isLineActive(index)}>
               <AppText variant={line.variant} color={line.color}>
                 {visibleText(index)}
               </AppText>
-            </View>
+            </FadingLine>
           </View>
         ))}
       </View>
