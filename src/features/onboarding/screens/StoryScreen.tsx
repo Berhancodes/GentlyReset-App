@@ -6,6 +6,7 @@ import { StoryCopy, type StoryCopyLine } from '@/features/onboarding/components/
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { StoryStep } from '@/features/onboarding/types/onboarding';
+import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
 import {
   deriveCarryingSubtitle,
   deriveConsistencyInsight,
@@ -40,7 +41,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
 
     nextLines.push({
       id: 'title',
-      text: step.title,
+      text: capitalizeHeading(step.title),
       variant: 'storyTitle',
       color: 'primary',
     });
