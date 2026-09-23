@@ -7,6 +7,7 @@ import { NoticeDialog } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import type { WelcomeStep } from '@/features/onboarding/types/onboarding';
+import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
 import { hapticImpact } from '@/utils/haptics';
 
 const WELCOME_ART = require('../../../../assets/images/onboarding/welcome-first-screen.png');
@@ -26,7 +27,7 @@ export function WelcomeScreen({ step }: WelcomeScreenProps) {
   const [signInOpen, setSignInOpen] = useState(false);
   const signInPrompt = step.signInPrompt;
   const signInLabel = step.signInLabel;
-  const spokenTitle = `${step.title.replace('\n', ' ')}. ${step.subtitle ?? ''}`;
+  const spokenTitle = `${capitalizeHeading(step.title).replace('\n', ' ')}. ${step.subtitle ?? ''}`;
 
   return (
     <View style={styles.root} accessible={false}>
@@ -65,7 +66,7 @@ export function WelcomeScreen({ step }: WelcomeScreenProps) {
       </View>
       <NoticeDialog
         visible={signInOpen}
-        title={SIGN_IN_NOTICE.title}
+        title={capitalizeHeading(SIGN_IN_NOTICE.title)}
         body={SIGN_IN_NOTICE.body}
         onClose={() => setSignInOpen(false)}
       />

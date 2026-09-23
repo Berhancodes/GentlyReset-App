@@ -8,6 +8,7 @@ import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardi
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { TextInputStep } from '@/features/onboarding/types/onboarding';
 import { canProceed } from '@/features/onboarding/utils/canProceed';
+import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
 import { getQuestionHelper } from '@/features/onboarding/utils/getQuestionHelper';
 
 type TextInputScreenProps = {
@@ -54,7 +55,7 @@ export function TextInputScreen({ step }: TextInputScreenProps) {
       <Pressable accessible={false} onPress={Keyboard.dismiss}>
         <View style={styles.inputWrap}>
           <TextInput
-            accessibilityLabel={step.title}
+            accessibilityLabel={capitalizeHeading(step.title)}
             placeholder={step.placeholder}
             placeholderTextColor={colors.text.helper}
             value={value}

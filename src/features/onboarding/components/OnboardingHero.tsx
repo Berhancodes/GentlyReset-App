@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
 import { spacing } from '@/design-system';
+import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
 
 type OnboardingHeroProps = {
   title: string;
@@ -36,7 +37,9 @@ export function OnboardingHero({
         </AppText>
       ) : null}
       {showTitle ? (
-        <AppText variant={isQuestion ? 'questionTitle' : 'display'}>{title}</AppText>
+        <AppText variant={isQuestion ? 'questionTitle' : 'display'}>
+          {capitalizeHeading(title)}
+        </AppText>
       ) : null}
       {subtitle ? (
         <AppText

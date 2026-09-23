@@ -1,4 +1,4 @@
-/** Capitalize the first letter of a story heading. Leaves the rest of the line as written. */
+/** Capitalize the first letter of an onboarding heading. Leaves the rest of the line as written. */
 export function capitalizeHeading(text: string): string {
   const letterIndex = text.search(/[A-Za-z]/);
   if (letterIndex < 0) {

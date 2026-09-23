@@ -6,6 +6,7 @@ import { OnboardingScreenLayout } from '@/features/onboarding/components/Onboard
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useStagedLoading } from '@/features/onboarding/hooks/useStagedLoading';
 import type { LoadingStep } from '@/features/onboarding/types/onboarding';
+import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
 
 type LoadingScreenProps = {
   step: LoadingStep;
@@ -30,7 +31,11 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
       hideProgress
       onBack={canGoBack ? goBack : undefined}
     >
-      <View accessibilityRole="progressbar" accessibilityLabel={step.title} style={styles.list}>
+      <View
+        accessibilityRole="progressbar"
+        accessibilityLabel={capitalizeHeading(step.title)}
+        style={styles.list}
+      >
         {step.stages.map((stage, index) => {
           const done = index < completedCount;
           return (

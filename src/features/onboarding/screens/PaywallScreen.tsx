@@ -15,6 +15,7 @@ import { BackChevron } from '@/features/onboarding/components/BackChevron';
 import { PAYWALL_NIGHT_ART } from '@/features/onboarding/data/onboardingAssets';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import type { PaywallStep } from '@/features/onboarding/types/onboarding';
+import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
 import { finishOnboarding } from '@/features/onboarding/utils/finishOnboarding';
 import { hapticImpact } from '@/utils/haptics';
 
@@ -66,7 +67,7 @@ export function PaywallScreen({ step }: PaywallScreenProps) {
             maxFontSizeMultiplier={1.25}
             style={styles.title}
           >
-            {step.title}
+            {capitalizeHeading(step.title)}
           </Text>
           {step.subtitle ? (
             <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.subtitle}>
