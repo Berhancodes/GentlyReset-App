@@ -19,11 +19,6 @@ import type {
   OnboardingIllustrationSize,
 } from '@/features/onboarding/types/onboarding';
 
-type OnboardingProgressChrome = {
-  count: string;
-  progress: number;
-};
-
 type OnboardingScreenLayoutProps = {
   title: string;
   subtitle?: string;
@@ -39,8 +34,6 @@ type OnboardingScreenLayoutProps = {
   tone?: 'default' | 'question' | 'story';
   /** Tighter vertical gaps so a compact question can fit on one phone screen. */
   compact?: boolean;
-  /** Gold bar + "n/n" count used by the first question mock. */
-  progressChrome?: OnboardingProgressChrome;
   /**
    * start: art above copy (questions).
    * afterHero: title then art then extra content (reveal, plan).
@@ -63,19 +56,13 @@ export function OnboardingScreenLayout({
   showTitle = true,
   tone = 'default',
   compact = false,
-  progressChrome,
   illustrationPlacement = 'start',
 }: OnboardingScreenLayoutProps) {
   const showProgress = !hideProgress;
   const isQuestion = tone === 'question';
   const isStory = tone === 'story';
   const useBrandNav = isQuestion || isStory;
-  const progress = showProgress ? (
-    <OnboardingProgress
-      stretch={Boolean(progressChrome)}
-      progressOverride={progressChrome?.progress}
-    />
-  ) : null;
+  const progress = showProgress ? <OnboardingProgress /> : null;
 
   const body = (
     <Screen>
@@ -95,13 +82,7 @@ export function OnboardingScreenLayout({
             <View style={styles.navSide} />
           )}
           <View style={styles.navCenter}>{progress}</View>
-          <View style={[styles.navSide, styles.navCount]}>
-            {progressChrome ? (
-              <AppText variant="progressCount" color="secondary" align="right">
-                {progressChrome.count}
-              </AppText>
-            ) : null}
-          </View>
+          <View style={styles.navSide} />
         </View>
       ) : (
         <View style={styles.header}>
@@ -202,11 +183,6 @@ const styles = StyleSheet.create({
     height: 44,
     alignItems: 'flex-start',
     justifyContent: 'center',
-  },
-  navCount: {
-    width: 48,
-    alignItems: 'flex-end',
-    paddingRight: spacing.xxs,
   },
   navCenter: {
     flex: 1,

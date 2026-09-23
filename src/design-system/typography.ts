@@ -158,12 +158,6 @@ export const textVariants = {
     lineHeight: 22,
     fontWeight: fontWeights.medium,
   },
-  progressCount: {
-    fontFamily: fontFamilies.rounded,
-    fontSize: fontSizes.xs,
-    lineHeight: lineHeights.xs,
-    fontWeight: fontWeights.medium,
-  },
   optionLabel: {
     fontFamily: fontFamilies.rounded,
     fontSize: fontSizes.sm,

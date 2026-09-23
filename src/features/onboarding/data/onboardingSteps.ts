@@ -32,15 +32,6 @@ export type CoreQuestionId = (typeof CORE_QUESTION_IDS)[number];
 
 export const CORE_QUESTION_COUNT: 21 = CORE_QUESTION_IDS.length;
 
-/**
- * Header chrome for the first question, matching the approved mock.
- * This is visual only — the questionnaire is still 21 core questions.
- */
-export const REASON_PROGRESS_CHROME = {
-  count: '1/12',
-  progress: 1 / 12,
-} as const;
-
 export const ONBOARDING_STEPS = [
   {
     id: 'welcome',

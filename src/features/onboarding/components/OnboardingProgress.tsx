@@ -7,23 +7,12 @@ import { useCurrentOnboardingStep } from '@/features/onboarding/hooks/useCurrent
 import { getCoreQuestionProgress } from '@/features/onboarding/utils/getCoreQuestionProgress';
 
 const BAR_WIDTH = 136;
-const QUESTION_BAR_THICKNESS = 6;
-
-type OnboardingProgressProps = {
-  fillColor?: string;
-  stretch?: boolean;
-  progressOverride?: number;
-};
 
 let lastCoreProgress = 0;
 
-export function OnboardingProgress({
-  fillColor,
-  stretch = false,
-  progressOverride,
-}: OnboardingProgressProps) {
+export function OnboardingProgress() {
   const { step, currentStepIndex } = useCurrentOnboardingStep();
-  const progress = progressOverride ?? getCoreQuestionProgress(step?.id, currentStepIndex);
+  const progress = getCoreQuestionProgress(step?.id, currentStepIndex);
   const initialProgress = lastCoreProgress;
 
   useEffect(() => {
@@ -31,14 +20,13 @@ export function OnboardingProgress({
   }, [progress]);
 
   return (
-    <View style={[styles.root, stretch ? styles.stretch : null]}>
-      <View style={[styles.bar, stretch ? styles.barStretch : null]}>
+    <View style={styles.root}>
+      <View style={styles.bar}>
         <ProgressBar
           initialProgress={initialProgress}
           progress={progress}
-          fillColor={fillColor ?? colors.progress.fillOnboarding}
+          fillColor={colors.progress.fillOnboarding}
           trackColor={colors.progress.trackOnboarding}
-          thickness={stretch ? QUESTION_BAR_THICKNESS : undefined}
         />
       </View>
     </View>
@@ -49,15 +37,8 @@ const styles = StyleSheet.create({
   root: {
     alignItems: 'center',
   },
-  stretch: {
-    width: '100%',
-    alignItems: 'stretch',
-  },
   bar: {
     width: BAR_WIDTH,
     maxWidth: '100%',
-  },
-  barStretch: {
-    width: '100%',
   },
 });
