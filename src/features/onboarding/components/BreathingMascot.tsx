@@ -7,7 +7,7 @@ import { colors, radius, shadows, spacing } from '@/design-system';
 const BREATHE_LOOP = require('../../../../assets/images/mascot/mascot-breathe.gif');
 const BREATHE_STILL = require('../../../../assets/images/mascot/mascot-breathe-still.png');
 
-const ART_WIDTH = 385;
+const ART_WIDTH = 384;
 const ART_HEIGHT = 408;
 const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 const MASCOT_SIZE_SCALE = 1.2;
