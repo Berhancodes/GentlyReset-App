@@ -4,7 +4,7 @@ import { useReducedMotion } from 'react-native-reanimated';
 import { AppText } from '@/components/ui';
 import { spacing } from '@/design-system';
 
-const BREATHE_LOOP = require('../../../../assets/images/mascot/mascot-breathe.webp');
+const BREATHE_LOOP = require('../../../../assets/images/mascot/mascot-breathe.gif');
 const BREATHE_STILL = require('../../../../assets/images/mascot/mascot-breathe-still.png');
 
 const ART_WIDTH = 385;
