@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import { PrimaryButton } from '@/components/ui';
+import { BreathingMascot } from '@/features/onboarding/components/BreathingMascot';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { StoryCopy, type StoryCopyLine } from '@/features/onboarding/components/StoryCopy';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
@@ -67,12 +68,14 @@ export function StoryScreen({ step }: StoryScreenProps) {
     return nextLines;
   }, [step.body, step.eyebrow, step.title, subtitle]);
 
+  const showBreathingScene = step.scene === 'breathing';
+
   return (
     <OnboardingScreenLayout
       tone="story"
       title={step.title}
       showTitle={false}
-      illustrationKey={step.illustrationKey}
+      illustrationKey={showBreathingScene ? undefined : step.illustrationKey}
       illustrationSize={step.illustrationSize ?? 'large'}
       illustrationPlacement="end"
       hideProgress
@@ -80,6 +83,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
       footer={<PrimaryButton label={step.ctaLabel} onPress={goToNext} />}
     >
       <StoryCopy lines={lines} />
+      {showBreathingScene ? <BreathingMascot /> : null}
     </OnboardingScreenLayout>
   );
 }
