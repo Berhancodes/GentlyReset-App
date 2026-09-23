@@ -3,8 +3,8 @@ import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { spacing } from '@/design-system';
 
 const THINKING_ART = require('../../../../assets/images/onboarding/reason/reason-mascot-thinking.png');
-const ART_WIDTH = 691;
-const ART_HEIGHT = 800;
+const ART_WIDTH = 996;
+const ART_HEIGHT = 1112;
 const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 
 /**
