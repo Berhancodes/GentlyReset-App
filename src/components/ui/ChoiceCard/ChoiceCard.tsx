@@ -141,7 +141,11 @@ export function ChoiceCard({
         <View style={[styles.copy, (isTile || isIllustrated) && styles.copyTile]}>
           <AppText
             variant={
-              description ? 'optionTitle' : isTile || isIllustrated ? 'optionLabel' : 'optionTitle'
+              description
+                ? 'onboardingChoiceTitle'
+                : isTile || isIllustrated
+                  ? 'onboardingChoice'
+                  : 'onboardingChoiceTitle'
             }
             color={disabled ? 'muted' : 'primary'}
             align={isTile || isIllustrated ? 'center' : 'left'}
@@ -150,7 +154,11 @@ export function ChoiceCard({
             {label}
           </AppText>
           {description ? (
-            <AppText variant="optionSubtitle" color="secondary" align={isTile ? 'center' : 'left'}>
+            <AppText
+              variant="onboardingChoiceSubtitle"
+              color="secondary"
+              align={isTile ? 'center' : 'left'}
+            >
               {description}
             </AppText>
           ) : null}

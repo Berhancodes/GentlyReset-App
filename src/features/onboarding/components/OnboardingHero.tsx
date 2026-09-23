@@ -27,7 +27,7 @@ export function OnboardingHero({
   return (
     <View style={[styles.copy, isQuestion ? styles.questionCopy : null]}>
       {eyebrow ? (
-        <AppText variant="questionHelper" color="helper">
+        <AppText variant="onboardingHelper" color="helper">
           {eyebrow}
         </AppText>
       ) : null}
@@ -36,7 +36,7 @@ export function OnboardingHero({
       ) : null}
       {subtitle ? (
         <AppText
-          variant={isQuestion ? 'questionHelper' : 'subtitle'}
+          variant={isQuestion ? 'onboardingHelper' : 'subtitle'}
           color={isQuestion ? 'helper' : 'secondary'}
         >
           {subtitle}
