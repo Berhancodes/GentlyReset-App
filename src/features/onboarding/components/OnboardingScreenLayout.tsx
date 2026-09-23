@@ -19,6 +19,11 @@ import type {
   OnboardingIllustrationSize,
 } from '@/features/onboarding/types/onboarding';
 
+type OnboardingProgressChrome = {
+  count: string;
+  progress: number;
+};
+
 type OnboardingScreenLayoutProps = {
   title: string;
   subtitle?: string;
@@ -34,6 +39,8 @@ type OnboardingScreenLayoutProps = {
   tone?: 'default' | 'question' | 'story';
   /** Tighter vertical gaps so a compact question can fit on one phone screen. */
   compact?: boolean;
+  /** Gold bar + "n/n" count used by the first question mock. */
+  progressChrome?: OnboardingProgressChrome;
   /**
    * start: art above copy (questions).
    * afterHero: title then art then extra content (reveal, plan).
@@ -56,12 +63,20 @@ export function OnboardingScreenLayout({
   showTitle = true,
   tone = 'default',
   compact = false,
+  progressChrome,
   illustrationPlacement = 'start',
 }: OnboardingScreenLayoutProps) {
   const showProgress = !hideProgress;
   const isQuestion = tone === 'question';
   const isStory = tone === 'story';
   const useBrandNav = isQuestion || isStory;
+  const progress = showProgress ? (
+    <OnboardingProgress
+      fillColor={progressChrome ? colors.progress.fillGold : undefined}
+      stretch={Boolean(progressChrome)}
+      progressOverride={progressChrome?.progress}
+    />
+  ) : null;
 
   const body = (
     <Screen>
@@ -80,12 +95,18 @@ export function OnboardingScreenLayout({
           ) : (
             <View style={styles.navSide} />
           )}
-          <View style={styles.navCenter}>{showProgress ? <OnboardingProgress /> : null}</View>
-          <View style={styles.navSide} />
+          <View style={styles.navCenter}>{progress}</View>
+          <View style={[styles.navSide, styles.navCount]}>
+            {progressChrome ? (
+              <AppText variant="progressCount" color="secondary" align="right">
+                {progressChrome.count}
+              </AppText>
+            ) : null}
+          </View>
         </View>
       ) : (
         <View style={styles.header}>
-          {showProgress ? <OnboardingProgress /> : <View style={styles.progressSpacer} />}
+          {progress ?? <View style={styles.progressSpacer} />}
           {onBack ? (
             <Pressable
               accessibilityRole="button"
@@ -183,10 +204,16 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'center',
   },
+  navCount: {
+    width: 48,
+    alignItems: 'flex-end',
+    paddingRight: spacing.xxs,
+  },
   navCenter: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: spacing.sm,
   },
   progressSpacer: {
     height: spacing.xs,
@@ -231,9 +258,9 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
   },
   compactScrollContent: {
-    paddingTop: spacing.sm,
+    paddingTop: spacing.md,
     paddingBottom: 0,
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   compactFooter: {
     paddingTop: spacing.md,

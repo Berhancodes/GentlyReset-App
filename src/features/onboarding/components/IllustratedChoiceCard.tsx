@@ -2,7 +2,7 @@ import { ChoiceCard, type ChoiceCardProps } from '@/components/ui/ChoiceCard';
 
 type IllustratedChoiceCardProps = Omit<ChoiceCardProps, 'variant' | 'showIndicator'>;
 
-/** Page 2-style illustrated answer card. Keep this wrapper thin so reason stays identical. */
+/** Illustrated answer card used by the first question and later short visual grids. */
 export function IllustratedChoiceCard(props: IllustratedChoiceCardProps) {
   return <ChoiceCard {...props} variant="illustrated" showIndicator={false} />;
 }

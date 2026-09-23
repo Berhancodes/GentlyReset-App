@@ -54,10 +54,12 @@ export function ChoiceCard({
         isIllustrated ? styles.illustrated : isTile ? styles.tile : styles.row,
         selected
           ? styles.selected
-          : isTile && !isIllustrated
-            ? styles.idle
-            : styles.illustratedIdle,
-        isIllustrated || !isTile ? shadows.soft : null,
+          : isIllustrated
+            ? styles.illustratedIdle
+            : isTile
+              ? styles.idle
+              : styles.rowIdle,
+        isIllustrated ? shadows.whisper : !isTile ? shadows.soft : null,
         disabled && styles.disabled,
         pressed && !disabled && styles.pressed,
       ]}
@@ -80,17 +82,6 @@ export function ChoiceCard({
           </AppText>
         ) : null}
       </View>
-      {isIllustrated && selected ? (
-        <View
-          style={[styles.indicator, styles.indicatorSelected, styles.illustratedCheck]}
-          accessibilityElementsHidden
-          importantForAccessibility="no"
-        >
-          <AppText variant="caption" color="inverse" align="center">
-            ✓
-          </AppText>
-        </View>
-      ) : null}
       {indicatorVisible && selected ? (
         <View
           style={[styles.indicator, styles.indicatorSelected]}
@@ -135,22 +126,27 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   illustrated: {
-    minHeight: 124,
+    minHeight: 108,
     flex: 1,
-    paddingTop: 14,
+    paddingTop: spacing.sm,
     paddingBottom: spacing.sm,
     paddingHorizontal: spacing.sm,
     alignItems: 'center',
     justifyContent: 'flex-start',
     gap: spacing.xs,
+    backgroundColor: colors.surface.raised,
   },
   idle: {
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  illustratedIdle: {
+  rowIdle: {
     borderWidth: 1,
     borderColor: colors.border.default,
+  },
+  illustratedIdle: {
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   selected: {
     backgroundColor: colors.surface.choiceSelected,
@@ -186,13 +182,6 @@ const styles = StyleSheet.create({
   },
   indicatorSelected: {
     backgroundColor: colors.text.primary,
-  },
-  illustratedCheck: {
-    position: 'absolute',
-    top: spacing.xs,
-    right: spacing.xs,
-    width: 20,
-    height: 20,
   },
   indicatorSpacer: {
     width: 22,

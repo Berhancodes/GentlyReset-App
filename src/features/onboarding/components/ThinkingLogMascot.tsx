@@ -1,14 +1,11 @@
 import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
 
-const WORLD_ART = require('../../../../assets/images/mascot/mascot-thinking-world.png');
-const ART_WIDTH = 1536;
-const ART_HEIGHT = 1024;
-const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
+import { spacing } from '@/design-system';
 
-/** Target width on a standard iPhone (~390×844). */
-const ART_MAX_WIDTH = 248;
-const ART_PREFERRED_WIDTH = 220;
-const ART_MIN_WIDTH = 180;
+const ROCK_ART = require('../../../../assets/images/onboarding/reason/reason-mascot-rock.png');
+const ART_WIDTH = 796;
+const ART_HEIGHT = 422;
+const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 
 /**
  * Decorative environment illustration for the "what brought you here today?" question.
@@ -16,12 +13,10 @@ const ART_MIN_WIDTH = 180;
  */
 export function ThinkingLogMascot() {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  const sizedByWidth = Math.round(windowWidth * 0.56);
-  const sizedByHeight = Math.round(windowHeight * 0.165 * ART_ASPECT);
-  const artWidth = Math.min(
-    ART_MAX_WIDTH,
-    Math.max(ART_MIN_WIDTH, Math.min(ART_PREFERRED_WIDTH, sizedByWidth, sizedByHeight)),
-  );
+  const availableWidth = Math.round(windowWidth - spacing.lg * 2);
+  const maxHeight = Math.round(windowHeight * 0.26);
+  const widthFromHeight = Math.round(maxHeight * ART_ASPECT);
+  const artWidth = Math.max(spacing.xxxl, Math.min(availableWidth, widthFromHeight));
   const artHeight = Math.round(artWidth / ART_ASPECT);
 
   return (
@@ -32,7 +27,7 @@ export function ThinkingLogMascot() {
       style={styles.wrap}
     >
       <Image
-        source={WORLD_ART}
+        source={ROCK_ART}
         resizeMode="contain"
         accessibilityElementsHidden
         importantForAccessibility="no"
@@ -45,6 +40,7 @@ export function ThinkingLogMascot() {
 const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
+    marginTop: spacing.xs,
     pointerEvents: 'none',
   },
 });
