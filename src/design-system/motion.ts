@@ -35,9 +35,6 @@ export const motion = {
     scaleX: 1.018,
     scaleY: 1.03,
     translateY: -3,
-    indicatorRestWidth: 40,
-    indicatorPeakWidth: 58,
-    indicatorHeight: 6,
   },
 } as const;
 

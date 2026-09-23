@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { AppText } from '@/components/ui';
-import { colors, motion, radius, spacing } from '@/design-system';
+import { motion, spacing } from '@/design-system';
 
 const OPEN_EYES = require('../../../../assets/images/mascot/mascot-breathe-open.png');
 const CLOSED_EYES = require('../../../../assets/images/mascot/mascot-breathe-closed.png');
@@ -21,6 +21,7 @@ const ART_WIDTH = 804;
 const ART_HEIGHT = 843;
 const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 const MASCOT_MAX_WIDTH = 200;
+const MASCOT_LOWER_OFFSET_FRACTION = 0.1;
 
 const {
   idleMs,
@@ -32,9 +33,6 @@ const {
   scaleX: peakScaleX,
   scaleY: peakScaleY,
   translateY: peakTranslateY,
-  indicatorRestWidth,
-  indicatorPeakWidth,
-  indicatorHeight,
 } = motion.breathing;
 
 const INHALE_END_MS = idleMs + inhaleMs;
@@ -43,7 +41,6 @@ const EXHALE_END_MS = HOLD_END_MS + exhaleMs;
 const CYCLE_MS = EXHALE_END_MS + restMs;
 const EYE_CLOSE_START_MS = INHALE_END_MS - eyeCrossfadeMs;
 const EYE_OPEN_START_MS = EXHALE_END_MS - eyeCrossfadeMs;
-const INDICATOR_PEAK_SCALE = indicatorPeakWidth / indicatorRestWidth;
 
 function easeInOutCosine(progress: number): number {
   'worklet';
@@ -141,19 +138,12 @@ export function BreathingMascot() {
     opacity: reduceMotion ? 0 : eyeClosedAmount(cycleMs.value),
   }));
 
-  const indicatorStyle = useAnimatedStyle(() => {
-    const breath = reduceMotion ? 0 : breathAmount(cycleMs.value);
-    return {
-      transform: [{ scaleX: interpolate(breath, [0, 1], [1, INDICATOR_PEAK_SCALE]) }],
-    };
-  });
-
   return (
     <View
       accessible
       accessibilityRole="image"
       accessibilityLabel="Take a deep breath"
-      style={styles.root}
+      style={[styles.root, { marginTop: Math.round(windowHeight * MASCOT_LOWER_OFFSET_FRACTION) }]}
     >
       <Animated.View
         accessibilityElementsHidden
@@ -176,12 +166,6 @@ export function BreathingMascot() {
         />
       </Animated.View>
 
-      <Animated.View
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-        style={[styles.indicator, indicatorStyle]}
-      />
-
       <AppText variant="onboardingHelper" color="helper" align="center">
         Take a deep breath
       </AppText>
@@ -201,12 +185,5 @@ const styles = StyleSheet.create({
   },
   closedFrame: {
     ...StyleSheet.absoluteFill,
-  },
-  indicator: {
-    width: indicatorRestWidth,
-    height: indicatorHeight,
-    borderRadius: radius.pill,
-    backgroundColor: colors.accent.gold,
-    marginTop: spacing.xs,
   },
 });
