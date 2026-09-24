@@ -551,7 +551,7 @@ export const ONBOARDING_STEPS = [
     type: 'story',
     title: "you don't have to do this alone.",
     subtitle: "I'll be here for the small wins, the hard days, and all the restarts.",
-    ctaLabel: 'meet my companion',
+    ctaLabel: 'start my journey',
     scene: 'companion',
     hideProgress: true,
     required: false,
