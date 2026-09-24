@@ -8,6 +8,7 @@ export const motion = {
     loadingMark: 240,
     loadingPulse: 900,
     loadingHold: 560,
+    pillReveal: 560,
   },
   scale: {
     press: 0.97,
@@ -29,6 +30,7 @@ export const motion = {
     linePauseMs: 400,
     lineFadeMs: 220,
     eraseMs: 320,
+    pillStaggerMs: 90,
   },
 } as const;
 

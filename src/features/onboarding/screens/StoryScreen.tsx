@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { PrimaryButton } from '@/components/ui';
+import { AppText, PrimaryButton } from '@/components/ui';
 import { motion, spacing } from '@/design-system';
 import { BreathingMascot } from '@/features/onboarding/components/BreathingMascot';
 import { CompanionMascot } from '@/features/onboarding/components/CompanionMascot';
@@ -197,13 +197,26 @@ export function StoryScreen({ step }: StoryScreenProps) {
       }
     >
       {showCompanionScene ? (
-        copyPhase === 'ready' ? (
-          <StoryCopy lines={readyLines} onFinished={handleReadyFinished} />
-        ) : (
-          <Animated.View style={companionFadeStyle}>
+        <View style={styles.copySlot}>
+          <View accessibilityElementsHidden importantForAccessibility="no" style={styles.copySizer}>
+            {readyLines.map((line) => (
+              <AppText key={line.id} variant={line.variant} color={line.color}>
+                {line.text}
+              </AppText>
+            ))}
+          </View>
+          <Animated.View
+            pointerEvents={copyPhase === 'ready' ? 'none' : 'auto'}
+            style={[styles.copyLayer, companionFadeStyle]}
+          >
             <StoryCopy lines={lines} onFinished={handleCompanionFinished} />
           </Animated.View>
-        )
+          {copyPhase === 'ready' ? (
+            <View style={styles.copyLayer}>
+              <StoryCopy lines={readyLines} onFinished={handleReadyFinished} />
+            </View>
+          ) : null}
+        </View>
       ) : (
         <StoryCopy lines={lines} onFinished={step.autoAdvance ? handleAutoAdvance : undefined} />
       )}
@@ -212,7 +225,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
       {showCompanionScene ? (
         <View style={styles.companionStage}>
           <CompanionMascot />
-          {readyCopyDone ? <PlanPreviewList items={PLAN_READY_PREVIEW} animateIn /> : null}
+          <PlanPreviewList items={PLAN_READY_PREVIEW} revealed={readyCopyDone} />
         </View>
       ) : null}
     </OnboardingScreenLayout>
@@ -220,9 +233,23 @@ export function StoryScreen({ step }: StoryScreenProps) {
 }
 
 const styles = StyleSheet.create({
+  copySlot: {
+    position: 'relative',
+    width: '100%',
+  },
+  copySizer: {
+    gap: spacing.md,
+    opacity: 0,
+  },
+  copyLayer: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    left: 0,
+  },
   companionStage: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     gap: spacing.lg,
     width: '100%',

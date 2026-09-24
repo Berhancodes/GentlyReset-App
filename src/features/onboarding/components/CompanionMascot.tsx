@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
-import { colors, shadows, spacing } from '@/design-system';
+import { colors, spacing } from '@/design-system';
 
 const WAVE_LOOP = require('../../../../assets/images/mascot/mascot-companion-loop.gif');
 const WAVE_STILL = require('../../../../assets/images/mascot/mascot-companion-still.png');
@@ -21,6 +21,7 @@ const MASCOT_MAX_WIDTH = Math.round(280 * MASCOT_SIZE_SCALE);
 const MASCOT_HEIGHT_FRACTION = 0.34 * MASCOT_SIZE_SCALE;
 
 const WEB_WRAP_GLOW = {
+  backgroundColor: 'transparent',
   filter: [
     `drop-shadow(0 0 8px ${colors.overlay.mascotGlow})`,
     `drop-shadow(0 0 18px ${colors.overlay.mascotGlowCore})`,
@@ -42,7 +43,7 @@ export function CompanionMascot() {
     Math.min(availableWidth, widthFromHeight, MASCOT_MAX_WIDTH),
   );
   const artHeight = Math.round(artWidth / ART_ASPECT);
-  const artStyle = { width: artWidth, height: artHeight };
+  const artStyle = { width: artWidth, height: artHeight, backgroundColor: 'transparent' as const };
 
   return (
     <View
@@ -52,13 +53,6 @@ export function CompanionMascot() {
       style={styles.root}
     >
       <View style={[styles.stage, artStyle]}>
-        <Image
-          source={WAVE_STILL}
-          resizeMode="contain"
-          accessibilityElementsHidden
-          importantForAccessibility="no"
-          style={[artStyle, styles.glowSilhouette]}
-        />
         <Image
           source={reduceMotion ? WAVE_STILL : WAVE_LOOP}
           resizeMode="contain"
@@ -76,17 +70,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
+    backgroundColor: 'transparent',
+    overflow: 'visible',
     pointerEvents: 'none',
   },
   stage: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  glowSilhouette: {
-    position: 'absolute',
-    tintColor: colors.accent.gold,
-    opacity: 0.55,
-    transform: [{ scale: 1.08 }],
-    ...(Platform.OS === 'web' ? { filter: 'blur(14px)' } : shadows.mascotGlow),
+    backgroundColor: 'transparent',
+    overflow: 'visible',
   },
 });
