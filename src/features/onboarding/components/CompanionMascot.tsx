@@ -6,7 +6,7 @@ import { colors, radius, shadows, spacing } from '@/design-system';
 const WAVE_LOOP = require('../../../../assets/images/mascot/mascot-companion-loop.gif');
 const WAVE_STILL = require('../../../../assets/images/mascot/mascot-companion-still.png');
 
-const ART_WIDTH = 306;
+const ART_WIDTH = 307;
 const ART_HEIGHT = 291;
 const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 const MASCOT_SIZE_SCALE = 1.29;
