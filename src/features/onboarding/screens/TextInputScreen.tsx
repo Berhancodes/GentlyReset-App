@@ -4,6 +4,7 @@ import { PrimaryButton } from '@/components/ui';
 import { colors, radius, shadows, spacing, textVariants } from '@/design-system';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { OnboardingTextButton } from '@/features/onboarding/components/OnboardingTextButton';
+import { StarMascot } from '@/features/onboarding/components/StarMascot';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { TextInputStep } from '@/features/onboarding/types/onboarding';
@@ -20,6 +21,29 @@ export function TextInputScreen({ step }: TextInputScreenProps) {
   const setAnswer = useOnboardingStore((state) => state.setAnswer);
   const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
   const value = answer?.type === 'textInput' ? answer.value : '';
+  const isResetReasonStep = step.id === 'resetReason';
+
+  const input = (
+    <Pressable accessible={false} onPress={Keyboard.dismiss}>
+      <View style={styles.inputWrap}>
+        <TextInput
+          accessibilityLabel={capitalizeHeading(step.title)}
+          placeholder={step.placeholder}
+          placeholderTextColor={colors.text.helper}
+          value={value}
+          maxLength={step.maxLength}
+          multiline={step.multiline}
+          textAlignVertical={step.multiline ? 'top' : 'center'}
+          onChangeText={(nextValue) => {
+            setAnswer(step.id, { type: 'textInput', value: nextValue });
+          }}
+          allowFontScaling
+          maxFontSizeMultiplier={1.5}
+          style={[styles.input, step.multiline ? styles.multiline : null]}
+        />
+      </View>
+    </Pressable>
+  );
 
   return (
     <OnboardingScreenLayout
@@ -52,25 +76,14 @@ export function TextInputScreen({ step }: TextInputScreenProps) {
         </View>
       }
     >
-      <Pressable accessible={false} onPress={Keyboard.dismiss}>
-        <View style={styles.inputWrap}>
-          <TextInput
-            accessibilityLabel={capitalizeHeading(step.title)}
-            placeholder={step.placeholder}
-            placeholderTextColor={colors.text.helper}
-            value={value}
-            maxLength={step.maxLength}
-            multiline={step.multiline}
-            textAlignVertical={step.multiline ? 'top' : 'center'}
-            onChangeText={(nextValue) => {
-              setAnswer(step.id, { type: 'textInput', value: nextValue });
-            }}
-            allowFontScaling
-            maxFontSizeMultiplier={1.5}
-            style={[styles.input, step.multiline ? styles.multiline : null]}
-          />
+      {isResetReasonStep ? (
+        <View style={styles.resetReasonBlock}>
+          {input}
+          <StarMascot />
         </View>
-      </Pressable>
+      ) : (
+        input
+      )}
     </OnboardingScreenLayout>
   );
 }
@@ -78,6 +91,11 @@ export function TextInputScreen({ step }: TextInputScreenProps) {
 const styles = StyleSheet.create({
   footerStack: {
     gap: spacing.xs,
+  },
+  resetReasonBlock: {
+    gap: spacing.sm,
+    flexGrow: 1,
+    justifyContent: 'space-between',
   },
   inputWrap: {
     borderRadius: radius.card,
