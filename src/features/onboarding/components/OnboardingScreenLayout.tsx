@@ -40,6 +40,8 @@ type OnboardingScreenLayoutProps = {
    * end: all copy, then art (story beats).
    */
   illustrationPlacement?: 'start' | 'afterHero' | 'end';
+  /** Let a child (companion mascot) own the leftover story space instead of a spacer. */
+  skipStorySpacer?: boolean;
 };
 
 export function OnboardingScreenLayout({
@@ -57,6 +59,7 @@ export function OnboardingScreenLayout({
   tone = 'default',
   compact = false,
   illustrationPlacement = 'start',
+  skipStorySpacer = false,
 }: OnboardingScreenLayoutProps) {
   const showProgress = !hideProgress;
   const isQuestion = tone === 'question';
@@ -132,7 +135,7 @@ export function OnboardingScreenLayout({
         {illustrationKey && illustrationPlacement === 'end' ? (
           <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
         ) : null}
-        {isStory ? <View style={styles.storyFlex} /> : null}
+        {isStory && !skipStorySpacer ? <View style={styles.storyFlex} /> : null}
       </ScrollView>
 
       {footer ? (

@@ -1,7 +1,7 @@
-import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Image, Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
-import { spacing } from '@/design-system';
+import { colors, radius, shadows, spacing } from '@/design-system';
 
 const WAVE_LOOP = require('../../../../assets/images/mascot/mascot-companion-loop.gif');
 const WAVE_STILL = require('../../../../assets/images/mascot/mascot-companion-still.png');
@@ -34,13 +34,37 @@ export function CompanionMascot() {
       accessibilityLabel="Gently Reset companion"
       style={styles.root}
     >
-      <Image
-        source={reduceMotion ? WAVE_STILL : WAVE_LOOP}
-        resizeMode="contain"
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-        style={{ width: artWidth, height: artHeight }}
-      />
+      <View style={[styles.stage, { width: artWidth, height: artHeight }]}>
+        <View
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+          style={[
+            styles.glowOuter,
+            {
+              width: Math.round(artWidth * 1.18),
+              height: Math.round(artHeight * 0.88),
+            },
+          ]}
+        />
+        <View
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+          style={[
+            styles.glowInner,
+            {
+              width: Math.round(artWidth * 0.78),
+              height: Math.round(artHeight * 0.62),
+            },
+          ]}
+        />
+        <Image
+          source={reduceMotion ? WAVE_STILL : WAVE_LOOP}
+          resizeMode="contain"
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+          style={{ width: artWidth, height: artHeight }}
+        />
+      </View>
     </View>
   );
 }
@@ -48,7 +72,26 @@ export function CompanionMascot() {
 const styles = StyleSheet.create({
   root: {
     alignItems: 'center',
+    justifyContent: 'center',
+    flexGrow: 1,
     width: '100%',
     pointerEvents: 'none',
+  },
+  stage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  glowOuter: {
+    position: 'absolute',
+    borderRadius: radius.pill,
+    backgroundColor: colors.overlay.mascotGlow,
+    ...shadows.mascotGlow,
+    ...(Platform.OS === 'web' ? { filter: 'blur(22px)' } : null),
+  },
+  glowInner: {
+    position: 'absolute',
+    borderRadius: radius.pill,
+    backgroundColor: colors.overlay.mascotGlowCore,
+    ...(Platform.OS === 'web' ? { filter: 'blur(16px)' } : null),
   },
 });

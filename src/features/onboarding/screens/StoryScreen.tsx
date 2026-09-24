@@ -83,6 +83,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
       illustrationKey={hideStillIllustration ? undefined : step.illustrationKey}
       illustrationSize={step.illustrationSize ?? 'large'}
       illustrationPlacement="end"
+      skipStorySpacer={showCompanionScene}
       hideProgress
       onBack={canGoBack ? goBack : undefined}
       footer={<PrimaryButton label={step.ctaLabel} onPress={goToNext} />}
