@@ -16,11 +16,8 @@ import { NoticingMascot } from '@/features/onboarding/components/NoticingMascot'
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { PlanPreviewList } from '@/features/onboarding/components/PlanPreviewList';
 import { StoryCopy, type StoryCopyLine } from '@/features/onboarding/components/StoryCopy';
-import {
-  ONBOARDING_STEPS,
-  PLAN_READY_COPY,
-  PLAN_READY_PREVIEW,
-} from '@/features/onboarding/data/onboardingSteps';
+import { PLAN_READY_COPY, PLAN_READY_PREVIEW } from '@/features/onboarding/data/onboardingSteps';
+import { useBoundAutoAdvance } from '@/features/onboarding/hooks/useBoundAutoAdvance';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { StoryStep } from '@/features/onboarding/types/onboarding';
@@ -42,9 +39,8 @@ export function StoryScreen({ step }: StoryScreenProps) {
   const reduceMotion = useReducedMotion();
   const [copyPhase, setCopyPhase] = useState<CompanionCopyPhase>('writing');
   const [readyCopyDone, setReadyCopyDone] = useState(false);
+  const [storyCopyDone, setStoryCopyDone] = useState(false);
   const companionFinished = useRef(false);
-  const autoAdvanceStarted = useRef(false);
-  const autoAdvanceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const subtitle =
     step.dynamicCopy === 'outOfBalance'
@@ -143,27 +139,11 @@ export function StoryScreen({ step }: StoryScreenProps) {
   const handleReadyFinished = useCallback(() => {
     setReadyCopyDone(true);
   }, []);
-  const handleAutoAdvance = useCallback(() => {
-    if (autoAdvanceStarted.current) {
-      return;
-    }
-    autoAdvanceStarted.current = true;
-    autoAdvanceTimeout.current = setTimeout(() => {
-      const current = ONBOARDING_STEPS[useOnboardingStore.getState().currentStepIndex];
-      if (current?.id !== step.id) {
-        return;
-      }
-      goToNext();
-    }, motion.duration.storyHold);
-  }, [goToNext, step.id]);
-
-  useEffect(() => {
-    return () => {
-      if (autoAdvanceTimeout.current) {
-        clearTimeout(autoAdvanceTimeout.current);
-      }
-    };
+  const handleStoryFinished = useCallback(() => {
+    setStoryCopyDone(true);
   }, []);
+
+  useBoundAutoAdvance(step.id, Boolean(step.autoAdvance && storyCopyDone), goToNext);
 
   useEffect(() => {
     if (copyPhase !== 'erasing') {
@@ -226,7 +206,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
           ) : null}
         </View>
       ) : (
-        <StoryCopy lines={lines} onFinished={step.autoAdvance ? handleAutoAdvance : undefined} />
+        <StoryCopy lines={lines} onFinished={step.autoAdvance ? handleStoryFinished : undefined} />
       )}
       {showBreathingScene ? <BreathingMascot /> : null}
       {showNoticingScene ? <NoticingMascot /> : null}

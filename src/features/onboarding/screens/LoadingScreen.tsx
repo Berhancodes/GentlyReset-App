@@ -1,13 +1,13 @@
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { motion, spacing } from '@/design-system';
 import { BuildingMascot } from '@/features/onboarding/components/BuildingMascot';
 import { LoadingStageRow } from '@/features/onboarding/components/LoadingStageRow';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
+import { getOnboardingStepIndex } from '@/features/onboarding/data/onboardingSteps';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useStagedLoading } from '@/features/onboarding/hooks/useStagedLoading';
-import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { LoadingStep } from '@/features/onboarding/types/onboarding';
 import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
 
@@ -17,9 +17,8 @@ type LoadingScreenProps = {
 
 export function LoadingScreen({ step }: LoadingScreenProps) {
   const { goToIndex, goBack, canGoBack } = useOnboardingNavigation();
-  const startIndexRef = useRef(useOnboardingStore.getState().currentStepIndex);
   const handleComplete = useCallback(() => {
-    goToIndex(startIndexRef.current + 1);
+    goToIndex(getOnboardingStepIndex('gotYouStory'));
   }, [goToIndex]);
   const completedCount = useStagedLoading({
     stageCount: step.stages.length,

@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { AppText, Screen } from '@/components/ui';
 import { DevStepJumper } from '@/features/onboarding/components/DevStepJumper';
@@ -21,12 +21,7 @@ export function OnboardingFlow() {
 
   return (
     <View style={styles.root}>
-      <Animated.View
-        key={step.id}
-        entering={FadeIn.duration(280)}
-        exiting={FadeOut.duration(160)}
-        style={styles.frame}
-      >
+      <Animated.View key={step.id} entering={FadeIn.duration(280)} style={styles.frame}>
         <OnboardingRenderer step={step} />
       </Animated.View>
       <DevStepJumper />
