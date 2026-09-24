@@ -8,6 +8,7 @@ import { IllustratedChoiceGrid } from '@/features/onboarding/components/Illustra
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { OptionGrid } from '@/features/onboarding/components/OptionGrid';
 import { OptionIcon } from '@/features/onboarding/components/OptionIcon';
+import { SupportTimingChoices } from '@/features/onboarding/components/SupportTimingChoices';
 import { getOptionIconSource } from '@/features/onboarding/data/onboardingAssets';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
@@ -28,6 +29,7 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
   const layout = step.layout ?? 'stacked';
   const illustratedGrid = shouldUseIllustratedGrid(step);
   const isHardestStep = step.id === 'consistencyStage';
+  const isSupportTimingStep = step.id === 'supportTiming';
   const useGrid = illustratedGrid || layout === 'grid2' || layout === 'grid3';
   const columns = illustratedGrid || layout === 'grid2' ? 2 : 3;
 
@@ -67,7 +69,9 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
   return (
     <OnboardingScreenLayout
       tone="question"
-      compact={isHardestStep || (illustratedGrid && step.options.length >= 8)}
+      compact={
+        isHardestStep || isSupportTimingStep || (illustratedGrid && step.options.length >= 8)
+      }
       title={step.title}
       subtitle={getQuestionHelper(step)}
       eyebrow={step.eyebrow}
@@ -79,7 +83,15 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
         <PrimaryButton label="next" disabled={!canProceed(step, answer)} onPress={goToNext} />
       }
     >
-      {isHardestStep ? (
+      {isSupportTimingStep ? (
+        <SupportTimingChoices
+          options={step.options}
+          selectedId={selectedId}
+          onSelect={(optionId) => {
+            setAnswer(step.id, { type: 'singleChoice', optionId });
+          }}
+        />
+      ) : isHardestStep ? (
         <View style={styles.hardestBlock}>
           <View style={styles.list}>{cards}</View>
           <ClimbingMascot />

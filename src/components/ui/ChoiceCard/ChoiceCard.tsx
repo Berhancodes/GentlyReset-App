@@ -24,6 +24,11 @@ export type ChoiceCardProps = {
   disabled?: boolean;
   variant?: ChoiceCardVariant;
   leading?: ReactNode;
+  /**
+   * Illustrated tiles only. Tighter padding for a trial layout on one question.
+   * Defaults stay unchanged for every other screen.
+   */
+  compact?: boolean;
   haptic?: 'selection' | 'success' | 'none';
   onPress: () => void;
 };
@@ -39,6 +44,7 @@ export function ChoiceCard({
   disabled = false,
   variant = 'row',
   leading,
+  compact = false,
   haptic = 'selection',
   onPress,
 }: ChoiceCardProps) {
@@ -131,7 +137,13 @@ export function ChoiceCard({
       <Animated.View
         style={[
           styles.card,
-          isIllustrated ? styles.illustrated : isTile ? styles.tile : styles.row,
+          isIllustrated
+            ? compact
+              ? styles.illustratedCompact
+              : styles.illustrated
+            : isTile
+              ? styles.tile
+              : styles.row,
           isIllustrated ? shadows.whisper : !isTile ? shadows.soft : null,
           disabled && styles.disabled,
           cardMotionStyle,
@@ -213,6 +225,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     gap: spacing.xs,
+  },
+  illustratedCompact: {
+    minHeight: 100,
+    flex: 1,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xxs,
   },
   disabled: {
     opacity: 0.55,
