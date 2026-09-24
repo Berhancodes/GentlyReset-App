@@ -38,7 +38,10 @@ export function StoryScreen({ step }: StoryScreenProps) {
   const reduceMotion = useReducedMotion();
   const [copyPhase, setCopyPhase] = useState<CompanionCopyPhase>('writing');
   const [readyCopyDone, setReadyCopyDone] = useState(false);
+  const [companionCopyHeight, setCompanionCopyHeight] = useState(0);
+  const [readyCopyHeight, setReadyCopyHeight] = useState(0);
   const companionFinished = useRef(false);
+  const copySlotHeight = Math.max(companionCopyHeight, readyCopyHeight);
 
   const subtitle =
     step.dynamicCopy === 'outOfBalance'
@@ -175,8 +178,29 @@ export function StoryScreen({ step }: StoryScreenProps) {
       }
     >
       {showCompanionScene ? (
-        <View style={styles.copySlot}>
-          <View accessibilityElementsHidden importantForAccessibility="no" style={styles.copySizer}>
+        <View style={[styles.copySlot, copySlotHeight > 0 ? { height: copySlotHeight } : null]}>
+          <View
+            accessibilityElementsHidden
+            importantForAccessibility="no"
+            onLayout={(event) => {
+              setCompanionCopyHeight(event.nativeEvent.layout.height);
+            }}
+            style={styles.copySizer}
+          >
+            {lines.map((line) => (
+              <AppText key={line.id} variant={line.variant} color={line.color}>
+                {line.text}
+              </AppText>
+            ))}
+          </View>
+          <View
+            accessibilityElementsHidden
+            importantForAccessibility="no"
+            onLayout={(event) => {
+              setReadyCopyHeight(event.nativeEvent.layout.height);
+            }}
+            style={[styles.copySizer, styles.copyLayer]}
+          >
             {readyLines.map((line) => (
               <AppText key={line.id} variant={line.variant} color={line.color}>
                 {line.text}
@@ -202,7 +226,9 @@ export function StoryScreen({ step }: StoryScreenProps) {
       {showNoticingScene ? <NoticingMascot /> : null}
       {showCompanionScene ? (
         <View style={styles.companionStage}>
-          <CompanionMascot />
+          <View style={styles.mascotSlot}>
+            <CompanionMascot />
+          </View>
           <PlanPreviewList items={PLAN_READY_PREVIEW} revealed={readyCopyDone} />
         </View>
       ) : null}
@@ -232,5 +258,9 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
     width: '100%',
     paddingTop: spacing.sm,
+  },
+  mascotSlot: {
+    alignItems: 'center',
+    width: '100%',
   },
 });

@@ -8,13 +8,14 @@ export const motion = {
     loadingMark: 240,
     loadingPulse: 900,
     loadingHold: 560,
-    pillReveal: 560,
+    pillReveal: 820,
     storyHold: 2800,
   },
   scale: {
     press: 0.97,
     checkFrom: 0.7,
     loadingPop: 1.12,
+    pillFrom: 0.98,
   },
   spring: {
     release: {
@@ -31,7 +32,7 @@ export const motion = {
     linePauseMs: 400,
     lineFadeMs: 220,
     eraseMs: 320,
-    pillStaggerMs: 90,
+    pillStaggerMs: 160,
   },
 } as const;
 

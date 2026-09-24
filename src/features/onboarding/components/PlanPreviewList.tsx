@@ -38,14 +38,17 @@ function PlanPreviewRow({ item, index, revealed }: PlanPreviewRowProps) {
       revealed ? index * motion.typewriter.pillStaggerMs : 0,
       withTiming(revealed ? 1 : 0, {
         duration: motion.duration.pillReveal,
-        easing: Easing.bezier(0.22, 1, 0.36, 1),
+        easing: Easing.bezier(0.33, 0, 0.2, 1),
       }),
     );
   }, [index, progress, reduceMotion, revealed]);
 
   const revealStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
-    transform: [{ translateY: (1 - progress.value) * spacing.sm }],
+    transform: [
+      { translateY: (1 - progress.value) * spacing.xxs },
+      { scale: motion.scale.pillFrom + progress.value * (1 - motion.scale.pillFrom) },
+    ],
   }));
 
   return (
