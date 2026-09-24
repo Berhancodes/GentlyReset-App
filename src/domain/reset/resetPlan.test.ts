@@ -46,11 +46,11 @@ check(
 check('B PLAN_DAY_COUNT aliases DEFAULT_CYCLE_LENGTH', PLAN_DAY_COUNT === DEFAULT_CYCLE_LENGTH);
 check('B there are 30 canonical titles', PLAN_DAY_TITLES.length === 30);
 check(
-  'B day 1 title matches onboarding planReady preview',
+  'B day 1 title matches onboarding companion preview',
   getPlanDayTitle(1) === 'Start smaller than usual',
 );
 check(
-  'B day 3 title matches onboarding planReady preview',
+  'B day 3 title matches onboarding companion preview',
   getPlanDayTitle(3) === 'Build one repeatable win',
 );
 

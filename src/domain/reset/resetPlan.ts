@@ -18,7 +18,7 @@ export const thirtyDayPlan = {
 } as const;
 
 /**
- * Canonical local-day titles. Days 1–3 match the onboarding `planReady`
+ * Canonical local-day titles. Days 1–3 match the onboarding companion
  * preview copy; later days stay in this module. Domain does not import
  * onboarding data.
  */

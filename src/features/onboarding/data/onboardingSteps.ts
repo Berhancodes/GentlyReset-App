@@ -6,6 +6,13 @@ export const PLAN_READY_PREVIEW: readonly PlanPreviewItem[] = [
   { dayLabel: 'Day 3', title: 'Build one repeatable win' },
 ];
 
+export const PLAN_READY_COPY = {
+  eyebrow: 'your reset is ready',
+  title: '30 Days.',
+  supporting: 'one step at a time.',
+  subtitle: 'built around what you told me.',
+} as const;
+
 /**
  * The 21 core personalization questions. Feedback after the Reset Type
  * (`profileAccuracy`) is a question-style screen but is not part of this set.
@@ -555,19 +562,6 @@ export const ONBOARDING_STEPS = [
     scene: 'companion',
     hideProgress: true,
     required: false,
-  },
-  {
-    id: 'planReady',
-    type: 'final',
-    eyebrow: 'your reset is ready',
-    title: '30 Days.\none step at a time.',
-    subtitle: 'built around what you told me.',
-    ctaLabel: 'start my journey',
-    illustrationKey: 'journey',
-    illustrationSize: 'default',
-    hideProgress: true,
-    required: false,
-    preview: PLAN_READY_PREVIEW,
   },
   {
     id: 'paywall',
