@@ -9,8 +9,9 @@ const WAVE_STILL = require('../../../../assets/images/mascot/mascot-companion-st
 const ART_WIDTH = 306;
 const ART_HEIGHT = 291;
 const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
-const MASCOT_MAX_WIDTH = 280;
-const MASCOT_HEIGHT_FRACTION = 0.34;
+const MASCOT_SIZE_SCALE = 1.29;
+const MASCOT_MAX_WIDTH = Math.round(280 * MASCOT_SIZE_SCALE);
+const MASCOT_HEIGHT_FRACTION = 0.34 * MASCOT_SIZE_SCALE;
 
 /**
  * Companion-story mascot. Plays the wave loop unless Reduce Motion is on.
