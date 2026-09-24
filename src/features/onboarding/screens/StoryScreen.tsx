@@ -16,7 +16,11 @@ import { NoticingMascot } from '@/features/onboarding/components/NoticingMascot'
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { PlanPreviewList } from '@/features/onboarding/components/PlanPreviewList';
 import { StoryCopy, type StoryCopyLine } from '@/features/onboarding/components/StoryCopy';
-import { PLAN_READY_COPY, PLAN_READY_PREVIEW } from '@/features/onboarding/data/onboardingSteps';
+import {
+  getOnboardingStepIndex,
+  PLAN_READY_COPY,
+  PLAN_READY_PREVIEW,
+} from '@/features/onboarding/data/onboardingSteps';
 import { useBoundAutoAdvance } from '@/features/onboarding/hooks/useBoundAutoAdvance';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
@@ -34,7 +38,7 @@ type StoryScreenProps = {
 type CompanionCopyPhase = 'writing' | 'erasing' | 'ready';
 
 export function StoryScreen({ step }: StoryScreenProps) {
-  const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
+  const { goToNext, goToIndex, goBack, canGoBack } = useOnboardingNavigation();
   const answers = useOnboardingStore((state) => state.answers);
   const reduceMotion = useReducedMotion();
   const [copyPhase, setCopyPhase] = useState<CompanionCopyPhase>('writing');
@@ -142,8 +146,11 @@ export function StoryScreen({ step }: StoryScreenProps) {
   const handleStoryFinished = useCallback(() => {
     setStoryCopyDone(true);
   }, []);
+  const handleAutoAdvance = useCallback(() => {
+    goToIndex(getOnboardingStepIndex('resetReveal'));
+  }, [goToIndex]);
 
-  useBoundAutoAdvance(step.id, Boolean(step.autoAdvance && storyCopyDone), goToNext);
+  useBoundAutoAdvance(step.id, Boolean(step.autoAdvance && storyCopyDone), handleAutoAdvance);
 
   useEffect(() => {
     if (copyPhase !== 'erasing') {
