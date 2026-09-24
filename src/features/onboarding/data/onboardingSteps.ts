@@ -495,16 +495,6 @@ export const ONBOARDING_STEPS = [
     ],
   },
   {
-    id: 'gotYouStory',
-    type: 'story',
-    title: "I think I've got you.",
-    autoAdvance: true,
-    illustrationKey: 'gotYou',
-    illustrationSize: 'large',
-    hideProgress: true,
-    required: false,
-  },
-  {
     id: 'resetReveal',
     type: 'result',
     // Title/profileId are unused at render; ResultScreen classifies from answers.

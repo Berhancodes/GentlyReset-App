@@ -1,11 +1,13 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { motion, spacing } from '@/design-system';
 import { BuildingMascot } from '@/features/onboarding/components/BuildingMascot';
 import { LoadingStageRow } from '@/features/onboarding/components/LoadingStageRow';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
+import { StoryCopy, type StoryCopyLine } from '@/features/onboarding/components/StoryCopy';
 import { getOnboardingStepIndex } from '@/features/onboarding/data/onboardingSteps';
+import { useBoundAutoAdvance } from '@/features/onboarding/hooks/useBoundAutoAdvance';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useStagedLoading } from '@/features/onboarding/hooks/useStagedLoading';
 import type { LoadingStep } from '@/features/onboarding/types/onboarding';
@@ -15,48 +17,87 @@ type LoadingScreenProps = {
   step: LoadingStep;
 };
 
+type LoadingPhase = 'checks' | 'gotYou';
+
+const GOT_YOU_TITLE = "I think I've got you.";
+
+const GOT_YOU_LINES: readonly StoryCopyLine[] = [
+  {
+    id: 'got-you-title',
+    text: capitalizeHeading(GOT_YOU_TITLE),
+    variant: 'storyTitle',
+    color: 'primary',
+  },
+];
+
 export function LoadingScreen({ step }: LoadingScreenProps) {
   const { goToIndex, goBack, canGoBack } = useOnboardingNavigation();
-  const handleComplete = useCallback(() => {
-    const gotYouIndex = getOnboardingStepIndex('gotYouStory');
-    goToIndex(gotYouIndex);
+  const [phase, setPhase] = useState<LoadingPhase>('checks');
+  const [gotYouCopyDone, setGotYouCopyDone] = useState(false);
+  const showBuildingScene = step.scene === 'building';
+  const showGotYou = phase === 'gotYou';
+
+  const handleChecksComplete = useCallback(() => {
+    if (showBuildingScene) {
+      setPhase('gotYou');
+      return;
+    }
+    goToIndex(getOnboardingStepIndex('resetReveal'));
+  }, [goToIndex, showBuildingScene]);
+
+  const handleGotYouFinished = useCallback(() => {
+    setGotYouCopyDone(true);
+  }, []);
+
+  const handleAdvanceToReveal = useCallback(() => {
+    goToIndex(getOnboardingStepIndex('resetReveal'));
   }, [goToIndex]);
+
   const completedCount = useStagedLoading({
     stageCount: step.stages.length,
     mockDurationMs: step.mockDurationMs,
     settleMs: motion.duration.loadingHold,
-    onComplete: handleComplete,
+    onComplete: handleChecksComplete,
   });
-  const showBuildingScene = step.scene === 'building';
+
+  useBoundAutoAdvance(step.id, showGotYou && gotYouCopyDone, handleAdvanceToReveal);
+
   const stageTotal = step.stages.length;
 
   return (
     <OnboardingScreenLayout
       tone="story"
-      title={step.title}
-      subtitle={step.subtitle}
-      illustrationKey={showBuildingScene ? undefined : step.illustrationKey}
+      title={showGotYou ? GOT_YOU_TITLE : step.title}
+      subtitle={showGotYou ? undefined : step.subtitle}
+      showTitle={false}
+      illustrationKey={showGotYou ? 'gotYou' : showBuildingScene ? undefined : step.illustrationKey}
       illustrationSize="large"
-      illustrationPlacement="afterHero"
+      illustrationPlacement={showGotYou ? 'end' : 'afterHero'}
       hideProgress
       onBack={canGoBack ? goBack : undefined}
     >
-      {showBuildingScene ? <BuildingMascot /> : null}
-      <View
-        accessibilityRole="progressbar"
-        accessibilityLabel={capitalizeHeading(step.title)}
-        accessibilityValue={{ min: 0, max: stageTotal, now: completedCount }}
-        style={styles.list}
-      >
-        {step.stages.map((stage, index) => (
-          <LoadingStageRow
-            key={stage.id}
-            label={stage.label}
-            done={index < completedCount}
-            active={index === completedCount}
-          />
-        ))}
-      </View>
+      {showGotYou ? (
+        <StoryCopy lines={GOT_YOU_LINES} onFinished={handleGotYouFinished} />
+      ) : (
+        <>
+          {showBuildingScene ? <BuildingMascot /> : null}
+          <View
+            accessibilityRole="progressbar"
+            accessibilityLabel={capitalizeHeading(step.title)}
+            accessibilityValue={{ min: 0, max: stageTotal, now: completedCount }}
+            style={styles.list}
+          >
+            {step.stages.map((stage, index) => (
+              <LoadingStageRow
+                key={stage.id}
+                label={stage.label}
+                done={index < completedCount}
+                active={index === completedCount}
+              />
+            ))}
+          </View>
+        </>
+      )}
     </OnboardingScreenLayout>
   );
 }
