@@ -21,40 +21,52 @@ export function useStagedLoading({
 }: UseStagedLoadingOptions) {
   const [completedCount, setCompletedCount] = useState(0);
   const onCompleteRef = useRef(onComplete);
+  const finishedRef = useRef(false);
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
 
   useEffect(() => {
-    if (stageCount === 0) {
+    const timers = new Set<ReturnType<typeof setTimeout>>();
+
+    const schedule = (delayMs: number, callback: () => void) => {
+      const timerId = setTimeout(() => {
+        timers.delete(timerId);
+        callback();
+      }, delayMs);
+      timers.add(timerId);
+    };
+
+    const finish = () => {
+      if (finishedRef.current) {
+        return;
+      }
+      finishedRef.current = true;
       onCompleteRef.current();
-      return;
+    };
+
+    if (stageCount === 0) {
+      finish();
+      return () => {
+        timers.forEach(clearTimeout);
+        timers.clear();
+      };
     }
 
     const perStage = mockDurationMs / stageCount;
-    const timers: ReturnType<typeof setTimeout>[] = [];
-
     for (let index = 0; index < stageCount; index += 1) {
-      timers.push(
-        setTimeout(
-          () => {
-            setCompletedCount(index + 1);
-            if (index === stageCount - 1) {
-              timers.push(
-                setTimeout(() => {
-                  onCompleteRef.current();
-                }, settleMs),
-              );
-            }
-          },
-          perStage * (index + 1),
-        ),
-      );
+      schedule(perStage * (index + 1), () => {
+        setCompletedCount(index + 1);
+        if (index === stageCount - 1) {
+          schedule(settleMs, finish);
+        }
+      });
     }
 
     return () => {
       timers.forEach(clearTimeout);
+      timers.clear();
     };
   }, [mockDurationMs, settleMs, stageCount]);
 

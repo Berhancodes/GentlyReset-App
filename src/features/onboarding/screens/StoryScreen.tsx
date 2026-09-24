@@ -16,7 +16,11 @@ import { NoticingMascot } from '@/features/onboarding/components/NoticingMascot'
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { PlanPreviewList } from '@/features/onboarding/components/PlanPreviewList';
 import { StoryCopy, type StoryCopyLine } from '@/features/onboarding/components/StoryCopy';
-import { PLAN_READY_COPY, PLAN_READY_PREVIEW } from '@/features/onboarding/data/onboardingSteps';
+import {
+  ONBOARDING_STEPS,
+  PLAN_READY_COPY,
+  PLAN_READY_PREVIEW,
+} from '@/features/onboarding/data/onboardingSteps';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { StoryStep } from '@/features/onboarding/types/onboarding';
@@ -145,9 +149,13 @@ export function StoryScreen({ step }: StoryScreenProps) {
     }
     autoAdvanceStarted.current = true;
     autoAdvanceTimeout.current = setTimeout(() => {
+      const current = ONBOARDING_STEPS[useOnboardingStore.getState().currentStepIndex];
+      if (current?.id !== step.id) {
+        return;
+      }
       goToNext();
     }, motion.duration.storyHold);
-  }, [goToNext]);
+  }, [goToNext, step.id]);
 
   useEffect(() => {
     return () => {

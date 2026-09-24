@@ -8,10 +8,18 @@ export function useOnboardingNavigation() {
   const currentStepIndex = useOnboardingStore((state) => state.currentStepIndex);
   const next = useOnboardingStore((state) => state.next);
   const back = useOnboardingStore((state) => state.back);
+  const goToStep = useOnboardingStore((state) => state.goToStep);
 
   const goToNext = useCallback(() => {
     next();
   }, [next]);
+
+  const goToIndex = useCallback(
+    (index: number) => {
+      goToStep(index);
+    },
+    [goToStep],
+  );
 
   const goBack = useCallback(() => {
     if (currentStepIndex <= 0) {
@@ -24,6 +32,7 @@ export function useOnboardingNavigation() {
   return {
     router,
     goToNext,
+    goToIndex,
     goBack,
     canGoBack: currentStepIndex > 0,
   };
