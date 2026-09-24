@@ -9,6 +9,7 @@ export const motion = {
     loadingPulse: 900,
     loadingHold: 560,
     pillReveal: 560,
+    storyHold: 1600,
   },
   scale: {
     press: 0.97,

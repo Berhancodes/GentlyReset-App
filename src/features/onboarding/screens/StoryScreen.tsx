@@ -146,7 +146,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
     autoAdvanceStarted.current = true;
     autoAdvanceTimeout.current = setTimeout(() => {
       goToNext();
-    }, motion.duration.loadingHold);
+    }, motion.duration.storyHold);
   }, [goToNext]);
 
   useEffect(() => {
