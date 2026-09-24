@@ -117,7 +117,7 @@ export type StoryStep = BaseOnboardingStep & {
   body?: string;
   ctaLabel: string;
   dynamicCopy?: 'outOfBalance' | 'consistencyStage';
-  scene?: 'breathing' | 'noticing';
+  scene?: 'breathing' | 'noticing' | 'companion';
 };
 
 export type BeforeAfterStep = BaseOnboardingStep & {

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { PrimaryButton } from '@/components/ui';
 import { BreathingMascot } from '@/features/onboarding/components/BreathingMascot';
+import { CompanionMascot } from '@/features/onboarding/components/CompanionMascot';
 import { NoticingMascot } from '@/features/onboarding/components/NoticingMascot';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { StoryCopy, type StoryCopyLine } from '@/features/onboarding/components/StoryCopy';
@@ -71,13 +72,15 @@ export function StoryScreen({ step }: StoryScreenProps) {
 
   const showBreathingScene = step.scene === 'breathing';
   const showNoticingScene = step.scene === 'noticing';
+  const showCompanionScene = step.scene === 'companion';
+  const hideStillIllustration = showBreathingScene || showNoticingScene || showCompanionScene;
 
   return (
     <OnboardingScreenLayout
       tone="story"
       title={step.title}
       showTitle={false}
-      illustrationKey={showBreathingScene || showNoticingScene ? undefined : step.illustrationKey}
+      illustrationKey={hideStillIllustration ? undefined : step.illustrationKey}
       illustrationSize={step.illustrationSize ?? 'large'}
       illustrationPlacement="end"
       hideProgress
@@ -87,6 +90,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
       <StoryCopy lines={lines} />
       {showBreathingScene ? <BreathingMascot /> : null}
       {showNoticingScene ? <NoticingMascot /> : null}
+      {showCompanionScene ? <CompanionMascot /> : null}
     </OnboardingScreenLayout>
   );
 }
