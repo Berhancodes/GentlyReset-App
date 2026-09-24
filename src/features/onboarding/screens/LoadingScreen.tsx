@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
 import { colors, radius, spacing } from '@/design-system';
+import { BuildingMascot } from '@/features/onboarding/components/BuildingMascot';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useStagedLoading } from '@/features/onboarding/hooks/useStagedLoading';
@@ -19,18 +20,20 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
     mockDurationMs: step.mockDurationMs,
     onComplete: goToNext,
   });
+  const showBuildingScene = step.scene === 'building';
 
   return (
     <OnboardingScreenLayout
       tone="story"
       title={step.title}
       subtitle={step.subtitle}
-      illustrationKey={step.illustrationKey}
+      illustrationKey={showBuildingScene ? undefined : step.illustrationKey}
       illustrationSize="large"
       illustrationPlacement="afterHero"
       hideProgress
       onBack={canGoBack ? goBack : undefined}
     >
+      {showBuildingScene ? <BuildingMascot /> : null}
       <View
         accessibilityRole="progressbar"
         accessibilityLabel={capitalizeHeading(step.title)}

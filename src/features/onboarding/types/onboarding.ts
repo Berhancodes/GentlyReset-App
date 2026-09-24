@@ -133,6 +133,7 @@ export type LoadingStep = BaseOnboardingStep & {
    * without rewriting LoadingScreen.
    */
   mockDurationMs: number;
+  scene?: 'building';
 };
 
 export type ResultStep = BaseOnboardingStep & {
