@@ -81,6 +81,13 @@ function snapshotAt(
   return { lineIndex: lastIndex, charCount: lines[lastIndex]?.text.length ?? 0 };
 }
 
+function isSnapshotComplete(lines: readonly TypewriterLine[], snapshot: TypedSnapshot): boolean {
+  const lastLine = lines[lines.length - 1];
+  return (
+    snapshot.lineIndex >= lines.length - 1 && snapshot.charCount >= (lastLine?.text.length ?? 0)
+  );
+}
+
 function nowMs(): number {
   return typeof performance !== 'undefined' ? performance.now() : Date.now();
 }
@@ -111,9 +118,7 @@ export function useStagedTypewriter(lines: readonly TypewriterLine[]) {
           : next,
       );
 
-      const lastLine = lines[lines.length - 1];
-      const finished =
-        next.lineIndex >= lines.length - 1 && next.charCount >= (lastLine?.text.length ?? 0);
+      const finished = isSnapshotComplete(lines, next);
 
       if (!finished) {
         frameId = requestAnimationFrame(tick);
@@ -190,6 +195,7 @@ export function useStagedTypewriter(lines: readonly TypewriterLine[]) {
   );
 
   return {
+    isComplete: reduceMotion || isSnapshotComplete(lines, snapshot),
     isLineActive,
     revealRemaining,
     visibleText,

@@ -23,6 +23,7 @@ export type StoryCopyLine = TypewriterLine & {
 
 type StoryCopyProps = {
   lines: readonly StoryCopyLine[];
+  onFinished?: () => void;
 };
 
 function FadingLine({ active, children }: { active: boolean; children: ReactNode }) {
@@ -43,14 +44,20 @@ function FadingLine({ active, children }: { active: boolean; children: ReactNode
   return <Animated.View style={[styles.typed, fadeStyle]}>{children}</Animated.View>;
 }
 
-export function StoryCopy({ lines }: StoryCopyProps) {
+export function StoryCopy({ lines, onFinished }: StoryCopyProps) {
   const signature = lines.map((line) => `${line.id}:${line.text}`).join('\n');
 
-  return <TypedStoryCopy key={signature} lines={lines} />;
+  return <TypedStoryCopy key={signature} lines={lines} onFinished={onFinished} />;
 }
 
-function TypedStoryCopy({ lines }: StoryCopyProps) {
-  const { isLineActive, revealRemaining, visibleText } = useStagedTypewriter(lines);
+function TypedStoryCopy({ lines, onFinished }: StoryCopyProps) {
+  const { isComplete, isLineActive, revealRemaining, visibleText } = useStagedTypewriter(lines);
+
+  useEffect(() => {
+    if (isComplete) {
+      onFinished?.();
+    }
+  }, [isComplete, onFinished]);
   const spoken = lines.map((line) => line.text).join(' ');
 
   return (

@@ -1,11 +1,15 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { PrimaryButton } from '@/components/ui';
+import { spacing } from '@/design-system';
 import { BreathingMascot } from '@/features/onboarding/components/BreathingMascot';
 import { CompanionMascot } from '@/features/onboarding/components/CompanionMascot';
 import { NoticingMascot } from '@/features/onboarding/components/NoticingMascot';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
+import { PlanPreviewList } from '@/features/onboarding/components/PlanPreviewList';
 import { StoryCopy, type StoryCopyLine } from '@/features/onboarding/components/StoryCopy';
+import { PLAN_READY_PREVIEW } from '@/features/onboarding/data/onboardingSteps';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { StoryStep } from '@/features/onboarding/types/onboarding';
@@ -22,6 +26,7 @@ type StoryScreenProps = {
 export function StoryScreen({ step }: StoryScreenProps) {
   const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
   const answers = useOnboardingStore((state) => state.answers);
+  const [companionCopyDone, setCompanionCopyDone] = useState(false);
 
   const subtitle =
     step.dynamicCopy === 'outOfBalance'
@@ -74,6 +79,9 @@ export function StoryScreen({ step }: StoryScreenProps) {
   const showNoticingScene = step.scene === 'noticing';
   const showCompanionScene = step.scene === 'companion';
   const hideStillIllustration = showBreathingScene || showNoticingScene || showCompanionScene;
+  const handleCompanionFinished = useCallback(() => {
+    setCompanionCopyDone(true);
+  }, []);
 
   return (
     <OnboardingScreenLayout
@@ -88,10 +96,29 @@ export function StoryScreen({ step }: StoryScreenProps) {
       onBack={canGoBack ? goBack : undefined}
       footer={<PrimaryButton label={step.ctaLabel} onPress={goToNext} />}
     >
-      <StoryCopy lines={lines} />
+      <StoryCopy
+        lines={lines}
+        onFinished={showCompanionScene ? handleCompanionFinished : undefined}
+      />
       {showBreathingScene ? <BreathingMascot /> : null}
       {showNoticingScene ? <NoticingMascot /> : null}
-      {showCompanionScene ? <CompanionMascot /> : null}
+      {showCompanionScene ? (
+        <View style={styles.companionStage}>
+          <CompanionMascot />
+          {companionCopyDone ? <PlanPreviewList items={PLAN_READY_PREVIEW} animateIn /> : null}
+        </View>
+      ) : null}
     </OnboardingScreenLayout>
   );
 }
+
+const styles = StyleSheet.create({
+  companionStage: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.lg,
+    width: '100%',
+    paddingTop: spacing.sm,
+  },
+});

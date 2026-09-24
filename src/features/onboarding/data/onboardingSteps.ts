@@ -1,4 +1,10 @@
-import type { OnboardingStep } from '../types/onboarding';
+import type { OnboardingStep, PlanPreviewItem } from '../types/onboarding';
+
+export const PLAN_READY_PREVIEW: readonly PlanPreviewItem[] = [
+  { dayLabel: 'Day 1', title: 'Start smaller than usual' },
+  { dayLabel: 'Day 2', title: 'Make your environment easier' },
+  { dayLabel: 'Day 3', title: 'Build one repeatable win' },
+];
 
 /**
  * The 21 core personalization questions. Feedback after the Reset Type
@@ -554,18 +560,14 @@ export const ONBOARDING_STEPS = [
     id: 'planReady',
     type: 'final',
     eyebrow: 'your reset is ready',
-    title: '30 days.\none step at a time.',
+    title: '30 Days.\none step at a time.',
     subtitle: 'built around what you told me.',
     ctaLabel: 'start my journey',
     illustrationKey: 'journey',
     illustrationSize: 'default',
     hideProgress: true,
     required: false,
-    preview: [
-      { dayLabel: 'Day 1', title: 'Start smaller than usual' },
-      { dayLabel: 'Day 2', title: 'Make your environment easier' },
-      { dayLabel: 'Day 3', title: 'Build one repeatable win' },
-    ],
+    preview: PLAN_READY_PREVIEW,
   },
   {
     id: 'paywall',

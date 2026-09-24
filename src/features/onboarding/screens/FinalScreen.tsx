@@ -1,8 +1,6 @@
-import { StyleSheet, View } from 'react-native';
-
-import { AppText, PrimaryButton } from '@/components/ui';
-import { colors, radius, shadows, spacing } from '@/design-system';
+import { PrimaryButton } from '@/components/ui';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
+import { PlanPreviewList } from '@/features/onboarding/components/PlanPreviewList';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import type { FinalStep } from '@/features/onboarding/types/onboarding';
 
@@ -26,34 +24,7 @@ export function FinalScreen({ step }: FinalScreenProps) {
       onBack={canGoBack ? goBack : undefined}
       footer={<PrimaryButton label={step.ctaLabel} haptic="success" onPress={goToNext} />}
     >
-      <View style={styles.preview}>
-        {step.preview.map((item) => (
-          <View key={item.dayLabel} style={styles.row}>
-            <AppText variant="label" color="helper">
-              {item.dayLabel}
-            </AppText>
-            <AppText variant="optionTitle">{item.title}</AppText>
-          </View>
-        ))}
-      </View>
+      <PlanPreviewList items={step.preview} />
     </OnboardingScreenLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  preview: {
-    gap: spacing.sm,
-  },
-  row: {
-    minHeight: 64,
-    borderRadius: radius.card,
-    backgroundColor: colors.surface.choice,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    justifyContent: 'center',
-    gap: spacing.xxs,
-    ...shadows.soft,
-  },
-});
