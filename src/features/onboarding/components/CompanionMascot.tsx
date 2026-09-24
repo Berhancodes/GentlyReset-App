@@ -1,7 +1,14 @@
-import { Image, Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  Image,
+  Platform,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+  type ImageStyle,
+} from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
-import { colors, radius, shadows, spacing } from '@/design-system';
+import { colors, shadows, spacing } from '@/design-system';
 
 const WAVE_LOOP = require('../../../../assets/images/mascot/mascot-companion-loop.gif');
 const WAVE_STILL = require('../../../../assets/images/mascot/mascot-companion-still.png');
@@ -12,6 +19,14 @@ const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 const MASCOT_SIZE_SCALE = 1.29;
 const MASCOT_MAX_WIDTH = Math.round(280 * MASCOT_SIZE_SCALE);
 const MASCOT_HEIGHT_FRACTION = 0.34 * MASCOT_SIZE_SCALE;
+
+const WEB_WRAP_GLOW = {
+  filter: [
+    `drop-shadow(0 0 8px ${colors.overlay.mascotGlow})`,
+    `drop-shadow(0 0 18px ${colors.overlay.mascotGlowCore})`,
+    `drop-shadow(0 0 34px ${colors.overlay.mascotGlow})`,
+  ].join(' '),
+} as const;
 
 /**
  * Companion-story mascot. Plays the wave loop unless Reduce Motion is on.
@@ -27,6 +42,7 @@ export function CompanionMascot() {
     Math.min(availableWidth, widthFromHeight, MASCOT_MAX_WIDTH),
   );
   const artHeight = Math.round(artWidth / ART_ASPECT);
+  const artStyle = { width: artWidth, height: artHeight };
 
   return (
     <View
@@ -35,35 +51,20 @@ export function CompanionMascot() {
       accessibilityLabel="Gently Reset companion"
       style={styles.root}
     >
-      <View style={[styles.stage, { width: artWidth, height: artHeight }]}>
-        <View
+      <View style={[styles.stage, artStyle]}>
+        <Image
+          source={WAVE_STILL}
+          resizeMode="contain"
           accessibilityElementsHidden
           importantForAccessibility="no"
-          style={[
-            styles.glowOuter,
-            {
-              width: Math.round(artWidth * 1.18),
-              height: Math.round(artHeight * 0.88),
-            },
-          ]}
-        />
-        <View
-          accessibilityElementsHidden
-          importantForAccessibility="no"
-          style={[
-            styles.glowInner,
-            {
-              width: Math.round(artWidth * 0.78),
-              height: Math.round(artHeight * 0.62),
-            },
-          ]}
+          style={[artStyle, styles.glowSilhouette]}
         />
         <Image
           source={reduceMotion ? WAVE_STILL : WAVE_LOOP}
           resizeMode="contain"
           accessibilityElementsHidden
           importantForAccessibility="no"
-          style={{ width: artWidth, height: artHeight }}
+          style={[artStyle, Platform.OS === 'web' ? (WEB_WRAP_GLOW as ImageStyle) : null]}
         />
       </View>
     </View>
@@ -82,17 +83,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  glowOuter: {
+  glowSilhouette: {
     position: 'absolute',
-    borderRadius: radius.pill,
-    backgroundColor: colors.overlay.mascotGlow,
-    ...shadows.mascotGlow,
-    ...(Platform.OS === 'web' ? { filter: 'blur(22px)' } : null),
-  },
-  glowInner: {
-    position: 'absolute',
-    borderRadius: radius.pill,
-    backgroundColor: colors.overlay.mascotGlowCore,
-    ...(Platform.OS === 'web' ? { filter: 'blur(16px)' } : null),
+    tintColor: colors.accent.gold,
+    opacity: 0.55,
+    transform: [{ scale: 1.08 }],
+    ...(Platform.OS === 'web' ? { filter: 'blur(14px)' } : shadows.mascotGlow),
   },
 });
