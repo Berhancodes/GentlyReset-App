@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { ChoiceCard, PrimaryButton } from '@/components/ui';
 import { spacing } from '@/design-system';
+import { ClimbingMascot } from '@/features/onboarding/components/ClimbingMascot';
 import { IllustratedChoiceCard } from '@/features/onboarding/components/IllustratedChoiceCard';
 import { IllustratedChoiceGrid } from '@/features/onboarding/components/IllustratedChoiceGrid';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
@@ -26,6 +27,7 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
   const selectedId = answer?.type === 'singleChoice' ? answer.optionId : undefined;
   const layout = step.layout ?? 'stacked';
   const illustratedGrid = shouldUseIllustratedGrid(step);
+  const isHardestStep = step.id === 'consistencyStage';
   const useGrid = illustratedGrid || layout === 'grid2' || layout === 'grid3';
   const columns = illustratedGrid || layout === 'grid2' ? 2 : 3;
 
@@ -65,7 +67,7 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
   return (
     <OnboardingScreenLayout
       tone="question"
-      compact={illustratedGrid && step.options.length >= 8}
+      compact={isHardestStep || (illustratedGrid && step.options.length >= 8)}
       title={step.title}
       subtitle={getQuestionHelper(step)}
       eyebrow={step.eyebrow}
@@ -77,7 +79,12 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
         <PrimaryButton label="next" disabled={!canProceed(step, answer)} onPress={goToNext} />
       }
     >
-      {illustratedGrid ? (
+      {isHardestStep ? (
+        <View style={styles.hardestBlock}>
+          <View style={styles.list}>{cards}</View>
+          <ClimbingMascot />
+        </View>
+      ) : illustratedGrid ? (
         <IllustratedChoiceGrid>{cards}</IllustratedChoiceGrid>
       ) : useGrid ? (
         <OptionGrid columns={columns}>{cards}</OptionGrid>
@@ -91,5 +98,10 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
 const styles = StyleSheet.create({
   list: {
     gap: spacing.sm,
+  },
+  hardestBlock: {
+    gap: spacing.sm,
+    flexGrow: 1,
+    justifyContent: 'space-between',
   },
 });
