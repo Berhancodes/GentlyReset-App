@@ -28,6 +28,7 @@ export const motion = {
     sentencePauseMs: 260,
     linePauseMs: 400,
     lineFadeMs: 220,
+    eraseMs: 320,
   },
 } as const;
 

@@ -1,8 +1,15 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { PrimaryButton } from '@/components/ui';
-import { spacing } from '@/design-system';
+import { motion, spacing } from '@/design-system';
 import { BreathingMascot } from '@/features/onboarding/components/BreathingMascot';
 import { CompanionMascot } from '@/features/onboarding/components/CompanionMascot';
 import { NoticingMascot } from '@/features/onboarding/components/NoticingMascot';
@@ -23,11 +30,15 @@ type StoryScreenProps = {
   step: StoryStep;
 };
 
+type CompanionCopyPhase = 'writing' | 'erasing' | 'ready';
+
 export function StoryScreen({ step }: StoryScreenProps) {
   const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
   const answers = useOnboardingStore((state) => state.answers);
-  const [companionCopyDone, setCompanionCopyDone] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const [copyPhase, setCopyPhase] = useState<CompanionCopyPhase>('writing');
   const [readyCopyDone, setReadyCopyDone] = useState(false);
+  const companionFinished = useRef(false);
 
   const subtitle =
     step.dynamicCopy === 'outOfBalance'
@@ -110,12 +121,44 @@ export function StoryScreen({ step }: StoryScreenProps) {
   const showNoticingScene = step.scene === 'noticing';
   const showCompanionScene = step.scene === 'companion';
   const hideStillIllustration = showBreathingScene || showNoticingScene || showCompanionScene;
+  const companionOpacity = useSharedValue(1);
+
   const handleCompanionFinished = useCallback(() => {
-    setCompanionCopyDone(true);
-  }, []);
+    if (companionFinished.current) {
+      return;
+    }
+    companionFinished.current = true;
+    if (reduceMotion) {
+      setCopyPhase('ready');
+      return;
+    }
+    setCopyPhase('erasing');
+  }, [reduceMotion]);
   const handleReadyFinished = useCallback(() => {
     setReadyCopyDone(true);
   }, []);
+
+  useEffect(() => {
+    if (copyPhase !== 'erasing') {
+      return;
+    }
+
+    companionOpacity.value = withTiming(0, {
+      duration: motion.typewriter.eraseMs,
+      easing: Easing.out(Easing.cubic),
+    });
+    const timeoutId = setTimeout(() => {
+      setCopyPhase('ready');
+    }, motion.typewriter.eraseMs);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [companionOpacity, copyPhase]);
+
+  const companionFadeStyle = useAnimatedStyle(() => ({
+    opacity: companionOpacity.value,
+  }));
 
   return (
     <OnboardingScreenLayout
@@ -130,13 +173,17 @@ export function StoryScreen({ step }: StoryScreenProps) {
       onBack={canGoBack ? goBack : undefined}
       footer={<PrimaryButton label={step.ctaLabel} onPress={goToNext} />}
     >
-      <StoryCopy
-        lines={lines}
-        onFinished={showCompanionScene ? handleCompanionFinished : undefined}
-      />
-      {showCompanionScene && companionCopyDone ? (
-        <StoryCopy lines={readyLines} onFinished={handleReadyFinished} />
-      ) : null}
+      {showCompanionScene ? (
+        copyPhase === 'ready' ? (
+          <StoryCopy lines={readyLines} onFinished={handleReadyFinished} />
+        ) : (
+          <Animated.View style={companionFadeStyle}>
+            <StoryCopy lines={lines} onFinished={handleCompanionFinished} />
+          </Animated.View>
+        )
+      ) : (
+        <StoryCopy lines={lines} />
+      )}
       {showBreathingScene ? <BreathingMascot /> : null}
       {showNoticingScene ? <NoticingMascot /> : null}
       {showCompanionScene ? (
