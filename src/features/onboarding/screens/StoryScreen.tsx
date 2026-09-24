@@ -39,6 +39,8 @@ export function StoryScreen({ step }: StoryScreenProps) {
   const [copyPhase, setCopyPhase] = useState<CompanionCopyPhase>('writing');
   const [readyCopyDone, setReadyCopyDone] = useState(false);
   const companionFinished = useRef(false);
+  const autoAdvanceStarted = useRef(false);
+  const autoAdvanceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const subtitle =
     step.dynamicCopy === 'outOfBalance'
@@ -137,6 +139,23 @@ export function StoryScreen({ step }: StoryScreenProps) {
   const handleReadyFinished = useCallback(() => {
     setReadyCopyDone(true);
   }, []);
+  const handleAutoAdvance = useCallback(() => {
+    if (autoAdvanceStarted.current) {
+      return;
+    }
+    autoAdvanceStarted.current = true;
+    autoAdvanceTimeout.current = setTimeout(() => {
+      goToNext();
+    }, motion.duration.loadingHold);
+  }, [goToNext]);
+
+  useEffect(() => {
+    return () => {
+      if (autoAdvanceTimeout.current) {
+        clearTimeout(autoAdvanceTimeout.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (copyPhase !== 'erasing') {
@@ -171,7 +190,11 @@ export function StoryScreen({ step }: StoryScreenProps) {
       skipStorySpacer={showCompanionScene}
       hideProgress
       onBack={canGoBack ? goBack : undefined}
-      footer={<PrimaryButton label={step.ctaLabel} onPress={goToNext} />}
+      footer={
+        step.autoAdvance || !step.ctaLabel ? undefined : (
+          <PrimaryButton label={step.ctaLabel} onPress={goToNext} />
+        )
+      }
     >
       {showCompanionScene ? (
         copyPhase === 'ready' ? (
@@ -182,7 +205,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
           </Animated.View>
         )
       ) : (
-        <StoryCopy lines={lines} />
+        <StoryCopy lines={lines} onFinished={step.autoAdvance ? handleAutoAdvance : undefined} />
       )}
       {showBreathingScene ? <BreathingMascot /> : null}
       {showNoticingScene ? <NoticingMascot /> : null}

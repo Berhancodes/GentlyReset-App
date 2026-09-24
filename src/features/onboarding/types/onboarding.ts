@@ -115,7 +115,8 @@ export type TextInputStep = BaseOnboardingStep & {
 export type StoryStep = BaseOnboardingStep & {
   type: 'story';
   body?: string;
-  ctaLabel: string;
+  ctaLabel?: string;
+  autoAdvance?: boolean;
   dynamicCopy?: 'outOfBalance' | 'consistencyStage';
   scene?: 'breathing' | 'noticing' | 'companion';
 };

@@ -498,7 +498,7 @@ export const ONBOARDING_STEPS = [
     id: 'gotYouStory',
     type: 'story',
     title: "I think I've got you.",
-    ctaLabel: 'show me',
+    autoAdvance: true,
     illustrationKey: 'gotYou',
     illustrationSize: 'large',
     hideProgress: true,
