@@ -18,7 +18,8 @@ type LoadingScreenProps = {
 export function LoadingScreen({ step }: LoadingScreenProps) {
   const { goToIndex, goBack, canGoBack } = useOnboardingNavigation();
   const handleComplete = useCallback(() => {
-    goToIndex(getOnboardingStepIndex('gotYouStory'));
+    const gotYouIndex = getOnboardingStepIndex('gotYouStory');
+    goToIndex(gotYouIndex);
   }, [goToIndex]);
   const completedCount = useStagedLoading({
     stageCount: step.stages.length,

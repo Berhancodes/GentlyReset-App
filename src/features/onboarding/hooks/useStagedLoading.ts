@@ -28,45 +28,40 @@ export function useStagedLoading({
   }, [onComplete]);
 
   useEffect(() => {
-    const timers = new Set<ReturnType<typeof setTimeout>>();
+    finishedRef.current = false;
 
-    const schedule = (delayMs: number, callback: () => void) => {
-      const timerId = setTimeout(() => {
-        timers.delete(timerId);
-        callback();
-      }, delayMs);
-      timers.add(timerId);
-    };
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const durationMs =
+      Number.isFinite(mockDurationMs) && mockDurationMs > 0 ? mockDurationMs : 5200;
+    const holdMs =
+      Number.isFinite(settleMs) && settleMs > 0 ? settleMs : motion.duration.loadingHold;
 
-    const finish = () => {
-      if (finishedRef.current) {
-        return;
+    if (stageCount > 0) {
+      const perStage = durationMs / stageCount;
+      for (let index = 0; index < stageCount; index += 1) {
+        timers.push(
+          setTimeout(
+            () => {
+              setCompletedCount(index + 1);
+            },
+            perStage * (index + 1),
+          ),
+        );
       }
-      finishedRef.current = true;
-      onCompleteRef.current();
-    };
-
-    if (stageCount === 0) {
-      finish();
-      return () => {
-        timers.forEach(clearTimeout);
-        timers.clear();
-      };
     }
 
-    const perStage = mockDurationMs / stageCount;
-    for (let index = 0; index < stageCount; index += 1) {
-      schedule(perStage * (index + 1), () => {
-        setCompletedCount(index + 1);
-        if (index === stageCount - 1) {
-          schedule(settleMs, finish);
+    timers.push(
+      setTimeout(() => {
+        if (finishedRef.current) {
+          return;
         }
-      });
-    }
+        finishedRef.current = true;
+        onCompleteRef.current();
+      }, durationMs + holdMs),
+    );
 
     return () => {
       timers.forEach(clearTimeout);
-      timers.clear();
     };
   }, [mockDurationMs, settleMs, stageCount]);
 
