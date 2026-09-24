@@ -472,7 +472,7 @@ export const ONBOARDING_STEPS = [
     scene: 'building',
     hideProgress: true,
     required: false,
-    mockDurationMs: 4000,
+    mockDurationMs: 5200,
     stages: [
       { id: 'where', label: 'understanding where you are' },
       { id: 'patterns', label: 'finding your patterns' },

@@ -1,8 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 
-import { AppText } from '@/components/ui';
-import { colors, radius, spacing } from '@/design-system';
+import { motion, spacing } from '@/design-system';
 import { BuildingMascot } from '@/features/onboarding/components/BuildingMascot';
+import { LoadingStageRow } from '@/features/onboarding/components/LoadingStageRow';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useStagedLoading } from '@/features/onboarding/hooks/useStagedLoading';
@@ -18,9 +18,11 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
   const completedCount = useStagedLoading({
     stageCount: step.stages.length,
     mockDurationMs: step.mockDurationMs,
+    settleMs: motion.duration.loadingHold,
     onComplete: goToNext,
   });
   const showBuildingScene = step.scene === 'building';
+  const stageTotal = step.stages.length;
 
   return (
     <OnboardingScreenLayout
@@ -37,25 +39,17 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
       <View
         accessibilityRole="progressbar"
         accessibilityLabel={capitalizeHeading(step.title)}
+        accessibilityValue={{ min: 0, max: stageTotal, now: completedCount }}
         style={styles.list}
       >
-        {step.stages.map((stage, index) => {
-          const done = index < completedCount;
-          return (
-            <View key={stage.id} style={styles.row}>
-              <View style={[styles.mark, done ? styles.markDone : styles.markIdle]}>
-                {done ? (
-                  <AppText variant="caption" color="inverse" align="center">
-                    ✓
-                  </AppText>
-                ) : null}
-              </View>
-              <AppText variant="body" color={done ? 'primary' : 'helper'}>
-                {stage.label}
-              </AppText>
-            </View>
-          );
-        })}
+        {step.stages.map((stage, index) => (
+          <LoadingStageRow
+            key={stage.id}
+            label={stage.label}
+            done={index < completedCount}
+            active={index === completedCount}
+          />
+        ))}
       </View>
     </OnboardingScreenLayout>
   );
@@ -63,28 +57,8 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
 
 const styles = StyleSheet.create({
   list: {
-    gap: spacing.md,
-    paddingTop: spacing.xs,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: spacing.sm,
-    minHeight: 44,
-  },
-  mark: {
-    width: 22,
-    height: 22,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  markIdle: {
-    borderWidth: 1.5,
-    borderColor: colors.border.default,
-    backgroundColor: colors.surface.choice,
-  },
-  markDone: {
-    backgroundColor: colors.text.primary,
+    paddingTop: spacing.sm,
+    flexGrow: 1,
   },
 });

@@ -5,10 +5,14 @@ export const motion = {
   duration: {
     selection: 180,
     press: 120,
+    loadingMark: 240,
+    loadingPulse: 900,
+    loadingHold: 560,
   },
   scale: {
     press: 0.97,
     checkFrom: 0.7,
+    loadingPop: 1.12,
   },
   spring: {
     release: {

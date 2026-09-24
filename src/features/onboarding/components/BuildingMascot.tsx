@@ -9,8 +9,8 @@ const BUILD_STILL = require('../../../../assets/images/mascot/mascot-building-st
 const ART_WIDTH = 347;
 const ART_HEIGHT = 212;
 const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
-const MASCOT_MAX_WIDTH = 300;
-const MASCOT_HEIGHT_FRACTION = 0.22;
+const MASCOT_MAX_WIDTH = 320;
+const MASCOT_HEIGHT_FRACTION = 0.24;
 
 /**
  * Combined build-reset mascot. Plays the desk loop unless Reduce Motion is on.

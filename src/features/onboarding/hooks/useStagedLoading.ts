@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { motion } from '@/design-system';
+
 type UseStagedLoadingOptions = {
   stageCount: number;
   mockDurationMs: number;
+  settleMs?: number;
   onComplete: () => void;
 };
 
@@ -13,6 +16,7 @@ type UseStagedLoadingOptions = {
 export function useStagedLoading({
   stageCount,
   mockDurationMs,
+  settleMs = motion.duration.loadingHold,
   onComplete,
 }: UseStagedLoadingOptions) {
   const [completedCount, setCompletedCount] = useState(0);
@@ -40,7 +44,7 @@ export function useStagedLoading({
               timers.push(
                 setTimeout(() => {
                   onCompleteRef.current();
-                }, 320),
+                }, settleMs),
               );
             }
           },
@@ -52,7 +56,7 @@ export function useStagedLoading({
     return () => {
       timers.forEach(clearTimeout);
     };
-  }, [mockDurationMs, stageCount]);
+  }, [mockDurationMs, settleMs, stageCount]);
 
   return completedCount;
 }
