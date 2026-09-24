@@ -1,13 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { motion, spacing } from '@/design-system';
 import { BuildingMascot } from '@/features/onboarding/components/BuildingMascot';
 import { LoadingStageRow } from '@/features/onboarding/components/LoadingStageRow';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
-import { StoryCopy, type StoryCopyLine } from '@/features/onboarding/components/StoryCopy';
 import { getOnboardingStepIndex } from '@/features/onboarding/data/onboardingSteps';
-import { useBoundAutoAdvance } from '@/features/onboarding/hooks/useBoundAutoAdvance';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useStagedLoading } from '@/features/onboarding/hooks/useStagedLoading';
 import type { LoadingStep } from '@/features/onboarding/types/onboarding';
@@ -21,37 +19,15 @@ type LoadingPhase = 'checks' | 'gotYou';
 
 const GOT_YOU_TITLE = "I think I've got you.";
 
-const GOT_YOU_LINES: readonly StoryCopyLine[] = [
-  {
-    id: 'got-you-title',
-    text: capitalizeHeading(GOT_YOU_TITLE),
-    variant: 'storyTitle',
-    color: 'primary',
-  },
-];
-
 export function LoadingScreen({ step }: LoadingScreenProps) {
   const { goToIndex, goBack, canGoBack } = useOnboardingNavigation();
   const [phase, setPhase] = useState<LoadingPhase>('checks');
-  const [gotYouCopyDone, setGotYouCopyDone] = useState(false);
   const showBuildingScene = step.scene === 'building';
   const showGotYou = phase === 'gotYou';
 
   const handleChecksComplete = useCallback(() => {
-    if (showBuildingScene) {
-      setPhase('gotYou');
-      return;
-    }
-    goToIndex(getOnboardingStepIndex('resetReveal'));
-  }, [goToIndex, showBuildingScene]);
-
-  const handleGotYouFinished = useCallback(() => {
-    setGotYouCopyDone(true);
+    setPhase('gotYou');
   }, []);
-
-  const handleAdvanceToReveal = useCallback(() => {
-    goToIndex(getOnboardingStepIndex('resetReveal'));
-  }, [goToIndex]);
 
   const completedCount = useStagedLoading({
     stageCount: step.stages.length,
@@ -60,7 +36,19 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
     onComplete: handleChecksComplete,
   });
 
-  useBoundAutoAdvance(step.id, showGotYou && gotYouCopyDone, handleAdvanceToReveal);
+  useEffect(() => {
+    if (phase !== 'gotYou') {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      goToIndex(getOnboardingStepIndex('resetReveal'));
+    }, motion.duration.storyHold);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [goToIndex, phase]);
 
   const stageTotal = step.stages.length;
 
@@ -69,16 +57,14 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
       tone="story"
       title={showGotYou ? GOT_YOU_TITLE : step.title}
       subtitle={showGotYou ? undefined : step.subtitle}
-      showTitle={false}
+      showTitle={showGotYou}
       illustrationKey={showGotYou ? 'gotYou' : showBuildingScene ? undefined : step.illustrationKey}
       illustrationSize="large"
       illustrationPlacement={showGotYou ? 'end' : 'afterHero'}
       hideProgress
       onBack={canGoBack ? goBack : undefined}
     >
-      {showGotYou ? (
-        <StoryCopy lines={GOT_YOU_LINES} onFinished={handleGotYouFinished} />
-      ) : (
+      {showGotYou ? null : (
         <>
           {showBuildingScene ? <BuildingMascot /> : null}
           <View
