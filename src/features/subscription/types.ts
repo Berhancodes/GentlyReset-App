@@ -25,3 +25,15 @@ export type PurchaseActionResult =
   { ok: true } | { ok: false; kind: PurchaseFailureKind; message: string };
 
 export type RestoreActionResult = { ok: true; unlocked: boolean } | { ok: false; message: string };
+
+export type PurchasesClient = {
+  available: boolean;
+  configure: (apiKey: string) => Promise<void>;
+  getCustomerInfo: () => Promise<CustomerInfoLike>;
+  getCurrentOffering: () => Promise<OfferingLike | null>;
+  purchasePackage: (identifier: string) => Promise<CustomerInfoLike>;
+  restorePurchases: () => Promise<CustomerInfoLike>;
+  logIn: (appUserId: string) => Promise<CustomerInfoLike>;
+  logOut: () => Promise<CustomerInfoLike>;
+  addCustomerInfoListener: (listener: (info: CustomerInfoLike) => void) => () => void;
+};

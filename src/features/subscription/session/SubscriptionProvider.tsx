@@ -14,13 +14,13 @@ import { offeringHasUnexpectedTrial } from '@/features/subscription/access/packa
 import {
   createPurchasesClient,
   isNativePurchasesSupported,
-  type PurchasesClient,
 } from '@/features/subscription/purchases/purchasesClient';
 import type {
   CustomerInfoLike,
   OfferingLike,
   PresentedPackage,
   PurchaseActionResult,
+  PurchasesClient,
   RestoreActionResult,
 } from '@/features/subscription/types';
 import { mapPurchaseError } from '@/features/subscription/utils/mapPurchaseError';
