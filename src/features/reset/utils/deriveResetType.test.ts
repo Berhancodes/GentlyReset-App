@@ -74,7 +74,6 @@ function contributionCount(
 const CLEARLY_OVERLOADED: Record<string, OnboardingAnswer> = {
   changePattern: single('all-in-burn-out'),
   primaryObstacle: multi(['too-much']),
-  recurringThought: single('further-ahead'),
   outOfBalance: multi(['everything', 'direction']),
   recentFeeling: single('overwhelmed'),
 };
@@ -82,8 +81,6 @@ const CLEARLY_OVERLOADED: Record<string, OnboardingAnswer> = {
 const CLEARLY_RESTARTING: Record<string, OnboardingAnswer> = {
   changePattern: single('bad-day-week'),
   consistencyStage: single('restarting'),
-  selfTalkAfterSlip: single('ruined-progress'),
-  recurringThought: single('tired-of-starting-over'),
   outOfBalance: multi(['confidence']),
 };
 
@@ -91,14 +88,12 @@ const CLEARLY_ALMOST_STARTER: Record<string, OnboardingAnswer> = {
   changePattern: single('plan-dont-start'),
   consistencyStage: single('starting'),
   primaryObstacle: multi(['overthink', 'put-off']),
-  recurringThought: single('start-tomorrow'),
 };
 
 const CLEARLY_FADING_FLAME: Record<string, OnboardingAnswer> = {
   changePattern: single('start-strong-fall-off'),
   consistencyStage: single('staying-consistent'),
   primaryObstacle: multi(['lose-motivation']),
-  selfTalkAfterSlip: single('knew-i-wouldnt'),
   outOfBalance: multi(['energy', 'habits']),
   recentFeeling: single('drained'),
 };
@@ -107,15 +102,12 @@ const MIXED_DREAMER_ALMOST: Record<string, OnboardingAnswer> = {
   changePattern: single('keep-changing'),
   consistencyStage: single('starting'),
   primaryObstacle: multi(['too-much', 'overthink']),
-  recurringThought: single('get-it-together'),
   recentFeeling: single('overwhelmed'),
 };
 
 const MIXED_RESTARTER_FLAME: Record<string, OnboardingAnswer> = {
   changePattern: single('bad-day-week'),
   consistencyStage: single('staying-consistent'),
-  selfTalkAfterSlip: single('ruined-progress'),
-  primaryObstacle: multi(['lose-motivation']),
 };
 
 const SPARSE_STARTING: Record<string, OnboardingAnswer> = {
@@ -126,7 +118,6 @@ const CONFLICTING: Record<string, OnboardingAnswer> = {
   changePattern: single('plan-dont-start'),
   consistencyStage: single('restarting'),
   primaryObstacle: multi(['too-much']),
-  selfTalkAfterSlip: single('knew-i-wouldnt'),
 };
 
 const overloaded = deriveResetType(CLEARLY_OVERLOADED);
@@ -134,7 +125,7 @@ check('1 clearly overloaded winner', overloaded.id === 'overloaded-dreamer');
 check('1 clearly overloaded name', overloaded.name === 'The Overloaded Dreamer');
 check(
   '1 clearly overloaded scores',
-  scoresEqual(overloaded.scores, expectedScores({ 'overloaded-dreamer': 10 })),
+  scoresEqual(overloaded.scores, expectedScores({ 'overloaded-dreamer': 8 })),
   JSON.stringify(overloaded.scores),
 );
 check('1 clearly overloaded runner-up id', overloaded.runnerUp?.id === 'soft-restarter');
@@ -158,7 +149,7 @@ const restarter = deriveResetType(CLEARLY_RESTARTING);
 check('2 clearly restarting winner', restarter.id === 'soft-restarter');
 check(
   '2 clearly restarting scores',
-  scoresEqual(restarter.scores, expectedScores({ 'soft-restarter': 11 })),
+  scoresEqual(restarter.scores, expectedScores({ 'soft-restarter': 7 })),
   JSON.stringify(restarter.scores),
 );
 check(
@@ -175,7 +166,7 @@ const almost = deriveResetType(CLEARLY_ALMOST_STARTER);
 check('3 clearly almost-starter winner', almost.id === 'almost-starter');
 check(
   '3 clearly almost-starter scores',
-  scoresEqual(almost.scores, expectedScores({ 'almost-starter': 12 })),
+  scoresEqual(almost.scores, expectedScores({ 'almost-starter': 10 })),
   JSON.stringify(almost.scores),
 );
 check(
@@ -192,7 +183,7 @@ const fading = deriveResetType(CLEARLY_FADING_FLAME);
 check('4 clearly fading-flame winner', fading.id === 'fading-flame');
 check(
   '4 clearly fading-flame scores',
-  scoresEqual(fading.scores, expectedScores({ 'fading-flame': 13 })),
+  scoresEqual(fading.scores, expectedScores({ 'fading-flame': 11 })),
   JSON.stringify(fading.scores),
 );
 check(
@@ -211,36 +202,30 @@ check(
   '5 mixed dreamer+almost scores',
   scoresEqual(
     mixedDreamerAlmost.scores,
-    expectedScores({ 'overloaded-dreamer': 8, 'almost-starter': 7 }),
+    expectedScores({ 'overloaded-dreamer': 6, 'almost-starter': 5 }),
   ),
   JSON.stringify(mixedDreamerAlmost.scores),
 );
 check(
   '5 mixed dreamer+almost runner-up',
-  mixedDreamerAlmost.runnerUp?.id === 'almost-starter' && mixedDreamerAlmost.runnerUp.score === 7,
+  mixedDreamerAlmost.runnerUp?.id === 'almost-starter' && mixedDreamerAlmost.runnerUp.score === 5,
 );
-check('5 mixed dreamer+almost confidence', mixedDreamerAlmost.confidence === (8 - 7) / 8);
+check('5 mixed dreamer+almost confidence', mixedDreamerAlmost.confidence === (6 - 5) / 6);
 check(
-  '5 mixed dual-mapped get-it-together',
+  '5 mixed includes keep-changing',
   contributionCount(
     mixedDreamerAlmost.breakdown,
     'overloaded-dreamer',
-    'recurringThought',
-    'get-it-together',
-  ) === 1 &&
-    contributionCount(
-      mixedDreamerAlmost.breakdown,
-      'almost-starter',
-      'recurringThought',
-      'get-it-together',
-    ) === 1,
+    'changePattern',
+    'keep-changing',
+  ) === 1,
 );
 
 const mixedRestarterFlame = deriveResetType(MIXED_RESTARTER_FLAME);
 check(
-  '6 mixed restarter+flame scores tied at 5',
-  mixedRestarterFlame.scores['soft-restarter'] === 5 &&
-    mixedRestarterFlame.scores['fading-flame'] === 5,
+  '6 mixed restarter+flame scores tied at 3',
+  mixedRestarterFlame.scores['soft-restarter'] === 3 &&
+    mixedRestarterFlame.scores['fading-flame'] === 3,
 );
 check(
   '6 mixed restarter+flame winner via changePattern',
@@ -248,7 +233,7 @@ check(
 );
 check(
   '6 mixed restarter+flame runner-up',
-  mixedRestarterFlame.runnerUp?.id === 'fading-flame' && mixedRestarterFlame.runnerUp.score === 5,
+  mixedRestarterFlame.runnerUp?.id === 'fading-flame' && mixedRestarterFlame.runnerUp.score === 3,
 );
 check('6 mixed restarter+flame confidence is 0 on tie', mixedRestarterFlame.confidence === 0);
 
@@ -270,7 +255,7 @@ check(
       'almost-starter': 3,
       'soft-restarter': 3,
       'overloaded-dreamer': 2,
-      'fading-flame': 2,
+      'fading-flame': 0,
     }),
   ),
   JSON.stringify(conflicting.scores),
@@ -324,7 +309,7 @@ const prettyGood = deriveResetType({
 });
 check(
   'pretty-good is unscored',
-  prettyGood.scores['overloaded-dreamer'] === 9 &&
+  prettyGood.scores['overloaded-dreamer'] === 7 &&
     prettyGood.breakdown.every((entry) => entry.optionId !== 'pretty-good'),
 );
 
@@ -429,11 +414,19 @@ check(
 check('question weights: changePattern is 3', QUESTION_WEIGHTS.changePattern === 3);
 check('question weights: consistencyStage is 3', QUESTION_WEIGHTS.consistencyStage === 3);
 check('question weights: primaryObstacle is 2', QUESTION_WEIGHTS.primaryObstacle === 2);
-check('question weights: selfTalkAfterSlip is 2', QUESTION_WEIGHTS.selfTalkAfterSlip === 2);
-check('question weights: recurringThought is 2', QUESTION_WEIGHTS.recurringThought === 2);
 check('question weights: outOfBalance is 1', QUESTION_WEIGHTS.outOfBalance === 1);
 check('question weights: recentFeeling is 1', QUESTION_WEIGHTS.recentFeeling === 1);
 check('question weights: resetReason is 1', QUESTION_WEIGHTS.resetReason === 1);
+
+const legacyParked = deriveResetType({
+  ...CLEARLY_OVERLOADED,
+  recurringThought: single('further-ahead'),
+  selfTalkAfterSlip: single('ruined-progress'),
+});
+check(
+  'parked recurringThought and selfTalkAfterSlip do not change scores',
+  scoresEqual(legacyParked.scores, overloaded.scores) && legacyParked.id === overloaded.id,
+);
 
 if (failed > 0) {
   throw new Error(`${failed} reset-type check(s) failed`);

@@ -14,36 +14,28 @@ export const PLAN_READY_COPY = {
 } as const;
 
 /**
- * The 21 core personalization questions. Feedback after the Reset Type
- * (`profileAccuracy`) is a question-style screen but is not part of this set.
+ * The 13 primary onboarding questions. Story/loading/reveal screens and
+ * `profileAccuracy` are not part of this set.
  */
 export const CORE_QUESTION_IDS = [
   'reason',
   'outOfBalance',
   'recentFeeling',
-  'recurringThought',
   'primaryObstacle',
   'changePattern',
-  'selfTalkAfterSlip',
   'consistencyStage',
   'thirtyDayOutcome',
-  'desiredFeelings',
-  'desiredDailyLife',
   'desiredIdentity',
-  'successStatement',
   'dailyCommitment',
   'supportTiming',
   'supportStyle',
   'missedDayResponse',
-  'churnRisk',
-  'readiness',
   'resetReason',
-  'thirtyDayCommitment',
 ] as const;
 
 export type CoreQuestionId = (typeof CORE_QUESTION_IDS)[number];
 
-export const CORE_QUESTION_COUNT: 21 = CORE_QUESTION_IDS.length;
+export const CORE_QUESTION_COUNT: 13 = CORE_QUESTION_IDS.length;
 
 export const ONBOARDING_STEPS = [
   {
@@ -113,24 +105,6 @@ export const ONBOARDING_STEPS = [
     ],
   },
   {
-    id: 'recurringThought',
-    type: 'singleChoice',
-    chapter: 'where-you-are',
-    title: 'which thought has been showing up the most lately?',
-    required: true,
-    comfortable: true,
-    layout: 'stacked',
-    options: [
-      { id: 'further-ahead', label: 'I should be further ahead.' },
-      { id: 'get-it-together', label: "Why can't I just get it together?" },
-      { id: 'start-tomorrow', label: "I'll start tomorrow." },
-      { id: 'tired-of-starting-over', label: "I'm tired of starting over." },
-      { id: 'dont-know-life', label: "I don't know what I'm doing with my life." },
-      { id: 'miss-old-me', label: 'I miss the old me.' },
-      { id: 'capable-of-more', label: "I know I'm capable of more." },
-    ],
-  },
-  {
     id: 'carryingStory',
     type: 'story',
     eyebrow: 'a quick reminder',
@@ -177,23 +151,6 @@ export const ONBOARDING_STEPS = [
       { id: 'bad-day-week', label: 'one bad day turns into a bad week' },
       { id: 'keep-changing', label: "I keep changing what I'm trying to fix" },
       { id: 'never-know-start', label: 'I never know where to start' },
-    ],
-  },
-  {
-    id: 'selfTalkAfterSlip',
-    type: 'singleChoice',
-    chapter: 'whats-holding-you-back',
-    title: 'when you fall off track, what do you usually tell yourself?',
-    required: true,
-    comfortable: true,
-    layout: 'stacked',
-    options: [
-      { id: 'here-we-go', label: 'here we go again.' },
-      { id: 'ruined-progress', label: 'I ruined my progress.' },
-      { id: 'restart-monday', label: "I'll restart Monday." },
-      { id: 'just-lazy', label: "maybe I'm just lazy." },
-      { id: 'knew-i-wouldnt', label: "I knew I wouldn't stick with it." },
-      { id: 'try-again', label: "it's okay, I'll try again." },
     ],
   },
   {
@@ -254,44 +211,6 @@ export const ONBOARDING_STEPS = [
     ],
   },
   {
-    id: 'desiredFeelings',
-    type: 'multiChoice',
-    chapter: 'where-youre-going',
-    title: 'what do you want to feel more often?',
-    required: true,
-    minSelections: 1,
-    layout: 'grid3',
-    options: [
-      { id: 'calm', label: 'calm' },
-      { id: 'confident', label: 'confident' },
-      { id: 'motivated', label: 'motivated' },
-      { id: 'proud', label: 'proud of myself' },
-      { id: 'energized', label: 'energized' },
-      { id: 'present', label: 'present' },
-      { id: 'hopeful', label: 'hopeful' },
-      { id: 'in-control', label: 'in control' },
-    ],
-  },
-  {
-    id: 'desiredDailyLife',
-    type: 'multiChoice',
-    chapter: 'where-youre-going',
-    title: 'what do you want your days to have more of?',
-    required: true,
-    minSelections: 1,
-    layout: 'grid2',
-    options: [
-      { id: 'structure', label: 'structure' },
-      { id: 'exercise', label: 'exercise' },
-      { id: 'sleep', label: 'better sleep' },
-      { id: 'less-phone', label: 'time away from my phone' },
-      { id: 'meaningful-work', label: 'meaningful work' },
-      { id: 'time-for-myself', label: 'time for myself' },
-      { id: 'healthier-routines', label: 'healthier routines' },
-      { id: 'people', label: 'people I care about' },
-    ],
-  },
-  {
     id: 'desiredIdentity',
     type: 'singleChoice',
     chapter: 'where-youre-going',
@@ -308,26 +227,6 @@ export const ONBOARDING_STEPS = [
       { id: 'excited', label: "someone who's excited about life" },
       { id: 'knows-direction', label: "someone who knows where they're going" },
       { id: 'proud', label: "honestly? just someone I'm proud of." },
-    ],
-  },
-  {
-    id: 'successStatement',
-    type: 'singleChoice',
-    chapter: 'where-youre-going',
-    title: "what's one thing you'd love to be able to say 30 days from now?",
-    required: true,
-    comfortable: true,
-    layout: 'stacked',
-    options: [
-      { id: 'stuck-with-it', label: 'I actually stuck with it.' },
-      { id: 'feel-better', label: 'I feel so much better.' },
-      { id: 'taking-care', label: "I'm finally taking care of myself." },
-      { id: 'less-hard', label: 'I stopped being so hard on myself.' },
-      { id: 'routine-back', label: 'I have my routine back.' },
-      { id: 'trust-myself', label: 'I trust myself again.' },
-      // Future: selecting this can reveal a small text input. Leave it
-      // selectable for now so the flow stays a single-choice step.
-      { id: 'something-else', label: 'something else...' },
     ],
   },
   {
@@ -413,38 +312,6 @@ export const ONBOARDING_STEPS = [
     ],
   },
   {
-    id: 'churnRisk',
-    type: 'singleChoice',
-    chapter: 'your-reset',
-    title: "what's most likely to make you stop using Gently Reset?",
-    required: true,
-    comfortable: true,
-    layout: 'stacked',
-    options: [
-      { id: 'asks-too-much', label: 'it asks too much from me' },
-      { id: 'forget-apps', label: 'I forget about apps' },
-      { id: 'no-progress', label: 'I stop seeing progress' },
-      { id: 'repetitive', label: 'it becomes repetitive' },
-      { id: 'too-busy', label: 'I get too busy' },
-      { id: 'lose-motivation', label: 'I lose motivation' },
-      { id: 'not-sure', label: "I'm not sure" },
-    ],
-  },
-  {
-    id: 'readiness',
-    type: 'scale',
-    chapter: 'your-reset',
-    title: 'how ready do you feel to make a change right now?',
-    required: true,
-    points: [
-      { value: 1, label: 'just thinking about it' },
-      { value: 2, label: 'not quite ready' },
-      { value: 3, label: 'getting there' },
-      { value: 4, label: 'pretty ready' },
-      { value: 5, label: "I'm ready" },
-    ],
-  },
-  {
     id: 'resetReason',
     type: 'textInput',
     chapter: 'your-reset',
@@ -454,28 +321,6 @@ export const ONBOARDING_STEPS = [
     placeholder: 'I want to...',
     multiline: true,
     required: false,
-  },
-  {
-    id: 'thirtyDayCommitment',
-    type: 'singleChoice',
-    chapter: 'your-reset',
-    title: 'can you give yourself 30 days to see what changes?',
-    required: true,
-    comfortable: true,
-    layout: 'stackedWithSubtitle',
-    options: [
-      {
-        id: 'in',
-        label: "I'm in.",
-        description: 'one day at a time.',
-        selectHaptic: 'success',
-      },
-      {
-        id: 'not-sure',
-        label: "I'm not sure yet.",
-        description: 'I still want to see what this could look like.',
-      },
-    ],
   },
   {
     id: 'buildingResetLoading',

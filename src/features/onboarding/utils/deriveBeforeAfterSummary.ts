@@ -37,6 +37,17 @@ const LATER_FROM_OUTCOME: Record<string, string> = {
   'feel-like-me': 'like yourself again',
 };
 
+const LATER_FROM_IDENTITY: Record<string, string> = {
+  'keeps-promises': 'someone who keeps promises to themselves',
+  'feels-calm': 'calmer',
+  disciplined: 'more disciplined',
+  confident: 'more confident',
+  present: 'more present',
+  excited: 'more excited about life',
+  'knows-direction': 'a clearer direction',
+  proud: "someone you're proud of",
+};
+
 const FALLBACK: BeforeAfterSummary = {
   today: ['overwhelmed', 'inconsistent', 'tired'],
   later: ['calmer', 'more consistent', 'proud of yourself'],
@@ -65,10 +76,12 @@ export function deriveBeforeAfterSummary(
   const todayFromFeeling = feeling ? TODAY_FROM_FEELING[feeling] : undefined;
   const today = uniqueTake(todayFromFeeling ? [todayFromFeeling] : [], 3);
 
+  const identity = getSingleChoiceId(answers, 'desiredIdentity');
   const later = uniqueTake(
     [
-      ...getMultiChoiceIds(answers, 'desiredFeelings').map((id) => LATER_FROM_FEELING[id]),
       ...getMultiChoiceIds(answers, 'thirtyDayOutcome').map((id) => LATER_FROM_OUTCOME[id]),
+      identity ? LATER_FROM_IDENTITY[identity] : undefined,
+      ...getMultiChoiceIds(answers, 'desiredFeelings').map((id) => LATER_FROM_FEELING[id]),
     ].filter((value): value is string => Boolean(value)),
     3,
   );

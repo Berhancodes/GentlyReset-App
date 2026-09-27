@@ -4,6 +4,10 @@ import { persist } from 'zustand/middleware';
 import { ONBOARDING_STEPS } from '@/features/onboarding/data/onboardingSteps';
 import type { OnboardingAnswer, OnboardingStep } from '@/features/onboarding/types/onboarding';
 import { canProceed } from '@/features/onboarding/utils/canProceed';
+import {
+  migrateOnboardingPersist,
+  ONBOARDING_PERSIST_VERSION,
+} from '@/features/onboarding/utils/migrateOnboardingPersist';
 import { toggleMultiSelection } from '@/features/onboarding/utils/toggleMultiSelection';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { asyncPersistStorage } from '@/utils/persistStorage';
@@ -82,8 +86,12 @@ export const useOnboardingStore = create<OnboardingState & OnboardingActions>()(
     {
       name: 'gently-reset-onboarding',
       storage: asyncPersistStorage,
+      version: ONBOARDING_PERSIST_VERSION,
+      migrate: (persistedState, fromVersion) =>
+        migrateOnboardingPersist(persistedState, fromVersion),
       partialize: (state) => ({
         currentStepIndex: state.currentStepIndex,
+        currentStepId: ONBOARDING_STEPS[state.currentStepIndex]?.id,
         answers: state.answers,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
       }),

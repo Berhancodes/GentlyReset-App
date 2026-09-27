@@ -17,13 +17,7 @@ import {
 export { isResetTypeId, LEGACY_FALLBACK_RESET_TYPE_ID } from '../types';
 
 export type ScoredQuestionId =
-  | 'changePattern'
-  | 'consistencyStage'
-  | 'primaryObstacle'
-  | 'selfTalkAfterSlip'
-  | 'recurringThought'
-  | 'outOfBalance'
-  | 'recentFeeling';
+  'changePattern' | 'consistencyStage' | 'primaryObstacle' | 'outOfBalance' | 'recentFeeling';
 
 export type ScoreContribution = {
   questionId: ScoredQuestionId | 'resetReason';
@@ -49,8 +43,6 @@ export const QUESTION_WEIGHTS: Record<ScoredQuestionId | 'resetReason', number> 
   changePattern: 3,
   consistencyStage: 3,
   primaryObstacle: 2,
-  selfTalkAfterSlip: 2,
-  recurringThought: 2,
   outOfBalance: 1,
   recentFeeling: 1,
   resetReason: 1,
@@ -104,23 +96,6 @@ export const OPTION_TYPE_MATRIX: Record<
     distracted: ['almost-starter'],
     'dont-know': ['overloaded-dreamer'],
   },
-  selfTalkAfterSlip: {
-    'here-we-go': ['soft-restarter'],
-    'ruined-progress': ['soft-restarter'],
-    'restart-monday': ['soft-restarter', 'almost-starter'],
-    'just-lazy': ['soft-restarter'],
-    'knew-i-wouldnt': ['fading-flame'],
-    'try-again': ['soft-restarter'],
-  },
-  recurringThought: {
-    'further-ahead': ['overloaded-dreamer'],
-    'get-it-together': ['overloaded-dreamer', 'almost-starter'],
-    'start-tomorrow': ['almost-starter'],
-    'tired-of-starting-over': ['soft-restarter'],
-    'dont-know-life': ['overloaded-dreamer'],
-    'miss-old-me': ['fading-flame'],
-    'capable-of-more': ['overloaded-dreamer'],
-  },
   outOfBalance: {
     mind: ['almost-starter', 'overloaded-dreamer'],
     energy: ['fading-flame'],
@@ -143,8 +118,6 @@ export const OPTION_TYPE_MATRIX: Record<
 const SINGLE_CHOICE_QUESTIONS: readonly ScoredQuestionId[] = [
   'changePattern',
   'consistencyStage',
-  'selfTalkAfterSlip',
-  'recurringThought',
   'recentFeeling',
 ];
 
@@ -339,10 +312,11 @@ function scoreResetReason(value: string): ScoreContribution[] {
 
 /**
  * Weighted reset-type classifier. Pure: same answers always produce the same
- * result. Unscored questions (dailyCommitment, desiredFeelings, desiredIdentity,
- * supportStyle, supportTiming, readiness, churnRisk, thirtyDayOutcome,
- * desiredDailyLife, successStatement, missedDayResponse, and `reason`) are
- * ignored even if present.
+ * result. Parked questions (`recurringThought`, `selfTalkAfterSlip`, and the
+ * other retired onboarding items) are ignored even if still present in
+ * persisted answers. Unscored live questions (dailyCommitment, desiredIdentity,
+ * supportStyle, supportTiming, thirtyDayOutcome, missedDayResponse, and
+ * `reason`) are also ignored.
  */
 export function deriveResetType(
   answers: Record<string, OnboardingAnswer>,

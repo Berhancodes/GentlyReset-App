@@ -13,8 +13,8 @@ function coreQuestionIndex(stepId: string | undefined): number {
 }
 
 /**
- * Progress through the 21 core questions only.
- * Non-question screens keep the most recent core-question value.
+ * Progress through the 13 primary questions only.
+ * Non-question screens keep the most recent primary-question value.
  */
 export function getCoreQuestionProgress(stepId: string | undefined, stepIndex: number): number {
   const directIndex = coreQuestionIndex(stepId);
