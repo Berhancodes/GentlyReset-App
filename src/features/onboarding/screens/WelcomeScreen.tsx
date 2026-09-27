@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { NoticeDialog, PrimaryButton } from '@/components/ui';
-import { colors, spacing } from '@/design-system';
+import { colors, spacing, textVariants } from '@/design-system';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import type { WelcomeStep } from '@/features/onboarding/types/onboarding';
 import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
@@ -51,8 +51,15 @@ export function WelcomeScreen({ step }: WelcomeScreenProps) {
             accessibilityRole="button"
             accessibilityLabel={`${signInPrompt} ${signInLabel}`}
             onPress={() => setSignInOpen(true)}
-            style={styles.signInHit}
-          />
+            style={styles.signInRow}
+          >
+            <Text allowFontScaling maxFontSizeMultiplier={1.4} style={styles.signInPrompt}>
+              {signInPrompt}
+            </Text>
+            <Text allowFontScaling maxFontSizeMultiplier={1.4} style={styles.signInLabel}>
+              {signInLabel}
+            </Text>
+          </Pressable>
         ) : null}
       </View>
       <NoticeDialog
@@ -68,12 +75,17 @@ export function WelcomeScreen({ step }: WelcomeScreenProps) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    overflow: 'hidden',
     backgroundColor: colors.accent.blue,
   },
   background: {
-    ...StyleSheet.absoluteFill,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    left: 0,
+    height: '128%',
     width: '100%',
-    height: '100%',
+    ...(Platform.OS === 'web' ? { objectPosition: 'top' } : null),
   },
   headerHit: {
     ...StyleSheet.absoluteFill,
@@ -85,8 +97,22 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingHorizontal: spacing.lg,
+    gap: spacing.xs,
   },
-  signInHit: {
+  signInRow: {
     minHeight: spacing.hitTarget,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+  },
+  signInPrompt: {
+    ...textVariants.onboardingHelper,
+    color: colors.text.inverse,
+  },
+  signInLabel: {
+    ...textVariants.onboardingHelper,
+    color: colors.accent.gold,
+    textDecorationLine: 'underline',
   },
 });
