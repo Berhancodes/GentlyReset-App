@@ -120,7 +120,9 @@ Welcome's "Sign in" opens `/sign-in`. Create Account is `/sign-up`. Both use Sup
 
 Authentication answers "who is this user?" RevenueCat answers "is Pro active?" Completing onboarding without Pro opens the hard paywall, not Home.
 
-Signing in or out does not change local reset progress, onboarding answers, journal entries, or Journey visual state. Reset data is not synced to Supabase yet.
+Signing in or out does not change local reset progress, onboarding answers, journal entries, or Journey visual state.
+
+Reset progress is local-first. After a local write succeeds, an authenticated account can back up Cycle 1 to Supabase (`reset_cycles` + `reset_day_completions`). Journal entries stay local. Anonymous use never creates a cloud user. Local data from account A is never uploaded into account B.
 
 When a Supabase user is signed in, RevenueCat `logIn` uses that UUID. Sign-out calls RevenueCat `logOut` and creates a new anonymous customer. Purchases stay on the identified RevenueCat customer.
 

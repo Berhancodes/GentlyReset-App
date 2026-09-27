@@ -11,6 +11,7 @@ import { colors } from '@/design-system';
 import { AuthProvider } from '@/features/auth/session/AuthProvider';
 import { useAuth } from '@/features/auth/session/useAuth';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { ResetSyncController } from '@/features/reset/sync/ResetSyncController';
 import { SubscriptionProvider } from '@/features/subscription/session/SubscriptionProvider';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
 import { usePersistedStoresHydrated } from '@/hooks/usePersistedStoresHydrated';
@@ -52,6 +53,7 @@ function RootLayoutReady() {
     <SafeAreaProvider>
       <GestureHandlerRootView style={styles.root}>
         <StatusBar style="dark" />
+        <ResetSyncController />
         <Stack
           screenOptions={{
             headerShown: false,

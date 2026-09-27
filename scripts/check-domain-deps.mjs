@@ -17,6 +17,7 @@ const forbidden = [
   [/from\s+['"]@\/data\//, '@/data'],
   [/from\s+['"]@\/components\//, '@/components'],
   [/from\s+['"]@\/navigation\//, '@/navigation'],
+  [/from\s+['"]@supabase\//, 'supabase'],
 ];
 
 function listTypeScriptFiles(directory) {
