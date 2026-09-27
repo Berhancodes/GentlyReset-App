@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { PrimaryButton } from '@/components/ui';
 import {
   colors,
   fontFamilies,
@@ -17,7 +18,6 @@ import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardi
 import type { PaywallStep } from '@/features/onboarding/types/onboarding';
 import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
 import { finishOnboarding } from '@/features/onboarding/utils/finishOnboarding';
-import { hapticImpact } from '@/utils/haptics';
 
 const CTA_SAFE_AREA_GAP = 12;
 
@@ -92,19 +92,7 @@ export function PaywallScreen({ step }: PaywallScreenProps) {
         <View style={styles.stage} />
 
         <View style={{ paddingBottom: Math.max(insets.bottom, spacing.sm) + CTA_SAFE_AREA_GAP }}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={step.ctaLabel}
-            onPress={() => {
-              void hapticImpact();
-              complete();
-            }}
-            style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
-          >
-            <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.ctaLabel}>
-              {step.ctaLabel}
-            </Text>
-          </Pressable>
+          <PrimaryButton label={step.ctaLabel} onPress={complete} />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={step.secondaryCtaLabel}
@@ -202,25 +190,6 @@ const styles = StyleSheet.create({
   },
   stage: {
     flex: 1,
-  },
-  cta: {
-    minHeight: 56,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.action.primaryBackground,
-    borderWidth: 3,
-    borderColor: colors.text.inverse,
-  },
-  ctaPressed: {
-    backgroundColor: colors.action.primaryBackgroundPressed,
-    transform: [{ scale: 0.98 }],
-  },
-  ctaLabel: {
-    ...textVariants.button,
-    color: colors.action.primaryText,
   },
   skip: {
     minHeight: 44,

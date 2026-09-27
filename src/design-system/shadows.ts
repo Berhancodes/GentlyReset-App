@@ -31,6 +31,7 @@ export const shadows = {
   whisper: createShadow(2, 0.07, 8, 2),
   soft: createShadow(6, 0.08, 16, 3),
   medium: createShadow(8, 0.12, 20, 5),
+  button: createShadow(5, 0.26, 12, 5),
   mascotGlow:
     Platform.OS === 'web'
       ? ({

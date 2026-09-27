@@ -17,6 +17,9 @@ export const motion = {
     loadingPop: 1.12,
     pillFrom: 0.98,
   },
+  offset: {
+    press: 6,
+  },
   spring: {
     release: {
       damping: 20,

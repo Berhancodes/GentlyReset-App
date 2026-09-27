@@ -3,12 +3,11 @@ import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { NoticeDialog } from '@/components/ui';
+import { NoticeDialog, PrimaryButton } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import type { WelcomeStep } from '@/features/onboarding/types/onboarding';
 import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
-import { hapticImpact } from '@/utils/haptics';
 
 const WELCOME_ART = require('../../../../assets/images/onboarding/welcome-first-screen.png');
 
@@ -46,15 +45,7 @@ export function WelcomeScreen({ step }: WelcomeScreenProps) {
         style={styles.headerHit}
       />
       <View style={[styles.actions, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={step.ctaLabel}
-          onPress={() => {
-            void hapticImpact();
-            goToNext();
-          }}
-          style={styles.ctaHit}
-        />
+        <PrimaryButton label={step.ctaLabel} onPress={goToNext} />
         {signInPrompt && signInLabel ? (
           <Pressable
             accessibilityRole="button"
@@ -94,10 +85,6 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingHorizontal: spacing.lg,
-  },
-  ctaHit: {
-    minHeight: 56,
-    borderRadius: 999,
   },
   signInHit: {
     minHeight: spacing.hitTarget,
