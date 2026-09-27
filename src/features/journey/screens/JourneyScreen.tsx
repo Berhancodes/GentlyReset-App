@@ -10,6 +10,7 @@ import { JourneyDaySheet } from '@/features/journey/components/JourneyDaySheet';
 import { JourneyLinearStage } from '@/features/journey/components/JourneyLinearStage';
 import { JourneyQuoteCard } from '@/features/journey/components/JourneyQuoteCard';
 import { useJourneyProgression } from '@/features/journey/hooks/useJourneyProgression';
+import { useJourneyVisualStore } from '@/features/journey/store/useJourneyVisualStore';
 import { getJourneyChapterForDay } from '@/features/journey/data/journeyChapters';
 import { getJourneyQuote } from '@/features/journey/data/journeyCopy';
 import { getJourneySheetModel } from '@/features/journey/utils/getJourneySheetModel';
@@ -138,6 +139,19 @@ export function JourneyScreen() {
       ) : null}
     </Screen>
   );
+}
+
+if (__DEV__) {
+  Object.assign(globalThis, {
+    replayJourneyProgression() {
+      const day = useResetStore.getState().currentDay;
+      if (day <= 1) {
+        console.warn('Need currentDay 2 or later to replay a walk.');
+        return;
+      }
+      useJourneyVisualStore.getState().acknowledgeDay(day - 1);
+    },
+  });
 }
 
 const styles = StyleSheet.create({
