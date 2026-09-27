@@ -201,7 +201,6 @@ export function JourneySkyDecor({ layout }: JourneySkyDecorProps) {
 
   return (
     <Animated.View
-      pointerEvents="none"
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       style={styles.sky}
@@ -253,6 +252,7 @@ function JourneySkyPiece({ source, rect, animatedStyle }: JourneySkyPieceProps) 
 const styles = StyleSheet.create({
   sky: {
     ...StyleSheet.absoluteFill,
+    pointerEvents: 'none',
   },
   decorImage: {
     position: 'absolute',
