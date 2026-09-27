@@ -1,5 +1,4 @@
 import { PLAN_DAY_COUNT } from '../../reset/data/thirtyDayPlan';
-import { motion } from '../../../design-system/motion';
 import { clampJourneyDay } from '../data/journeyChapters';
 import { getJourneyTimelineTrack } from '../utils/getJourneyTimelineMotion';
 
@@ -117,9 +116,7 @@ export type JourneyStageLayout = {
   day1X: number;
   day2X: number;
   currentX: number;
-  incomingStartX: number;
-  worldTravel: number;
-  mascotLead: number;
+  nextX: number;
   mascot: JourneyRect;
   sign: JourneyRect;
   bush: JourneyRect;
@@ -315,11 +312,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
 
   const lineLeft = JOURNEY_DAY1_ANCHORS.lineLeftX * safeWidth;
   const lineWidth = (JOURNEY_DAY1_ANCHORS.lineRightX - JOURNEY_DAY1_ANCHORS.lineLeftX) * safeWidth;
-  const track = getJourneyTimelineTrack(
-    safeWidth,
-    day1X,
-    nodeSize + motion.offset.journeyTimelineEdgePad,
-  );
+  const track = getJourneyTimelineTrack(day1X, day2X);
 
   return {
     width: safeWidth,
@@ -333,9 +326,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
     day1X,
     day2X,
     currentX: track.currentX,
-    incomingStartX: track.incomingStartX,
-    worldTravel: track.worldTravel,
-    mascotLead: track.mascotLead,
+    nextX: track.nextX,
     mascot,
     sign,
     bush,
@@ -343,7 +334,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
     sun,
     clouds,
     progressMascot: getJourneyProgressMascotRect(mascot, day1X),
-    travelDistance: track.worldTravel,
+    travelDistance: track.travelDistance,
   };
 }
 

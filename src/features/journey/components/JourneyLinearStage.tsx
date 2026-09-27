@@ -253,8 +253,7 @@ function JourneyPathBand({
   const mascotMotionStyle = useAnimatedStyle(() => ({
     transform: [
       {
-        translateX:
-          Math.sin(travelProgress.value * Math.PI) * layout.mascotLead * walkDirection.value,
+        translateX: travelProgress.value * layout.travelDistance * walkDirection.value,
       },
     ],
   }));
@@ -276,24 +275,10 @@ function JourneyPathBand({
   }));
   const outgoingNodeStyle = useAnimatedStyle(() => ({
     opacity: reduceMotion ? 1 - fadeProgress.value : 1,
-    transform: [
-      {
-        translateX: -travelProgress.value * layout.worldTravel * walkDirection.value,
-      },
-    ],
   }));
   const incomingNodeStyle = useAnimatedStyle(() => ({
     opacity: reduceMotion ? fadeProgress.value : 1,
-    transform: [
-      {
-        translateX:
-          (reduceMotion
-            ? 0
-            : layout.incomingStartX - layout.currentX - travelProgress.value * layout.worldTravel) *
-          walkDirection.value,
-      },
-      { scale: nodePop.value },
-    ],
+    transform: [{ scale: nodePop.value }],
   }));
   const arrivalRingStyle = useAnimatedStyle(() => ({
     opacity: arrivalRing.value <= 0 ? 0 : (1 - arrivalRing.value) * 0.38,
@@ -334,7 +319,7 @@ function JourneyPathBand({
           style={[
             styles.arrivalRing,
             {
-              left: layout.currentX - ringSize / 2,
+              left: layout.nextX - ringSize / 2,
               top: layout.lineY - timelineTop - ringSize / 2,
               width: ringSize,
               height: ringSize,
@@ -367,7 +352,7 @@ function JourneyPathBand({
             style={[
               styles.nodeSlot,
               {
-                left: layout.currentX - NODE_SLOT_WIDTH / 2,
+                left: (reduceMotion ? layout.currentX : layout.nextX) - NODE_SLOT_WIDTH / 2,
                 top: layout.lineY - timelineTop - spacing.hitTarget / 2,
                 width: NODE_SLOT_WIDTH,
               },

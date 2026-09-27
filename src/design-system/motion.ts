@@ -55,8 +55,6 @@ export const motion = {
     journeyParallaxCloud: 4,
     journeyParallaxSun: 2,
     journeyArrivalTilt: 1.6,
-    journeyTimelineEdgePad: 24,
-    journeyMascotLeadShare: 0.32,
   },
   delay: {
     journeyLeftCloud: 50,

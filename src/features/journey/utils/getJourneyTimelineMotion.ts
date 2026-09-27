@@ -1,20 +1,17 @@
 import { PLAN_DAY_COUNT } from '../../reset/data/thirtyDayPlan';
-import { motion } from '../../../design-system/motion';
 import { clampJourneyDay } from '../data/journeyChapters';
 import type { JourneyWalkDirection } from './getJourneyWalkMotion';
 
 export type JourneyTimelineTrack = {
   currentX: number;
-  incomingStartX: number;
-  outgoingEndX: number;
-  worldTravel: number;
-  mascotLead: number;
+  nextX: number;
+  travelDistance: number;
 };
 
 export type JourneyTimelinePositions = {
   outgoingX: number;
   incomingX: number;
-  mascotLeadX: number;
+  mascotX: number;
 };
 
 export function getJourneyRestingDays(
@@ -36,19 +33,12 @@ export function getJourneyIncomingDay(
   return toDay;
 }
 
-export function getJourneyTimelineTrack(
-  stageWidth: number,
-  currentX: number,
-  edgePad: number = motion.offset.journeyTimelineEdgePad,
-): JourneyTimelineTrack {
-  const incomingStartX = Math.max(stageWidth, currentX) + edgePad;
-  const worldTravel = incomingStartX - currentX;
+/** Static current → next marks. The mascot walks; the nodes stay put. */
+export function getJourneyTimelineTrack(currentX: number, nextX: number): JourneyTimelineTrack {
   return {
     currentX,
-    incomingStartX,
-    outgoingEndX: currentX - worldTravel,
-    worldTravel,
-    mascotLead: worldTravel * motion.offset.journeyMascotLeadShare,
+    nextX,
+    travelDistance: nextX - currentX,
   };
 }
 
@@ -58,18 +48,9 @@ export function getJourneyTimelinePositions(
   direction: JourneyWalkDirection = 1,
 ): JourneyTimelinePositions {
   const clamped = Math.min(1, Math.max(0, progress));
-  const worldShift = clamped * track.worldTravel * direction;
   return {
-    outgoingX: track.currentX - worldShift,
-    incomingX: track.incomingStartX - worldShift,
-    mascotLeadX: Math.sin(clamped * Math.PI) * track.mascotLead * direction,
+    outgoingX: track.currentX,
+    incomingX: track.nextX,
+    mascotX: clamped * track.travelDistance * direction,
   };
-}
-
-export function isJourneyTimelineNodeOffscreen(
-  nodeX: number,
-  stageWidth: number,
-  nodeHalfWidth: number,
-): boolean {
-  return nodeX + nodeHalfWidth <= 0 || nodeX - nodeHalfWidth >= stageWidth;
 }

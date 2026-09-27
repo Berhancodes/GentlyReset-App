@@ -40,7 +40,6 @@ import {
   getJourneyRestingDays,
   getJourneyTimelinePositions,
   getJourneyTimelineTrack,
-  isJourneyTimelineNodeOffscreen,
 } from './getJourneyTimelineMotion';
 import {
   applyJourneySheetAction,
@@ -431,27 +430,22 @@ const skyRest = getJourneySkyRest();
 const leftCloud390 = skyPieces390.leftCloud;
 const rightCloud390 = skyPieces390.rightCloud;
 const upperCloud390 = skyPieces390.upperCloud;
-const timeline390 = getJourneyTimelineTrack(
-  stage390.width,
-  stage390.currentX,
-  stage390.nodeSize + motion.offset.journeyTimelineEdgePad,
-);
+const timeline390 = getJourneyTimelineTrack(stage390.currentX, stage390.nextX);
 const timelineStart = getJourneyTimelinePositions(0, timeline390);
 const timelineMid = getJourneyTimelinePositions(0.5, timeline390);
 const timelineEnd = getJourneyTimelinePositions(1, timeline390);
-const nodeHalf = stage390.nodeSize / 2;
 check(
-  'side-scroll track keeps the next day offscreen at rest and on the current mark at arrival',
-  Math.abs(stage390.travelDistance - stage390.worldTravel) < 1e-9 &&
-    Math.abs(stage390.currentX - stage390.day1X) < 1e-9 &&
-    isJourneyTimelineNodeOffscreen(timelineStart.incomingX, stage390.width, nodeHalf) &&
-    !isJourneyTimelineNodeOffscreen(timelineStart.outgoingX, stage390.width, nodeHalf) &&
-    isJourneyTimelineNodeOffscreen(timelineEnd.outgoingX, stage390.width, nodeHalf) &&
-    Math.abs(timelineEnd.incomingX - stage390.currentX) < 1e-6 &&
-    Math.abs(timelineEnd.mascotLeadX) < 1e-6 &&
-    timelineMid.mascotLeadX > 0 &&
-    timelineMid.incomingX < timelineStart.incomingX &&
-    timelineMid.outgoingX < timelineStart.outgoingX &&
+  'mascot walks to a static next-day mark; the nodes do not side-scroll',
+  Math.abs(stage390.currentX - stage390.day1X) < 1e-9 &&
+    Math.abs(stage390.nextX - stage390.day2X) < 1e-9 &&
+    Math.abs(stage390.travelDistance - (stage390.day2X - stage390.day1X)) < 1e-9 &&
+    timelineStart.outgoingX === stage390.currentX &&
+    timelineEnd.outgoingX === stage390.currentX &&
+    timelineStart.incomingX === stage390.nextX &&
+    timelineEnd.incomingX === stage390.nextX &&
+    timelineStart.mascotX === 0 &&
+    Math.abs(timelineEnd.mascotX - stage390.travelDistance) < 1e-9 &&
+    Math.abs(timelineMid.mascotX - stage390.travelDistance / 2) < 1e-9 &&
     getJourneyIncomingDay(3, 4) === 4 &&
     getJourneyIncomingDay(30, 31) === undefined,
 );
