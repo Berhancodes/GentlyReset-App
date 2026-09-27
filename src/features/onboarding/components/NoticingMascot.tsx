@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react';
 import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
-import { spacing } from '@/design-system';
+import { colors, spacing } from '@/design-system';
 
 const NOTICE_LOOP = require('../../../../assets/images/mascot/mascot-noticing-loop.gif');
 const NOTICE_STILL = require('../../../../assets/images/mascot/mascot-noticing-still.png');
@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
   root: {
     alignItems: 'center',
     width: '100%',
+    backgroundColor: colors.background.primary,
     pointerEvents: 'none',
   },
 });
