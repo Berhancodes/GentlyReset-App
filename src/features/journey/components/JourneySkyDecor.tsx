@@ -1,6 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
-import { StyleSheet, type ImageSourcePropType, type ImageStyle } from 'react-native';
-import { useIsFocused } from 'expo-router';
+import { Image, StyleSheet, type ImageSourcePropType, type ViewStyle } from 'react-native';
 import Animated, {
   cancelAnimation,
   Easing,
@@ -27,6 +26,7 @@ const SKY_EASING = Easing.out(Easing.cubic);
 
 type JourneySkyDecorProps = {
   layout: JourneyStageLayout;
+  focused: boolean;
 };
 
 type SkyMotion = {
@@ -47,6 +47,30 @@ function rectStyle(rect: JourneyRect) {
     top: rect.top,
     width: rect.width,
     height: rect.height,
+  };
+}
+
+function collectSkyMotion(
+  sunX: SharedValue<number>,
+  sunY: SharedValue<number>,
+  leftX: SharedValue<number>,
+  leftY: SharedValue<number>,
+  rightX: SharedValue<number>,
+  rightY: SharedValue<number>,
+  upperX: SharedValue<number>,
+  upperY: SharedValue<number>,
+  upperOpacity: SharedValue<number>,
+): SkyMotion {
+  return {
+    sunX,
+    sunY,
+    leftX,
+    leftY,
+    rightX,
+    rightY,
+    upperX,
+    upperY,
+    upperOpacity,
   };
 }
 
@@ -72,9 +96,7 @@ function applySkyValues(motionValues: SkyMotion, next: JourneySkyEntranceStart) 
   motionValues.upperOpacity.value = next.upperOpacity;
 }
 
-function playSkyEntrance(motionValues: SkyMotion, start: JourneySkyEntranceStart) {
-  applySkyValues(motionValues, start);
-
+function animateSkyToRest(motionValues: SkyMotion) {
   const timing = (duration: number) => ({
     duration,
     easing: SKY_EASING,
@@ -121,7 +143,7 @@ function playSkyEntrance(motionValues: SkyMotion, start: JourneySkyEntranceStart
   );
 }
 
-export function JourneySkyDecor({ layout }: JourneySkyDecorProps) {
+export function JourneySkyDecor({ layout, focused }: JourneySkyDecorProps) {
   const reduceMotion = useReducedMotion() === true;
   const layoutRef = useRef(layout);
   const start = getJourneySkyEntranceStart(layout);
@@ -138,14 +160,12 @@ export function JourneySkyDecor({ layout }: JourneySkyDecorProps) {
   const upperY = useSharedValue(initial.upperY);
   const upperOpacity = useSharedValue(initial.upperOpacity);
 
-  const isFocused = useIsFocused();
-
   useLayoutEffect(() => {
     layoutRef.current = layout;
   }, [layout]);
 
   useLayoutEffect(() => {
-    const values: SkyMotion = {
+    const values = collectSkyMotion(
       sunX,
       sunY,
       leftX,
@@ -155,7 +175,7 @@ export function JourneySkyDecor({ layout }: JourneySkyDecorProps) {
       upperX,
       upperY,
       upperOpacity,
-    };
+    );
 
     if (reduceMotion) {
       applySkyValues(values, getJourneySkyRest());
@@ -163,14 +183,19 @@ export function JourneySkyDecor({ layout }: JourneySkyDecorProps) {
     }
 
     const nextStart = getJourneySkyEntranceStart(layoutRef.current);
-    if (!isFocused) {
-      applySkyValues(values, nextStart);
+    applySkyValues(values, nextStart);
+
+    if (!focused) {
       return;
     }
 
-    playSkyEntrance(values, nextStart);
+    const frame = requestAnimationFrame(() => {
+      animateSkyToRest(values);
+    });
+
+    return () => cancelAnimationFrame(frame);
   }, [
-    isFocused,
+    focused,
     leftX,
     leftY,
     reduceMotion,
@@ -234,18 +259,24 @@ export function JourneySkyDecor({ layout }: JourneySkyDecorProps) {
 type JourneySkyPieceProps = {
   source: ImageSourcePropType;
   rect: JourneyRect;
-  animatedStyle: AnimatedStyle<ImageStyle>;
+  animatedStyle: AnimatedStyle<ViewStyle>;
 };
 
 function JourneySkyPiece({ source, rect, animatedStyle }: JourneySkyPieceProps) {
   return (
-    <Animated.Image
-      source={source}
-      resizeMode="contain"
+    <Animated.View
       accessibilityElementsHidden
       importantForAccessibility="no"
-      style={[styles.decorImage, rectStyle(rect), animatedStyle]}
-    />
+      style={[styles.decorLayer, rectStyle(rect), animatedStyle]}
+    >
+      <Image
+        source={source}
+        resizeMode="contain"
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+        style={styles.fillImage}
+      />
+    </Animated.View>
   );
 }
 
@@ -254,7 +285,11 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     pointerEvents: 'none',
   },
-  decorImage: {
+  decorLayer: {
     position: 'absolute',
+  },
+  fillImage: {
+    width: '100%',
+    height: '100%',
   },
 });

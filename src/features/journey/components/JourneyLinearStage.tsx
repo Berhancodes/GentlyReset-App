@@ -25,6 +25,7 @@ type JourneyLinearStageProps = {
   todayCompleted: boolean;
   taskTitle: string;
   onPressDay: (day: number) => void;
+  focused: boolean;
 };
 
 function rectStyle(rect: JourneyRect) {
@@ -42,6 +43,7 @@ export function JourneyLinearStage({
   todayCompleted,
   taskTitle,
   onPressDay,
+  focused,
 }: JourneyLinearStageProps) {
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
   const layout =
@@ -64,7 +66,7 @@ export function JourneyLinearStage({
         }
       }}
     >
-      {layout ? <JourneySkyDecor layout={layout} /> : null}
+      {layout ? <JourneySkyDecor layout={layout} focused={focused} /> : null}
 
       <View style={styles.titleBlock}>
         <AppText variant="journeyDay" color="primary" align="center">

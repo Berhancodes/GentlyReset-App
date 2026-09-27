@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { MainTabHeader, Screen } from '@/components/ui';
@@ -34,6 +34,16 @@ export function JourneyScreen() {
   useSyncResetDay();
   const router = useRouter();
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [journeyFocused, setJourneyFocused] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      setJourneyFocused(true);
+      return () => {
+        setJourneyFocused(false);
+      };
+    }, []),
+  );
 
   const currentDay = useResetStore((state) => state.currentDay);
   const completedDays = useResetStore((state) => state.completedDays);
@@ -110,6 +120,7 @@ export function JourneyScreen() {
             todayCompleted={todayCompleted}
             taskTitle={currentTask.title}
             onPressDay={onPressDay}
+            focused={journeyFocused}
           />
           <JourneyQuoteCard
             quote={chapter ? getJourneyQuote(chapter.id) : 'One small step can change everything.'}
