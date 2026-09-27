@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -44,7 +44,7 @@ export function WelcomeScreen({ step }: WelcomeScreenProps) {
         accessibilityLabel={spokenTitle}
         style={styles.headerHit}
       />
-      <View style={[styles.actions, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}>
+      <View style={[styles.actions, { paddingBottom: Math.max(insets.bottom, spacing.xl) }]}>
         <PrimaryButton label={step.ctaLabel} onPress={goToNext} />
         {signInPrompt && signInLabel ? (
           <Pressable
@@ -76,16 +76,12 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     overflow: 'hidden',
-    backgroundColor: colors.accent.blue,
+    backgroundColor: colors.background.sky,
   },
   background: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    left: 0,
-    height: '128%',
+    ...StyleSheet.absoluteFill,
     width: '100%',
-    ...(Platform.OS === 'web' ? { objectPosition: 'top' } : null),
+    height: '100%',
   },
   headerHit: {
     ...StyleSheet.absoluteFill,
@@ -97,7 +93,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingHorizontal: spacing.lg,
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   signInRow: {
     minHeight: spacing.hitTarget,

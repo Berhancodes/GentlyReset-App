@@ -137,19 +137,19 @@ const styles = StyleSheet.create({
   lip: {
     ...StyleSheet.absoluteFill,
     top: motion.offset.press,
-    borderRadius: radius.xxl,
+    borderRadius: radius.pill,
     backgroundColor: colors.action.primaryBackgroundPressed,
   },
   shadow: {
     ...StyleSheet.absoluteFill,
     top: motion.offset.press,
-    borderRadius: radius.xxl,
+    borderRadius: radius.pill,
     backgroundColor: colors.action.primaryBackgroundPressed,
     ...shadows.button,
   },
   face: {
     minHeight: 56,
-    borderRadius: radius.xxl,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
