@@ -95,6 +95,10 @@ The launch gate lives in `src/navigation/getRootHref.ts` so it can later become:
 
 Subscription logic is not implemented yet.
 
+## Accounts
+
+Welcome's "Sign in" opens `/sign-in`. The page is a real email/password form. There is no Supabase or cloud session yet, so a valid submit cannot restore a remote account. Use "begin a new reset" to return to onboarding.
+
 ## Design tokens
 
 All visual constants live in `src/design-system`. Components consume semantic names such as `colors.background.primary` and `spacing.lg`. Do not paste hex values into screens.

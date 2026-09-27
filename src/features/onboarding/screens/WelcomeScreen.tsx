@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { NoticeDialog, PrimaryButton } from '@/components/ui';
+import { PrimaryButton } from '@/components/ui';
 import { colors, spacing, textVariants } from '@/design-system';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import type { WelcomeStep } from '@/features/onboarding/types/onboarding';
@@ -11,19 +10,13 @@ import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading
 
 const WELCOME_ART = require('../../../../assets/images/onboarding/welcome-first-screen.png');
 
-const SIGN_IN_NOTICE = {
-  title: 'sign in',
-  body: 'accounts are not part of this build yet. begin a new reset to continue.',
-} as const;
-
 type WelcomeScreenProps = {
   step: WelcomeStep;
 };
 
 export function WelcomeScreen({ step }: WelcomeScreenProps) {
-  const { goToNext } = useOnboardingNavigation();
+  const { router, goToNext } = useOnboardingNavigation();
   const insets = useSafeAreaInsets();
-  const [signInOpen, setSignInOpen] = useState(false);
   const signInPrompt = step.signInPrompt;
   const signInLabel = step.signInLabel;
   const spokenTitle = `${capitalizeHeading(step.title).replace('\n', ' ')}. ${step.subtitle ?? ''}`;
@@ -50,7 +43,7 @@ export function WelcomeScreen({ step }: WelcomeScreenProps) {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`${signInPrompt} ${signInLabel}`}
-            onPress={() => setSignInOpen(true)}
+            onPress={() => router.push('/(auth)/sign-in')}
             style={styles.signInRow}
           >
             <Text allowFontScaling maxFontSizeMultiplier={1.4} style={styles.signInPrompt}>
@@ -62,12 +55,6 @@ export function WelcomeScreen({ step }: WelcomeScreenProps) {
           </Pressable>
         ) : null}
       </View>
-      <NoticeDialog
-        visible={signInOpen}
-        title={capitalizeHeading(SIGN_IN_NOTICE.title)}
-        body={SIGN_IN_NOTICE.body}
-        onClose={() => setSignInOpen(false)}
-      />
     </View>
   );
 }
