@@ -13,6 +13,11 @@ import Animated, {
 import { colors, motion, radius, shadows, spacing, textVariants } from '@/design-system';
 import { hapticImpact, hapticSuccess } from '@/utils/haptics';
 
+const PRESS_TRAVEL = motion.offset.press;
+const PRESS_DURATION = motion.duration.press;
+const PRESS_SHADOW_FADE = 0.72;
+const PRESS_SHADOW_LAG = 0.35;
+
 type PrimaryButtonProps = {
   label: string;
   onPress: () => void;
@@ -51,14 +56,14 @@ export function PrimaryButton({
 
     pressProgress.value = isPressed
       ? withTiming(1, {
-          duration: motion.duration.press,
+          duration: PRESS_DURATION,
           easing: Easing.out(Easing.quad),
         })
       : withSpring(0, motion.spring.release);
   };
 
   const faceStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: pressProgress.value * motion.offset.press }],
+    transform: [{ translateY: pressProgress.value * PRESS_TRAVEL }],
     backgroundColor: interpolateColor(
       enabledProgress.value,
       [0, 1],
@@ -78,8 +83,8 @@ export function PrimaryButton({
   }));
 
   const shadowStyle = useAnimatedStyle(() => ({
-    opacity: enabledProgress.value * (1 - pressProgress.value * 0.72),
-    transform: [{ translateY: pressProgress.value * motion.offset.press * 0.35 }],
+    opacity: enabledProgress.value * (1 - pressProgress.value * PRESS_SHADOW_FADE),
+    transform: [{ translateY: pressProgress.value * PRESS_TRAVEL * PRESS_SHADOW_LAG }],
   }));
 
   const labelStyle = useAnimatedStyle(() => ({
@@ -132,17 +137,17 @@ export function PrimaryButton({
 const styles = StyleSheet.create({
   base: {
     position: 'relative',
-    paddingBottom: motion.offset.press,
+    paddingBottom: PRESS_TRAVEL,
   },
   lip: {
     ...StyleSheet.absoluteFill,
-    top: motion.offset.press,
+    top: PRESS_TRAVEL,
     borderRadius: radius.pill,
     backgroundColor: colors.action.primaryBackgroundPressed,
   },
   shadow: {
     ...StyleSheet.absoluteFill,
-    top: motion.offset.press,
+    top: PRESS_TRAVEL,
     borderRadius: radius.pill,
     backgroundColor: colors.action.primaryBackgroundPressed,
     ...shadows.button,
