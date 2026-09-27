@@ -6,12 +6,8 @@ import { spacing } from '@/design-system';
 import { DayProgressHeader } from '@/features/home/components/DayProgressHeader';
 import { HomeScene } from '@/features/home/components/HomeScene';
 import { TodayResetCard } from '@/features/home/components/TodayResetCard';
-import {
-  getHomeGreeting,
-  getHomeSupportLine,
-  HOME_COMPLETION_MESSAGE,
-  HOME_IDLE_SUBTITLE,
-} from '@/features/home/utils/homeCopy';
+import { getCompanionPresentation } from '@/features/home/utils/getCompanionPresentation';
+import { getHomeSupportLine } from '@/features/home/utils/homeCopy';
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
@@ -35,6 +31,7 @@ export function HomeScreen() {
   const completedDays = useResetStore((state) => state.completedDays);
   const todayCompleted = useResetStore((state) => state.todayCompleted);
   const todayStarted = useResetStore((state) => state.todayStarted);
+  const missedYesterday = useResetStore((state) => state.missedYesterday);
   const personalization = useResetStore((state) => state.personalization);
   const resetTypeId = useResetStore((state) => state.resetTypeId);
   const startToday = useResetStore((state) => state.startToday);
@@ -58,6 +55,15 @@ export function HomeScreen() {
   const planDay = getCurrentPlanDay({ currentDay });
   const completedCount = getCompletedDayCount({ completedDays });
   const progress = getResetProgress({ completedDays });
+  const companion = getCompanionPresentation({
+    resetStartedOn,
+    currentDay,
+    completedDays,
+    todayStarted,
+    todayCompleted,
+    missedYesterday,
+    resetTypeId,
+  });
   const supportLine = resetTypeId
     ? getResetProfile(resetTypeId).homeSupportLine
     : getHomeSupportLine(personalization.primaryObstacle);
@@ -83,9 +89,9 @@ export function HomeScreen() {
         overScrollMode="never"
       >
         <View style={styles.greeting}>
-          <AppText variant="display">{getHomeGreeting()}</AppText>
+          <AppText variant="display">{companion.greeting}</AppText>
           <AppText variant="body" color="primary">
-            {HOME_IDLE_SUBTITLE}
+            {companion.supportingMessage}
           </AppText>
         </View>
         <DayProgressHeader
@@ -102,7 +108,7 @@ export function HomeScreen() {
           minutes={task.minutes}
           started={todayStarted}
           completed={todayCompleted}
-          completionMessage={HOME_COMPLETION_MESSAGE}
+          completionMessage={companion.supportingMessage}
           onStart={startToday}
           onComplete={completeToday}
         />
