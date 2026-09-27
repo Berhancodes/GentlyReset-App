@@ -135,7 +135,7 @@ export function useJourneyProgression({
     });
 
     if (!focused) {
-      if (playingRef.current || decision.kind === 'advance' || decision.kind === 'snap') {
+      if (playingRef.current) {
         clearTimers();
         settleIdle();
       }
