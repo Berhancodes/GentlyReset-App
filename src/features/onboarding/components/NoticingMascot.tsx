@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
@@ -15,7 +16,7 @@ const MASCOT_HEIGHT_FRACTION = 0.32;
 /**
  * Noticing-story mascot. Plays the supplied detective loop unless Reduce Motion is on.
  */
-export function NoticingMascot() {
+export const NoticingMascot = memo(function NoticingMascot() {
   const reduceMotion = useReducedMotion();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const availableWidth = Math.round(windowWidth - spacing.lg * 2);
@@ -26,6 +27,7 @@ export function NoticingMascot() {
     Math.min(availableWidth, widthFromHeight, MASCOT_MAX_WIDTH),
   );
   const artHeight = Math.round(artWidth / ART_ASPECT);
+  const imageSize = useMemo(() => ({ width: artWidth, height: artHeight }), [artHeight, artWidth]);
 
   return (
     <View
@@ -37,13 +39,14 @@ export function NoticingMascot() {
       <Image
         source={reduceMotion ? NOTICE_STILL : NOTICE_LOOP}
         resizeMode="contain"
+        fadeDuration={0}
         accessibilityElementsHidden
         importantForAccessibility="no"
-        style={{ width: artWidth, height: artHeight }}
+        style={imageSize}
       />
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   root: {
