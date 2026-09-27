@@ -1,22 +1,12 @@
-import { useEffect } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
-import Animated, {
-  Easing,
-  interpolateColor,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, motion, radius, shadows, spacing, textVariants } from '@/design-system';
 import { hapticImpact, hapticSuccess } from '@/utils/haptics';
 
 const PRESS_TRAVEL = motion.offset.press;
-const PRESS_DURATION = motion.duration.press;
-const PRESS_SHADOW_FADE = 0.72;
-const PRESS_SHADOW_LAG = 0.35;
+const [EASE_X1, EASE_Y1, EASE_X2, EASE_Y2] = motion.easing.standard;
+const PRESS_DURATION_MS = `${motion.duration.press}ms`;
+const PRESS_EASING = `cubic-bezier(${EASE_X1}, ${EASE_Y1}, ${EASE_X2}, ${EASE_Y2})`;
 
 type PrimaryButtonProps = {
   label: string;
@@ -33,68 +23,6 @@ export function PrimaryButton({
   accessibilityHint,
   haptic = 'light',
 }: PrimaryButtonProps) {
-  const reduceMotion = useReducedMotion();
-  const enabledProgress = useSharedValue(disabled ? 0 : 1);
-  const pressProgress = useSharedValue(0);
-
-  useEffect(() => {
-    enabledProgress.value = withTiming(disabled ? 0 : 1, {
-      duration: reduceMotion ? 0 : motion.duration.selection,
-      easing: Easing.out(Easing.cubic),
-    });
-  }, [disabled, enabledProgress, reduceMotion]);
-
-  const setPressed = (isPressed: boolean) => {
-    if (disabled) {
-      return;
-    }
-
-    if (reduceMotion) {
-      pressProgress.value = isPressed ? 1 : 0;
-      return;
-    }
-
-    pressProgress.value = isPressed
-      ? withTiming(1, {
-          duration: PRESS_DURATION,
-          easing: Easing.out(Easing.quad),
-        })
-      : withSpring(0, motion.spring.release);
-  };
-
-  const faceStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: pressProgress.value * PRESS_TRAVEL }],
-    backgroundColor: interpolateColor(
-      enabledProgress.value,
-      [0, 1],
-      [
-        colors.action.primaryBackgroundDisabled,
-        interpolateColor(
-          pressProgress.value,
-          [0, 1],
-          [colors.action.primaryBackground, colors.action.primaryBackgroundPressed],
-        ),
-      ],
-    ),
-  }));
-
-  const lipStyle = useAnimatedStyle(() => ({
-    opacity: enabledProgress.value,
-  }));
-
-  const shadowStyle = useAnimatedStyle(() => ({
-    opacity: enabledProgress.value * (1 - pressProgress.value * PRESS_SHADOW_FADE),
-    transform: [{ translateY: pressProgress.value * PRESS_TRAVEL * PRESS_SHADOW_LAG }],
-  }));
-
-  const labelStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(
-      enabledProgress.value,
-      [0, 1],
-      [colors.action.primaryTextDisabled, colors.action.primaryText],
-    ),
-  }));
-
   return (
     <Pressable
       accessibilityRole="button"
@@ -102,12 +30,6 @@ export function PrimaryButton({
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
       disabled={disabled}
-      onPressIn={() => {
-        setPressed(true);
-      }}
-      onPressOut={() => {
-        setPressed(false);
-      }}
       onPress={() => {
         if (haptic === 'light') {
           void hapticImpact();
@@ -119,20 +41,48 @@ export function PrimaryButton({
       }}
       style={styles.base}
     >
-      <Animated.View pointerEvents="none" style={[styles.lip, lipStyle]} />
-      <Animated.View pointerEvents="none" style={[styles.shadow, shadowStyle]} />
-      <Animated.View style={[styles.face, faceStyle]}>
-        <Animated.Text
-          allowFontScaling
-          maxFontSizeMultiplier={1.4}
-          style={[styles.label, labelStyle]}
-        >
-          {label}
-        </Animated.Text>
-      </Animated.View>
+      {({ pressed }) => {
+        const isPressed = pressed && !disabled;
+
+        return (
+          <>
+            {disabled ? null : <View pointerEvents="none" style={styles.lip} />}
+            {disabled ? null : (
+              <View
+                pointerEvents="none"
+                style={[styles.shadow, isPressed ? styles.shadowPressed : null]}
+              />
+            )}
+            <View
+              style={[
+                styles.face,
+                disabled ? styles.faceDisabled : styles.faceEnabled,
+                isPressed ? styles.facePressed : null,
+              ]}
+            >
+              <Text
+                allowFontScaling
+                maxFontSizeMultiplier={1.4}
+                style={[styles.label, disabled ? styles.labelDisabled : styles.labelEnabled]}
+              >
+                {label}
+              </Text>
+            </View>
+          </>
+        );
+      }}
     </Pressable>
   );
 }
+
+const webPressTransition =
+  Platform.OS === 'web'
+    ? {
+        transitionProperty: 'transform, background-color, opacity, box-shadow',
+        transitionDuration: PRESS_DURATION_MS,
+        transitionTimingFunction: PRESS_EASING,
+      }
+    : null;
 
 const styles = StyleSheet.create({
   base: {
@@ -151,6 +101,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     backgroundColor: colors.action.primaryBackgroundPressed,
     ...shadows.button,
+    ...webPressTransition,
+  },
+  shadowPressed: {
+    opacity: 0.28,
   },
   face: {
     minHeight: 56,
@@ -159,8 +113,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
+    ...webPressTransition,
+  },
+  faceEnabled: {
+    backgroundColor: colors.action.primaryBackground,
+  },
+  faceDisabled: {
+    backgroundColor: colors.action.primaryBackgroundDisabled,
+  },
+  facePressed: {
+    backgroundColor: colors.action.primaryBackgroundPressed,
+    transform: [{ translateY: PRESS_TRAVEL }],
   },
   label: {
     ...textVariants.button,
+  },
+  labelEnabled: {
+    color: colors.action.primaryText,
+  },
+  labelDisabled: {
+    color: colors.action.primaryTextDisabled,
   },
 });

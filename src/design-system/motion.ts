@@ -4,7 +4,8 @@
 export const motion = {
   duration: {
     selection: 180,
-    press: 120,
+    press: 240,
+    screen: 480,
     loadingMark: 240,
     loadingPulse: 900,
     loadingHold: 560,
@@ -19,6 +20,9 @@ export const motion = {
   },
   offset: {
     press: 6,
+  },
+  easing: {
+    standard: [0.33, 0, 0.2, 1],
   },
   spring: {
     release: {
