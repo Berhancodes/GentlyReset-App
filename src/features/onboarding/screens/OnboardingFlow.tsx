@@ -41,13 +41,13 @@ export function OnboardingFlow() {
     : !hasAnimatedStep
       ? undefined
       : goingForward
-        ? SlideInRight.duration(motion.duration.screen).easing(slideEasing)
-        : SlideInLeft.duration(motion.duration.screen).easing(slideEasing);
+        ? SlideInLeft.duration(motion.duration.screen).easing(slideEasing)
+        : SlideInRight.duration(motion.duration.screen).easing(slideEasing);
   const exiting = reduceMotion
     ? undefined
     : goingForward
-      ? SlideOutLeft.duration(motion.duration.screen).easing(slideEasing)
-      : SlideOutRight.duration(motion.duration.screen).easing(slideEasing);
+      ? SlideOutRight.duration(motion.duration.screen).easing(slideEasing)
+      : SlideOutLeft.duration(motion.duration.screen).easing(slideEasing);
 
   return (
     <View style={styles.root}>
