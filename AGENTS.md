@@ -30,7 +30,7 @@ Gently Reset is an iOS-first Expo app. Follow these rules when changing this rep
 
 16. Do not introduce dependencies without a clear reason. Use `npx expo install` for Expo-compatible versions.
 17. Run `npm run typecheck` and `npm run lint` after meaningful changes.
-18. Do not add Supabase, RevenueCat, auth, OpenAI, analytics, push notifications, or networking until that work is explicitly requested.
+18. Supabase Auth and `profiles` exist (Phase 4B). Do not add RevenueCat, a paywall, reset sync, OpenAI, analytics, push notifications, or extra networking unless explicitly requested. Never commit the service role key.
 
 ## Onboarding
 

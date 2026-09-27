@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { AppText, PrimaryButton } from '@/components/ui';
 import { spacing } from '@/design-system';
 import { AuthTextField } from '@/features/auth/components/AuthTextField';
+import { useAuth } from '@/features/auth/session/useAuth';
 import type { SignInErrors, SignInValues } from '@/features/auth/types';
 import { canSubmitSignIn, validateSignIn } from '@/features/auth/utils/validateSignIn';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
@@ -15,13 +16,13 @@ const EMPTY_VALUES: SignInValues = {
   password: '',
 };
 
-const CLOUD_UNAVAILABLE = "cloud sign-in isn't available yet. begin a new reset to continue.";
-
 export function SignInScreen() {
   const router = useRouter();
+  const { signIn } = useAuth();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
   const [values, setValues] = useState<SignInValues>(EMPTY_VALUES);
   const [errors, setErrors] = useState<SignInErrors>({});
+  const [submitting, setSubmitting] = useState(false);
 
   const updateField = <Field extends keyof SignInValues>(
     field: Field,
@@ -46,20 +47,38 @@ export function SignInScreen() {
     router.replace('/(onboarding)/flow');
   };
 
+  const afterAuthenticated = () => {
+    if (hasCompletedOnboarding) {
+      router.replace('/(app)/(tabs)/home');
+      return;
+    }
+    router.replace('/(onboarding)/flow');
+  };
+
   const submit = () => {
     Keyboard.dismiss();
+    if (submitting) {
+      return;
+    }
+
     const nextErrors = validateSignIn(values);
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;
     }
 
-    if (hasCompletedOnboarding) {
-      router.replace('/(app)/(tabs)/home');
-      return;
-    }
-
-    setErrors({ form: CLOUD_UNAVAILABLE });
+    setSubmitting(true);
+    void signIn(values.email, values.password)
+      .then((result) => {
+        if (!result.ok) {
+          setErrors({ form: result.message });
+          return;
+        }
+        afterAuthenticated();
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
   };
 
   return (
@@ -72,7 +91,24 @@ export function SignInScreen() {
       avoidKeyboard
       footer={
         <View style={styles.footer}>
-          <PrimaryButton label="sign in →" disabled={!canSubmitSignIn(values)} onPress={submit} />
+          <PrimaryButton
+            label={submitting ? 'signing in…' : 'sign in →'}
+            disabled={!canSubmitSignIn(values) || submitting}
+            onPress={submit}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Create an account"
+            onPress={() => router.push('/(auth)/sign-up')}
+            style={({ pressed }) => [styles.switchRow, pressed ? styles.pressed : null]}
+          >
+            <AppText variant="caption" color="helper">
+              new here?
+            </AppText>
+            <AppText variant="caption" color="gold">
+              create an account
+            </AppText>
+          </Pressable>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Begin a new reset"
@@ -80,7 +116,7 @@ export function SignInScreen() {
             style={({ pressed }) => [styles.switchRow, pressed ? styles.pressed : null]}
           >
             <AppText variant="caption" color="helper">
-              new here?
+              skip for now?
             </AppText>
             <AppText variant="caption" color="gold">
               begin a new reset
@@ -117,7 +153,7 @@ export function SignInScreen() {
           </AppText>
         ) : (
           <AppText variant="caption" color="helper">
-            accounts are not connected to a server yet.
+            signing in does not change your local reset.
           </AppText>
         )}
       </View>

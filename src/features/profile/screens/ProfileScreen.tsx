@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useRouter } from 'expo-router';
 
 import { MainTabHeader, NoticeDialog, Screen } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
+import { useAuth } from '@/features/auth/session/useAuth';
 import { AboutResetTypeCard } from '@/features/profile/components/AboutResetTypeCard';
 import { MyResetCard } from '@/features/profile/components/MyResetCard';
 import { ProfileHero } from '@/features/profile/components/ProfileHero';
@@ -28,7 +30,10 @@ type Notice = {
 
 export function ProfileScreen() {
   useSyncResetDay();
+  const router = useRouter();
+  const { isAuthenticated, signOut } = useAuth();
   const [notice, setNotice] = useState<Notice | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
   const currentDay = useResetStore((state) => state.currentDay);
   const completedDays = useResetStore((state) => state.completedDays);
   const resetTypeId = useResetStore((state) => state.resetTypeId);
@@ -77,6 +82,29 @@ export function ProfileScreen() {
       title: 'help & support',
       body: 'this part of Gently Reset is coming later.',
     });
+  };
+
+  const openSignIn = () => {
+    router.push('/(auth)/sign-in');
+  };
+
+  const handleSignOut = () => {
+    if (signingOut) {
+      return;
+    }
+    setSigningOut(true);
+    void signOut()
+      .then((result) => {
+        if (!result.ok) {
+          setNotice({
+            title: 'couldn’t sign out',
+            body: result.message,
+          });
+        }
+      })
+      .finally(() => {
+        setSigningOut(false);
+      });
   };
 
   return (
@@ -164,6 +192,17 @@ export function ProfileScreen() {
               title: 'help & support',
               onPress: openHelpNotice,
             },
+            isAuthenticated
+              ? {
+                  icon: <Ionicons name="log-out-outline" size={22} color={colors.text.primary} />,
+                  title: signingOut ? 'signing out…' : 'sign out',
+                  onPress: handleSignOut,
+                }
+              : {
+                  icon: <Ionicons name="log-in-outline" size={22} color={colors.text.primary} />,
+                  title: 'sign in',
+                  onPress: openSignIn,
+                },
           ]}
         />
       </ScrollView>

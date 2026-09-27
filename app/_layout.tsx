@@ -8,26 +8,38 @@ import * as SystemUI from 'expo-system-ui';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { colors } from '@/design-system';
+import { AuthProvider } from '@/features/auth/session/AuthProvider';
+import { useAuth } from '@/features/auth/session/useAuth';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { usePersistedStoresHydrated } from '@/hooks/usePersistedStoresHydrated';
 
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootLayoutReady />
+    </AuthProvider>
+  );
+}
+
+function RootLayoutReady() {
   const storesHydrated = usePersistedStoresHydrated();
+  const { initializing: authInitializing } = useAuth();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
+  const ready = storesHydrated && !authInitializing;
 
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(colors.background.primary);
   }, []);
 
   useEffect(() => {
-    if (storesHydrated) {
+    if (ready) {
       void SplashScreen.hideAsync();
     }
-  }, [storesHydrated]);
+  }, [ready]);
 
-  if (!storesHydrated) {
+  if (!ready) {
     return <View style={styles.root} />;
   }
 

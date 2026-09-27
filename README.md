@@ -9,6 +9,7 @@ design system, navigation, and a complete data-driven onboarding experience.
 - TypeScript (strict)
 - Expo Router
 - Zustand
+- Supabase Auth (`@supabase/supabase-js`)
 - React Native Reanimated
 - expo-haptics
 - ESLint and Prettier
@@ -20,6 +21,15 @@ iOS is the primary target. Android and web exist only because Expo supports them
 ```bash
 npm install
 ```
+
+Copy `.env.example` to `.env` and set the publishable client values:
+
+```
+EXPO_PUBLIC_SUPABASE_URL=
+EXPO_PUBLIC_SUPABASE_ANON_KEY=
+```
+
+Never put the service role key, database password, or other admin secrets in the app or in git.
 
 ## Run (iOS)
 
@@ -97,7 +107,13 @@ Subscription logic is not implemented yet.
 
 ## Accounts
 
-Welcome's "Sign in" opens `/sign-in`. The page is a real email/password form. There is no Supabase or cloud session yet, so a valid submit cannot restore a remote account. Use "begin a new reset" to return to onboarding.
+Welcome's "Sign in" opens `/sign-in`. Create Account is `/sign-up`. Both use Supabase email/password auth. Sessions persist in AsyncStorage and restore when the app reopens.
+
+Authentication answers "who is this user?" It is not the paywall and not the launch gate. Completing onboarding still opens the main app. RevenueCat / hard paywall is a later phase.
+
+Signing in or out does not change local reset progress, onboarding answers, journal entries, or Journey visual state. Reset data is not synced to Supabase yet.
+
+Sign out lives on the You tab when a session is present.
 
 ## Design tokens
 
