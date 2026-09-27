@@ -227,10 +227,10 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
   const day1X = JOURNEY_DAY1_ANCHORS.day1X * safeWidth;
   const day2X = JOURNEY_DAY1_ANCHORS.day2X * safeWidth;
 
-  // Line through the standing plane so the gold node tucks under the body
-  // and the toes rest on the circle. Using toe-tips alone leaves a float gap.
-  const standingFromMascotTop = mascotHeight * JOURNEY_MASCOT_ART.standingY;
-  const lineFromMascotTop = standingFromMascotTop + nodeSize * 0.38;
+  // Sit the day line just under the painted toes so the nodes ground the
+  // mascot instead of slicing through the feet.
+  const toeFromMascotTop = mascotHeight * JOURNEY_MASCOT_ART.feetY;
+  const lineFromMascotTop = toeFromMascotTop + nodeSize * 0.3;
   const sceneHeight = lineFromMascotTop + nodeSize / 2 + labelBlock + pathBottomPad;
   // Hug the illustrated characters so leftover stage height becomes sky
   // between the hero copy and the path, not a gap under the feet.

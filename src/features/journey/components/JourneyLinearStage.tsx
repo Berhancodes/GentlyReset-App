@@ -386,22 +386,22 @@ const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: colors.text.primary,
     borderRadius: 1,
-    zIndex: 4,
+    zIndex: 3,
   },
   arrivalRing: {
     position: 'absolute',
     borderWidth: 1.5,
     borderColor: colors.accent.gold,
-    zIndex: 5,
-  },
-  mascotLayer: {
-    position: 'absolute',
-    zIndex: 3,
-    overflow: 'visible',
+    zIndex: 4,
   },
   nodeSlot: {
     position: 'absolute',
     alignItems: 'center',
-    zIndex: 20,
+    zIndex: 5,
+  },
+  mascotLayer: {
+    position: 'absolute',
+    zIndex: 6,
+    overflow: 'visible',
   },
 });
