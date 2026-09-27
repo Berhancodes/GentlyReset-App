@@ -306,60 +306,6 @@ function JourneyPathBand({
 
   return (
     <View style={[styles.pathBand, { height: layout.pathHeight }]}>
-      <Animated.Image
-        source={JOURNEY_SPRITES.bush}
-        resizeMode="contain"
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-        style={[styles.vegetationLayer, rectStyle(layout.bushLeft), leftBushStyle]}
-      />
-      <Animated.Image
-        source={JOURNEY_SPRITES.bush}
-        resizeMode="contain"
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-        style={[styles.vegetationLayer, rectStyle(layout.bush), rightBushStyle]}
-      />
-
-      <Animated.View
-        accessible
-        accessibilityRole="text"
-        accessibilityLabel={signLabel}
-        pointerEvents="none"
-        style={[styles.signLayer, rectStyle(layout.sign), signStyle]}
-      >
-        <Image
-          source={JOURNEY_SPRITES.signEncouragement}
-          resizeMode="contain"
-          accessibilityElementsHidden
-          importantForAccessibility="no"
-          style={[styles.fillImage, { width: layout.sign.width, height: layout.sign.height }]}
-        />
-      </Animated.View>
-
-      {presentation.showProgressMascot ? (
-        <Animated.View
-          pointerEvents="none"
-          style={[styles.mascotLayer, rectStyle(layout.progressMascot), mascotMotionStyle]}
-        >
-          <JourneyProgressMascot rect={layout.progressMascot} playing />
-        </Animated.View>
-      ) : (
-        <Pressable
-          accessible={false}
-          onPress={() => onPressDay(outgoingDay)}
-          style={[styles.mascotLayer, rectStyle(layout.mascot)]}
-        >
-          <Image
-            source={JOURNEY_SPRITES.mascotStand}
-            resizeMode="contain"
-            accessibilityElementsHidden
-            importantForAccessibility="no"
-            style={[styles.fillImage, { width: layout.mascot.width, height: layout.mascot.height }]}
-          />
-        </Pressable>
-      )}
-
       <View
         pointerEvents="box-none"
         style={[
@@ -436,6 +382,65 @@ function JourneyPathBand({
           </Animated.View>
         ) : null}
       </View>
+
+      <View pointerEvents="box-none" style={styles.worldPlane}>
+        <Animated.Image
+          source={JOURNEY_SPRITES.bush}
+          resizeMode="contain"
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+          style={[styles.worldLayer, rectStyle(layout.bushLeft), leftBushStyle]}
+        />
+        <Animated.Image
+          source={JOURNEY_SPRITES.bush}
+          resizeMode="contain"
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+          style={[styles.worldLayer, rectStyle(layout.bush), rightBushStyle]}
+        />
+
+        <Animated.View
+          accessible
+          accessibilityRole="text"
+          accessibilityLabel={signLabel}
+          pointerEvents="none"
+          style={[styles.worldLayer, rectStyle(layout.sign), signStyle]}
+        >
+          <Image
+            source={JOURNEY_SPRITES.signEncouragement}
+            resizeMode="contain"
+            accessibilityElementsHidden
+            importantForAccessibility="no"
+            style={[styles.fillImage, { width: layout.sign.width, height: layout.sign.height }]}
+          />
+        </Animated.View>
+
+        {presentation.showProgressMascot ? (
+          <Animated.View
+            pointerEvents="none"
+            style={[styles.worldLayer, rectStyle(layout.progressMascot), mascotMotionStyle]}
+          >
+            <JourneyProgressMascot rect={layout.progressMascot} playing />
+          </Animated.View>
+        ) : (
+          <Pressable
+            accessible={false}
+            onPress={() => onPressDay(outgoingDay)}
+            style={[styles.worldHit, rectStyle(layout.mascot)]}
+          >
+            <Image
+              source={JOURNEY_SPRITES.mascotStand}
+              resizeMode="contain"
+              accessibilityElementsHidden
+              importantForAccessibility="no"
+              style={[
+                styles.fillImage,
+                { width: layout.mascot.width, height: layout.mascot.height },
+              ]}
+            />
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 }
@@ -462,41 +467,37 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  vegetationLayer: {
-    position: 'absolute',
-    zIndex: 1,
-  },
-  signLayer: {
-    position: 'absolute',
-    zIndex: 2,
-  },
   timelineViewport: {
     position: 'absolute',
     left: 0,
     right: 0,
     overflow: 'hidden',
-    zIndex: 5,
+    zIndex: 1,
   },
   line: {
     position: 'absolute',
     backgroundColor: colors.text.primary,
     borderRadius: 1,
-    zIndex: 3,
   },
   arrivalRing: {
     position: 'absolute',
     borderWidth: 1.5,
     borderColor: colors.accent.gold,
-    zIndex: 4,
   },
   nodeSlot: {
     position: 'absolute',
     alignItems: 'center',
-    zIndex: 5,
   },
-  mascotLayer: {
-    position: 'absolute',
-    zIndex: 6,
+  worldPlane: {
+    ...StyleSheet.absoluteFill,
     overflow: 'visible',
+    zIndex: 2,
+  },
+  worldLayer: {
+    position: 'absolute',
+    pointerEvents: 'none',
+  },
+  worldHit: {
+    position: 'absolute',
   },
 });
