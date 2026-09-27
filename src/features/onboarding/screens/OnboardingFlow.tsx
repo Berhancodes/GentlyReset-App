@@ -48,7 +48,7 @@ export function OnboardingFlow() {
         return;
       }
 
-      const destination = direction === 'forward' ? width : -width;
+      const destination = direction === 'forward' ? -width : width;
       shiftX.value = withTiming(
         destination,
         {
