@@ -17,6 +17,12 @@ export const motion = {
     journeyLeftCloud: 1040,
     journeyRightCloud: 980,
     journeyUpperCloud: 780,
+    journeyProgressHold: 200,
+    journeyProgressWalk: 1800,
+    journeyProgressTotal: 4000,
+    journeyProgressHeading: 320,
+    journeyProgressSettle: 200,
+    journeyProgressCrossfade: 80,
   },
   scale: {
     press: 0.97,
@@ -32,6 +38,7 @@ export const motion = {
     journeyUpperCloudX: 24,
     journeyUpperCloudY: -16,
     journeySkyEdgePad: 16,
+    journeyHeadingShift: 10,
   },
   delay: {
     journeyLeftCloud: 50,

@@ -1,29 +1,33 @@
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
-import { AppText } from '@/components/ui';
-import { colors, spacing } from '@/design-system';
+import { colors, motion, spacing } from '@/design-system';
 import { JourneyDayNode } from '@/features/journey/components/JourneyDayNode';
+import { JourneyHeroCopy } from '@/features/journey/components/JourneyHeroCopy';
+import { JourneyProgressMascot } from '@/features/journey/components/JourneyProgressMascot';
 import { JourneySkyDecor } from '@/features/journey/components/JourneySkyDecor';
 import { JOURNEY_SPRITES } from '@/features/journey/data/journeyChapterImages';
 import { getJourneyChapterForDay } from '@/features/journey/data/journeyChapters';
 import { getJourneySignLine } from '@/features/journey/data/journeyCopy';
 import {
   getJourneyStageLayout,
-  getJourneyVisibleDays,
-  splitJourneyTaskTitle,
   type JourneyRect,
   type JourneyStageLayout,
 } from '@/features/journey/layout/journeyStageLayout';
-import { getJourneyDayState } from '@/features/journey/utils/getJourneyDayState';
+import type { JourneyProgressionPresentation } from '@/features/journey/hooks/useJourneyProgression';
 
 const NODE_SLOT_WIDTH = spacing.xxl + spacing.md;
 
 type JourneyLinearStageProps = {
-  currentDay: number;
-  completedDays: readonly number[];
-  todayCompleted: boolean;
-  taskTitle: string;
+  presentation: JourneyProgressionPresentation;
   onPressDay: (day: number) => void;
   focused: boolean;
 };
@@ -37,22 +41,13 @@ function rectStyle(rect: JourneyRect) {
   };
 }
 
-export function JourneyLinearStage({
-  currentDay,
-  completedDays,
-  todayCompleted,
-  taskTitle,
-  onPressDay,
-  focused,
-}: JourneyLinearStageProps) {
+export function JourneyLinearStage({ presentation, onPressDay, focused }: JourneyLinearStageProps) {
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
   const layout =
     stageSize.width > 0 && stageSize.height > 0
       ? getJourneyStageLayout(stageSize.width, stageSize.height)
       : null;
-  const titleLines = splitJourneyTaskTitle(taskTitle);
-  const visibleDays = getJourneyVisibleDays(currentDay);
-  const chapter = getJourneyChapterForDay(currentDay);
+  const chapter = getJourneyChapterForDay(presentation.headingDay);
   const signLabel = chapter ? getJourneySignLine(chapter.id) : 'you can do this';
 
   return (
@@ -66,29 +61,23 @@ export function JourneyLinearStage({
         }
       }}
     >
+      <Image
+        source={JOURNEY_SPRITES.mascotProgress}
+        resizeMode="contain"
+        fadeDuration={0}
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+        style={styles.preload}
+      />
       {layout ? <JourneySkyDecor layout={layout} focused={focused} /> : null}
 
-      <View style={styles.titleBlock}>
-        <AppText variant="journeyDay" color="primary" align="center">
-          {`day ${currentDay}`}
-        </AppText>
-        <View style={styles.titleLines}>
-          {titleLines.map((line) => (
-            <AppText key={line} variant="journeyTask" color="primary" align="center">
-              {line}
-            </AppText>
-          ))}
-        </View>
-      </View>
+      <JourneyHeroCopy day={presentation.headingDay} title={presentation.headingTitle} />
 
       <View style={styles.midStage}>
         {layout ? (
           <JourneyPathBand
             layout={layout}
-            currentDay={currentDay}
-            completedDays={completedDays}
-            todayCompleted={todayCompleted}
-            visibleDays={visibleDays}
+            presentation={presentation}
             signLabel={signLabel}
             onPressDay={onPressDay}
           />
@@ -100,25 +89,61 @@ export function JourneyLinearStage({
 
 type JourneyPathBandProps = {
   layout: JourneyStageLayout;
-  currentDay: number;
-  completedDays: readonly number[];
-  todayCompleted: boolean;
-  visibleDays: readonly number[];
+  presentation: JourneyProgressionPresentation;
   signLabel: string;
   onPressDay: (day: number) => void;
 };
 
-function JourneyPathBand({
-  layout,
-  currentDay,
-  completedDays,
-  todayCompleted,
-  visibleDays,
-  signLabel,
-  onPressDay,
-}: JourneyPathBandProps) {
-  const currentDayValue = visibleDays[0] ?? currentDay;
-  const futureDay = visibleDays[1];
+function JourneyPathBand({ layout, presentation, signLabel, onPressDay }: JourneyPathBandProps) {
+  const reduceMotion = useReducedMotion() === true;
+  const translateX = useSharedValue(0);
+  const nodePop = useSharedValue(1);
+  const leftDay = presentation.visibleDays[0] ?? presentation.toDay;
+  const rightDay = presentation.visibleDays[1];
+
+  useLayoutEffect(() => {
+    if (reduceMotion || presentation.phase === 'idle' || presentation.phase === 'holding') {
+      translateX.value = 0;
+      return;
+    }
+
+    if (presentation.phase === 'walking') {
+      translateX.value = 0;
+      translateX.value = withTiming(layout.travelDistance, {
+        duration: motion.duration.journeyProgressWalk,
+        easing: Easing.inOut(Easing.cubic),
+      });
+      return;
+    }
+
+    translateX.value = layout.travelDistance;
+  }, [layout.travelDistance, presentation.phase, reduceMotion, translateX]);
+
+  useLayoutEffect(() => {
+    if (presentation.phase !== 'celebrating' || reduceMotion) {
+      nodePop.value = 1;
+      return;
+    }
+
+    nodePop.value = 0.94;
+    nodePop.value = withSequence(
+      withTiming(1.04, {
+        duration: 140,
+        easing: Easing.out(Easing.cubic),
+      }),
+      withTiming(1, {
+        duration: 160,
+        easing: Easing.inOut(Easing.cubic),
+      }),
+    );
+  }, [nodePop, presentation.phase, reduceMotion]);
+
+  const mascotMotionStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
+  const rightNodeStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: nodePop.value }],
+  }));
 
   return (
     <View style={[styles.pathBand, { height: layout.pathHeight }]}>
@@ -153,19 +178,28 @@ function JourneyPathBand({
         />
       </View>
 
-      <Pressable
-        accessible={false}
-        onPress={() => onPressDay(currentDayValue)}
-        style={[styles.mascotLayer, rectStyle(layout.mascot)]}
-      >
-        <Image
-          source={JOURNEY_SPRITES.mascotStand}
-          resizeMode="contain"
-          accessibilityElementsHidden
-          importantForAccessibility="no"
-          style={[styles.fillImage, { width: layout.mascot.width, height: layout.mascot.height }]}
-        />
-      </Pressable>
+      {presentation.showProgressMascot ? (
+        <Animated.View
+          pointerEvents="none"
+          style={[styles.mascotLayer, rectStyle(layout.progressMascot), mascotMotionStyle]}
+        >
+          <JourneyProgressMascot rect={layout.progressMascot} playing />
+        </Animated.View>
+      ) : (
+        <Pressable
+          accessible={false}
+          onPress={() => onPressDay(leftDay)}
+          style={[styles.mascotLayer, rectStyle(layout.mascot)]}
+        >
+          <Image
+            source={JOURNEY_SPRITES.mascotStand}
+            resizeMode="contain"
+            accessibilityElementsHidden
+            importantForAccessibility="no"
+            style={[styles.fillImage, { width: layout.mascot.width, height: layout.mascot.height }]}
+          />
+        </Pressable>
+      )}
 
       <View
         pointerEvents="none"
@@ -192,13 +226,13 @@ function JourneyPathBand({
       >
         <JourneyDayNode
           size={layout.nodeSize}
-          state={getJourneyDayState(currentDayValue, currentDay, completedDays, todayCompleted)}
-          onPress={() => onPressDay(currentDayValue)}
+          state={presentation.leftNode}
+          onPress={() => onPressDay(leftDay)}
         />
       </View>
 
-      {futureDay !== undefined ? (
-        <View
+      {rightDay !== undefined && presentation.rightNode ? (
+        <Animated.View
           style={[
             styles.nodeSlot,
             {
@@ -206,14 +240,15 @@ function JourneyPathBand({
               top: layout.lineY - spacing.hitTarget / 2,
               width: NODE_SLOT_WIDTH,
             },
+            rightNodeStyle,
           ]}
         >
           <JourneyDayNode
             size={layout.nodeSize}
-            state={getJourneyDayState(futureDay, currentDay, completedDays, todayCompleted)}
-            onPress={() => onPressDay(futureDay)}
+            state={presentation.rightNode}
+            onPress={() => onPressDay(rightDay)}
           />
-        </View>
+        </Animated.View>
       ) : null}
     </View>
   );
@@ -223,15 +258,11 @@ const styles = StyleSheet.create({
   stage: {
     flex: 1,
   },
-  titleBlock: {
-    alignItems: 'center',
-    paddingTop: spacing.md,
-    paddingHorizontal: spacing.lg,
-    gap: spacing.md,
-    zIndex: 2,
-  },
-  titleLines: {
-    alignItems: 'center',
+  preload: {
+    position: 'absolute',
+    width: 1,
+    height: 1,
+    opacity: 0,
   },
   midStage: {
     flex: 1,

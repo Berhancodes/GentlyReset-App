@@ -9,6 +9,7 @@ import {
   ONBOARDING_PERSIST_VERSION,
 } from '@/features/onboarding/utils/migrateOnboardingPersist';
 import { toggleMultiSelection } from '@/features/onboarding/utils/toggleMultiSelection';
+import { useJourneyVisualStore } from '@/features/journey/store/useJourneyVisualStore';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { asyncPersistStorage } from '@/utils/persistStorage';
 
@@ -80,6 +81,7 @@ export const useOnboardingStore = create<OnboardingState & OnboardingActions>()(
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),
       resetOnboarding: () => {
         useResetStore.getState().clearReset();
+        useJourneyVisualStore.getState().clearJourneyVisual();
         set(initialState);
       },
     }),

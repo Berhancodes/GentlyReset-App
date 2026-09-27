@@ -4,6 +4,7 @@
  */
 export const JOURNEY_SPRITES = {
   mascotStand: require('../../../../assets/images/app/journey/journey-mascot-stand.png'),
+  mascotProgress: require('../../../../assets/images/app/journey/journey-mascot-progress.gif'),
   mascotIdle: require('../../../../assets/images/app/journey/journey-mascot-idle.png'),
   mascotWalk: require('../../../../assets/images/app/journey/journey-mascot-walk.png'),
   mascotLook: require('../../../../assets/images/app/journey/journey-mascot-look.png'),

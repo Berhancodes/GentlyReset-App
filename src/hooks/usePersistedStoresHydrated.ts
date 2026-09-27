@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react';
 
+import { useJourneyVisualStore } from '@/features/journey/store/useJourneyVisualStore';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 
 function bothHydrated(): boolean {
-  return useOnboardingStore.persist.hasHydrated() && useResetStore.persist.hasHydrated();
+  return (
+    useOnboardingStore.persist.hasHydrated() &&
+    useResetStore.persist.hasHydrated() &&
+    useJourneyVisualStore.persist.hasHydrated()
+  );
 }
 
 /**
@@ -33,11 +38,13 @@ export function usePersistedStoresHydrated(): boolean {
 
     const unsubscribeOnboarding = useOnboardingStore.persist.onFinishHydration(update);
     const unsubscribeReset = useResetStore.persist.onFinishHydration(update);
+    const unsubscribeJourneyVisual = useJourneyVisualStore.persist.onFinishHydration(update);
     update();
 
     return () => {
       unsubscribeOnboarding();
       unsubscribeReset();
+      unsubscribeJourneyVisual();
     };
   }, []);
 

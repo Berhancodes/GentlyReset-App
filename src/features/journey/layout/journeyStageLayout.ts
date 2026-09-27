@@ -51,6 +51,18 @@ export const JOURNEY_CLOUD_ART = {
   height: 1086,
 } as const;
 
+/**
+ * Progress GIF canvas. Transparent padding stays in the file; we only
+ * use these fractions to size/align the container to the standing mascot.
+ */
+export const JOURNEY_PROGRESS_MASCOT_ART = {
+  width: 720,
+  height: 1280,
+  bodyCenterX: 360 / 720,
+  feetY: 925 / 1280,
+  walkBodyHeight: 574 / 1280,
+} as const;
+
 export const JOURNEY_SUN_ART = {
   width: 1254,
   height: 1254,
@@ -108,6 +120,8 @@ export type JourneyStageLayout = {
   bushLeft: JourneyRect;
   sun: JourneyRect;
   clouds: readonly JourneyRect[];
+  progressMascot: JourneyRect;
+  travelDistance: number;
 };
 
 export function clampLayout(value: number, min: number, max: number): number {
@@ -315,5 +329,20 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
     bushLeft,
     sun,
     clouds,
+    progressMascot: getJourneyProgressMascotRect(mascot, day1X),
+    travelDistance: day2X - day1X,
+  };
+}
+
+function getJourneyProgressMascotRect(mascot: JourneyRect, day1X: number): JourneyRect {
+  const standBodyHeight = mascot.height * JOURNEY_MASCOT_ART.standingY;
+  const height = standBodyHeight / JOURNEY_PROGRESS_MASCOT_ART.walkBodyHeight;
+  const width = height * (JOURNEY_PROGRESS_MASCOT_ART.width / JOURNEY_PROGRESS_MASCOT_ART.height);
+  const standFeetY = mascot.top + mascot.height * JOURNEY_MASCOT_ART.feetY;
+  return {
+    left: day1X - width * JOURNEY_PROGRESS_MASCOT_ART.bodyCenterX,
+    top: standFeetY - height * JOURNEY_PROGRESS_MASCOT_ART.feetY,
+    width,
+    height,
   };
 }

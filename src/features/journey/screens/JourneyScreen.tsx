@@ -9,6 +9,7 @@ import { DayProgressHeader } from '@/features/home/components/DayProgressHeader'
 import { JourneyDaySheet } from '@/features/journey/components/JourneyDaySheet';
 import { JourneyLinearStage } from '@/features/journey/components/JourneyLinearStage';
 import { JourneyQuoteCard } from '@/features/journey/components/JourneyQuoteCard';
+import { useJourneyProgression } from '@/features/journey/hooks/useJourneyProgression';
 import { getJourneyChapterForDay } from '@/features/journey/data/journeyChapters';
 import { getJourneyQuote } from '@/features/journey/data/journeyCopy';
 import { getJourneySheetModel } from '@/features/journey/utils/getJourneySheetModel';
@@ -17,7 +18,6 @@ import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import {
   getCompletedDayCount,
-  getCurrentPlanDay,
   getCurrentResetTask,
   getResetProgress,
 } from '@/features/reset/utils/resetSelectors';
@@ -55,9 +55,15 @@ export function JourneyScreen() {
   const startToday = useResetStore((state) => state.startToday);
 
   const rememberLine = getResetProfile(resetTypeId).homeSupportLine;
-  const planDay = getCurrentPlanDay({ currentDay });
-  const chapter = getJourneyChapterForDay(planDay);
   const currentTask = getCurrentResetTask({ currentDay, personalization });
+  const progression = useJourneyProgression({
+    currentDay,
+    completedDays,
+    todayCompleted,
+    currentTitle: currentTask.title,
+    focused: journeyFocused,
+  });
+  const chapter = getJourneyChapterForDay(progression.headingDay);
   const completedCount = getCompletedDayCount({ completedDays });
   const progress = getResetProgress({ completedDays });
 
@@ -105,7 +111,7 @@ export function JourneyScreen() {
         <>
           <View style={styles.progress}>
             <DayProgressHeader
-              currentDay={planDay}
+              currentDay={progression.progressDay}
               completedCount={completedCount}
               progress={progress}
               thickness={spacing.xxs}
@@ -115,10 +121,7 @@ export function JourneyScreen() {
             />
           </View>
           <JourneyLinearStage
-            currentDay={currentDay}
-            completedDays={completedDays}
-            todayCompleted={todayCompleted}
-            taskTitle={currentTask.title}
+            presentation={progression}
             onPressDay={onPressDay}
             focused={journeyFocused}
           />

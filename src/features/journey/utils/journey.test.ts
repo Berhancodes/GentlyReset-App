@@ -24,6 +24,7 @@ import {
   getJourneySkyRest,
 } from './getJourneySkyEntrance';
 import { getJourneyDayState } from './getJourneyDayState';
+import { getJourneyProgression } from './getJourneyProgression';
 import {
   applyJourneySheetAction,
   getJourneySheetModel,
@@ -398,6 +399,39 @@ const skyRest = getJourneySkyRest();
 const leftCloud390 = skyPieces390.leftCloud;
 const rightCloud390 = skyPieces390.rightCloud;
 const upperCloud390 = skyPieces390.upperCloud;
+check(
+  'progress mascot travel uses node centers, not a fixed pixel distance',
+  Math.abs(stage390.travelDistance - (stage390.day2X - stage390.day1X)) < 1e-9 &&
+    Math.abs(stage430.travelDistance - (stage430.day2X - stage430.day1X)) < 1e-9 &&
+    stage430.travelDistance > stage390.travelDistance,
+);
+
+check(
+  'first Journey visit bootstraps without walking',
+  getJourneyProgression({ currentDay: 4, acknowledgedDay: null }).kind === 'bootstrap',
+);
+
+check(
+  'acknowledged current day stays idle',
+  getJourneyProgression({ currentDay: 4, acknowledgedDay: 4 }).kind === 'idle',
+);
+
+const oneDayAdvance = getJourneyProgression({ currentDay: 4, acknowledgedDay: 3 });
+check(
+  'exactly one unacknowledged day plays 3 → 4',
+  oneDayAdvance.kind === 'advance' && oneDayAdvance.fromDay === 3 && oneDayAdvance.toDay === 4,
+);
+
+check(
+  'multi-day gaps snap instead of chaining walks',
+  getJourneyProgression({ currentDay: 5, acknowledgedDay: 1 }).kind === 'snap',
+);
+
+check(
+  'completing today is not a visual day advance',
+  getJourneyProgression({ currentDay: 3, acknowledgedDay: 3 }).kind === 'idle',
+);
+
 check(
   'sky entrance parks the sun fully past the right edge',
   leftCloud390 !== undefined &&
