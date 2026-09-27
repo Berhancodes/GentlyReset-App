@@ -5,6 +5,7 @@ import {
   getJourneyWeekLabel,
   JOURNEY_CHAPTERS,
 } from '../data/journeyChapters';
+import { motion } from '../../../design-system/motion';
 import { getJourneyQuote, getJourneySignLine } from '../data/journeyCopy';
 import {
   getJourneyStageLayout,
@@ -25,6 +26,13 @@ import {
 } from './getJourneySkyEntrance';
 import { getJourneyDayState } from './getJourneyDayState';
 import { getJourneyProgression } from './getJourneyProgression';
+import {
+  getJourneyParallaxOffset,
+  getJourneyWalkDirection,
+  getJourneyWalkTranslate,
+  JOURNEY_WALK_LAYERS,
+  sampleJourneyWalkEased,
+} from './getJourneyWalkMotion';
 import {
   applyJourneySheetAction,
   getJourneySheetModel,
@@ -447,6 +455,56 @@ check(
     skyRest.sunX === 0 &&
     skyRest.sunY === 0 &&
     skyRest.upperOpacity === 1,
+);
+
+check(
+  'walk easing lands at 0 and 1 and stays near-linear through the middle',
+  sampleJourneyWalkEased(0) === 0 &&
+    Math.abs(sampleJourneyWalkEased(1) - 1) < 1e-6 &&
+    Math.abs(sampleJourneyWalkEased(0.5) - 0.5) < 0.03 &&
+    sampleJourneyWalkEased(0.1) < 0.1 &&
+    sampleJourneyWalkEased(0.9) > 0.9 &&
+    Math.abs(
+      sampleJourneyWalkEased(0.65) -
+        sampleJourneyWalkEased(0.5) -
+        (sampleJourneyWalkEased(0.5) - sampleJourneyWalkEased(0.35)),
+    ) < 0.012,
+);
+
+check(
+  'walk translation uses node travel and the walk curve, not a raw ease-in-out rush',
+  Math.abs(getJourneyWalkTranslate(1, stage390.travelDistance) - stage390.travelDistance) < 1e-6 &&
+    getJourneyWalkTranslate(0, stage390.travelDistance) === 0 &&
+    Math.abs(getJourneyWalkTranslate(0.5, stage390.travelDistance) - stage390.travelDistance / 2) <
+      stage390.travelDistance * 0.03,
+);
+
+check(
+  'environment parallax moves opposite the mascot and stays within the soft ranges',
+  getJourneyWalkDirection(3, 4) === 1 &&
+    getJourneyWalkDirection(4, 3) === -1 &&
+    getJourneyParallaxOffset(1, 1, JOURNEY_WALK_LAYERS.foreground) === -15 &&
+    getJourneyParallaxOffset(1, -1, JOURNEY_WALK_LAYERS.foreground) === 15 &&
+    getJourneyParallaxOffset(0, 1, JOURNEY_WALK_LAYERS.sign) === 0 &&
+    JOURNEY_WALK_LAYERS.foreground >= 12 &&
+    JOURNEY_WALK_LAYERS.foreground <= 18 &&
+    JOURNEY_WALK_LAYERS.sign >= 8 &&
+    JOURNEY_WALK_LAYERS.sign <= 12 &&
+    JOURNEY_WALK_LAYERS.bush >= 6 &&
+    JOURNEY_WALK_LAYERS.bush <= 10 &&
+    JOURNEY_WALK_LAYERS.cloud >= 3 &&
+    JOURNEY_WALK_LAYERS.cloud <= 5 &&
+    JOURNEY_WALK_LAYERS.sun >= 1 &&
+    JOURNEY_WALK_LAYERS.sun <= 3,
+);
+
+check(
+  'heading waits until the jump; walk duration stays 1800ms',
+  motion.duration.journeyProgressWalk === 1800 &&
+    motion.duration.journeyProgressHeadingDelay === 420 &&
+    motion.duration.journeyArrivalRing === 420 &&
+    motion.scale.journeyArrivalFrom === 0.96 &&
+    motion.scale.journeyArrivalPeak === 1.04,
 );
 
 if (failed > 0) {

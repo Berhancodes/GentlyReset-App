@@ -1,15 +1,17 @@
 import { useLayoutEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
   withSequence,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
 
-import { colors, motion, spacing } from '@/design-system';
+import { colors, MOTION_EASING_JOURNEY_WALK, motion, spacing } from '@/design-system';
 import { JourneyDayNode } from '@/features/journey/components/JourneyDayNode';
 import { JourneyHeroCopy } from '@/features/journey/components/JourneyHeroCopy';
 import { JourneyProgressMascot } from '@/features/journey/components/JourneyProgressMascot';
@@ -23,8 +25,18 @@ import {
   type JourneyStageLayout,
 } from '@/features/journey/layout/journeyStageLayout';
 import type { JourneyProgressionPresentation } from '@/features/journey/hooks/useJourneyProgression';
+import { JOURNEY_WALK_LAYERS } from '@/features/journey/utils/getJourneyWalkMotion';
 
 const NODE_SLOT_WIDTH = spacing.xxl + spacing.md;
+
+const WALK_EASING = Easing.bezier(
+  MOTION_EASING_JOURNEY_WALK[0],
+  MOTION_EASING_JOURNEY_WALK[1],
+  MOTION_EASING_JOURNEY_WALK[2],
+  MOTION_EASING_JOURNEY_WALK[3],
+);
+const ARRIVAL_RING_FROM = motion.scale.journeyArrivalRingFrom;
+const ARRIVAL_RING_TO = motion.scale.journeyArrivalRingTo;
 
 type JourneyLinearStageProps = {
   presentation: JourneyProgressionPresentation;
@@ -42,6 +54,9 @@ function rectStyle(rect: JourneyRect) {
 }
 
 export function JourneyLinearStage({ presentation, onPressDay, focused }: JourneyLinearStageProps) {
+  const reduceMotion = useReducedMotion() === true;
+  const walkProgress = useSharedValue(0);
+  const walkDirection = useSharedValue(1);
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
   const layout =
     stageSize.width > 0 && stageSize.height > 0
@@ -49,6 +64,29 @@ export function JourneyLinearStage({ presentation, onPressDay, focused }: Journe
       : null;
   const chapter = getJourneyChapterForDay(presentation.headingDay);
   const signLabel = chapter ? getJourneySignLine(chapter.id) : 'you can do this';
+
+  useLayoutEffect(() => {
+    walkDirection.value = presentation.walkDirection;
+
+    if (reduceMotion || presentation.phase === 'idle' || presentation.phase === 'holding') {
+      cancelAnimation(walkProgress);
+      walkProgress.value = 0;
+      return;
+    }
+
+    if (presentation.phase === 'walking') {
+      cancelAnimation(walkProgress);
+      walkProgress.value = 0;
+      walkProgress.value = withTiming(1, {
+        duration: motion.duration.journeyProgressWalk,
+        easing: WALK_EASING,
+      });
+      return;
+    }
+
+    cancelAnimation(walkProgress);
+    walkProgress.value = 1;
+  }, [presentation.phase, presentation.walkDirection, reduceMotion, walkDirection, walkProgress]);
 
   return (
     <View
@@ -69,7 +107,14 @@ export function JourneyLinearStage({ presentation, onPressDay, focused }: Journe
         importantForAccessibility="no"
         style={styles.preload}
       />
-      {layout ? <JourneySkyDecor layout={layout} focused={focused} /> : null}
+      {layout ? (
+        <JourneySkyDecor
+          layout={layout}
+          focused={focused}
+          walkProgress={walkProgress}
+          walkDirection={walkDirection}
+        />
+      ) : null}
 
       <JourneyHeroCopy day={presentation.headingDay} title={presentation.headingTitle} />
 
@@ -80,6 +125,8 @@ export function JourneyLinearStage({ presentation, onPressDay, focused }: Journe
             presentation={presentation}
             signLabel={signLabel}
             onPressDay={onPressDay}
+            walkProgress={walkProgress}
+            walkDirection={walkDirection}
           />
         ) : null}
       </View>
@@ -92,82 +139,119 @@ type JourneyPathBandProps = {
   presentation: JourneyProgressionPresentation;
   signLabel: string;
   onPressDay: (day: number) => void;
+  walkProgress: SharedValue<number>;
+  walkDirection: SharedValue<number>;
 };
 
-function JourneyPathBand({ layout, presentation, signLabel, onPressDay }: JourneyPathBandProps) {
+function JourneyPathBand({
+  layout,
+  presentation,
+  signLabel,
+  onPressDay,
+  walkProgress,
+  walkDirection,
+}: JourneyPathBandProps) {
   const reduceMotion = useReducedMotion() === true;
-  const translateX = useSharedValue(0);
   const nodePop = useSharedValue(1);
+  const arrivalRing = useSharedValue(0);
+  const plantTilt = useSharedValue(0);
   const leftDay = presentation.visibleDays[0] ?? presentation.toDay;
   const rightDay = presentation.visibleDays[1];
-
-  useLayoutEffect(() => {
-    if (reduceMotion || presentation.phase === 'idle' || presentation.phase === 'holding') {
-      translateX.value = 0;
-      return;
-    }
-
-    if (presentation.phase === 'walking') {
-      translateX.value = 0;
-      translateX.value = withTiming(layout.travelDistance, {
-        duration: motion.duration.journeyProgressWalk,
-        easing: Easing.inOut(Easing.cubic),
-      });
-      return;
-    }
-
-    translateX.value = layout.travelDistance;
-  }, [layout.travelDistance, presentation.phase, reduceMotion, translateX]);
+  const ringSize = layout.nodeSize * 1.7;
 
   useLayoutEffect(() => {
     if (presentation.phase !== 'celebrating' || reduceMotion) {
       nodePop.value = 1;
+      arrivalRing.value = 0;
+      plantTilt.value = 0;
       return;
     }
 
-    nodePop.value = 0.94;
+    nodePop.value = motion.scale.journeyArrivalFrom;
     nodePop.value = withSequence(
-      withTiming(1.04, {
-        duration: 140,
+      withTiming(motion.scale.journeyArrivalPeak, {
+        duration: 150,
         easing: Easing.out(Easing.cubic),
       }),
       withTiming(1, {
-        duration: 160,
+        duration: 180,
         easing: Easing.inOut(Easing.cubic),
       }),
     );
-  }, [nodePop, presentation.phase, reduceMotion]);
+
+    arrivalRing.value = 0;
+    arrivalRing.value = withTiming(1, {
+      duration: motion.duration.journeyArrivalRing,
+      easing: Easing.out(Easing.cubic),
+    });
+
+    plantTilt.value = 0;
+    plantTilt.value = withSequence(
+      withTiming(motion.offset.journeyArrivalTilt, {
+        duration: 120,
+        easing: Easing.out(Easing.cubic),
+      }),
+      withTiming(0, {
+        duration: motion.duration.journeyArrivalTilt,
+        easing: Easing.inOut(Easing.cubic),
+      }),
+    );
+  }, [arrivalRing, nodePop, plantTilt, presentation.phase, reduceMotion]);
 
   const mascotMotionStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
+    transform: [{ translateX: walkProgress.value * layout.travelDistance }],
+  }));
+  const leftBushStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: -walkProgress.value * JOURNEY_WALK_LAYERS.foreground * walkDirection.value },
+    ],
+  }));
+  const rightBushStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: -walkProgress.value * JOURNEY_WALK_LAYERS.bush * walkDirection.value },
+      { rotate: `${plantTilt.value}deg` },
+    ],
+  }));
+  const signStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: -walkProgress.value * JOURNEY_WALK_LAYERS.sign * walkDirection.value },
+    ],
   }));
   const rightNodeStyle = useAnimatedStyle(() => ({
     transform: [{ scale: nodePop.value }],
   }));
+  const arrivalRingStyle = useAnimatedStyle(() => ({
+    opacity: arrivalRing.value <= 0 ? 0 : (1 - arrivalRing.value) * 0.38,
+    transform: [
+      {
+        scale: ARRIVAL_RING_FROM + arrivalRing.value * (ARRIVAL_RING_TO - ARRIVAL_RING_FROM),
+      },
+    ],
+  }));
 
   return (
     <View style={[styles.pathBand, { height: layout.pathHeight }]}>
-      <Image
+      <Animated.Image
         source={JOURNEY_SPRITES.bush}
         resizeMode="contain"
         accessibilityElementsHidden
         importantForAccessibility="no"
-        style={[styles.vegetationLayer, rectStyle(layout.bushLeft)]}
+        style={[styles.vegetationLayer, rectStyle(layout.bushLeft), leftBushStyle]}
       />
-      <Image
+      <Animated.Image
         source={JOURNEY_SPRITES.bush}
         resizeMode="contain"
         accessibilityElementsHidden
         importantForAccessibility="no"
-        style={[styles.vegetationLayer, rectStyle(layout.bush)]}
+        style={[styles.vegetationLayer, rectStyle(layout.bush), rightBushStyle]}
       />
 
-      <View
+      <Animated.View
         accessible
         accessibilityRole="text"
         accessibilityLabel={signLabel}
         pointerEvents="none"
-        style={[styles.signLayer, rectStyle(layout.sign)]}
+        style={[styles.signLayer, rectStyle(layout.sign), signStyle]}
       >
         <Image
           source={JOURNEY_SPRITES.signEncouragement}
@@ -176,7 +260,7 @@ function JourneyPathBand({ layout, presentation, signLabel, onPressDay }: Journe
           importantForAccessibility="no"
           style={[styles.fillImage, { width: layout.sign.width, height: layout.sign.height }]}
         />
-      </View>
+      </Animated.View>
 
       {presentation.showProgressMascot ? (
         <Animated.View
@@ -211,6 +295,21 @@ function JourneyPathBand({ layout, presentation, signLabel, onPressDay }: Journe
             width: layout.lineWidth,
             height: layout.lineThickness,
           },
+        ]}
+      />
+
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.arrivalRing,
+          {
+            left: layout.day2X - ringSize / 2,
+            top: layout.lineY - ringSize / 2,
+            width: ringSize,
+            height: ringSize,
+            borderRadius: ringSize / 2,
+          },
+          arrivalRingStyle,
         ]}
       />
 
@@ -288,6 +387,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.text.primary,
     borderRadius: 1,
     zIndex: 4,
+  },
+  arrivalRing: {
+    position: 'absolute',
+    borderWidth: 1.5,
+    borderColor: colors.accent.gold,
+    zIndex: 5,
   },
   mascotLayer: {
     position: 'absolute',

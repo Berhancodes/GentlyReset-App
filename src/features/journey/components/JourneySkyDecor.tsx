@@ -21,12 +21,15 @@ import {
   getJourneySkyRest,
   type JourneySkyEntranceStart,
 } from '@/features/journey/utils/getJourneySkyEntrance';
+import { JOURNEY_WALK_LAYERS } from '@/features/journey/utils/getJourneyWalkMotion';
 
 const SKY_EASING = Easing.out(Easing.cubic);
 
 type JourneySkyDecorProps = {
   layout: JourneyStageLayout;
   focused: boolean;
+  walkProgress: SharedValue<number>;
+  walkDirection: SharedValue<number>;
 };
 
 type SkyMotion = {
@@ -143,7 +146,12 @@ function animateSkyToRest(motionValues: SkyMotion) {
   );
 }
 
-export function JourneySkyDecor({ layout, focused }: JourneySkyDecorProps) {
+export function JourneySkyDecor({
+  layout,
+  focused,
+  walkProgress,
+  walkDirection,
+}: JourneySkyDecorProps) {
   const reduceMotion = useReducedMotion() === true;
   const layoutRef = useRef(layout);
   const start = getJourneySkyEntranceStart(layout);
@@ -209,17 +217,40 @@ export function JourneySkyDecor({ layout, focused }: JourneySkyDecorProps) {
   ]);
 
   const sunStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: sunX.value }, { translateY: sunY.value }],
+    transform: [
+      {
+        translateX: sunX.value - walkProgress.value * JOURNEY_WALK_LAYERS.sun * walkDirection.value,
+      },
+      { translateY: sunY.value },
+    ],
   }));
   const leftStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: leftX.value }, { translateY: leftY.value }],
+    transform: [
+      {
+        translateX:
+          leftX.value - walkProgress.value * JOURNEY_WALK_LAYERS.cloud * walkDirection.value,
+      },
+      { translateY: leftY.value },
+    ],
   }));
   const rightStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: rightX.value }, { translateY: rightY.value }],
+    transform: [
+      {
+        translateX:
+          rightX.value - walkProgress.value * JOURNEY_WALK_LAYERS.cloud * walkDirection.value,
+      },
+      { translateY: rightY.value },
+    ],
   }));
   const upperStyle = useAnimatedStyle(() => ({
     opacity: upperOpacity.value,
-    transform: [{ translateX: upperX.value }, { translateY: upperY.value }],
+    transform: [
+      {
+        translateX:
+          upperX.value - walkProgress.value * JOURNEY_WALK_LAYERS.cloudFar * walkDirection.value,
+      },
+      { translateY: upperY.value },
+    ],
   }));
 
   const pieces = getJourneySkyPieces(layout);

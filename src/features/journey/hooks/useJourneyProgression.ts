@@ -13,6 +13,10 @@ import {
   type JourneyDayState,
 } from '@/features/journey/utils/getJourneyDayState';
 import { getJourneyProgression } from '@/features/journey/utils/getJourneyProgression';
+import {
+  getJourneyWalkDirection,
+  type JourneyWalkDirection,
+} from '@/features/journey/utils/getJourneyWalkMotion';
 import { getPlanDayTitle } from '@/features/reset/data/thirtyDayPlan';
 import { hapticImpact, hapticSuccess } from '@/utils/haptics';
 
@@ -27,6 +31,7 @@ export type JourneyProgressionPresentation = {
   headingDay: number;
   headingTitle: string;
   progressDay: number;
+  walkDirection: JourneyWalkDirection;
   showProgressMascot: boolean;
   leftNode: JourneyDayState;
   rightNode: JourneyDayState | undefined;
@@ -45,6 +50,7 @@ type ProgressionSequence = {
   fromDay: number;
   toDay: number;
   arrived: boolean;
+  headingReady: boolean;
 };
 
 function idlePresentation(
@@ -66,6 +72,7 @@ function idlePresentation(
     headingDay: currentDay,
     headingTitle: currentTitle,
     progressDay: currentDay,
+    walkDirection: 1,
     showProgressMascot: false,
     leftNode: getJourneyDayState(leftDay, currentDay, completedDays, todayCompleted),
     rightNode:
@@ -77,6 +84,7 @@ function idlePresentation(
 
 function progressingPresentation(sequence: ProgressionSequence): JourneyProgressionPresentation {
   const showingGif = sequence.phase === 'walking' || sequence.phase === 'celebrating';
+  const headingDay = sequence.headingReady ? sequence.toDay : sequence.fromDay;
 
   return {
     phase: sequence.phase,
@@ -84,9 +92,10 @@ function progressingPresentation(sequence: ProgressionSequence): JourneyProgress
     fromDay: sequence.fromDay,
     toDay: sequence.toDay,
     visibleDays: [sequence.fromDay, sequence.toDay],
-    headingDay: sequence.arrived ? sequence.toDay : sequence.fromDay,
-    headingTitle: getPlanDayTitle(sequence.arrived ? sequence.toDay : sequence.fromDay),
+    headingDay,
+    headingTitle: getPlanDayTitle(headingDay),
     progressDay: sequence.arrived ? sequence.toDay : sequence.fromDay,
+    walkDirection: getJourneyWalkDirection(sequence.fromDay, sequence.toDay),
     showProgressMascot: showingGif,
     leftNode: {
       day: sequence.fromDay,
@@ -161,7 +170,7 @@ export function useJourneyProgression({
 
     if (reduceMotion) {
       void hapticSuccess();
-      setSequence({ phase: 'settling', fromDay, toDay, arrived: true });
+      setSequence({ phase: 'settling', fromDay, toDay, arrived: true, headingReady: true });
       const settle = setTimeout(() => {
         settleIdle();
       }, motion.duration.journeyProgressSettle);
@@ -173,22 +182,36 @@ export function useJourneyProgression({
     }
 
     void hapticSuccess();
-    setSequence({ phase: 'holding', fromDay, toDay, arrived: false });
+    setSequence({ phase: 'holding', fromDay, toDay, arrived: false, headingReady: false });
 
     const walkTimer = setTimeout(() => {
-      setSequence({ phase: 'walking', fromDay, toDay, arrived: false });
+      setSequence({ phase: 'walking', fromDay, toDay, arrived: false, headingReady: false });
     }, motion.duration.journeyProgressHold);
 
     const arriveTimer = setTimeout(() => {
       void hapticImpact();
-      setSequence({ phase: 'celebrating', fromDay, toDay, arrived: true });
+      setSequence({ phase: 'celebrating', fromDay, toDay, arrived: true, headingReady: false });
     }, motion.duration.journeyProgressHold + motion.duration.journeyProgressWalk);
+
+    const headingTimer = setTimeout(
+      () => {
+        setSequence((current) => {
+          if (!current) {
+            return current;
+          }
+          return { ...current, headingReady: true };
+        });
+      },
+      motion.duration.journeyProgressHold +
+        motion.duration.journeyProgressWalk +
+        motion.duration.journeyProgressHeadingDelay,
+    );
 
     const doneTimer = setTimeout(() => {
       settleIdle();
     }, motion.duration.journeyProgressHold + motion.duration.journeyProgressTotal);
 
-    timersRef.current = [walkTimer, arriveTimer, doneTimer];
+    timersRef.current = [walkTimer, arriveTimer, headingTimer, doneTimer];
 
     return () => {
       clearTimers();

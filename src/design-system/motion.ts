@@ -2,6 +2,8 @@
  * Shared timing for selection interactions. Keep these soft and short.
  */
 export const MOTION_EASING_STANDARD = [0.33, 0, 0.2, 1] as const;
+/** Brief ease in/out; the middle ~70% of the walk stays near constant speed. */
+export const MOTION_EASING_JOURNEY_WALK = [0.16, 0, 0.84, 1] as const;
 
 export const motion = {
   duration: {
@@ -23,12 +25,19 @@ export const motion = {
     journeyProgressHeading: 320,
     journeyProgressSettle: 200,
     journeyProgressCrossfade: 80,
+    journeyProgressHeadingDelay: 420,
+    journeyArrivalRing: 420,
+    journeyArrivalTilt: 280,
   },
   scale: {
     press: 0.97,
     checkFrom: 0.7,
     loadingPop: 1.12,
     pillFrom: 0.98,
+    journeyArrivalFrom: 0.96,
+    journeyArrivalPeak: 1.04,
+    journeyArrivalRingFrom: 0.74,
+    journeyArrivalRingTo: 1.42,
   },
   offset: {
     press: 8,
@@ -39,6 +48,13 @@ export const motion = {
     journeyUpperCloudY: -16,
     journeySkyEdgePad: 16,
     journeyHeadingShift: 10,
+    journeyParallaxForeground: 15,
+    journeyParallaxSign: 10,
+    journeyParallaxBush: 7,
+    journeyParallaxCloudFar: 3,
+    journeyParallaxCloud: 4,
+    journeyParallaxSun: 2,
+    journeyArrivalTilt: 1.6,
   },
   delay: {
     journeyLeftCloud: 50,
@@ -48,6 +64,7 @@ export const motion = {
   },
   easing: {
     standard: MOTION_EASING_STANDARD,
+    journeyWalk: MOTION_EASING_JOURNEY_WALK,
   },
   spring: {
     release: {
