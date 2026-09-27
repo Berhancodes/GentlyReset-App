@@ -10,8 +10,10 @@ import { getJourneyQuote, getJourneySignLine } from '../data/journeyCopy';
 import {
   getJourneyStageLayout,
   getJourneyVisibleDays,
+  JOURNEY_BUSH_ART,
   JOURNEY_DAY1_ANCHORS,
   JOURNEY_MASCOT_ART,
+  JOURNEY_SIGN_ART,
   splitJourneyTaskTitle,
 } from '../layout/journeyStageLayout';
 import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
@@ -344,6 +346,10 @@ check(
 const mascotCenterX = stage390.mascot.left + stage390.mascot.width * JOURNEY_MASCOT_ART.bodyCenterX;
 const bodySitY = stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.standingY;
 const toeY = stage390.mascot.top + stage390.mascot.height * JOURNEY_MASCOT_ART.feetY;
+const signGroundY = stage390.sign.top + stage390.sign.height * JOURNEY_SIGN_ART.visualBottom;
+const bushGroundY = stage390.bush.top + stage390.bush.height * JOURNEY_BUSH_ART.visualBottom;
+const bushLeftGroundY =
+  stage390.bushLeft.top + stage390.bushLeft.height * JOURNEY_BUSH_ART.visualBottom;
 check(
   'mascot stands on the day line without the line cutting the toes',
   Math.abs(mascotCenterX - stage390.day1X) < 0.5 &&
@@ -351,6 +357,13 @@ check(
     toeY <= stage390.lineY &&
     stage390.lineY - toeY > 0 &&
     stage390.lineY - toeY <= stage390.nodeSize * 0.4,
+);
+
+check(
+  'mascot, sign, and plants share the same ground line',
+  Math.abs(signGroundY - toeY) < 0.5 &&
+    Math.abs(bushGroundY - toeY) < 0.5 &&
+    Math.abs(bushLeftGroundY - toeY) < 0.5,
 );
 
 check(

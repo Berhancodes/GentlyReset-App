@@ -230,8 +230,8 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
   const day1X = JOURNEY_DAY1_ANCHORS.day1X * safeWidth;
   const day2X = JOURNEY_DAY1_ANCHORS.day2X * safeWidth;
 
-  // Sit the day line just under the painted toes so the nodes ground the
-  // mascot instead of slicing through the feet.
+  // Mascot, plants, and sign share one ground at the painted toes.
+  // The day line sits just under that ground so it does not cut the feet.
   const toeFromMascotTop = mascotHeight * JOURNEY_MASCOT_ART.feetY;
   const lineFromMascotTop = toeFromMascotTop + nodeSize * 0.3;
   const sceneHeight = lineFromMascotTop + nodeSize / 2 + labelBlock + pathBottomPad;
@@ -240,6 +240,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
   const pathHeight = sceneHeight;
   const originY = 0;
 
+  const groundY = originY + toeFromMascotTop;
   const lineY = originY + lineFromMascotTop;
   const mascotLeft = day1X - mascotWidth * JOURNEY_MASCOT_ART.bodyCenterX;
   const mascot: JourneyRect = {
@@ -253,7 +254,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
   const signVisualBottom = signHeight * JOURNEY_SIGN_ART.visualBottom;
   const sign: JourneyRect = {
     left: signCenterX - signWidth / 2,
-    top: lineY - signVisualBottom,
+    top: groundY - signVisualBottom,
     width: signWidth,
     height: signHeight,
   };
@@ -262,7 +263,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
   const bushVisualBottom = bushHeight * JOURNEY_BUSH_ART.visualBottom;
   const bush: JourneyRect = {
     left: bushCenterX - bushWidth / 2,
-    top: lineY - bushVisualBottom,
+    top: groundY - bushVisualBottom,
     width: bushWidth,
     height: bushHeight,
   };
@@ -271,7 +272,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
   const bushLeftVisualBottom = bushLeftHeight * JOURNEY_BUSH_ART.visualBottom;
   const bushLeft: JourneyRect = {
     left: bushLeftCenterX - bushLeftWidth / 2,
-    top: lineY - bushLeftVisualBottom,
+    top: groundY - bushLeftVisualBottom,
     width: bushLeftWidth,
     height: bushLeftHeight,
   };
