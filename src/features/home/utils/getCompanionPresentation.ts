@@ -50,6 +50,16 @@ const CTA_LABEL_BY_STATE: Record<CompanionState, string> = {
   cycle_complete: "that's enough for today",
 };
 
+const CTA_DESTINATION_BY_STATE: Record<CompanionState, CompanionCtaDestination> = {
+  new_user: 'home',
+  ready: 'journey',
+  started: 'journey',
+  completed: 'journey',
+  returned_after_miss: 'journey',
+  milestone: 'journey',
+  cycle_complete: 'home',
+};
+
 const MILESTONE_MESSAGE_BY_DAY: Record<number, string> = {
   7: 'one week of showing up. that counts.',
   14: 'two weeks in. you are still here.',
@@ -118,6 +128,6 @@ export function getCompanionPresentation(input: CompanionPresentationInput): Com
     supportingMessage: supportingMessageForState(state, input.resetTypeId, input.currentDay),
     animationId: ANIMATION_BY_STATE[state],
     primaryCtaLabel: CTA_LABEL_BY_STATE[state],
-    primaryCtaDestination: 'home',
+    primaryCtaDestination: CTA_DESTINATION_BY_STATE[state],
   };
 }

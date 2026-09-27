@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { MainTabHeader, Screen } from '@/components/ui';
@@ -33,7 +33,6 @@ function JourneyMapGlyph() {
 
 export function JourneyScreen() {
   useSyncResetDay();
-  const router = useRouter();
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [journeyFocused, setJourneyFocused] = useState(false);
 
@@ -54,6 +53,7 @@ export function JourneyScreen() {
   const resetTypeId = useResetStore((state) => state.resetTypeId);
   const resetStartedOn = useResetStore((state) => state.resetStartedOn);
   const startToday = useResetStore((state) => state.startToday);
+  const completeToday = useResetStore((state) => state.completeToday);
 
   const rememberLine = getResetProfile(resetTypeId).homeSupportLine;
   const currentTask = getCurrentResetTask({ currentDay, personalization });
@@ -95,15 +95,12 @@ export function JourneyScreen() {
     }
     if (sheetModel.cta === 'start') {
       startToday();
-      setSelectedDay(null);
-      router.navigate('/(app)/(tabs)/home');
       return;
     }
-    if (sheetModel.cta === 'continue') {
-      setSelectedDay(null);
-      router.navigate('/(app)/(tabs)/home');
+    if (sheetModel.cta === 'complete') {
+      completeToday();
     }
-  }, [router, sheetModel, startToday]);
+  }, [completeToday, sheetModel, startToday]);
 
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>

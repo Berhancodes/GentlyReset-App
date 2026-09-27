@@ -6,6 +6,8 @@ import {
   JOURNEY_CHAPTERS,
 } from '../data/journeyChapters';
 import { motion } from '../../../design-system/motion';
+import { getCompanionState } from '../../../domain/reset/companionState';
+import { completeResetDay } from '../../../application/reset/completeResetDay';
 import { getJourneyQuote, getJourneySignLine } from '../data/journeyCopy';
 import {
   getJourneyStageLayout,
@@ -18,7 +20,12 @@ import {
 } from '../layout/journeyStageLayout';
 import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
 import { PLAN_DAY_COUNT, getPlanDayTitle } from '../../reset/data/thirtyDayPlan';
-import { applyStartToday } from '../../reset/utils/dailyResetActions';
+import { parseLocalDateKey } from '../../reset/utils/calendar';
+import {
+  applyCompleteToday,
+  applySaveReflection,
+  applyStartToday,
+} from '../../reset/utils/dailyResetActions';
 import { getTaskForDay } from '../../reset/utils/getTaskForDay';
 import { getCurrentResetTask } from '../../reset/utils/resetSelectors';
 import {
@@ -56,6 +63,10 @@ function check(label: string, condition: boolean, detail?: string) {
   }
   failed += 1;
   console.error(`fail  ${label}${detail ? ` — ${detail}` : ''}`);
+}
+
+function dateOn(key: string): Date {
+  return parseLocalDateKey(key);
 }
 
 function personalization(overrides: Partial<ResetPersonalization> = {}): ResetPersonalization {
@@ -203,9 +214,7 @@ check(
   afterCompletedOpen.completedDays.join(',') === completedState.completedDays.join(',') &&
     afterCompletedClose.todayCompleted === false &&
     completedModel.cta === 'none' &&
-    completedModel.completeLabel === '✓ complete' &&
-    applyJourneySheetAction(completedState, 'continue').completedDays.length ===
-      completedState.completedDays.length,
+    completedModel.completeLabel === '✓ complete',
 );
 
 const idle = snapshot({ currentDay: 1 });
@@ -231,10 +240,8 @@ const startedModel = getJourneySheetModel({
   rememberLine: SOFT_RESTARTER_LINE,
 });
 check(
-  '13. started current CTA is Continue',
-  startedModel.cta === 'continue' &&
-    startedModel.ctaLabel === "continue today's reset →" &&
-    applyJourneySheetAction(startedBySheet, 'continue').todayCompleted === false,
+  '13. started current CTA is Complete',
+  startedModel.cta === 'complete' && startedModel.ctaLabel === "complete today's reset →",
 );
 
 const completedCurrentModel = getJourneySheetModel({
@@ -541,6 +548,168 @@ check(
     motion.duration.journeyArrivalRing === 420 &&
     motion.scale.journeyArrivalFrom === 0.96 &&
     motion.scale.journeyArrivalPeak === 1.04,
+);
+
+const readyModel = getJourneySheetModel({
+  day: 1,
+  currentDay: 1,
+  completedDays: [],
+  todayStarted: false,
+  todayCompleted: false,
+  personalization: defaultPersonalization,
+  rememberLine: SOFT_RESTARTER_LINE,
+});
+check(
+  'READY current day exposes Start',
+  readyModel.cta === 'start' && readyModel.ctaLabel === "start today's reset →",
+);
+
+const startedOnceMore = applyJourneySheetAction(startedBySheet, 'start');
+check(
+  'duplicate Start stays started and incomplete',
+  startedOnceMore.todayStarted === true &&
+    startedOnceMore.todayCompleted === false &&
+    startedOnceMore.currentDay === 1 &&
+    startedOnceMore.completedDays.length === 0,
+);
+
+const completedBySheet = applyJourneySheetAction(startedBySheet, 'complete', dateOn('2026-09-19'));
+const completedByEngine = completeResetDay(startedBySheet, dateOn('2026-09-19'));
+const completedByApply = applyCompleteToday(startedBySheet, dateOn('2026-09-19'));
+check(
+  'Complete uses the canonical completeResetDay command',
+  completedBySheet.todayCompleted === true &&
+    completedBySheet.todayStarted === true &&
+    completedBySheet.completedDays.join(',') === '1' &&
+    completedBySheet.currentDay === 1 &&
+    completedBySheet.lastCompletedOn === '2026-09-19' &&
+    completedBySheet.streak === 1 &&
+    completedBySheet.todayCompleted === completedByEngine.todayCompleted &&
+    completedBySheet.completedDays.join(',') === completedByEngine.completedDays.join(',') &&
+    completedBySheet.streak === completedByApply.streak &&
+    completedBySheet.lastCompletedOn === completedByApply.lastCompletedOn,
+);
+
+const completedAgain = applyJourneySheetAction(completedBySheet, 'complete', dateOn('2026-09-19'));
+check(
+  'duplicate Complete stays complete on the same day',
+  completedAgain.todayCompleted === true &&
+    completedAgain.currentDay === 1 &&
+    completedAgain.completedDays.filter((day) => day === 1).length === 1,
+);
+
+const afterCompleteModel = getJourneySheetModel({
+  day: 1,
+  currentDay: completedBySheet.currentDay,
+  completedDays: completedBySheet.completedDays,
+  todayStarted: completedBySheet.todayStarted,
+  todayCompleted: completedBySheet.todayCompleted,
+  personalization: defaultPersonalization,
+  rememberLine: SOFT_RESTARTER_LINE,
+});
+check(
+  'COMPLETED current day has no primary CTA',
+  afterCompleteModel.completeLabel === '✓ reset complete' &&
+    afterCompleteModel.footnote === 'you showed up.' &&
+    afterCompleteModel.cta === 'none',
+);
+
+check(
+  'Journey completion derives Home companion completed',
+  getCompanionState(completedBySheet) === 'completed',
+);
+
+check(
+  'completing today is still not a visual day advance',
+  getJourneyProgression({
+    currentDay: completedBySheet.currentDay,
+    acknowledgedDay: completedBySheet.currentDay,
+  }).kind === 'idle',
+);
+
+function completeCurrentDay(
+  day: number,
+  completedBefore: readonly number[],
+  lastCompletedOn: string | null,
+  streak: number,
+) {
+  const ready = snapshot({
+    currentDay: day,
+    completedDays: [...completedBefore],
+    lastCompletedOn,
+    streak,
+    resetStartedOn: '2026-08-21',
+    lastSeenOn: '2026-09-19',
+  });
+  const startedDay = applyJourneySheetAction(ready, 'start');
+  return applyJourneySheetAction(startedDay, 'complete', dateOn('2026-09-19'));
+}
+
+const day7Completed = completeCurrentDay(7, [1, 2, 3, 4, 5, 6], '2026-09-18', 6);
+check(
+  'Day 7 Journey completion is a milestone and stays on day 7',
+  day7Completed.currentDay === 7 &&
+    day7Completed.todayCompleted === true &&
+    day7Completed.completedDays.includes(7) &&
+    day7Completed.streak === 7 &&
+    getCompanionState(day7Completed) === 'milestone',
+);
+
+const day14Completed = completeCurrentDay(
+  14,
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+  '2026-09-18',
+  13,
+);
+check(
+  'Day 14 Journey completion is a milestone and stays on day 14',
+  day14Completed.currentDay === 14 &&
+    day14Completed.todayCompleted === true &&
+    day14Completed.completedDays.includes(14) &&
+    getCompanionState(day14Completed) === 'milestone',
+);
+
+const day21Completed = completeCurrentDay(
+  21,
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+  '2026-09-18',
+  20,
+);
+check(
+  'Day 21 Journey completion is a milestone and stays on day 21',
+  day21Completed.currentDay === 21 &&
+    day21Completed.todayCompleted === true &&
+    day21Completed.completedDays.includes(21) &&
+    getCompanionState(day21Completed) === 'milestone',
+);
+
+const day30Completed = completeCurrentDay(
+  30,
+  Array.from({ length: 29 }, (_, index) => index + 1),
+  '2026-09-18',
+  29,
+);
+check(
+  'Day 30 Journey completion is cycle_complete and stays Day 30',
+  day30Completed.currentDay === 30 &&
+    day30Completed.todayCompleted === true &&
+    day30Completed.completedDays.includes(30) &&
+    day30Completed.completedDays.filter((day) => day === 30).length === 1 &&
+    getCompanionState(day30Completed) === 'cycle_complete',
+);
+
+const afterJournal = applySaveReflection(
+  idle,
+  { mood: 3, text: 'a quiet note', prompt: 'how did it feel?' },
+  dateOn('2026-09-19'),
+);
+check(
+  'journal save remains optional and non-advancing',
+  afterJournal.todayStarted === false &&
+    afterJournal.todayCompleted === false &&
+    afterJournal.currentDay === 1 &&
+    afterJournal.completedDays.length === 0 &&
+    afterJournal.reflections.length === 1,
 );
 
 if (failed > 0) {

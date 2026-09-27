@@ -44,7 +44,8 @@ check(
     day1Ready.greeting === 'good morning' &&
     day1Ready.supportingMessage === "you don't have to start over. just continue." &&
     day1Ready.animationId === 'idle' &&
-    day1Ready.primaryCtaLabel === "start today's reset",
+    day1Ready.primaryCtaLabel === "start today's reset" &&
+    day1Ready.primaryCtaDestination === 'journey',
 );
 
 const started = getCompanionPresentation(input({ todayStarted: true }));
@@ -53,7 +54,8 @@ check(
   started.state === 'started' &&
     started.animationId === 'encourage' &&
     started.supportingMessage === 'take it slowly. I will be right here.' &&
-    started.primaryCtaLabel === "continue today's reset",
+    started.primaryCtaLabel === "continue today's reset" &&
+    started.primaryCtaDestination === 'journey',
 );
 
 const completed = getCompanionPresentation(
@@ -68,7 +70,8 @@ check(
   'task completed uses celebrate',
   completed.state === 'completed' &&
     completed.animationId === 'celebrate' &&
-    completed.supportingMessage === "that's a real day. I'm proud of you.",
+    completed.supportingMessage === "that's a real day. I'm proud of you." &&
+    completed.primaryCtaDestination === 'journey',
 );
 
 const missed = getCompanionPresentation(
@@ -78,7 +81,8 @@ check(
   'missed-day return uses the reset-type missed line',
   missed.state === 'returned_after_miss' &&
     missed.animationId === 'welcome_back' &&
-    missed.supportingMessage === 'you can continue from here. no restart required.',
+    missed.supportingMessage === 'you can continue from here. no restart required.' &&
+    missed.primaryCtaDestination === 'journey',
 );
 
 const almostMissed = getCompanionPresentation(
@@ -109,7 +113,8 @@ check(
   'ordinary milestone copy and animation',
   milestone.state === 'milestone' &&
     milestone.animationId === 'milestone' &&
-    milestone.supportingMessage === 'one week of showing up. that counts.',
+    milestone.supportingMessage === 'one week of showing up. that counts.' &&
+    milestone.primaryCtaDestination === 'journey',
 );
 
 const cycleComplete = getCompanionPresentation(
@@ -125,7 +130,8 @@ check(
   cycleComplete.state === 'cycle_complete' &&
     cycleComplete.animationId === 'milestone' &&
     cycleComplete.supportingMessage === 'thirty days. you kept the promise.' &&
-    cycleComplete.primaryCtaLabel === "that's enough for today",
+    cycleComplete.primaryCtaLabel === "that's enough for today" &&
+    cycleComplete.primaryCtaDestination === 'home',
 );
 
 const named = getCompanionPresentation(input({ firstName: 'Maya' }));

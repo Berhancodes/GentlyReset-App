@@ -1,3 +1,4 @@
+import { completeResetDay } from '../../../application/reset/completeResetDay';
 import { startResetDay } from '../../../application/reset/startResetDay';
 import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
 import { formatMinutesLabel, getTaskForDay } from '../../reset/utils/getTaskForDay';
@@ -8,7 +9,7 @@ import {
 } from '../data/journeyChapters';
 import { getJourneyDayState, type JourneyDayKind } from './getJourneyDayState';
 
-export type JourneySheetCta = 'start' | 'continue' | 'none';
+export type JourneySheetCta = 'start' | 'complete' | 'none';
 
 export type JourneySheetDot = {
   day: number;
@@ -111,24 +112,29 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
     rememberLine: input.rememberLine,
     footnote: null,
     completeLabel: null,
-    cta: started ? 'continue' : 'start',
-    ctaLabel: started ? "continue today's reset →" : "start today's reset →",
+    cta: started ? 'complete' : 'start',
+    ctaLabel: started ? "complete today's reset →" : "start today's reset →",
     weekLabel,
     weekDots,
   };
 }
 
-export type JourneySheetAction = 'open' | 'start' | 'continue' | 'close';
+export type JourneySheetAction = 'open' | 'start' | 'complete' | 'close';
 
 /**
- * Journey never completes a reset. Only "start" mutates, via startResetDay.
+ * Journey owns daily Start and Complete UI.
+ * Both mutations go through the canonical reset commands.
  */
 export function applyJourneySheetAction(
   snapshot: ResetSnapshot,
   action: JourneySheetAction,
+  now: Date = new Date(),
 ): ResetSnapshot {
   if (action === 'start') {
     return startResetDay(snapshot);
+  }
+  if (action === 'complete') {
+    return completeResetDay(snapshot, now);
   }
   return snapshot;
 }

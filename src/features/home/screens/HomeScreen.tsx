@@ -1,20 +1,23 @@
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText, getTabBarScenePadding, MainTabHeader, Screen } from '@/components/ui';
+import {
+  AppText,
+  getTabBarScenePadding,
+  MainTabHeader,
+  PrimaryButton,
+  Screen,
+} from '@/components/ui';
 import { spacing } from '@/design-system';
 import { DayProgressHeader } from '@/features/home/components/DayProgressHeader';
 import { HomeScene } from '@/features/home/components/HomeScene';
-import { TodayResetCard } from '@/features/home/components/TodayResetCard';
 import { getCompanionPresentation } from '@/features/home/utils/getCompanionPresentation';
-import { getHomeSupportLine } from '@/features/home/utils/homeCopy';
-import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import {
   getCompletedDayCount,
   getCurrentPlanDay,
-  getCurrentResetTask,
   getResetProgress,
 } from '@/features/reset/utils/resetSelectors';
 
@@ -23,6 +26,7 @@ const COMPACT_HEIGHT = 740;
 
 export function HomeScreen() {
   useSyncResetDay();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const compact = height < COMPACT_HEIGHT;
@@ -32,10 +36,7 @@ export function HomeScreen() {
   const todayCompleted = useResetStore((state) => state.todayCompleted);
   const todayStarted = useResetStore((state) => state.todayStarted);
   const missedYesterday = useResetStore((state) => state.missedYesterday);
-  const personalization = useResetStore((state) => state.personalization);
   const resetTypeId = useResetStore((state) => state.resetTypeId);
-  const startToday = useResetStore((state) => state.startToday);
-  const completeToday = useResetStore((state) => state.completeToday);
 
   if (!resetStartedOn) {
     return (
@@ -51,7 +52,6 @@ export function HomeScreen() {
     );
   }
 
-  const task = getCurrentResetTask({ currentDay, personalization });
   const planDay = getCurrentPlanDay({ currentDay });
   const completedCount = getCompletedDayCount({ completedDays });
   const progress = getResetProgress({ completedDays });
@@ -64,9 +64,6 @@ export function HomeScreen() {
     missedYesterday,
     resetTypeId,
   });
-  const supportLine = resetTypeId
-    ? getResetProfile(resetTypeId).homeSupportLine
-    : getHomeSupportLine(personalization.primaryObstacle);
 
   return (
     <Screen
@@ -101,17 +98,15 @@ export function HomeScreen() {
           showCount={false}
           layout="inline"
         />
-        <TodayResetCard
-          title={task.title}
-          description={task.description}
-          supportLine={supportLine}
-          minutes={task.minutes}
-          started={todayStarted}
-          completed={todayCompleted}
-          completionMessage={companion.supportingMessage}
-          onStart={startToday}
-          onComplete={completeToday}
-        />
+        {companion.primaryCtaDestination === 'journey' ? (
+          <PrimaryButton
+            label={companion.primaryCtaLabel}
+            accessibilityHint="Opens Journey for today's reset"
+            onPress={() => {
+              router.navigate('/(app)/(tabs)/journey');
+            }}
+          />
+        ) : null}
         <View style={styles.landscape} />
       </ScrollView>
     </Screen>

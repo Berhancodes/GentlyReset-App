@@ -170,8 +170,8 @@ export function JourneyDaySheet({ visible, model, onClose, onPrimary }: JourneyD
                 accessibilityLabel={model.ctaLabel}
                 accessibilityHint={
                   model.cta === 'start'
-                    ? 'Starts today’s reset and opens Home'
-                    : 'Opens Home to continue today’s reset'
+                    ? "Starts today's reset on Journey"
+                    : "Marks today's reset complete on Journey"
                 }
                 onPress={onPrimary}
                 style={({ pressed }) => [styles.cta, pressed ? styles.ctaPressed : null]}
