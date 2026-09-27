@@ -10,6 +10,8 @@ import type { SignInErrors, SignInValues } from '@/features/auth/types';
 import { canSubmitSignIn, validateSignIn } from '@/features/auth/utils/validateSignIn';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { useSubscription } from '@/features/subscription/session/useSubscription';
+import { getRootHref } from '@/navigation/getRootHref';
 
 const EMPTY_VALUES: SignInValues = {
   email: '',
@@ -19,6 +21,7 @@ const EMPTY_VALUES: SignInValues = {
 export function SignInScreen() {
   const router = useRouter();
   const { signIn } = useAuth();
+  const { isPro } = useSubscription();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
   const [values, setValues] = useState<SignInValues>(EMPTY_VALUES);
   const [errors, setErrors] = useState<SignInErrors>({});
@@ -39,20 +42,8 @@ export function SignInScreen() {
     }
   };
 
-  const beginNewReset = () => {
-    if (hasCompletedOnboarding) {
-      router.replace('/(app)/(tabs)/home');
-      return;
-    }
-    router.replace('/(onboarding)/flow');
-  };
-
-  const afterAuthenticated = () => {
-    if (hasCompletedOnboarding) {
-      router.replace('/(app)/(tabs)/home');
-      return;
-    }
-    router.replace('/(onboarding)/flow');
+  const goToAccessDestination = () => {
+    router.replace(getRootHref({ hasCompletedOnboarding, isPro }));
   };
 
   const submit = () => {
@@ -74,7 +65,7 @@ export function SignInScreen() {
           setErrors({ form: result.message });
           return;
         }
-        afterAuthenticated();
+        goToAccessDestination();
       })
       .finally(() => {
         setSubmitting(false);
@@ -112,7 +103,7 @@ export function SignInScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Begin a new reset"
-            onPress={beginNewReset}
+            onPress={goToAccessDestination}
             style={({ pressed }) => [styles.switchRow, pressed ? styles.pressed : null]}
           >
             <AppText variant="caption" color="helper">

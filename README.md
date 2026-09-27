@@ -10,6 +10,7 @@ design system, navigation, and a complete data-driven onboarding experience.
 - Expo Router
 - Zustand
 - Supabase Auth (`@supabase/supabase-js`)
+- RevenueCat (`react-native-purchases`) — Test Store in development
 - React Native Reanimated
 - expo-haptics
 - ESLint and Prettier
@@ -27,9 +28,16 @@ Copy `.env.example` to `.env` and set the publishable client values:
 ```
 EXPO_PUBLIC_SUPABASE_URL=
 EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_REVENUECAT_API_KEY=
+EXPO_PUBLIC_TERMS_URL=
+EXPO_PUBLIC_PRIVACY_URL=
 ```
 
-Never put the service role key, database password, or other admin secrets in the app or in git.
+Never put the service role key, RevenueCat secret API keys, database password, or other admin secrets in the app or in git.
+
+`EXPO_PUBLIC_REVENUECAT_API_KEY` is the **public** SDK key. Use the Test Store `test_…` key for development. Production will later use an App Store `appl_…` key. Do not invent App Store product IDs here.
+
+Leave the legal URLs blank until real Terms and Privacy pages exist.
 
 ## Run (iOS)
 
@@ -91,27 +99,32 @@ Onboarding is a list of typed steps in `src/features/onboarding/data/onboardingS
 
 The production questionnaire lives in `src/features/onboarding/data/onboardingSteps.ts`. There are exactly 21 core personalization questions across four chapters (4 / 4 / 5 / 8). `profileAccuracy` is a question-style screen after the Reset Type reveal and is not counted in those 21.
 
-Reset type is classified from onboarding answers in `src/features/reset/utils/deriveResetType.ts`, with copy in `src/features/reset/data/resetProfiles.ts`. Share is stubbed. Loading is timer-based. The final Pro paywall is visual only — both CTAs still enter the app, with no IAP, AI, or backend yet.
+Reset type is classified from onboarding answers in `src/features/reset/utils/deriveResetType.ts`, with copy in `src/features/reset/data/resetProfiles.ts`. Share is stubbed. Loading is timer-based. The hard paywall is the boundary after onboarding.
 
 `successStatement` includes a "something else..." option as a selectable choice. A follow-up text field can be added later without changing the step id.
 
 In development, a small `dev` control on onboarding lets you jump to any step.
 
-The launch gate lives in `src/navigation/getRootHref.ts` so it can later become:
+The launch gate lives in `src/navigation/getRootHref.ts`:
 
 - onboarding incomplete → onboarding
-- onboarding complete, not subscribed → paywall
-- subscribed → main tabs
+- onboarding complete, subscription initializing → splash
+- onboarding complete, Pro inactive → hard paywall
+- onboarding complete, `gentlyreset_ios_app_pro` active → main tabs
 
-Subscription logic is not implemented yet.
+There is no free trial, skip, or continue-free path. Authentication is not the paywall.
 
 ## Accounts
 
 Welcome's "Sign in" opens `/sign-in`. Create Account is `/sign-up`. Both use Supabase email/password auth. Sessions persist in AsyncStorage and restore when the app reopens.
 
-Authentication answers "who is this user?" It is not the paywall and not the launch gate. Completing onboarding still opens the main app. RevenueCat / hard paywall is a later phase.
+Authentication answers "who is this user?" RevenueCat answers "is Pro active?" Completing onboarding without Pro opens the hard paywall, not Home.
 
 Signing in or out does not change local reset progress, onboarding answers, journal entries, or Journey visual state. Reset data is not synced to Supabase yet.
+
+When a Supabase user is signed in, RevenueCat `logIn` uses that UUID. Sign-out calls RevenueCat `logOut` and creates a new anonymous customer. Purchases stay on the identified RevenueCat customer.
+
+Test Store purchases require an iOS development build. Expo web / Expo Go cannot complete a real Test Store transaction.
 
 Sign out lives on the You tab when a session is present.
 

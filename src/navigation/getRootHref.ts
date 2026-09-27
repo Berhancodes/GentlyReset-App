@@ -1,18 +1,31 @@
 import type { Href } from 'expo-router';
 
+import { getAccessDestination } from '@/features/subscription/access/getAccessDestination';
+
 /**
  * Single place for the launch destination.
- * Auth is not the launch gate and not the paywall.
- * Later this can grow to: incomplete onboarding -> paywall -> subscribed app.
+ * Auth is not the launch gate. Pro entitlement is the app gate.
  */
 export type RootNavigationState = {
   hasCompletedOnboarding: boolean;
+  isPro: boolean;
 };
 
 export function getRootHref(state: RootNavigationState): Href {
-  if (!state.hasCompletedOnboarding) {
-    return '/(onboarding)/flow';
-  }
+  const destination = getAccessDestination({
+    hasCompletedOnboarding: state.hasCompletedOnboarding,
+    subscriptionInitializing: false,
+    isPro: state.isPro,
+  });
 
-  return '/(app)/(tabs)/home';
+  switch (destination) {
+    case 'onboarding':
+      return '/(onboarding)/flow';
+    case 'loading':
+      return '/';
+    case 'paywall':
+      return '/(paywall)';
+    case 'app':
+      return '/(app)/(tabs)/home';
+  }
 }

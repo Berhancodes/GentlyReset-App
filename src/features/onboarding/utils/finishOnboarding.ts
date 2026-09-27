@@ -1,14 +1,12 @@
-import type { Href } from 'expo-router';
-
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 
 /**
- * Completes onboarding, seeds the daily reset, and enters the main app.
+ * Completes onboarding and seeds the daily reset.
+ * Does not enter the main app — the access gate sends unpaid users to the paywall.
  */
-export function finishOnboarding(router: { replace: (href: Href) => void }) {
+export function finishOnboarding() {
   const answers = useOnboardingStore.getState().answers;
   useResetStore.getState().seedFromOnboarding(answers);
   useOnboardingStore.getState().completeOnboarding();
-  router.replace('/(app)/(tabs)/home');
 }

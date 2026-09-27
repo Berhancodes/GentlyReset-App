@@ -11,6 +11,8 @@ import { colors } from '@/design-system';
 import { AuthProvider } from '@/features/auth/session/AuthProvider';
 import { useAuth } from '@/features/auth/session/useAuth';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { SubscriptionProvider } from '@/features/subscription/session/SubscriptionProvider';
+import { useSubscription } from '@/features/subscription/session/useSubscription';
 import { usePersistedStoresHydrated } from '@/hooks/usePersistedStoresHydrated';
 
 void SplashScreen.preventAutoHideAsync();
@@ -18,7 +20,9 @@ void SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutReady />
+      <SubscriptionProvider>
+        <RootLayoutReady />
+      </SubscriptionProvider>
     </AuthProvider>
   );
 }
@@ -26,8 +30,9 @@ export default function RootLayout() {
 function RootLayoutReady() {
   const storesHydrated = usePersistedStoresHydrated();
   const { initializing: authInitializing } = useAuth();
+  const { initializing: subscriptionInitializing, isPro } = useSubscription();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
-  const ready = storesHydrated && !authInitializing;
+  const ready = storesHydrated && !authInitializing && !subscriptionInitializing;
 
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(colors.background.primary);
@@ -59,7 +64,10 @@ function RootLayoutReady() {
           <Stack.Protected guard={!hasCompletedOnboarding}>
             <Stack.Screen name="(onboarding)" />
           </Stack.Protected>
-          <Stack.Protected guard={hasCompletedOnboarding}>
+          <Stack.Protected guard={hasCompletedOnboarding && !isPro}>
+            <Stack.Screen name="(paywall)" />
+          </Stack.Protected>
+          <Stack.Protected guard={hasCompletedOnboarding && isPro}>
             <Stack.Screen name="(app)" />
           </Stack.Protected>
         </Stack>

@@ -10,6 +10,8 @@ import type { SignUpErrors, SignUpValues } from '@/features/auth/types';
 import { canSubmitSignIn, validateSignIn } from '@/features/auth/utils/validateSignIn';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { useSubscription } from '@/features/subscription/session/useSubscription';
+import { getRootHref } from '@/navigation/getRootHref';
 
 const EMPTY_VALUES: SignUpValues = {
   email: '',
@@ -19,6 +21,7 @@ const EMPTY_VALUES: SignUpValues = {
 export function SignUpScreen() {
   const router = useRouter();
   const { signUp } = useAuth();
+  const { isPro } = useSubscription();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
   const [values, setValues] = useState<SignUpValues>(EMPTY_VALUES);
   const [errors, setErrors] = useState<SignUpErrors>({});
@@ -41,11 +44,7 @@ export function SignUpScreen() {
   };
 
   const afterAuthenticated = () => {
-    if (hasCompletedOnboarding) {
-      router.replace('/(app)/(tabs)/home');
-      return;
-    }
-    router.replace('/(onboarding)/flow');
+    router.replace(getRootHref({ hasCompletedOnboarding, isPro }));
   };
 
   const submit = () => {

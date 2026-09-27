@@ -401,10 +401,10 @@ export const ONBOARDING_STEPS = [
   {
     id: 'paywall',
     type: 'paywall',
-    title: 'unlock your\nfull journey',
-    subtitle: 'go further with Gently Reset Pro.',
-    ctaLabel: 'start free trial',
-    secondaryCtaLabel: 'maybe later',
+    title: 'Gently Reset\nPro',
+    subtitle: 'unlock your full journey.',
+    ctaLabel: 'unlock Gently Reset Pro',
+    secondaryCtaLabel: 'Restore Purchases',
     hideProgress: true,
     required: false,
     benefits: [

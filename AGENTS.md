@@ -30,7 +30,7 @@ Gently Reset is an iOS-first Expo app. Follow these rules when changing this rep
 
 16. Do not introduce dependencies without a clear reason. Use `npx expo install` for Expo-compatible versions.
 17. Run `npm run typecheck` and `npm run lint` after meaningful changes.
-18. Supabase Auth and `profiles` exist (Phase 4B). Do not add RevenueCat, a paywall, reset sync, OpenAI, analytics, push notifications, or extra networking unless explicitly requested. Never commit the service role key.
+18. Supabase Auth, `profiles`, and RevenueCat Pro (`gentlyreset_ios_app_pro`) exist. The hard paywall is the app gate. Do not add reset sync, Friends, Cycle 2/3, OpenAI, analytics, or extra networking unless explicitly requested. Never commit service-role or RevenueCat secret keys. Never add a free trial or skip on the paywall.
 
 ## Onboarding
 
