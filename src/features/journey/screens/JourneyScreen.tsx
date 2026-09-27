@@ -144,12 +144,21 @@ export function JourneyScreen() {
 if (__DEV__) {
   Object.assign(globalThis, {
     replayJourneyProgression() {
-      const day = useResetStore.getState().currentDay;
-      if (day <= 1) {
-        console.warn('Need currentDay 2 or later to replay a walk.');
+      const visual = useJourneyVisualStore.getState();
+      const preview = visual.devPreview;
+      if (preview && preview.restDay === preview.toDay && !preview.pendingPlay) {
+        visual.restDevSideScroll(preview.fromDay);
+        console.log(`Journey preview resting on day ${preview.fromDay} only.`);
         return;
       }
-      useJourneyVisualStore.getState().acknowledgeDay(day - 1);
+      visual.playDevSideScroll(3, 4);
+      console.log('Journey preview: day 3 exits left, day 4 enters right.');
+    },
+    resetJourneyProgression() {
+      const day = useResetStore.getState().currentDay;
+      useJourneyVisualStore.getState().clearDevSideScroll();
+      useJourneyVisualStore.getState().acknowledgeDay(day);
+      console.log(`Journey preview cleared. Resting on real day ${day}.`);
     },
   });
 }

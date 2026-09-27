@@ -1,6 +1,5 @@
 /* Timed day-progression sequence. React state updates from timeouts are the
  * machine; do not derive walking/celebrating from render alone. */
-/* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'react-native-reanimated';
@@ -13,6 +12,7 @@ import {
   type JourneyDayState,
 } from '@/features/journey/utils/getJourneyDayState';
 import { getJourneyProgression } from '@/features/journey/utils/getJourneyProgression';
+import { getJourneyIncomingDay } from '@/features/journey/utils/getJourneyTimelineMotion';
 import {
   getJourneyWalkDirection,
   type JourneyWalkDirection,
@@ -33,8 +33,8 @@ export type JourneyProgressionPresentation = {
   progressDay: number;
   walkDirection: JourneyWalkDirection;
   showProgressMascot: boolean;
-  leftNode: JourneyDayState;
-  rightNode: JourneyDayState | undefined;
+  outgoingNode: JourneyDayState;
+  incomingNode: JourneyDayState | undefined;
 };
 
 type UseJourneyProgressionInput = {
@@ -51,62 +51,68 @@ type ProgressionSequence = {
   toDay: number;
   arrived: boolean;
   headingReady: boolean;
+  preview: boolean;
 };
 
 function idlePresentation(
+  displayDay: number,
   currentDay: number,
   completedDays: readonly number[],
   todayCompleted: boolean,
   currentTitle: string,
 ): JourneyProgressionPresentation {
-  const visibleDays = getJourneyVisibleDays(currentDay);
-  const leftDay = visibleDays[0] ?? currentDay;
-  const rightDay = visibleDays[1];
+  const visibleDays = getJourneyVisibleDays(displayDay);
 
   return {
     phase: 'idle',
     playing: false,
-    fromDay: currentDay,
-    toDay: currentDay,
+    fromDay: displayDay,
+    toDay: displayDay,
     visibleDays,
-    headingDay: currentDay,
-    headingTitle: currentTitle,
-    progressDay: currentDay,
+    headingDay: displayDay,
+    headingTitle: displayDay === currentDay ? currentTitle : getPlanDayTitle(displayDay),
+    progressDay: displayDay,
     walkDirection: 1,
     showProgressMascot: false,
-    leftNode: getJourneyDayState(leftDay, currentDay, completedDays, todayCompleted),
-    rightNode:
-      rightDay === undefined
-        ? undefined
-        : getJourneyDayState(rightDay, currentDay, completedDays, todayCompleted),
+    outgoingNode: getJourneyDayState(
+      displayDay,
+      displayDay,
+      completedDays,
+      displayDay === currentDay && todayCompleted,
+    ),
+    incomingNode: undefined,
   };
 }
 
 function progressingPresentation(sequence: ProgressionSequence): JourneyProgressionPresentation {
   const showingGif = sequence.phase === 'walking' || sequence.phase === 'celebrating';
   const headingDay = sequence.headingReady ? sequence.toDay : sequence.fromDay;
+  const incomingDay = getJourneyIncomingDay(sequence.fromDay, sequence.toDay);
 
   return {
     phase: sequence.phase,
     playing: true,
     fromDay: sequence.fromDay,
     toDay: sequence.toDay,
-    visibleDays: [sequence.fromDay, sequence.toDay],
+    visibleDays: incomingDay === undefined ? [sequence.fromDay] : [sequence.fromDay, incomingDay],
     headingDay,
     headingTitle: getPlanDayTitle(headingDay),
     progressDay: sequence.arrived ? sequence.toDay : sequence.fromDay,
     walkDirection: getJourneyWalkDirection(sequence.fromDay, sequence.toDay),
     showProgressMascot: showingGif,
-    leftNode: {
+    outgoingNode: {
       day: sequence.fromDay,
       kind: 'completed',
       todayCompleted: false,
     },
-    rightNode: {
-      day: sequence.toDay,
-      kind: sequence.arrived ? 'current' : 'future',
-      todayCompleted: false,
-    },
+    incomingNode:
+      incomingDay === undefined
+        ? undefined
+        : {
+            day: incomingDay,
+            kind: sequence.arrived ? 'current' : 'future',
+            todayCompleted: false,
+          },
   };
 }
 
@@ -120,9 +126,13 @@ export function useJourneyProgression({
   const reduceMotion = useReducedMotion() === true;
   const acknowledgedDay = useJourneyVisualStore((state) => state.acknowledgedDay);
   const acknowledgeDay = useJourneyVisualStore((state) => state.acknowledgeDay);
+  const devPreview = useJourneyVisualStore((state) => state.devPreview);
+  const restDevSideScroll = useJourneyVisualStore((state) => state.restDevSideScroll);
+  const clearDevSideScroll = useJourneyVisualStore((state) => state.clearDevSideScroll);
   const [sequence, setSequence] = useState<ProgressionSequence | null>(null);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const playingRef = useRef(false);
+  const startedPreviewGenerationRef = useRef(0);
 
   useEffect(() => {
     const clearTimers = () => {
@@ -132,24 +142,125 @@ export function useJourneyProgression({
       timersRef.current = [];
     };
 
-    const settleIdle = () => {
-      playingRef.current = false;
-      setSequence(null);
-      acknowledgeDay(currentDay);
+    const startSequence = (fromDay: number, toDay: number, preview: boolean) => {
+      playingRef.current = true;
+
+      if (reduceMotion) {
+        void hapticSuccess();
+        setSequence({
+          phase: 'settling',
+          fromDay,
+          toDay,
+          arrived: true,
+          headingReady: true,
+          preview,
+        });
+        const settle = setTimeout(() => {
+          playingRef.current = false;
+          setSequence(null);
+          if (preview) {
+            restDevSideScroll(toDay);
+            return;
+          }
+          acknowledgeDay(currentDay);
+        }, motion.duration.journeyProgressSettle);
+        timersRef.current = [settle];
+        return;
+      }
+
+      void hapticSuccess();
+      setSequence({
+        phase: 'holding',
+        fromDay,
+        toDay,
+        arrived: false,
+        headingReady: false,
+        preview,
+      });
+
+      const walkTimer = setTimeout(() => {
+        setSequence({
+          phase: 'walking',
+          fromDay,
+          toDay,
+          arrived: false,
+          headingReady: false,
+          preview,
+        });
+      }, motion.duration.journeyProgressHold);
+
+      const arriveTimer = setTimeout(() => {
+        void hapticImpact();
+        setSequence({
+          phase: 'celebrating',
+          fromDay,
+          toDay,
+          arrived: true,
+          headingReady: false,
+          preview,
+        });
+      }, motion.duration.journeyProgressHold + motion.duration.journeyProgressWalk);
+
+      const headingTimer = setTimeout(
+        () => {
+          setSequence((current) => {
+            if (!current) {
+              return current;
+            }
+            return { ...current, headingReady: true };
+          });
+        },
+        motion.duration.journeyProgressHold +
+          motion.duration.journeyProgressWalk +
+          motion.duration.journeyProgressHeadingDelay,
+      );
+
+      const doneTimer = setTimeout(() => {
+        playingRef.current = false;
+        setSequence(null);
+        if (preview) {
+          restDevSideScroll(toDay);
+          return;
+        }
+        acknowledgeDay(currentDay);
+      }, motion.duration.journeyProgressHold + motion.duration.journeyProgressTotal);
+
+      timersRef.current = [walkTimer, arriveTimer, headingTimer, doneTimer];
     };
+
+    if (!focused) {
+      if (playingRef.current) {
+        clearTimers();
+        playingRef.current = false;
+        setSequence(null);
+        if (devPreview) {
+          clearDevSideScroll();
+        }
+        acknowledgeDay(currentDay);
+      }
+      return;
+    }
+
+    if (devPreview) {
+      if (
+        devPreview.pendingPlay &&
+        startedPreviewGenerationRef.current !== devPreview.generation &&
+        !playingRef.current
+      ) {
+        startedPreviewGenerationRef.current = devPreview.generation;
+        startSequence(devPreview.fromDay, devPreview.toDay, true);
+        return () => {
+          clearTimers();
+          playingRef.current = false;
+        };
+      }
+      return;
+    }
 
     const decision = getJourneyProgression({
       currentDay,
       acknowledgedDay,
     });
-
-    if (!focused) {
-      if (playingRef.current) {
-        clearTimers();
-        settleIdle();
-      }
-      return;
-    }
 
     if (decision.kind === 'bootstrap') {
       acknowledgeDay(decision.day);
@@ -165,63 +276,27 @@ export function useJourneyProgression({
       return;
     }
 
-    playingRef.current = true;
-    const { fromDay, toDay } = decision;
-
-    if (reduceMotion) {
-      void hapticSuccess();
-      setSequence({ phase: 'settling', fromDay, toDay, arrived: true, headingReady: true });
-      const settle = setTimeout(() => {
-        settleIdle();
-      }, motion.duration.journeyProgressSettle);
-      timersRef.current = [settle];
-      return () => {
-        clearTimers();
-        playingRef.current = false;
-      };
-    }
-
-    void hapticSuccess();
-    setSequence({ phase: 'holding', fromDay, toDay, arrived: false, headingReady: false });
-
-    const walkTimer = setTimeout(() => {
-      setSequence({ phase: 'walking', fromDay, toDay, arrived: false, headingReady: false });
-    }, motion.duration.journeyProgressHold);
-
-    const arriveTimer = setTimeout(() => {
-      void hapticImpact();
-      setSequence({ phase: 'celebrating', fromDay, toDay, arrived: true, headingReady: false });
-    }, motion.duration.journeyProgressHold + motion.duration.journeyProgressWalk);
-
-    const headingTimer = setTimeout(
-      () => {
-        setSequence((current) => {
-          if (!current) {
-            return current;
-          }
-          return { ...current, headingReady: true };
-        });
-      },
-      motion.duration.journeyProgressHold +
-        motion.duration.journeyProgressWalk +
-        motion.duration.journeyProgressHeadingDelay,
-    );
-
-    const doneTimer = setTimeout(() => {
-      settleIdle();
-    }, motion.duration.journeyProgressHold + motion.duration.journeyProgressTotal);
-
-    timersRef.current = [walkTimer, arriveTimer, headingTimer, doneTimer];
+    startSequence(decision.fromDay, decision.toDay, false);
 
     return () => {
       clearTimers();
       playingRef.current = false;
     };
-  }, [acknowledgeDay, acknowledgedDay, currentDay, focused, reduceMotion]);
+  }, [
+    acknowledgeDay,
+    acknowledgedDay,
+    clearDevSideScroll,
+    currentDay,
+    devPreview,
+    focused,
+    reduceMotion,
+    restDevSideScroll,
+  ]);
 
   if (sequence) {
     return progressingPresentation(sequence);
   }
 
-  return idlePresentation(currentDay, completedDays, todayCompleted, currentTitle);
+  const displayDay = devPreview?.restDay ?? currentDay;
+  return idlePresentation(displayDay, currentDay, completedDays, todayCompleted, currentTitle);
 }

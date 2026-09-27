@@ -34,6 +34,13 @@ import {
   sampleJourneyWalkEased,
 } from './getJourneyWalkMotion';
 import {
+  getJourneyIncomingDay,
+  getJourneyRestingDays,
+  getJourneyTimelinePositions,
+  getJourneyTimelineTrack,
+  isJourneyTimelineNodeOffscreen,
+} from './getJourneyTimelineMotion';
+import {
   applyJourneySheetAction,
   getJourneySheetModel,
   journeyPressMutates,
@@ -304,8 +311,11 @@ check(
 );
 
 check(
-  'Day 1 path shows only day 1 and day 2',
-  day1Visible.join(',') === '1,2' && !day1Visible.includes(3),
+  'resting path shows only the current day',
+  day1Visible.join(',') === '1' &&
+    !day1Visible.includes(2) &&
+    getJourneyRestingDays(3).join(',') === '3' &&
+    getJourneyRestingDays(30).join(',') === '30',
 );
 
 check(
@@ -361,7 +371,7 @@ check(
 
 check(
   'building a Day 1 stage does not change currentDay',
-  getJourneyVisibleDays(1).join(',') === '1,2' && journeyPressMutates() === false,
+  getJourneyVisibleDays(1).join(',') === '1' && journeyPressMutates() === false,
 );
 
 check(
@@ -408,11 +418,29 @@ const skyRest = getJourneySkyRest();
 const leftCloud390 = skyPieces390.leftCloud;
 const rightCloud390 = skyPieces390.rightCloud;
 const upperCloud390 = skyPieces390.upperCloud;
+const timeline390 = getJourneyTimelineTrack(
+  stage390.width,
+  stage390.currentX,
+  stage390.nodeSize + motion.offset.journeyTimelineEdgePad,
+);
+const timelineStart = getJourneyTimelinePositions(0, timeline390);
+const timelineMid = getJourneyTimelinePositions(0.5, timeline390);
+const timelineEnd = getJourneyTimelinePositions(1, timeline390);
+const nodeHalf = stage390.nodeSize / 2;
 check(
-  'progress mascot travel uses node centers, not a fixed pixel distance',
-  Math.abs(stage390.travelDistance - (stage390.day2X - stage390.day1X)) < 1e-9 &&
-    Math.abs(stage430.travelDistance - (stage430.day2X - stage430.day1X)) < 1e-9 &&
-    stage430.travelDistance > stage390.travelDistance,
+  'side-scroll track keeps the next day offscreen at rest and on the current mark at arrival',
+  Math.abs(stage390.travelDistance - stage390.worldTravel) < 1e-9 &&
+    Math.abs(stage390.currentX - stage390.day1X) < 1e-9 &&
+    isJourneyTimelineNodeOffscreen(timelineStart.incomingX, stage390.width, nodeHalf) &&
+    !isJourneyTimelineNodeOffscreen(timelineStart.outgoingX, stage390.width, nodeHalf) &&
+    isJourneyTimelineNodeOffscreen(timelineEnd.outgoingX, stage390.width, nodeHalf) &&
+    Math.abs(timelineEnd.incomingX - stage390.currentX) < 1e-6 &&
+    Math.abs(timelineEnd.mascotLeadX) < 1e-6 &&
+    timelineMid.mascotLeadX > 0 &&
+    timelineMid.incomingX < timelineStart.incomingX &&
+    timelineMid.outgoingX < timelineStart.outgoingX &&
+    getJourneyIncomingDay(3, 4) === 4 &&
+    getJourneyIncomingDay(30, 31) === undefined,
 );
 
 check(

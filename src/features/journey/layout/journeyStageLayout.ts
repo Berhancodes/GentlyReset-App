@@ -1,5 +1,7 @@
 import { PLAN_DAY_COUNT } from '../../reset/data/thirtyDayPlan';
+import { motion } from '../../../design-system/motion';
 import { clampJourneyDay } from '../data/journeyChapters';
+import { getJourneyTimelineTrack } from '../utils/getJourneyTimelineMotion';
 
 /**
  * Day 1 composition as fractions of the STAGE (not the window).
@@ -114,6 +116,10 @@ export type JourneyStageLayout = {
   nodeSize: number;
   day1X: number;
   day2X: number;
+  currentX: number;
+  incomingStartX: number;
+  worldTravel: number;
+  mascotLead: number;
   mascot: JourneyRect;
   sign: JourneyRect;
   bush: JourneyRect;
@@ -128,16 +134,13 @@ export function clampLayout(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-/** Current day plus the next neighbor. Day 1 never shows Day 3. */
+/** Resting timeline shows only the real current day. */
 export function getJourneyVisibleDays(
   currentDay: number,
   planDayCount: number = PLAN_DAY_COUNT,
 ): readonly number[] {
   const current = Math.min(planDayCount, Math.max(1, clampJourneyDay(currentDay)));
-  if (current >= planDayCount) {
-    return [current];
-  }
-  return [current, current + 1];
+  return [current];
 }
 
 /** Two-line task title for the Day 1 hero, matching “start smaller / than usual”. */
@@ -311,6 +314,11 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
 
   const lineLeft = JOURNEY_DAY1_ANCHORS.lineLeftX * safeWidth;
   const lineWidth = (JOURNEY_DAY1_ANCHORS.lineRightX - JOURNEY_DAY1_ANCHORS.lineLeftX) * safeWidth;
+  const track = getJourneyTimelineTrack(
+    safeWidth,
+    day1X,
+    nodeSize + motion.offset.journeyTimelineEdgePad,
+  );
 
   return {
     width: safeWidth,
@@ -323,6 +331,10 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
     nodeSize,
     day1X,
     day2X,
+    currentX: track.currentX,
+    incomingStartX: track.incomingStartX,
+    worldTravel: track.worldTravel,
+    mascotLead: track.mascotLead,
     mascot,
     sign,
     bush,
@@ -330,7 +342,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
     sun,
     clouds,
     progressMascot: getJourneyProgressMascotRect(mascot, day1X),
-    travelDistance: day2X - day1X,
+    travelDistance: track.worldTravel,
   };
 }
 
