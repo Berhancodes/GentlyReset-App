@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Image, Pressable, StyleSheet, View, type ImageSourcePropType } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
 import { JourneyDayNode } from '@/features/journey/components/JourneyDayNode';
+import { JourneySkyDecor } from '@/features/journey/components/JourneySkyDecor';
 import { JOURNEY_SPRITES } from '@/features/journey/data/journeyChapterImages';
 import { getJourneyChapterForDay } from '@/features/journey/data/journeyChapters';
 import { getJourneySignLine } from '@/features/journey/data/journeyCopy';
@@ -33,18 +34,6 @@ function rectStyle(rect: JourneyRect) {
     width: rect.width,
     height: rect.height,
   };
-}
-
-function DecorativeImage({ source, rect }: { source: ImageSourcePropType; rect: JourneyRect }) {
-  return (
-    <Image
-      source={source}
-      resizeMode="contain"
-      accessibilityElementsHidden
-      importantForAccessibility="no"
-      style={[styles.decorImage, rectStyle(rect)]}
-    />
-  );
 }
 
 export function JourneyLinearStage({
@@ -103,22 +92,6 @@ export function JourneyLinearStage({
           />
         ) : null}
       </View>
-    </View>
-  );
-}
-
-function JourneySkyDecor({ layout }: { layout: JourneyStageLayout }) {
-  return (
-    <View
-      pointerEvents="none"
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      style={StyleSheet.absoluteFill}
-    >
-      {layout.clouds.map((cloud, index) => (
-        <DecorativeImage key={`cloud-${index}`} source={JOURNEY_SPRITES.cloud} rect={cloud} />
-      ))}
-      <DecorativeImage source={JOURNEY_SPRITES.sun} rect={layout.sun} />
     </View>
   );
 }
@@ -264,9 +237,6 @@ const styles = StyleSheet.create({
   },
   pathBand: {
     position: 'relative',
-  },
-  decorImage: {
-    position: 'absolute',
   },
   fillImage: {
     width: '100%',

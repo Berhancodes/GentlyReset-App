@@ -13,6 +13,10 @@ export const motion = {
     loadingHold: 560,
     pillReveal: 820,
     storyHold: 2800,
+    journeySun: 820,
+    journeyLeftCloud: 1040,
+    journeyRightCloud: 980,
+    journeyUpperCloud: 780,
   },
   scale: {
     press: 0.97,
@@ -22,6 +26,18 @@ export const motion = {
   },
   offset: {
     press: 8,
+    journeySunRise: 12,
+    journeyLeftCloudLift: 8,
+    journeyRightCloudLift: -6,
+    journeyUpperCloudX: 24,
+    journeyUpperCloudY: -16,
+    journeySkyEdgePad: 16,
+  },
+  delay: {
+    journeyLeftCloud: 50,
+    journeySun: 100,
+    journeyRightCloud: 140,
+    journeyUpperCloud: 200,
   },
   easing: {
     standard: MOTION_EASING_STANDARD,

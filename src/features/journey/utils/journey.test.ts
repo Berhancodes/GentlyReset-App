@@ -18,6 +18,11 @@ import { PLAN_DAY_COUNT, getPlanDayTitle } from '../../reset/data/thirtyDayPlan'
 import { applyStartToday } from '../../reset/utils/dailyResetActions';
 import { getTaskForDay } from '../../reset/utils/getTaskForDay';
 import { getCurrentResetTask } from '../../reset/utils/resetSelectors';
+import {
+  getJourneySkyEntranceStart,
+  getJourneySkyPieces,
+  getJourneySkyRest,
+} from './getJourneySkyEntrance';
 import { getJourneyDayState } from './getJourneyDayState';
 import {
   applyJourneySheetAction,
@@ -385,6 +390,29 @@ check(
     getJourneySignLine('week-2') === 'keep going' &&
     getJourneySignLine('week-1') !== DREAMER_LINE &&
     getJourneyQuote('week-1') === 'One small step can change everything.',
+);
+
+const sky390 = getJourneySkyEntranceStart(stage390);
+const skyPieces390 = getJourneySkyPieces(stage390);
+const skyRest = getJourneySkyRest();
+const leftCloud390 = skyPieces390.leftCloud;
+const rightCloud390 = skyPieces390.rightCloud;
+const upperCloud390 = skyPieces390.upperCloud;
+check(
+  'sky entrance parks the sun fully past the right edge',
+  leftCloud390 !== undefined &&
+    rightCloud390 !== undefined &&
+    upperCloud390 !== undefined &&
+    sky390.sunX >= stage390.width - stage390.sun.left &&
+    sky390.sunY > 0 &&
+    sky390.leftX <= -(leftCloud390.left + leftCloud390.width) &&
+    sky390.rightX >= stage390.width - rightCloud390.left &&
+    sky390.upperX > 0 &&
+    sky390.upperY < 0 &&
+    sky390.upperOpacity === 0 &&
+    skyRest.sunX === 0 &&
+    skyRest.sunY === 0 &&
+    skyRest.upperOpacity === 1,
 );
 
 if (failed > 0) {
