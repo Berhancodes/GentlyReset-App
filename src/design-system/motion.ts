@@ -7,7 +7,7 @@ export const motion = {
   duration: {
     selection: 180,
     press: 240,
-    screen: 480,
+    screen: 640,
     loadingMark: 240,
     loadingPulse: 900,
     loadingHold: 560,

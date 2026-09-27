@@ -16,8 +16,6 @@ function clampStepIndex(index: number): number {
 
 type OnboardingState = {
   currentStepIndex: number;
-  stepDirection: 'forward' | 'back';
-  hasAnimatedStep: boolean;
   answers: Record<string, OnboardingAnswer>;
   hasCompletedOnboarding: boolean;
 };
@@ -35,8 +33,6 @@ type OnboardingActions = {
 
 const initialState: OnboardingState = {
   currentStepIndex: 0,
-  stepDirection: 'forward',
-  hasAnimatedStep: false,
   answers: {},
   hasCompletedOnboarding: false,
 };
@@ -70,24 +66,12 @@ export const useOnboardingStore = create<OnboardingState & OnboardingActions>()(
       next: () =>
         set((state) => ({
           currentStepIndex: clampStepIndex(state.currentStepIndex + 1),
-          stepDirection: 'forward',
-          hasAnimatedStep: true,
         })),
       back: () =>
         set((state) => ({
           currentStepIndex: clampStepIndex(state.currentStepIndex - 1),
-          stepDirection: 'back',
-          hasAnimatedStep: true,
         })),
-      goToStep: (index) =>
-        set((state) => {
-          const nextIndex = clampStepIndex(index);
-          return {
-            currentStepIndex: nextIndex,
-            stepDirection: nextIndex >= state.currentStepIndex ? 'forward' : 'back',
-            hasAnimatedStep: true,
-          };
-        }),
+      goToStep: (index) => set({ currentStepIndex: clampStepIndex(index) }),
       canContinue: (step) => canProceed(step, get().answers[step.id]),
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),
       resetOnboarding: () => {

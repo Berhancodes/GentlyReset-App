@@ -1,20 +1,27 @@
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useLayoutEffect } from 'react';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
+  cancelAnimation,
   Easing,
-  FadeIn,
-  SlideInLeft,
-  SlideInRight,
-  SlideOutLeft,
-  SlideOutRight,
+  runOnJS,
+  useAnimatedStyle,
   useReducedMotion,
+  useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 
 import { AppText, Screen } from '@/components/ui';
+import { colors } from '@/design-system';
 import { MOTION_EASING_STANDARD, motion } from '@/design-system/motion';
 import { DevStepJumper } from '@/features/onboarding/components/DevStepJumper';
 import { OnboardingRenderer } from '@/features/onboarding/components/OnboardingRenderer';
 import { useCurrentOnboardingStep } from '@/features/onboarding/hooks/useCurrentOnboardingStep';
-import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import {
+  registerOnboardingPageShift,
+  releaseOnboardingPageShift,
+} from '@/features/onboarding/utils/onboardingPageShift';
+
+const SCREEN_SHIFT_MS = motion.duration.screen;
 
 const slideEasing = Easing.bezier(
   MOTION_EASING_STANDARD[0],
@@ -25,9 +32,48 @@ const slideEasing = Easing.bezier(
 
 export function OnboardingFlow() {
   const { step } = useCurrentOnboardingStep();
-  const stepDirection = useOnboardingStore((state) => state.stepDirection);
-  const hasAnimatedStep = useOnboardingStore((state) => state.hasAnimatedStep);
   const reduceMotion = useReducedMotion();
+  const { width } = useWindowDimensions();
+  const shiftX = useSharedValue(0);
+
+  useLayoutEffect(() => {
+    cancelAnimation(shiftX);
+    shiftX.value = 0;
+  }, [shiftX, step?.id]);
+
+  useEffect(() => {
+    registerOnboardingPageShift((direction, commit) => {
+      if (reduceMotion || width <= 0) {
+        commit();
+        return;
+      }
+
+      const destination = direction === 'forward' ? width : -width;
+      shiftX.value = withTiming(
+        destination,
+        {
+          duration: SCREEN_SHIFT_MS,
+          easing: slideEasing,
+        },
+        (finished) => {
+          if (finished) {
+            runOnJS(commit)();
+            return;
+          }
+
+          runOnJS(releaseOnboardingPageShift)();
+        },
+      );
+    });
+
+    return () => {
+      registerOnboardingPageShift(null);
+    };
+  }, [reduceMotion, shiftX, width]);
+
+  const shiftStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: shiftX.value }],
+  }));
 
   if (!step) {
     return (
@@ -39,23 +85,9 @@ export function OnboardingFlow() {
     );
   }
 
-  const goingForward = stepDirection === 'forward';
-  const entering = reduceMotion
-    ? FadeIn.duration(0)
-    : !hasAnimatedStep
-      ? undefined
-      : goingForward
-        ? SlideInLeft.duration(motion.duration.screen).easing(slideEasing)
-        : SlideInRight.duration(motion.duration.screen).easing(slideEasing);
-  const exiting = reduceMotion
-    ? undefined
-    : goingForward
-      ? SlideOutRight.duration(motion.duration.screen).easing(slideEasing)
-      : SlideOutLeft.duration(motion.duration.screen).easing(slideEasing);
-
   return (
     <View style={styles.root}>
-      <Animated.View key={step.id} entering={entering} exiting={exiting} style={styles.frame}>
+      <Animated.View style={[styles.frame, shiftStyle]}>
         <OnboardingRenderer step={step} />
       </Animated.View>
       <DevStepJumper />
@@ -67,6 +99,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     overflow: 'hidden',
+    backgroundColor: colors.background.primary,
   },
   frame: {
     flex: 1,

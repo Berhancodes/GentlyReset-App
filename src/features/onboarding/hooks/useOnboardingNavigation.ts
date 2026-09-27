@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useCallback } from 'react';
 
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { runOnboardingPageShift } from '@/features/onboarding/utils/onboardingPageShift';
 
 export function useOnboardingNavigation() {
   const router = useRouter();
@@ -11,14 +12,20 @@ export function useOnboardingNavigation() {
   const goToStep = useOnboardingStore((state) => state.goToStep);
 
   const goToNext = useCallback(() => {
-    next();
+    runOnboardingPageShift('forward', next);
   }, [next]);
 
   const goToIndex = useCallback(
     (index: number) => {
-      goToStep(index);
+      if (index === currentStepIndex) {
+        return;
+      }
+
+      runOnboardingPageShift(index > currentStepIndex ? 'forward' : 'back', () => {
+        goToStep(index);
+      });
     },
-    [goToStep],
+    [currentStepIndex, goToStep],
   );
 
   const goBack = useCallback(() => {
@@ -26,7 +33,7 @@ export function useOnboardingNavigation() {
       return;
     }
 
-    back();
+    runOnboardingPageShift('back', back);
   }, [back, currentStepIndex]);
 
   return {
