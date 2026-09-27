@@ -1,12 +1,12 @@
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, motion, radius, shadows, spacing, textVariants } from '@/design-system';
+import { colors, radius, shadows, spacing, textVariants } from '@/design-system';
+import { MOTION_EASING_STANDARD, motion } from '@/design-system/motion';
 import { hapticImpact, hapticSuccess } from '@/utils/haptics';
 
 const PRESS_TRAVEL = motion.offset.press;
-const [EASE_X1, EASE_Y1, EASE_X2, EASE_Y2] = motion.easing.standard;
 const PRESS_DURATION_MS = `${motion.duration.press}ms`;
-const PRESS_EASING = `cubic-bezier(${EASE_X1}, ${EASE_Y1}, ${EASE_X2}, ${EASE_Y2})`;
+const PRESS_EASING = `cubic-bezier(${MOTION_EASING_STANDARD[0]}, ${MOTION_EASING_STANDARD[1]}, ${MOTION_EASING_STANDARD[2]}, ${MOTION_EASING_STANDARD[3]})`;
 
 type PrimaryButtonProps = {
   label: string;
@@ -78,7 +78,7 @@ export function PrimaryButton({
 const webPressTransition =
   Platform.OS === 'web'
     ? {
-        transitionProperty: 'transform, background-color, opacity, box-shadow',
+        transitionProperty: 'transform',
         transitionDuration: PRESS_DURATION_MS,
         transitionTimingFunction: PRESS_EASING,
       }
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     ...webPressTransition,
   },
   shadowPressed: {
-    opacity: 0.28,
+    opacity: 0.2,
   },
   face: {
     minHeight: 56,
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   },
   facePressed: {
     backgroundColor: colors.action.primaryBackgroundPressed,
-    transform: [{ translateY: PRESS_TRAVEL }],
+    transform: [{ translateY: PRESS_TRAVEL }, { scale: motion.scale.press }],
   },
   label: {
     ...textVariants.button,

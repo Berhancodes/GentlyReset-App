@@ -10,14 +10,18 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { AppText, Screen } from '@/components/ui';
-import { motion } from '@/design-system';
+import { MOTION_EASING_STANDARD, motion } from '@/design-system/motion';
 import { DevStepJumper } from '@/features/onboarding/components/DevStepJumper';
 import { OnboardingRenderer } from '@/features/onboarding/components/OnboardingRenderer';
 import { useCurrentOnboardingStep } from '@/features/onboarding/hooks/useCurrentOnboardingStep';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 
-const [EASE_X1, EASE_Y1, EASE_X2, EASE_Y2] = motion.easing.standard;
-const slideEasing = Easing.bezier(EASE_X1, EASE_Y1, EASE_X2, EASE_Y2);
+const slideEasing = Easing.bezier(
+  MOTION_EASING_STANDARD[0],
+  MOTION_EASING_STANDARD[1],
+  MOTION_EASING_STANDARD[2],
+  MOTION_EASING_STANDARD[3],
+);
 
 export function OnboardingFlow() {
   const { step } = useCurrentOnboardingStep();

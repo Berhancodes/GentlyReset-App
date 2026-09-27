@@ -1,6 +1,8 @@
 /**
  * Shared timing for selection interactions. Keep these soft and short.
  */
+export const MOTION_EASING_STANDARD = [0.33, 0, 0.2, 1] as const;
+
 export const motion = {
   duration: {
     selection: 180,
@@ -19,10 +21,10 @@ export const motion = {
     pillFrom: 0.98,
   },
   offset: {
-    press: 6,
+    press: 8,
   },
   easing: {
-    standard: [0.33, 0, 0.2, 1],
+    standard: MOTION_EASING_STANDARD,
   },
   spring: {
     release: {
