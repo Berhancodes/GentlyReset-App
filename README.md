@@ -124,6 +124,8 @@ Signing in or out does not change local reset progress, onboarding answers, jour
 
 Reset progress is local-first. After a local write succeeds, an authenticated account can back up Cycle 1 to Supabase (`reset_cycles` + `reset_day_completions`). Journal entries are also local-first and back up to `journal_entries` after save, keyed by cycle and local day. Anonymous use never creates a cloud user. Local data from account A is never uploaded into account B.
 
+Friends are request-based and server-owned. People choose a unique `@username` from World or You, search an exact username, and accept a request. Opening an invite link never creates a friendship. Friends see only display name, username, and avatar — never journal or reset answers.
+
 When a Supabase user is signed in, RevenueCat `logIn` uses that UUID. Sign-out calls RevenueCat `logOut` and creates a new anonymous customer. Purchases stay on the identified RevenueCat customer.
 
 Test Store purchases require an iOS development build. Expo web / Expo Go cannot complete a real Test Store transaction.

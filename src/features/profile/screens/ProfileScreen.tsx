@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 
 import { MainTabHeader, NoticeDialog, Screen } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
 import { useAuth } from '@/features/auth/session/useAuth';
+import { fetchOwnSocialProfile } from '@/features/friends/api/friendsApi';
+import { formatUsernameHandle } from '@/features/friends/username';
 import { AboutResetTypeCard } from '@/features/profile/components/AboutResetTypeCard';
 import { MyResetCard } from '@/features/profile/components/MyResetCard';
 import { ProfileHero } from '@/features/profile/components/ProfileHero';
@@ -31,8 +33,10 @@ type Notice = {
 export function ProfileScreen() {
   useSyncResetDay();
   const router = useRouter();
-  const { isAuthenticated, signOut } = useAuth();
+  const { isAuthenticated, signOut, user } = useAuth();
+  const userId = user?.id ?? null;
   const [notice, setNotice] = useState<Notice | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
   const currentDay = useResetStore((state) => state.currentDay);
   const completedDays = useResetStore((state) => state.completedDays);
@@ -69,6 +73,17 @@ export function ProfileScreen() {
       body: goalLabels.length > 0 ? goalLabels.join('\n') : 'no goals were saved from onboarding.',
     });
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!userId) {
+        return;
+      }
+      void fetchOwnSocialProfile(userId).then((profile) => {
+        setUsername(profile.username);
+      });
+    }, [userId]),
+  );
 
   const openSettingsNotice = () => {
     setNotice({
@@ -182,6 +197,11 @@ export function ProfileScreen() {
         />
         <ProfileLinkRows
           links={[
+            {
+              icon: <Ionicons name="at-outline" size={22} color={colors.text.primary} />,
+              title: userId && username ? formatUsernameHandle(username) : 'choose username',
+              onPress: () => router.push('/choose-username'),
+            },
             {
               icon: <Ionicons name="settings-outline" size={22} color={colors.text.primary} />,
               title: 'settings',

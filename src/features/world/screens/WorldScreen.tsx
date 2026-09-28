@@ -1,19 +1,24 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { getTabBarScenePadding, MainTabHeader, NoticeDialog, Screen } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
+import { useAuth } from '@/features/auth/session/useAuth';
+import { createFriendInvite, fetchFriendsHome } from '@/features/friends/api/friendsApi';
+import { buildFriendInviteDeepLink } from '@/features/friends/invite/pendingFriendInvite';
+import type { FriendsHome } from '@/features/friends/types';
+import { getWorldFriendsPresentation } from '@/features/friends/worldState';
 import {
   FriendsSection,
   shareWorldInvite,
   type WorldNotice,
 } from '@/features/world/components/FriendsSection';
-import { WorldActivitySection } from '@/features/world/components/WorldActivitySection';
 import { WorldBackground } from '@/features/world/components/WorldBackground';
 import { WorldHeroMessage } from '@/features/world/components/WorldHeroMessage';
-import { WorldStatsCard } from '@/features/world/components/WorldStatsCard';
+import { WorldStatusCard } from '@/features/world/components/WorldStatusCard';
 import {
   WORLD_COLUMN_MAX_WIDTH,
   WORLD_STATS_OVERLAP,
@@ -21,18 +26,71 @@ import {
 } from '@/features/world/layout/worldHeroLayout';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 
+const EMPTY_HOME: FriendsHome = {
+  username: null,
+  displayName: null,
+  avatarUrl: null,
+  friends: [],
+  incoming: [],
+  outgoing: [],
+};
+
 export function WorldScreen() {
   useSyncResetDay();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { height: windowHeight } = useWindowDimensions();
   const heroHeight = getWorldHeroHeight(windowHeight);
+  const userId = useAuth().user?.id ?? null;
   const [notice, setNotice] = useState<WorldNotice | null>(null);
+  const [home, setHome] = useState<FriendsHome>(EMPTY_HOME);
+
+  const refresh = useCallback(() => {
+    if (!userId) {
+      return;
+    }
+    void fetchFriendsHome(userId).then(setHome);
+  }, [userId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh]),
+  );
+
+  const socialHome = userId ? home : EMPTY_HOME;
+  const presentation = getWorldFriendsPresentation(socialHome);
+
+  const openUsername = () => {
+    router.push('/choose-username');
+  };
+
+  const openFindFriend = () => {
+    if (!socialHome.username) {
+      openUsername();
+      return;
+    }
+    router.push('/find-friend');
+  };
 
   const openInvite = () => {
-    void shareWorldInvite().then((inviteNotice) => {
-      if (inviteNotice) {
-        setNotice(inviteNotice);
+    if (!socialHome.username) {
+      openUsername();
+      return;
+    }
+    void createFriendInvite().then((result) => {
+      if (!result.ok || !result.token) {
+        setNotice({
+          title: 'invite a friend',
+          body: result.ok ? 'couldn’t create an invite right now.' : result.message,
+        });
+        return;
       }
+      void shareWorldInvite(buildFriendInviteDeepLink(result.token)).then((inviteNotice) => {
+        if (inviteNotice) {
+          setNotice(inviteNotice);
+        }
+      });
     });
   };
 
@@ -82,10 +140,16 @@ export function WorldScreen() {
         </View>
         <View style={styles.sheet}>
           <View style={styles.statsAnchor}>
-            <WorldStatsCard />
+            <WorldStatusCard title={presentation.statusTitle} body={presentation.statusBody} />
           </View>
-          <FriendsSection onNotice={setNotice} />
-          <WorldActivitySection onNotice={setNotice} />
+          <FriendsSection
+            presentation={presentation}
+            onChooseUsername={openUsername}
+            onFindFriend={openFindFriend}
+            onInviteFriend={openInvite}
+            onRefresh={refresh}
+            onNotice={setNotice}
+          />
         </View>
       </ScrollView>
       <NoticeDialog

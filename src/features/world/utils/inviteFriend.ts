@@ -5,23 +5,32 @@ export const INVITE_MESSAGE =
 
 export type InviteResult = 'shared' | 'copied';
 
-export async function inviteFriend(): Promise<InviteResult> {
+export function buildInviteShareMessage(deepLink?: string): string {
+  if (!deepLink) {
+    return INVITE_MESSAGE;
+  }
+  return `${INVITE_MESSAGE}\n\n${deepLink}`;
+}
+
+export async function inviteFriend(deepLink?: string): Promise<InviteResult> {
+  const message = buildInviteShareMessage(deepLink);
+
   if (Platform.OS === 'web' && typeof navigator !== 'undefined') {
     const canShare =
       typeof navigator.share === 'function' &&
-      (typeof navigator.canShare !== 'function' || navigator.canShare({ text: INVITE_MESSAGE }));
+      (typeof navigator.canShare !== 'function' || navigator.canShare({ text: message }));
 
     if (canShare) {
-      await navigator.share({ text: INVITE_MESSAGE });
+      await navigator.share({ text: message });
       return 'shared';
     }
 
     if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(INVITE_MESSAGE);
+      await navigator.clipboard.writeText(message);
       return 'copied';
     }
   }
 
-  await Share.share({ message: INVITE_MESSAGE });
+  await Share.share({ message });
   return 'shared';
 }

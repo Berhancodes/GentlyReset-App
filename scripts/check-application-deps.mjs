@@ -21,6 +21,8 @@ const forbidden = [
   [/from\s+['"][^'"]*features\/reset\/sync/, 'reset sync'],
   [/from\s+['"]@\/features\/reflect\/sync/, 'journal sync'],
   [/from\s+['"][^'"]*features\/reflect\/sync/, 'journal sync'],
+  [/from\s+['"]@\/features\/friends\//, 'friends'],
+  [/from\s+['"][^'"]*features\/friends\//, 'friends'],
 ];
 
 function listTypeScriptFiles(directory) {
