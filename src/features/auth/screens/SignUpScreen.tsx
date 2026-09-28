@@ -11,6 +11,7 @@ import { canSubmitSignIn, validateSignIn } from '@/features/auth/utils/validateS
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
+import { requestResetCloudSyncForCurrentUser } from '@/features/reset/sync/requestResetCloudSync';
 import {
   markPaywallPurchaseReady,
   peekPaywallUnlock,
@@ -56,6 +57,7 @@ export function SignUpScreen() {
   const afterAuthenticated = () => {
     markPaywallPurchaseReady();
     const packageIdentifier = peekPaywallUnlock()?.packageIdentifier;
+    requestResetCloudSyncForCurrentUser();
     router.replace(getRootHref({ hasCompletedOnboarding, isPro }));
     if (packageIdentifier && !isPro) {
       void purchasePackage(packageIdentifier);

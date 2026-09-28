@@ -443,6 +443,104 @@ async function run(): Promise<void> {
   }
 
   {
+    const seededPersonalization = personalization({
+      dailyCommitment: 'ten',
+      supportStyle: 'be-gentle',
+      primaryObstacle: 'too-much',
+    });
+    const preAccount = snapshot({
+      currentDay: 1,
+      completedDays: [],
+      resetStartedOn: '2026-09-27',
+      lastSeenOn: '2026-09-27',
+      resetTypeId: 'soft-restarter',
+      profileAccuracy: 'mostly',
+      personalization: seededPersonalization,
+      todayTask: getTaskForDay(1, seededPersonalization),
+    });
+    const before = pickResetSnapshot(preAccount);
+    const memory = createMemoryGateway({ record: null });
+    const repository = memoryRepository(preAccount);
+    const result = await syncResetWithCloud({
+      userId: 'user-new',
+      repository,
+      ownership: ownership(),
+      gateway: memory.gateway,
+      now: new Date('2026-09-27T15:00:00.000Z'),
+    });
+    const after = repository.getSnapshot();
+    check(
+      'pre-account local personalization + new account uploads Cycle 1',
+      result.kind === 'first-backup',
+    );
+    check(
+      'pre-account reset type is preserved',
+      after.resetTypeId === 'soft-restarter' && after.resetTypeId === before.resetTypeId,
+    );
+    check(
+      'pre-account personalization is preserved',
+      after.personalization.dailyCommitment === 'ten' &&
+        after.personalization.primaryObstacle === 'too-much',
+    );
+    check('pre-account currentDay stays 1', after.currentDay === 1);
+    check(
+      'new account is associated with local progress',
+      result.ownership.ownerUserId === 'user-new',
+    );
+    check(
+      'uploaded Cycle 1 keeps onboarding identity',
+      memory.getRecord()?.cycle.resetTypeId === 'soft-restarter' &&
+        memory.getRecord()?.cycle.personalization.dailyCommitment === 'ten',
+    );
+  }
+
+  {
+    const local = snapshot({
+      currentDay: 6,
+      completedDays: [1, 2, 3],
+      lastSeenOn: '2026-09-27',
+      lastCompletedOn: '2026-09-26',
+      resetStartedOn: '2026-09-21',
+      resetTypeId: 'soft-restarter',
+    });
+    const cloud = cloudRecord(
+      {
+        currentDay: 6,
+        lastSeenOn: '2026-09-27',
+        lastCompletedOn: '2026-09-26',
+        resetStartedOn: '2026-09-21',
+        resetTypeId: 'soft-restarter',
+        todayStarted: false,
+        todayCompleted: false,
+      },
+      [
+        { localDay: 1, completedOn: null },
+        { localDay: 2, completedOn: null },
+        { localDay: 3, completedOn: '2026-09-26' },
+      ],
+    );
+    const memory = createMemoryGateway({ record: cloud });
+    const repository = memoryRepository(local);
+    const result = await syncResetWithCloud({
+      userId: 'user-a',
+      repository,
+      ownership: ownership({ ownerUserId: 'user-a' }),
+      gateway: memory.gateway,
+      now: new Date('2026-09-27T15:00:00.000Z'),
+    });
+    check(
+      'User A local ownership + User A login is normal sync',
+      result.kind === 'in-sync' || result.kind === 'merge',
+    );
+    check('User A login does not conflict', result.kind !== 'conflict');
+    check('User A login keeps ownership', result.ownership.ownerUserId === 'user-a');
+    check(
+      'User A login leaves local type intact',
+      repository.getSnapshot().resetTypeId === 'soft-restarter',
+    );
+  }
+
+  {
     const memory = createMemoryGateway({ record: null });
     const repository = memoryRepository(day17Local);
     const result = await syncResetWithCloud({

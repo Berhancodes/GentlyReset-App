@@ -11,6 +11,7 @@ import { canSubmitSignIn, validateSignIn } from '@/features/auth/utils/validateS
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
+import { requestResetCloudSyncForCurrentUser } from '@/features/reset/sync/requestResetCloudSync';
 import { getRootHref } from '@/navigation/getRootHref';
 
 const EMPTY_VALUES: SignInValues = {
@@ -65,6 +66,7 @@ export function SignInScreen() {
           setErrors({ form: result.message });
           return;
         }
+        requestResetCloudSyncForCurrentUser();
         goToAccessDestination();
       })
       .finally(() => {

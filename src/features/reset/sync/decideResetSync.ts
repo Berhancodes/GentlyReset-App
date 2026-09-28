@@ -64,6 +64,8 @@ export function decideResetSync(input: {
   const cloud = input.cloud ?? null;
   const today = toDateKeyInTimeZone(input.now, input.timeZone);
 
+  // Pre-account onboarding progress (owner still null) belongs to the
+  // first Supabase user created at the paywall. Do not recreate it.
   if (meaningful && !cloud && (ownerUserId === null || ownerUserId === input.userId)) {
     const payload = mapSnapshotToCloudPayload(input.local);
     return { kind: 'first-backup', ...payload };
