@@ -11,6 +11,10 @@ import { canSubmitSignIn, validateSignIn } from '@/features/auth/utils/validateS
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
+import {
+  markPaywallPurchaseReady,
+  peekPaywallUnlock,
+} from '@/features/subscription/access/pendingPaywallUnlock';
 import { getRootHref } from '@/navigation/getRootHref';
 
 const EMPTY_VALUES: SignUpValues = {
@@ -21,7 +25,7 @@ const EMPTY_VALUES: SignUpValues = {
 export function SignUpScreen() {
   const router = useRouter();
   const { signUp } = useAuth();
-  const { isPro } = useSubscription();
+  const { isPro, purchasePackage } = useSubscription();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
   const [values, setValues] = useState<SignUpValues>(EMPTY_VALUES);
   const [errors, setErrors] = useState<SignUpErrors>({});
@@ -50,7 +54,12 @@ export function SignUpScreen() {
   };
 
   const afterAuthenticated = () => {
+    markPaywallPurchaseReady();
+    const packageIdentifier = peekPaywallUnlock()?.packageIdentifier;
     router.replace(getRootHref({ hasCompletedOnboarding, isPro }));
+    if (packageIdentifier && !isPro) {
+      void purchasePackage(packageIdentifier);
+    }
   };
 
   const submit = () => {

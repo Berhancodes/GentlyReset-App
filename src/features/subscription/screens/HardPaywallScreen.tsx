@@ -17,7 +17,14 @@ import {
 import { useAuth } from '@/features/auth/session/useAuth';
 import { PAYWALL_NIGHT_ART } from '@/features/onboarding/data/onboardingAssets';
 import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
-import { getPaywallPrimaryAction } from '@/features/subscription/access/getPaywallPrimaryAction';
+import {
+  getPaywallUnlockLabel,
+  getPaywallUnlockNextStep,
+} from '@/features/subscription/access/getPaywallPrimaryAction';
+import {
+  peekPaywallUnlock,
+  rememberPaywallPackage,
+} from '@/features/subscription/access/pendingPaywallUnlock';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
 import type { PresentedPackage } from '@/features/subscription/types';
 import { getLegalUrls } from '@/features/subscription/utils/legalUrls';
@@ -37,28 +44,25 @@ export function HardPaywallScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const primaryAction = getPaywallPrimaryAction(isAuthenticated);
+  const unlockNextStep = getPaywallUnlockNextStep(isAuthenticated);
   const { available, packages, unexpectedTrial, purchasePackage, restorePurchases } =
     useSubscription();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    () => peekPaywallUnlock()?.packageIdentifier ?? null,
+  );
   const [busy, setBusy] = useState<'purchase' | 'restore' | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const legal = getLegalUrls();
 
   const selected = selectPackage(packages, selectedId);
 
-  const beginUnlock = () => {
-    if (primaryAction === 'create-account') {
-      router.push('/(auth)/sign-up');
-      return;
-    }
-
-    if (!selected || busy || unexpectedTrial) {
+  const startPurchase = (subscriptionPackage: PresentedPackage) => {
+    if (busy || unexpectedTrial) {
       return;
     }
     setBusy('purchase');
     setMessage(null);
-    void purchasePackage(selected.identifier)
+    void purchasePackage(subscriptionPackage.identifier)
       .then((result) => {
         if (!result.ok && result.kind !== 'cancelled') {
           setMessage(result.message);
@@ -67,6 +71,26 @@ export function HardPaywallScreen() {
       .finally(() => {
         setBusy(null);
       });
+  };
+
+  const choosePackage = (packageIdentifier: string) => {
+    rememberPaywallPackage(packageIdentifier);
+    setSelectedId(packageIdentifier);
+  };
+
+  const beginUnlock = () => {
+    if (!selected || busy || unexpectedTrial) {
+      return;
+    }
+
+    rememberPaywallPackage(selected.identifier);
+
+    if (unlockNextStep === 'create-account') {
+      router.push('/(auth)/sign-up');
+      return;
+    }
+
+    startPurchase(selected);
   };
 
   const restore = () => {
@@ -147,7 +171,7 @@ export function HardPaywallScreen() {
                   accessibilityRole="button"
                   accessibilityState={{ selected: selectedPlan }}
                   accessibilityLabel={`${subscriptionPackage.title}, ${subscriptionPackage.priceString} per ${subscriptionPackage.billingPeriod}`}
-                  onPress={() => setSelectedId(subscriptionPackage.identifier)}
+                  onPress={() => choosePackage(subscriptionPackage.identifier)}
                   style={[styles.plan, selectedPlan ? styles.planSelected : null]}
                 >
                   <Text style={styles.planTitle}>{subscriptionPackage.title}</Text>
@@ -167,20 +191,8 @@ export function HardPaywallScreen() {
             </Text>
           ) : null}
           <PrimaryButton
-            label={
-              primaryAction === 'create-account'
-                ? 'create account to unlock'
-                : busy === 'purchase'
-                  ? 'purchasing…'
-                  : selected
-                    ? `unlock ${selected.priceString}`
-                    : 'unlock Gently Reset Pro'
-            }
-            disabled={
-              primaryAction === 'create-account'
-                ? false
-                : !selected || busy !== null || unexpectedTrial
-            }
+            label={getPaywallUnlockLabel(busy === 'purchase')}
+            disabled={!selected || busy !== null || unexpectedTrial}
             onPress={beginUnlock}
           />
           <Pressable

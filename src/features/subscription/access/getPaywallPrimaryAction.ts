@@ -1,9 +1,13 @@
-export type PaywallPrimaryAction = 'create-account' | 'purchase';
+export type PaywallUnlockNextStep = 'create-account' | 'purchase';
 
 /**
- * New accounts are created at the paywall, not on Welcome or Sign in.
- * Purchase still requires an active Pro entitlement afterward.
+ * The visible CTA stays purchase-oriented.
+ * An unauthenticated tap opens account creation first; Pro still unlocks the app.
  */
-export function getPaywallPrimaryAction(isAuthenticated: boolean): PaywallPrimaryAction {
+export function getPaywallUnlockNextStep(isAuthenticated: boolean): PaywallUnlockNextStep {
   return isAuthenticated ? 'purchase' : 'create-account';
+}
+
+export function getPaywallUnlockLabel(isPurchasing: boolean): string {
+  return isPurchasing ? 'purchasing…' : 'unlock my reset';
 }

@@ -1,5 +1,11 @@
 import { getAccessDestination } from './getAccessDestination';
-import { getPaywallPrimaryAction } from './getPaywallPrimaryAction';
+import { getPaywallUnlockLabel, getPaywallUnlockNextStep } from './getPaywallPrimaryAction';
+import {
+  markPaywallPurchaseReady,
+  peekPaywallUnlock,
+  rememberPaywallPackage,
+  takePaywallResumePurchase,
+} from './pendingPaywallUnlock';
 import { isProEntitlementActive } from './isProEntitlementActive';
 import { offeringHasUnexpectedTrial } from './packageHasUnexpectedTrial';
 import { PRO_ENTITLEMENT_ID } from '../constants';
@@ -104,11 +110,31 @@ check(
 );
 
 check(
-  'unauthenticated paywall asks for an account first',
-  getPaywallPrimaryAction(false) === 'create-account',
+  'unauthenticated unlock still creates an account first',
+  getPaywallUnlockNextStep(false) === 'create-account',
 );
 
-check('authenticated paywall purchases next', getPaywallPrimaryAction(true) === 'purchase');
+check('authenticated unlock purchases next', getPaywallUnlockNextStep(true) === 'purchase');
+
+check('paywall CTA stays unlock my reset', getPaywallUnlockLabel(false) === 'unlock my reset');
+check('paywall CTA shows purchasing while busy', getPaywallUnlockLabel(true) === 'purchasing…');
+
+rememberPaywallPackage('$rc_annual');
+check(
+  'selected package is remembered across account creation',
+  peekPaywallUnlock()?.packageIdentifier === '$rc_annual',
+);
+check(
+  'remembering a package does not resume purchase',
+  peekPaywallUnlock()?.resumePurchase === false,
+);
+markPaywallPurchaseReady();
+check('successful account creation can resume purchase', takePaywallResumePurchase() === true);
+check('resume purchase is consumed once', takePaywallResumePurchase() === false);
+check(
+  'package remains after resume is consumed',
+  peekPaywallUnlock()?.packageIdentifier === '$rc_annual',
+);
 
 check('null customer info is not Pro', isProEntitlementActive(null) === false);
 

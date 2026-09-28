@@ -116,7 +116,7 @@ There is no free trial, skip, or continue-free path. Authentication is not the p
 
 ## Accounts
 
-Welcome and Sign in are for returning users only. New accounts are created at the hard paywall, when the person is ready to unlock Gently Reset Pro. `/sign-up` is gated until onboarding is complete. Sessions persist in AsyncStorage and restore when the app reopens.
+Welcome and Sign in are for returning users only. The paywall CTA stays “unlock my reset.” If the person is not signed in, that tap opens account creation, then returns to the same paywall with the selected plan so RevenueCat can purchase. Creating an account never unlocks the app. `/sign-up` is gated until onboarding is complete. Sessions persist in AsyncStorage and restore when the app reopens.
 
 Authentication answers "who is this user?" RevenueCat answers "is Pro active?" Completing onboarding without Pro opens the hard paywall, not Home.
 
