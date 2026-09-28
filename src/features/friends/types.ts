@@ -1,3 +1,5 @@
+import type { SharedFriendProgress } from './progress';
+
 export type PublicFriendIdentity = {
   userId: string;
   username: string | null;
@@ -15,6 +17,14 @@ export type FriendRequestItem = PublicFriendIdentity & {
   createdAt: string | null;
 };
 
+export type ReceivedEncouragement = {
+  id: string;
+  sender: PublicFriendIdentity;
+  kind: string;
+  createdAt: string;
+  readAt: string | null;
+};
+
 export type FriendsHome = {
   username: string | null;
   displayName: string | null;
@@ -22,6 +32,8 @@ export type FriendsHome = {
   friends: FriendListItem[];
   incoming: FriendRequestItem[];
   outgoing: FriendRequestItem[];
+  progress: SharedFriendProgress[];
+  encouragements: ReceivedEncouragement[];
 };
 
 export type FriendActionCode =
@@ -49,7 +61,10 @@ export type FriendActionCode =
   | 'resolved'
   | 'created'
   | 'reused'
-  | 'conflict';
+  | 'conflict'
+  | 'too_soon'
+  | 'invalid_kind'
+  | 'read';
 
 export type FriendActionResult =
   | {

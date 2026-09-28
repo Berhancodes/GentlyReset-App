@@ -33,6 +33,10 @@ export function friendsErrorMessage(code: FriendActionCode): string {
       return 'this invite has expired.';
     case 'conflict':
       return 'couldn’t update that friendship. try again.';
+    case 'too_soon':
+      return 'you already sent that recently. try another note, or wait until tomorrow.';
+    case 'invalid_kind':
+      return 'that note isn’t available.';
     default:
       return 'something got in the way. try again in a moment.';
   }

@@ -1,6 +1,8 @@
 import { isSupabaseConfigured, supabase } from '@/features/auth/supabase/client';
 
 import { friendsErrorMessage } from './mapFriendsError';
+import { isEncouragementKind, type EncouragementKind } from '../encouragements';
+import { SHARED_CYCLE_LENGTH, type SharedFriendProgress } from '../progress';
 import type {
   FriendActionResult,
   FriendListItem,
@@ -8,6 +10,7 @@ import type {
   FriendsHome,
   InviteResolution,
   PublicFriendIdentity,
+  ReceivedEncouragement,
 } from '../types';
 import { normalizeUsername } from '../username';
 
@@ -21,6 +24,8 @@ type JsonResult = {
   user_id?: string;
   display_name?: string | null;
   avatar_url?: string | null;
+  encouragement_id?: string;
+  kind?: string;
 };
 
 function unconfigured(): FriendActionResult {
@@ -90,14 +95,17 @@ export async function fetchFriendsHome(userId: string): Promise<FriendsHome> {
   const client = supabase;
   const own = await fetchOwnSocialProfile(userId);
   if (!client || !isSupabaseConfigured) {
-    return { ...own, friends: [], incoming: [], outgoing: [] };
+    return { ...own, friends: [], incoming: [], outgoing: [], progress: [], encouragements: [] };
   }
 
-  const [friendsResult, incomingResult, outgoingResult] = await Promise.all([
-    client.rpc('list_friends'),
-    client.rpc('list_incoming_friend_requests'),
-    client.rpc('list_outgoing_friend_requests'),
-  ]);
+  const [friendsResult, incomingResult, outgoingResult, progressResult, encouragementsResult] =
+    await Promise.all([
+      client.rpc('list_friends'),
+      client.rpc('list_incoming_friend_requests'),
+      client.rpc('list_outgoing_friend_requests'),
+      client.rpc('list_friend_progress'),
+      client.rpc('list_recent_encouragements'),
+    ]);
 
   const friends: FriendListItem[] = (friendsResult.data ?? []).map(
     (row: {
@@ -128,12 +136,99 @@ export async function fetchFriendsHome(userId: string): Promise<FriendsHome> {
     ...identityFromRow(row),
   });
 
+  const progress: SharedFriendProgress[] = (progressResult.data ?? []).map(
+    (row: {
+      user_id: string;
+      username: string | null;
+      display_name: string | null;
+      avatar_url: string | null;
+      current_day: number | null;
+      cycle_length: number | null;
+      completed_today: boolean | null;
+      streak: number | null;
+    }) => ({
+      userId: row.user_id,
+      username: row.username ?? null,
+      displayName: row.display_name ?? null,
+      avatarUrl: row.avatar_url ?? null,
+      currentDay: Math.min(SHARED_CYCLE_LENGTH, Math.max(1, row.current_day ?? 1)),
+      cycleLength: SHARED_CYCLE_LENGTH,
+      completedToday: Boolean(row.completed_today),
+      streak: Math.max(0, row.streak ?? 0),
+    }),
+  );
+
+  const encouragements: ReceivedEncouragement[] = (encouragementsResult.data ?? [])
+    .map(
+      (row: {
+        encouragement_id: string;
+        sender_user_id: string;
+        username: string | null;
+        display_name: string | null;
+        avatar_url: string | null;
+        kind: string;
+        created_at: string;
+        read_at: string | null;
+      }): ReceivedEncouragement | null => {
+        if (!isEncouragementKind(row.kind)) {
+          return null;
+        }
+        return {
+          id: row.encouragement_id,
+          kind: row.kind,
+          createdAt: row.created_at,
+          readAt: row.read_at,
+          sender: identityFromRow({
+            user_id: row.sender_user_id,
+            username: row.username,
+            display_name: row.display_name,
+            avatar_url: row.avatar_url,
+          }),
+        };
+      },
+    )
+    .filter((item: ReceivedEncouragement | null): item is ReceivedEncouragement => item !== null);
+
   return {
     ...own,
     friends,
     incoming: (incomingResult.data ?? []).map(mapRequest),
     outgoing: (outgoingResult.data ?? []).map(mapRequest),
+    progress,
+    encouragements,
   };
+}
+
+export async function sendEncouragement(
+  friendUserId: string,
+  kind: EncouragementKind,
+): Promise<FriendActionResult> {
+  const client = supabase;
+  if (!client || !isSupabaseConfigured) {
+    return unconfigured();
+  }
+  const { data, error } = await client.rpc('send_encouragement', {
+    friend_user_id: friendUserId,
+    encouragement_kind: kind,
+  });
+  if (error) {
+    return { ok: false, code: 'conflict', message: friendsErrorMessage('conflict') };
+  }
+  return asAction((data ?? null) as JsonResult | null);
+}
+
+export async function markEncouragementRead(encouragementId: string): Promise<FriendActionResult> {
+  const client = supabase;
+  if (!client || !isSupabaseConfigured) {
+    return unconfigured();
+  }
+  const { data, error } = await client.rpc('mark_encouragement_read', {
+    target_id: encouragementId,
+  });
+  if (error) {
+    return { ok: false, code: 'conflict', message: friendsErrorMessage('conflict') };
+  }
+  return asAction((data ?? null) as JsonResult | null);
 }
 
 export async function claimUsername(desiredUsername: string): Promise<FriendActionResult> {

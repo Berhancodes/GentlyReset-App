@@ -1,5 +1,12 @@
-import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  AppState,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -25,6 +32,7 @@ import {
   getWorldHeroHeight,
 } from '@/features/world/layout/worldHeroLayout';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
+import { useResetStore } from '@/features/reset/store/useResetStore';
 
 const EMPTY_HOME: FriendsHome = {
   username: null,
@@ -33,6 +41,8 @@ const EMPTY_HOME: FriendsHome = {
   friends: [],
   incoming: [],
   outgoing: [],
+  progress: [],
+  encouragements: [],
 };
 
 export function WorldScreen() {
@@ -42,14 +52,19 @@ export function WorldScreen() {
   const { height: windowHeight } = useWindowDimensions();
   const heroHeight = getWorldHeroHeight(windowHeight);
   const userId = useAuth().user?.id ?? null;
+  const currentDay = useResetStore((state) => state.currentDay);
   const [notice, setNotice] = useState<WorldNotice | null>(null);
   const [home, setHome] = useState<FriendsHome>(EMPTY_HOME);
+  const [nowMs, setNowMs] = useState(0);
 
   const refresh = useCallback(() => {
     if (!userId) {
       return;
     }
-    void fetchFriendsHome(userId).then(setHome);
+    void fetchFriendsHome(userId).then((nextHome) => {
+      setHome(nextHome);
+      setNowMs(Date.now());
+    });
   }, [userId]);
 
   useFocusEffect(
@@ -58,8 +73,22 @@ export function WorldScreen() {
     }, [refresh]),
   );
 
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        refresh();
+      }
+    });
+    return () => {
+      subscription.remove();
+    };
+  }, [refresh]);
+
   const socialHome = userId ? home : EMPTY_HOME;
-  const presentation = getWorldFriendsPresentation(socialHome);
+  const presentation = getWorldFriendsPresentation({
+    ...socialHome,
+    currentDay,
+  });
 
   const openUsername = () => {
     router.push('/choose-username');
@@ -144,6 +173,7 @@ export function WorldScreen() {
           </View>
           <FriendsSection
             presentation={presentation}
+            nowMs={nowMs}
             onChooseUsername={openUsername}
             onFindFriend={openFindFriend}
             onInviteFriend={openInvite}

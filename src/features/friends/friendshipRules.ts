@@ -201,3 +201,27 @@ export function removeFriend(
 export function canReadFriendship(row: FriendshipRecord, viewerUserId: string): boolean {
   return row.requesterId === viewerUserId || row.addresseeId === viewerUserId;
 }
+
+/**
+ * Central accepted-friend check. Future blocked_users belong here.
+ * Shared progress and encouragements both go through this gate.
+ */
+export function areAcceptedFriends(
+  store: FriendshipStore,
+  leftUserId: string,
+  rightUserId: string,
+): boolean {
+  if (!leftUserId || !rightUserId || leftUserId === rightUserId) {
+    return false;
+  }
+  const existing = findPair(store, leftUserId, rightUserId);
+  return existing?.status === 'accepted';
+}
+
+export function canSeeSharedProgress(
+  store: FriendshipStore,
+  viewerUserId: string,
+  targetUserId: string,
+): boolean {
+  return areAcceptedFriends(store, viewerUserId, targetUserId);
+}

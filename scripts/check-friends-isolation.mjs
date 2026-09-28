@@ -27,8 +27,10 @@ const forbidden = [
 const forbiddenMentions = [
   'journal_entries',
   'reset_cycles',
-  'currentDay',
+  'reset_day_completions',
   'completedDays',
+  'todayTask',
+  'ResetSnapshot',
   'gentlyreset_ios_app_pro',
 ];
 

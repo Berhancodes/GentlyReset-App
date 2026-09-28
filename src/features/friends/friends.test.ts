@@ -1,13 +1,32 @@
 import {
   acceptFriendRequest,
+  areAcceptedFriends,
   cancelFriendRequest,
   canReadFriendship,
+  canSeeSharedProgress,
   canonicalPairKey,
   declineFriendRequest,
   emptyFriendshipStore,
   removeFriend,
   sendFriendRequest,
 } from './friendshipRules';
+import {
+  emptyEncouragementStore,
+  listRecentEncouragements,
+  markEncouragementRead,
+  sendEncouragement,
+} from './encouragementRules';
+import {
+  ENCOURAGEMENT_COPY,
+  canSendEncouragementKind,
+  encouragementTimeLabel,
+} from './encouragements';
+import {
+  completedTodayFromCloud,
+  friendProgressCopy,
+  hasOnlySharedProgressFields,
+  toSharedFriendProgress,
+} from './progress';
 import {
   buildFriendInviteDeepLink,
   buildFriendInvitePath,
@@ -277,6 +296,296 @@ const friends = getWorldFriendsPresentation({
 });
 check('accepted friends render identity only', friends.friends[0]?.username === 'calm_day');
 check('friend presentation has no reset fields', !('currentDay' in friends.friends[0]!));
+check(
+  'own World presence can show day without duplicating Journey',
+  getWorldFriendsPresentation({
+    username: 'berhan_23',
+    friends: friends.friends,
+    incoming: [],
+    outgoing: [],
+    currentDay: 8,
+  }).statusBody === 'day 8 of 30',
+);
+
+const pendingOnly = sendFriendRequest(emptyFriendshipStore(), 'user-a', 'user-b').store;
+check(
+  'pending friend cannot see shared progress',
+  !canSeeSharedProgress(pendingOnly, 'user-a', 'user-b'),
+);
+
+let declinedStore = sendFriendRequest(emptyFriendshipStore(), 'user-a', 'user-b').store;
+declinedStore = declineFriendRequest(
+  declinedStore,
+  'user-b',
+  declinedStore.rows[0]?.id ?? '',
+).store;
+check(
+  'declined friend cannot see shared progress',
+  !canSeeSharedProgress(declinedStore, 'user-a', 'user-b'),
+);
+
+let removedStore = sendFriendRequest(emptyFriendshipStore(), 'user-a', 'user-b').store;
+removedStore = acceptFriendRequest(removedStore, 'user-b', removedStore.rows[0]?.id ?? '').store;
+removedStore = removeFriend(removedStore, 'user-a', removedStore.rows[0]?.id ?? '').store;
+check(
+  'removed friend cannot see shared progress',
+  !canSeeSharedProgress(removedStore, 'user-a', 'user-b'),
+);
+check(
+  'unrelated user cannot see shared progress',
+  !canSeeSharedProgress(
+    sendFriendRequest(emptyFriendshipStore(), 'user-a', 'user-b').store,
+    'user-c',
+    'user-a',
+  ),
+);
+
+let visibleStore = sendFriendRequest(emptyFriendshipStore(), 'user-a', 'user-b').store;
+visibleStore = acceptFriendRequest(visibleStore, 'user-b', visibleStore.rows[0]?.id ?? '').store;
+check('accepted friends share progress', canSeeSharedProgress(visibleStore, 'user-b', 'user-a'));
+check(
+  'are_accepted_friends is the encouragement gate too',
+  areAcceptedFriends(visibleStore, 'user-a', 'user-b'),
+);
+
+const projected = toSharedFriendProgress({
+  userId: 'user-a',
+  displayName: 'Sarah',
+  username: 'sarah',
+  avatarUrl: null,
+  currentDay: 8,
+  todayCompleted: true,
+  lastSeenOn: '2026-09-28',
+  lastCompletedOn: '2026-09-28',
+  streak: 4,
+  today: '2026-09-28',
+});
+check('projection contains only approved fields', hasOnlySharedProgressFields({ ...projected }));
+check('projection has no task content', !('todayTask' in projected));
+check('projection has no reset type', !('resetTypeId' in projected));
+check('projection has no personalization', !('personalization' in projected));
+check('projection has no journal', !('journal' in projected) && !('body' in projected));
+check(
+  'private onboarding fields stay private',
+  exposesPrivateSocialField({ userId: 'x', onboarding_completed_at: '2026-09-28' }),
+);
+
+check(
+  'completedToday follows last_seen_on + today_completed',
+  completedTodayFromCloud({
+    todayCompleted: true,
+    lastSeenOn: '2026-09-28',
+    lastCompletedOn: '2026-09-28',
+    today: '2026-09-28',
+  }),
+);
+check(
+  'yesterday today_completed is not today',
+  !completedTodayFromCloud({
+    todayCompleted: true,
+    lastSeenOn: '2026-09-27',
+    lastCompletedOn: '2026-09-27',
+    today: '2026-09-28',
+  }),
+);
+check(
+  'last_completed_on today still counts after a later open has not happened',
+  completedTodayFromCloud({
+    todayCompleted: false,
+    lastSeenOn: '2026-09-27',
+    lastCompletedOn: '2026-09-28',
+    today: '2026-09-28',
+  }),
+);
+check(
+  'historical current local_day completion is not today',
+  !completedTodayFromCloud({
+    todayCompleted: false,
+    lastSeenOn: '2026-09-20',
+    lastCompletedOn: '2026-09-20',
+    today: '2026-09-28',
+  }),
+);
+check('streak is the stored integer', projected.streak === 4);
+
+const copy = friendProgressCopy(projected);
+check('showed-up copy is gentle', copy.presenceLabel === 'showed up today');
+check(
+  'incomplete copy does not shame',
+  friendProgressCopy({ ...projected, completedToday: false }).presenceLabel ===
+    'taking today gently',
+);
+check(
+  'progress copy is not comparative',
+  !copy.dayLabel.includes('ahead') &&
+    !copy.presenceLabel?.includes('failed') &&
+    !copy.presenceLabel?.includes('missed') &&
+    !(copy.streakLabel ?? '').includes('leaderboard'),
+);
+
+const ranked = getWorldFriendsPresentation({
+  username: 'berhan_23',
+  friends: [
+    {
+      friendshipId: 'f-low',
+      userId: 'user-low',
+      username: 'calm_day',
+      displayName: 'Calm',
+      avatarUrl: null,
+      acceptedAt: null,
+    },
+    {
+      friendshipId: 'f-high',
+      userId: 'user-high',
+      username: 'zip_day',
+      displayName: 'Zip',
+      avatarUrl: null,
+      acceptedAt: null,
+    },
+  ],
+  incoming: [],
+  outgoing: [],
+  progress: [
+    { ...projected, userId: 'user-high', username: 'zip_day', displayName: 'Zip', streak: 20 },
+    { ...projected, userId: 'user-low', username: 'calm_day', displayName: 'Calm', streak: 1 },
+  ],
+});
+check(
+  'World keeps friend list order instead of ranking by streak',
+  ranked.friends[0]?.userId === 'user-low' && ranked.friends[1]?.userId === 'user-high',
+);
+
+const snapshot = { currentDay: 8, completedDays: [1, 2, 3], journal: 'secret' };
+let notes = emptyEncouragementStore();
+const sent = sendEncouragement(
+  visibleStore,
+  notes,
+  'user-b',
+  'user-a',
+  'proud_of_you',
+  '2026-09-28T12:00:00.000Z',
+);
+notes = sent.store;
+check('accepted friend can send a valid kind', sent.code === 'sent');
+check(
+  'social send does not mutate reset or journal state',
+  snapshot.currentDay === 8 && snapshot.journal === 'secret',
+);
+
+const pendingSend = sendEncouragement(
+  pendingOnly,
+  emptyEncouragementStore(),
+  'user-a',
+  'user-b',
+  'keep_going',
+  '2026-09-28T12:00:00.000Z',
+);
+check('pending friend cannot send encouragement', pendingSend.code === 'not_friends');
+check(
+  'unrelated user cannot send encouragement',
+  sendEncouragement(
+    visibleStore,
+    emptyEncouragementStore(),
+    'user-c',
+    'user-a',
+    'keep_going',
+    '2026-09-28T12:00:00.000Z',
+  ).code === 'not_friends',
+);
+check(
+  'self encouragement is rejected',
+  sendEncouragement(
+    visibleStore,
+    emptyEncouragementStore(),
+    'user-a',
+    'user-a',
+    'keep_going',
+    '2026-09-28T12:00:00.000Z',
+  ).code === 'self',
+);
+check(
+  'invalid kind is rejected',
+  sendEncouragement(
+    visibleStore,
+    emptyEncouragementStore(),
+    'user-b',
+    'user-a',
+    'hello_chat',
+    '2026-09-28T12:00:00.000Z',
+  ).code === 'invalid_kind',
+);
+
+const duplicateKind = sendEncouragement(
+  visibleStore,
+  notes,
+  'user-b',
+  'user-a',
+  'proud_of_you',
+  '2026-09-28T18:00:00.000Z',
+);
+check('same kind within 24 hours is rejected', duplicateKind.code === 'too_soon');
+check(
+  'a different kind can still be sent during cooldown',
+  sendEncouragement(
+    visibleStore,
+    notes,
+    'user-b',
+    'user-a',
+    'keep_going',
+    '2026-09-28T18:00:00.000Z',
+  ).code === 'sent',
+);
+check(
+  'cooldown helper matches the 24h rule',
+  !canSendEncouragementKind({
+    lastSentAt: '2026-09-28T12:00:00.000Z',
+    nowMs: Date.parse('2026-09-28T18:00:00.000Z'),
+  }) &&
+    canSendEncouragementKind({
+      lastSentAt: '2026-09-27T12:00:00.000Z',
+      nowMs: Date.parse('2026-09-28T12:00:00.000Z'),
+    }),
+);
+
+const received = listRecentEncouragements(notes, 'user-a');
+check('recipient sees the received encouragement', received[0]?.kind === 'proud_of_you');
+check(
+  'unrelated user cannot see that encouragement',
+  listRecentEncouragements(notes, 'user-c').length === 0,
+);
+
+const marked = markEncouragementRead(
+  notes,
+  'user-a',
+  received[0]?.id ?? '',
+  '2026-09-28T19:00:00.000Z',
+);
+check('recipient can mark read', marked.code === 'read' && marked.store.rows[0]?.readAt !== null);
+check(
+  'sender cannot mark the recipient row read',
+  markEncouragementRead(notes, 'user-b', received[0]?.id ?? '', '2026-09-28T19:00:00.000Z').code ===
+    'not_allowed',
+);
+
+const afterRemove = sendEncouragement(
+  removedStore,
+  notes,
+  'user-b',
+  'user-a',
+  'thinking_of_you',
+  '2026-09-28T20:00:00.000Z',
+);
+check('new encouragement after unfriend is rejected', afterRemove.code === 'not_friends');
+check(
+  'received history can remain after unfriend',
+  listRecentEncouragements(notes, 'user-a').length > 0,
+);
+check('preset copy exists for every kind', ENCOURAGEMENT_COPY.gentle_nudge.includes('nudge'));
+check(
+  'relative time label stays lightweight',
+  encouragementTimeLabel('2026-09-28T10:00:00.000Z', Date.parse('2026-09-28T12:00:00.000Z')) ===
+    '2h ago',
+);
 
 check(
   'invite does not bypass onboarding',

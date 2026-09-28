@@ -7,9 +7,16 @@ import {
   acceptFriendRequest,
   cancelFriendRequest,
   declineFriendRequest,
+  markEncouragementRead,
   removeFriend,
+  sendEncouragement,
 } from '@/features/friends/api/friendsApi';
+import { EncouragementPicker } from '@/features/friends/components/EncouragementPicker';
 import { FriendIdentityRow } from '@/features/friends/components/FriendIdentityRow';
+import { FriendProgressCard } from '@/features/friends/components/FriendProgressCard';
+import { ReceivedEncouragementList } from '@/features/friends/components/ReceivedEncouragementList';
+import type { EncouragementKind } from '@/features/friends/encouragements';
+import type { PublicFriendIdentity, ReceivedEncouragement } from '@/features/friends/types';
 import type { WorldFriendsPresentation } from '@/features/friends/worldState';
 import { WorldActionCard } from '@/features/world/components/WorldActionCard';
 import { buildInviteShareMessage, inviteFriend } from '@/features/world/utils/inviteFriend';
@@ -21,6 +28,7 @@ export type WorldNotice = {
 
 type FriendsSectionProps = {
   presentation: WorldFriendsPresentation;
+  nowMs: number;
   onChooseUsername: () => void;
   onFindFriend: () => void;
   onInviteFriend: () => void;
@@ -48,6 +56,7 @@ export async function shareWorldInvite(deepLink?: string): Promise<WorldNotice |
 
 export function FriendsSection({
   presentation,
+  nowMs,
   onChooseUsername,
   onFindFriend,
   onInviteFriend,
@@ -55,6 +64,7 @@ export function FriendsSection({
   onNotice,
 }: FriendsSectionProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [encourageFriend, setEncourageFriend] = useState<PublicFriendIdentity | null>(null);
 
   const run = (
     friendshipId: string,
@@ -76,6 +86,38 @@ export function FriendsSection({
       .finally(() => {
         setBusyId(null);
       });
+  };
+
+  const sendKind = (kind: EncouragementKind) => {
+    if (!encourageFriend || busyId) {
+      return;
+    }
+    setBusyId(encourageFriend.userId);
+    void sendEncouragement(encourageFriend.userId, kind)
+      .then((result) => {
+        if (!result.ok) {
+          onNotice({ title: 'encourage', body: result.message });
+          return;
+        }
+        setEncourageFriend(null);
+        onRefresh();
+      })
+      .finally(() => {
+        setBusyId(null);
+      });
+  };
+
+  const openReceived = (item: ReceivedEncouragement) => {
+    if (item.readAt) {
+      return;
+    }
+    void markEncouragementRead(item.id).then((result) => {
+      if (!result.ok && result.message) {
+        onNotice({ title: 'encouragement', body: result.message });
+        return;
+      }
+      onRefresh();
+    });
   };
 
   return (
@@ -104,6 +146,12 @@ export function FriendsSection({
           onPress={onInviteFriend}
         />
       ) : null}
+
+      <ReceivedEncouragementList
+        items={presentation.receivedEncouragements}
+        nowMs={nowMs}
+        onOpen={openReceived}
+      />
 
       {presentation.incoming.length > 0 ? (
         <View style={styles.block}>
@@ -140,10 +188,11 @@ export function FriendsSection({
             {presentation.friends.map((item, index) => (
               <View key={item.friendshipId}>
                 {index > 0 ? <View style={styles.divider} /> : null}
-                <FriendIdentityRow
-                  identity={item}
-                  accessory="remove"
-                  busy={busyId === item.friendshipId}
+                <FriendProgressCard
+                  friend={item}
+                  progress={presentation.progressByUserId[item.userId]}
+                  busy={busyId === item.friendshipId || busyId === item.userId}
+                  onEncourage={() => setEncourageFriend(item)}
                   onRemove={() => {
                     run(item.friendshipId, () => removeFriend(item.friendshipId), 'friends');
                   }}
@@ -174,6 +223,14 @@ export function FriendsSection({
           </View>
         </View>
       ) : null}
+
+      <EncouragementPicker
+        visible={encourageFriend !== null}
+        friend={encourageFriend}
+        busy={busyId !== null}
+        onSelect={sendKind}
+        onClose={() => setEncourageFriend(null)}
+      />
     </View>
   );
 }

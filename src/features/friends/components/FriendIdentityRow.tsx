@@ -15,7 +15,7 @@ type FriendIdentityRowProps = {
   busy?: boolean;
 };
 
-function displayLabel(identity: PublicFriendIdentity): string {
+export function friendDisplayLabel(identity: PublicFriendIdentity): string {
   if (identity.displayName && identity.displayName.trim().length > 0) {
     return identity.displayName.trim();
   }
@@ -40,11 +40,12 @@ export function FriendIdentityRow({
   busy = false,
 }: FriendIdentityRowProps) {
   const handle = identity.username ? formatUsernameHandle(identity.username) : null;
+  const label = friendDisplayLabel(identity);
 
   return (
     <View
       accessibilityRole="text"
-      accessibilityLabel={`${displayLabel(identity)}${handle ? `. ${handle}` : ''}`}
+      accessibilityLabel={`${label}${handle ? `. ${handle}` : ''}`}
       style={styles.row}
     >
       <View style={styles.avatar} accessibilityElementsHidden>
@@ -54,9 +55,9 @@ export function FriendIdentityRow({
       </View>
       <View style={styles.copy}>
         <AppText variant="optionTitle" numberOfLines={1}>
-          {displayLabel(identity)}
+          {label}
         </AppText>
-        {handle && displayLabel(identity) !== handle ? (
+        {handle && label !== handle ? (
           <AppText variant="caption" color="helper" numberOfLines={1}>
             {handle}
           </AppText>

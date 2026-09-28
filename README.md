@@ -124,7 +124,11 @@ Signing in or out does not change local reset progress, onboarding answers, jour
 
 Reset progress is local-first. After a local write succeeds, an authenticated account can back up Cycle 1 to Supabase (`reset_cycles` + `reset_day_completions`). Journal entries are also local-first and back up to `journal_entries` after save, keyed by cycle and local day. Anonymous use never creates a cloud user. Local data from account A is never uploaded into account B.
 
-Friends are request-based and server-owned. People choose a unique `@username` from World or You, search an exact username, and accept a request. Opening an invite link never creates a friendship. Friends see only display name, username, and avatar — never journal or reset answers.
+Friends are request-based and server-owned. People choose a unique `@username` from World or You, search an exact username, and accept a request. Opening an invite link never creates a friendship.
+
+Accepted friends may see a narrow presence projection: display name, username, avatar, current day, cycle length (30), whether they showed up today, and current streak. That projection comes from `list_friend_progress()`, not from direct reads of `reset_cycles`. Friends never see tasks, reset type, personalization, journal, or completion history.
+
+World also supports preset encouragements (not chat). The same sender may send the same kind to the same friend at most once per 24 hours. Received notes stay with the recipient if the friendship later ends; new sends then fail.
 
 When a Supabase user is signed in, RevenueCat `logIn` uses that UUID. Sign-out calls RevenueCat `logOut` and creates a new anonymous customer. Purchases stay on the identified RevenueCat customer.
 
