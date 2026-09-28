@@ -84,7 +84,11 @@ function snapshot(overrides: Partial<ResetSnapshot> = {}): ResetSnapshot {
     completedDays: [],
     todayCompleted: false,
     todayStarted: false,
-    todayTask: getTaskForDay(currentDay, nextPersonalization),
+    todayTask: getTaskForDay(
+      currentDay,
+      nextPersonalization,
+      overrides.resetTypeId ?? 'soft-restarter',
+    ),
     resetStartedOn: '2026-09-19',
     lastSeenOn: '2026-09-19',
     lastCompletedOn: null,
@@ -268,9 +272,9 @@ const journeyDay30 = getCurrentResetTask(snapshot({ currentDay: 30 }));
 check(
   '15. Home and Journey titles are identical for the same day',
   homeDay8.title === journeyDay8.title &&
-    homeDay8.title === getPlanDayTitle(8) &&
+    homeDay8.title === getPlanDayTitle(8, 'soft-restarter') &&
     homeDay30.title === journeyDay30.title &&
-    homeDay30.title === getPlanDayTitle(30) &&
+    homeDay30.title === getPlanDayTitle(30, 'soft-restarter') &&
     homeDay8.minutes === journeyDay8.minutes &&
     homeDay8.description === journeyDay8.description,
 );
@@ -304,14 +308,14 @@ check(
     new Set([SOFT_RESTARTER_LINE, DREAMER_LINE, ALMOST_STARTER_LINE, FADING_FLAME_LINE]).size === 4,
 );
 
-const overflowTask = getTaskForDay(31, defaultPersonalization);
+const overflowTask = getTaskForDay(31, defaultPersonalization, 'soft-restarter');
 const finishDays = getJourneyChapterDays(getJourneyChapterForDay(30) ?? JOURNEY_CHAPTERS[4]!);
 const day1Visible = getJourneyVisibleDays(1);
 const day30Visible = getJourneyVisibleDays(30);
 check(
   '17. day 30 does not exceed the 30-day plan',
   overflowTask.day === PLAN_DAY_COUNT &&
-    overflowTask.title === getPlanDayTitle(30) &&
+    overflowTask.title === getPlanDayTitle(30, 'soft-restarter') &&
     getJourneyChapterForDay(31)?.endDay === 30 &&
     finishDays.join(',') === '29,30' &&
     day30Visible.join(',') === '30' &&

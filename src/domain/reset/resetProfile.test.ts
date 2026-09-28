@@ -36,6 +36,10 @@ check(
 );
 check('D empty id falls back', getResetProfile('').id === LEGACY_FALLBACK_RESET_TYPE_ID);
 check('D isResetTypeId accepts stored ids', isResetTypeId('soft-restarter'));
+check(
+  'D isResetTypeId accepts new ids',
+  isResetTypeId('quiet-stranger') && isResetTypeId('all-in-heart'),
+);
 check('D isResetTypeId rejects unknown ids', isResetTypeId('unknown-old-type') === false);
 check(
   'D lookup is not a classifier — same id in, same id out',

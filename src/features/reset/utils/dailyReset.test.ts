@@ -35,7 +35,7 @@ function snapshot(overrides: Partial<ResetSnapshot> = {}): ResetSnapshot {
     completedDays: [],
     todayCompleted: false,
     todayStarted: false,
-    todayTask: getTaskForDay(currentDay, nextPersonalization),
+    todayTask: getTaskForDay(currentDay, nextPersonalization, 'soft-restarter'),
     resetStartedOn: '2026-09-19',
     lastSeenOn: '2026-09-19',
     lastCompletedOn: null,
@@ -77,7 +77,7 @@ const RESTARTER_ANSWERS: Record<string, OnboardingAnswer> = {
 };
 
 const OVERLOADED_ANSWERS: Record<string, OnboardingAnswer> = {
-  changePattern: single('all-in-burn-out'),
+  changePattern: single('keep-changing'),
   primaryObstacle: multi(['too-much']),
   recurringThought: single('further-ahead'),
   outOfBalance: multi(['everything', 'direction']),
@@ -96,44 +96,48 @@ function tasksMatch(
 }
 
 const defaultPersonalization = personalization();
-const homeDay1 = getTaskForDay(1, defaultPersonalization);
-const journeyDay1 = getTaskForDay(1, defaultPersonalization);
+const TYPE = 'soft-restarter';
+const homeDay1 = getTaskForDay(1, defaultPersonalization, TYPE);
+const journeyDay1 = getTaskForDay(1, defaultPersonalization, TYPE);
 
 check('day 1 Home and Journey resolve identical task', tasksMatch(homeDay1, journeyDay1));
-check('day 1 title is the plan title, not journal copy', homeDay1.title === getPlanDayTitle(1));
+check(
+  'day 1 title is the plan title, not journal copy',
+  homeDay1.title === getPlanDayTitle(1, TYPE),
+);
 check('day 1 default minutes are 5', homeDay1.minutes === 5);
-check('day 1 default description', homeDay1.description === "You don't need momentum. Just begin.");
+check('day 1 default description is type-specific', homeDay1.description.length > 0);
 
 const fiveMinutes = personalization({ dailyCommitment: 'five' });
 const twentyMinutes = personalization({ dailyCommitment: 'twenty' });
 check(
   'same dailyCommitment → identical minutes on Home and Journey',
-  getTaskForDay(3, twentyMinutes).minutes === getTaskForDay(3, twentyMinutes).minutes &&
-    getTaskForDay(3, twentyMinutes).minutes === 20 &&
-    getTaskForDay(8, fiveMinutes).minutes === 5,
+  getTaskForDay(3, twentyMinutes, TYPE).minutes === getTaskForDay(3, twentyMinutes, TYPE).minutes &&
+    getTaskForDay(3, twentyMinutes, TYPE).minutes === 20 &&
+    getTaskForDay(8, fiveMinutes, TYPE).minutes === 5,
 );
 check(
   'different dailyCommitment still matches across surfaces',
-  tasksMatch(getTaskForDay(4, twentyMinutes), getTaskForDay(4, twentyMinutes)) &&
-    getTaskForDay(4, twentyMinutes).minutes !== getTaskForDay(4, fiveMinutes).minutes,
+  tasksMatch(getTaskForDay(4, twentyMinutes, TYPE), getTaskForDay(4, twentyMinutes, TYPE)) &&
+    getTaskForDay(4, twentyMinutes, TYPE).minutes !== getTaskForDay(4, fiveMinutes, TYPE).minutes,
 );
 
 const tooMuch = personalization({ primaryObstacle: 'too-much' });
 const afraid = personalization({ primaryObstacle: 'afraid-wont-stick' });
-const day2TooMuchHome = getTaskForDay(2, tooMuch);
-const day2TooMuchJourney = getTaskForDay(2, tooMuch);
-const day2AfraidHome = getTaskForDay(2, afraid);
-const day2AfraidJourney = getTaskForDay(2, afraid);
+const day2TooMuchHome = getTaskForDay(2, tooMuch, TYPE);
+const day2TooMuchJourney = getTaskForDay(2, tooMuch, TYPE);
+const day2AfraidHome = getTaskForDay(2, afraid, TYPE);
+const day2AfraidJourney = getTaskForDay(2, afraid, TYPE);
 
 check(
   'same primaryObstacle → identical description on Home and Journey',
   day2TooMuchHome.description === day2TooMuchJourney.description &&
-    day2TooMuchHome.description === 'Smaller than you think. Then stop.',
+    day2TooMuchHome.description.includes('Then stop.'),
 );
 check(
   'different primaryObstacle still matches across surfaces',
   day2AfraidHome.description === day2AfraidJourney.description &&
-    day2AfraidHome.description === 'Showing up once still counts.' &&
+    day2AfraidHome.description.includes('Showing up once still counts.') &&
     day2TooMuchHome.description !== day2AfraidHome.description,
 );
 
@@ -157,8 +161,8 @@ check('complete does not advance currentDay', completed.currentDay === 1);
 check(
   'complete keeps the same task',
   tasksMatch(
-    getTaskForDay(1, defaultPersonalization),
-    getTaskForDay(completed.currentDay, completed.personalization),
+    getTaskForDay(1, defaultPersonalization, TYPE),
+    getTaskForDay(completed.currentDay, completed.personalization, TYPE),
   ),
 );
 
@@ -186,8 +190,8 @@ check('reopen same day keeps currentDay', sameDayReopen.currentDay === 1);
 check(
   'reopen same day keeps the same task',
   tasksMatch(
-    getTaskForDay(sameDayReopen.currentDay, sameDayReopen.personalization),
-    getTaskForDay(1, defaultPersonalization),
+    getTaskForDay(sameDayReopen.currentDay, sameDayReopen.personalization, TYPE),
+    getTaskForDay(1, defaultPersonalization, TYPE),
   ),
 );
 
@@ -197,10 +201,11 @@ check('next day after completion is not already complete', nextMorning.todayComp
 check(
   'next day after completion uses the next task',
   tasksMatch(
-    getTaskForDay(nextMorning.currentDay, nextMorning.personalization),
-    getTaskForDay(2, defaultPersonalization),
+    getTaskForDay(nextMorning.currentDay, nextMorning.personalization, TYPE),
+    getTaskForDay(2, defaultPersonalization, TYPE),
   ) &&
-    getTaskForDay(nextMorning.currentDay, nextMorning.personalization).title === getPlanDayTitle(2),
+    getTaskForDay(nextMorning.currentDay, nextMorning.personalization, TYPE).title ===
+      getPlanDayTitle(2, TYPE),
 );
 
 const missed = applyDateRollover(started, '2026-09-20');
@@ -209,8 +214,8 @@ check('missed day flags missedYesterday', missed.missedYesterday === true);
 check(
   'missed day keeps the same task',
   tasksMatch(
-    getTaskForDay(missed.currentDay, missed.personalization),
-    getTaskForDay(1, defaultPersonalization),
+    getTaskForDay(missed.currentDay, missed.personalization, TYPE),
+    getTaskForDay(1, defaultPersonalization, TYPE),
   ),
 );
 
@@ -233,9 +238,9 @@ check('day 30 stays completed after rollover', day30Next.todayCompleted === true
 check(
   'day 30 task stays the day-30 plan task',
   tasksMatch(
-    getTaskForDay(day30Next.currentDay, day30Next.personalization),
-    getTaskForDay(30, defaultPersonalization),
-  ) && getTaskForDay(30, defaultPersonalization).title === getPlanDayTitle(30),
+    getTaskForDay(day30Next.currentDay, day30Next.personalization, TYPE),
+    getTaskForDay(30, defaultPersonalization, TYPE),
+  ) && getTaskForDay(30, defaultPersonalization, TYPE).title === getPlanDayTitle(30, TYPE),
 );
 
 const multiDayGap = applyDateRollover(completed, '2026-09-23');
@@ -411,11 +416,11 @@ check(
 
 const staleTask = snapshot({
   currentDay: 2,
-  todayTask: getTaskForDay(1, defaultPersonalization),
+  todayTask: getTaskForDay(1, defaultPersonalization, TYPE),
 });
 check(
   'canonical task read ignores a stale persisted todayTask',
-  getCurrentResetTask(staleTask).title === getTaskForDay(2, defaultPersonalization).title &&
+  getCurrentResetTask(staleTask).title === getTaskForDay(2, defaultPersonalization, TYPE).title &&
     getCurrentResetTask(staleTask).title !== staleTask.todayTask.title,
 );
 

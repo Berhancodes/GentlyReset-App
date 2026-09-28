@@ -46,7 +46,11 @@ function snapshot(overrides: Partial<ResetSnapshot> = {}): ResetSnapshot {
     completedDays: [],
     todayCompleted: false,
     todayStarted: false,
-    todayTask: getTaskForDay(currentDay, nextPersonalization),
+    todayTask: getTaskForDay(
+      currentDay,
+      nextPersonalization,
+      overrides.resetTypeId ?? 'soft-restarter',
+    ),
     resetStartedOn: '2026-09-19',
     lastSeenOn: '2026-09-19',
     lastCompletedOn: null,
@@ -92,7 +96,7 @@ const RESTARTER_ANSWERS: Record<string, OnboardingAnswer> = {
 };
 
 const OVERLOADED_ANSWERS: Record<string, OnboardingAnswer> = {
-  changePattern: single('all-in-burn-out'),
+  changePattern: single('keep-changing'),
   primaryObstacle: multi(['too-much']),
   recurringThought: single('further-ahead'),
   outOfBalance: multi(['everything', 'direction']),

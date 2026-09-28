@@ -44,7 +44,7 @@ const cycle1 = getResetCycleFromSnapshot(
 );
 
 const day1 = getResetDay(cycle1, plan, 1);
-const expectedDay1Task = getTaskForDay(1, cycle1.personalization);
+const expectedDay1Task = getTaskForDay(1, cycle1.personalization, cycle1.resetTypeId);
 
 check('C1 D1 cycleId matches cycle', day1.cycleId === cycle1.id);
 check('C1 D1 local dayNumber is 1', day1.dayNumber === 1);
@@ -106,7 +106,8 @@ check('C2 D17 task is still the local day-17 resolver', day17c2.task.day === 17)
 check(
   'C2 D17 task minutes follow cycle personalization',
   day17c2.task.minutes === 20 &&
-    day17c2.task.title === getTaskForDay(17, cycle2MathOnly.personalization).title,
+    day17c2.task.title ===
+      getTaskForDay(17, cycle2MathOnly.personalization, cycle2MathOnly.resetTypeId).title,
 );
 check('C2 D17 status is current', day17c2.status === 'current');
 check('C2 D17 is not persisted on the snapshot adapter', cycle1.sequence === 1);

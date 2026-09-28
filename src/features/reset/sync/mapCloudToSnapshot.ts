@@ -40,7 +40,7 @@ export function mapCycleWriteToSnapshot(
     completedDays,
     todayCompleted: cycle.todayCompleted,
     todayStarted: cycle.todayStarted,
-    todayTask: getTaskForDay(currentDay, personalization),
+    todayTask: getTaskForDay(currentDay, personalization, cycle.resetTypeId),
     resetStartedOn: isValidCalendarDate(cycle.resetStartedOn) ? cycle.resetStartedOn : null,
     lastSeenOn: isValidCalendarDate(cycle.lastSeenOn) ? cycle.lastSeenOn : null,
     lastCompletedOn: isValidCalendarDate(cycle.lastCompletedOn) ? cycle.lastCompletedOn : null,

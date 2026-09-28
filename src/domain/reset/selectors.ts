@@ -4,6 +4,7 @@ import type { ResetPersonalization, TodayTask } from './types';
 export type ResetTaskSource = {
   currentDay: number;
   personalization: ResetPersonalization;
+  resetTypeId?: string;
 };
 
 export type ResetProgressSource = {
@@ -31,7 +32,7 @@ export type ResetDaySource = {
  * Looks up by LOCAL `currentDay`, never overallDay.
  */
 export function getCurrentResetTask(snapshot: ResetTaskSource): TodayTask {
-  return getTaskForDay(snapshot.currentDay, snapshot.personalization);
+  return getTaskForDay(snapshot.currentDay, snapshot.personalization, snapshot.resetTypeId);
 }
 
 /** LOCAL plan-day cursor in the active cycle (1–30). Not progress. Not overallDay. */

@@ -5,7 +5,6 @@ import {
   emptyResetTypeScores,
   LEGACY_FALLBACK_RESET_TYPE_ID,
   MULTI_QUESTION_TYPE_CAPS,
-  QUESTION_WEIGHTS,
   resolveStoredResetTypeId,
 } from './deriveResetType';
 
@@ -33,76 +32,62 @@ function text(value: string): OnboardingAnswer {
 }
 
 function scoresEqual(left: ResetTypeScores, right: ResetTypeScores): boolean {
-  return (
-    left['overloaded-dreamer'] === right['overloaded-dreamer'] &&
-    left['soft-restarter'] === right['soft-restarter'] &&
-    left['almost-starter'] === right['almost-starter'] &&
-    left['fading-flame'] === right['fading-flame']
-  );
-}
-
-function expectedScores(partial: Partial<ResetTypeScores>): ResetTypeScores {
-  return {
-    ...emptyResetTypeScores(),
-    ...partial,
-  };
-}
-
-function breakdownMatchesScores(
-  breakdown: ReturnType<typeof deriveResetType>['breakdown'],
-  scores: ResetTypeScores,
-): boolean {
-  const summed = emptyResetTypeScores();
-  for (const contribution of breakdown) {
-    summed[contribution.typeId] += contribution.points;
-  }
-  return scoresEqual(summed, scores);
-}
-
-function contributionCount(
-  breakdown: ReturnType<typeof deriveResetType>['breakdown'],
-  typeId: ResetTypeId,
-  questionId: string,
-  optionId: string,
-): number {
-  return breakdown.filter(
-    (entry) =>
-      entry.typeId === typeId && entry.questionId === questionId && entry.optionId === optionId,
-  ).length;
+  return (Object.keys(left) as ResetTypeId[]).every((id) => left[id] === right[id]);
 }
 
 const CLEARLY_OVERLOADED: Record<string, OnboardingAnswer> = {
-  changePattern: single('all-in-burn-out'),
+  changePattern: single('keep-changing'),
   primaryObstacle: multi(['too-much']),
-  outOfBalance: multi(['everything', 'direction']),
+  reason: multi(['overwhelmed']),
+  outOfBalance: multi(['everything']),
   recentFeeling: single('overwhelmed'),
 };
 
 const CLEARLY_RESTARTING: Record<string, OnboardingAnswer> = {
   changePattern: single('bad-day-week'),
   consistencyStage: single('restarting'),
-  outOfBalance: multi(['confidence']),
+  primaryObstacle: multi(['afraid-wont-stick']),
 };
 
 const CLEARLY_ALMOST_STARTER: Record<string, OnboardingAnswer> = {
   changePattern: single('plan-dont-start'),
   consistencyStage: single('starting'),
-  primaryObstacle: multi(['overthink', 'put-off']),
+  primaryObstacle: multi(['put-off', 'overthink']),
 };
 
 const CLEARLY_FADING_FLAME: Record<string, OnboardingAnswer> = {
   changePattern: single('start-strong-fall-off'),
   consistencyStage: single('staying-consistent'),
   primaryObstacle: multi(['lose-motivation']),
-  outOfBalance: multi(['energy', 'habits']),
+  reason: multi(['lost-motivation']),
+};
+
+const CLEARLY_ALL_IN: Record<string, OnboardingAnswer> = {
+  changePattern: single('all-in-burn-out'),
+  primaryObstacle: multi(['too-much']),
+};
+
+const CLEARLY_QUIET_DRAIN: Record<string, OnboardingAnswer> = {
+  primaryObstacle: multi(['no-energy']),
+  outOfBalance: multi(['energy']),
   recentFeeling: single('drained'),
 };
 
-const MIXED_DREAMER_ALMOST: Record<string, OnboardingAnswer> = {
-  changePattern: single('keep-changing'),
-  consistencyStage: single('starting'),
-  primaryObstacle: multi(['too-much', 'overthink']),
-  recentFeeling: single('overwhelmed'),
+const CLEARLY_COMPASS: Record<string, OnboardingAnswer> = {
+  changePattern: single('never-know-start'),
+  primaryObstacle: multi(['dont-know']),
+  outOfBalance: multi(['direction']),
+  reason: multi(['stuck']),
+};
+
+const CLEARLY_STRANGER: Record<string, OnboardingAnswer> = {
+  reason: multi(['not-myself']),
+  recentFeeling: single('disconnected'),
+};
+
+const CLEARLY_SCATTER: Record<string, OnboardingAnswer> = {
+  primaryObstacle: multi(['distracted']),
+  outOfBalance: multi(['routine']),
 };
 
 const MIXED_RESTARTER_FLAME: Record<string, OnboardingAnswer> = {
@@ -110,215 +95,122 @@ const MIXED_RESTARTER_FLAME: Record<string, OnboardingAnswer> = {
   consistencyStage: single('staying-consistent'),
 };
 
-const SPARSE_STARTING: Record<string, OnboardingAnswer> = {
-  consistencyStage: single('starting'),
+const REACHABLE: Record<ResetTypeId, Record<string, OnboardingAnswer>> = {
+  'overloaded-dreamer': CLEARLY_OVERLOADED,
+  'soft-restarter': CLEARLY_RESTARTING,
+  'almost-starter': CLEARLY_ALMOST_STARTER,
+  'fading-flame': CLEARLY_FADING_FLAME,
+  'all-in-heart': CLEARLY_ALL_IN,
+  'quiet-drain': CLEARLY_QUIET_DRAIN,
+  'drifting-compass': CLEARLY_COMPASS,
+  'quiet-stranger': CLEARLY_STRANGER,
+  'soft-scatter': CLEARLY_SCATTER,
 };
 
-const CONFLICTING: Record<string, OnboardingAnswer> = {
-  changePattern: single('plan-dont-start'),
-  consistencyStage: single('restarting'),
-  primaryObstacle: multi(['too-much']),
-};
+for (const [typeId, answers] of Object.entries(REACHABLE) as [
+  ResetTypeId,
+  Record<string, OnboardingAnswer>,
+][]) {
+  const result = deriveResetType(answers);
+  check(`reachable ${typeId}`, result.id === typeId, result.id);
+  check(`reachable ${typeId} has name`, result.name.length > 0);
+  check(
+    `reachable ${typeId} breakdown matches scores`,
+    scoresEqual(
+      result.scores,
+      result.breakdown.reduce((sum, entry) => {
+        sum[entry.typeId] += entry.points;
+        return sum;
+      }, emptyResetTypeScores()),
+    ),
+  );
+}
 
 const overloaded = deriveResetType(CLEARLY_OVERLOADED);
-check('1 clearly overloaded winner', overloaded.id === 'overloaded-dreamer');
-check('1 clearly overloaded name', overloaded.name === 'The Overloaded Dreamer');
+check('overloaded is not leftover all-in', overloaded.id === 'overloaded-dreamer');
+check('all-in-burn-out is All-In Heart', deriveResetType(CLEARLY_ALL_IN).id === 'all-in-heart');
 check(
-  '1 clearly overloaded scores',
-  scoresEqual(overloaded.scores, expectedScores({ 'overloaded-dreamer': 8 })),
-  JSON.stringify(overloaded.scores),
-);
-check('1 clearly overloaded runner-up id', overloaded.runnerUp?.id === 'soft-restarter');
-check('1 clearly overloaded runner-up score', overloaded.runnerUp?.score === 0);
-check('1 clearly overloaded confidence', overloaded.confidence === 1);
-check(
-  '1 clearly overloaded breakdown matches scores',
-  breakdownMatchesScores(overloaded.breakdown, overloaded.scores),
-);
-check(
-  '1 clearly overloaded includes all-in-burn-out',
-  contributionCount(
-    overloaded.breakdown,
-    'overloaded-dreamer',
-    'changePattern',
-    'all-in-burn-out',
-  ) === 1,
+  'all-in-burn-out does not elect Overloaded Dreamer',
+  deriveResetType({ changePattern: single('all-in-burn-out') }).id === 'all-in-heart' &&
+    deriveResetType({ changePattern: single('all-in-burn-out') }).scores['overloaded-dreamer'] ===
+      0,
 );
 
-const restarter = deriveResetType(CLEARLY_RESTARTING);
-check('2 clearly restarting winner', restarter.id === 'soft-restarter');
 check(
-  '2 clearly restarting scores',
-  scoresEqual(restarter.scores, expectedScores({ 'soft-restarter': 7 })),
-  JSON.stringify(restarter.scores),
-);
-check(
-  '2 clearly restarting runner-up',
-  restarter.runnerUp?.id === 'almost-starter' && restarter.runnerUp.score === 0,
-);
-check('2 clearly restarting confidence', restarter.confidence === 1);
-check(
-  '2 clearly restarting breakdown matches scores',
-  breakdownMatchesScores(restarter.breakdown, restarter.scores),
+  'distracted elects Soft Scatter, not Almost Starter',
+  deriveResetType({ primaryObstacle: multi(['distracted']) }).id === 'soft-scatter' &&
+    deriveResetType({ primaryObstacle: multi(['distracted']) }).scores['almost-starter'] === 0,
 );
 
-const almost = deriveResetType(CLEARLY_ALMOST_STARTER);
-check('3 clearly almost-starter winner', almost.id === 'almost-starter');
+const drainedOnly = deriveResetType({ recentFeeling: single('drained') });
+check('drained alone elects Quiet Drain, not Fading Flame', drainedOnly.id === 'quiet-drain');
+check('drained does not score Fading Flame', drainedOnly.scores['fading-flame'] === 0);
+
 check(
-  '3 clearly almost-starter scores',
-  scoresEqual(almost.scores, expectedScores({ 'almost-starter': 10 })),
-  JSON.stringify(almost.scores),
-);
-check(
-  '3 clearly almost-starter runner-up',
-  almost.runnerUp?.id === 'soft-restarter' && almost.runnerUp.score === 0,
-);
-check('3 clearly almost-starter confidence', almost.confidence === 1);
-check(
-  '3 clearly almost-starter breakdown matches scores',
-  breakdownMatchesScores(almost.breakdown, almost.scores),
+  'not-myself + disconnected elects Quiet Stranger',
+  deriveResetType(CLEARLY_STRANGER).id === 'quiet-stranger',
 );
 
-const fading = deriveResetType(CLEARLY_FADING_FLAME);
-check('4 clearly fading-flame winner', fading.id === 'fading-flame');
+const compass = deriveResetType(CLEARLY_COMPASS);
+check('never-know-start / direction elects Drifting Compass', compass.id === 'drifting-compass');
 check(
-  '4 clearly fading-flame scores',
-  scoresEqual(fading.scores, expectedScores({ 'fading-flame': 11 })),
-  JSON.stringify(fading.scores),
-);
-check(
-  '4 clearly fading-flame runner-up',
-  fading.runnerUp?.id === 'soft-restarter' && fading.runnerUp.score === 0,
-);
-check('4 clearly fading-flame confidence', fading.confidence === 1);
-check(
-  '4 clearly fading-flame breakdown matches scores',
-  breakdownMatchesScores(fading.breakdown, fading.scores),
+  'never-know-start still gives Almost Starter a weaker bump',
+  compass.scores['almost-starter'] === 1 && compass.scores['drifting-compass'] >= 8,
 );
 
-const mixedDreamerAlmost = deriveResetType(MIXED_DREAMER_ALMOST);
-check('5 mixed dreamer+almost winner', mixedDreamerAlmost.id === 'overloaded-dreamer');
+const mixed = deriveResetType(MIXED_RESTARTER_FLAME);
 check(
-  '5 mixed dreamer+almost scores',
-  scoresEqual(
-    mixedDreamerAlmost.scores,
-    expectedScores({ 'overloaded-dreamer': 6, 'almost-starter': 5 }),
-  ),
-  JSON.stringify(mixedDreamerAlmost.scores),
+  'exact tie uses changePattern',
+  mixed.scores['soft-restarter'] === mixed.scores['fading-flame'] && mixed.id === 'soft-restarter',
 );
-check(
-  '5 mixed dreamer+almost runner-up',
-  mixedDreamerAlmost.runnerUp?.id === 'almost-starter' && mixedDreamerAlmost.runnerUp.score === 5,
-);
-check('5 mixed dreamer+almost confidence', mixedDreamerAlmost.confidence === (6 - 5) / 6);
-check(
-  '5 mixed includes keep-changing',
-  contributionCount(
-    mixedDreamerAlmost.breakdown,
-    'overloaded-dreamer',
-    'changePattern',
-    'keep-changing',
-  ) === 1,
-);
-
-const mixedRestarterFlame = deriveResetType(MIXED_RESTARTER_FLAME);
-check(
-  '6 mixed restarter+flame scores tied at 3',
-  mixedRestarterFlame.scores['soft-restarter'] === 3 &&
-    mixedRestarterFlame.scores['fading-flame'] === 3,
-);
-check(
-  '6 mixed restarter+flame winner via changePattern',
-  mixedRestarterFlame.id === 'soft-restarter',
-);
-check(
-  '6 mixed restarter+flame runner-up',
-  mixedRestarterFlame.runnerUp?.id === 'fading-flame' && mixedRestarterFlame.runnerUp.score === 3,
-);
-check('6 mixed restarter+flame confidence is 0 on tie', mixedRestarterFlame.confidence === 0);
-
-const sparse = deriveResetType(SPARSE_STARTING);
-check('7 sparse winner', sparse.id === 'almost-starter');
-check('7 sparse scores', sparse.scores['almost-starter'] === 3);
-check(
-  '7 sparse runner-up is tie-priority among zeros',
-  sparse.runnerUp?.id === 'soft-restarter' && sparse.runnerUp.score === 0,
-);
-check('7 sparse confidence', sparse.confidence === 1);
-
-const conflicting = deriveResetType(CONFLICTING);
-check(
-  '8 conflicting scores',
-  scoresEqual(
-    conflicting.scores,
-    expectedScores({
-      'almost-starter': 3,
-      'soft-restarter': 3,
-      'overloaded-dreamer': 2,
-      'fading-flame': 0,
-    }),
-  ),
-  JSON.stringify(conflicting.scores),
-);
-check('8 conflicting winner via changePattern', conflicting.id === 'almost-starter');
-check(
-  '8 conflicting runner-up',
-  conflicting.runnerUp?.id === 'soft-restarter' && conflicting.runnerUp.score === 3,
-);
-check('8 conflicting confidence is 0 on top-score tie', conflicting.confidence === 0);
-check(
-  '8 conflicting is deterministic',
-  deriveResetType(CONFLICTING).id === conflicting.id &&
-    deriveResetType(CONFLICTING).runnerUp?.id === conflicting.runnerUp?.id,
-);
+check('tie confidence is 0', mixed.confidence === 0);
+check('tie runner-up is fading-flame', mixed.runnerUp?.id === 'fading-flame');
 
 const empty = deriveResetType({});
-check('9 empty winner is tie-priority restarter', empty.id === 'soft-restarter');
-check('9 empty all scores 0', scoresEqual(empty.scores, emptyResetTypeScores()));
+check('empty answers use tie-priority Soft Restarter', empty.id === 'soft-restarter');
+check('empty all scores 0', scoresEqual(empty.scores, emptyResetTypeScores()));
+check('empty confidence is 0', empty.confidence === 0);
+check('empty runner-up is almost-starter', empty.runnerUp?.id === 'almost-starter');
+
+const freshStart = deriveResetType({ reason: multi(['fresh-start']) });
 check(
-  '9 empty runner-up is almost-starter',
-  empty.runnerUp?.id === 'almost-starter' && empty.runnerUp.score === 0,
+  'fresh-start cannot win — it scores nothing',
+  scoresEqual(freshStart.scores, emptyResetTypeScores()),
 );
-check('9 empty confidence is 0', empty.confidence === 0);
-check('9 empty does not crash', empty.breakdown.length === 0);
+check('fresh-start falls through to tie priority', freshStart.id === 'soft-restarter');
+
+const prettyGood = deriveResetType({ recentFeeling: single('pretty-good') });
+check('pretty-good cannot win', scoresEqual(prettyGood.scores, emptyResetTypeScores()));
+check('pretty-good uses tie priority', prettyGood.id === 'soft-restarter');
+
+const relationships = deriveResetType({ outOfBalance: multi(['relationships']) });
+check('relationships cannot win', scoresEqual(relationships.scores, emptyResetTypeScores()));
+
+const couldBeBetter = deriveResetType({ reason: multi(['could-be-better']) });
+check('could-be-better is weak', couldBeBetter.scores['overloaded-dreamer'] === 1);
+
+check(
+  'same answers always same type',
+  deriveResetType(CLEARLY_ALMOST_STARTER).id === deriveResetType(CLEARLY_ALMOST_STARTER).id &&
+    deriveResetType(MIXED_RESTARTER_FLAME).runnerUp?.id === mixed.runnerUp?.id,
+);
 
 const withUnscored = deriveResetType({
   ...CLEARLY_ALMOST_STARTER,
-  desiredFeelings: multi(['calm', 'confident', 'motivated']),
+  desiredFeelings: multi(['calm']),
   dailyCommitment: single('thirty-plus'),
   desiredIdentity: single('disciplined'),
   supportStyle: single('accountable'),
   supportTiming: single('wake-up'),
-  readiness: { type: 'scale', value: 5 },
-  churnRisk: single('asks-too-much'),
   thirtyDayOutcome: multi(['consistent']),
-  desiredDailyLife: multi(['structure']),
-  successStatement: single('stuck-with-it'),
   missedDayResponse: single('continue'),
-  reason: multi(['overwhelmed', 'fresh-start']),
   profileAccuracy: single('not-really'),
 });
+const almost = deriveResetType(CLEARLY_ALMOST_STARTER);
 check(
-  'unscored questions do not change type',
+  'wishes do not change type',
   withUnscored.id === almost.id && scoresEqual(withUnscored.scores, almost.scores),
 );
-
-const prettyGood = deriveResetType({
-  ...CLEARLY_OVERLOADED,
-  recentFeeling: single('pretty-good'),
-});
-check(
-  'pretty-good is unscored',
-  prettyGood.scores['overloaded-dreamer'] === 7 &&
-    prettyGood.breakdown.every((entry) => entry.optionId !== 'pretty-good'),
-);
-
-const mostlyOkay = deriveResetType({ recentFeeling: single('mostly-okay') });
-check(
-  'mostly-okay is unscored (falls through to tie priority)',
-  mostlyOkay.id === 'soft-restarter',
-);
-check('mostly-okay adds no points', scoresEqual(mostlyOkay.scores, emptyResetTypeScores()));
 
 const allObstacles = deriveResetType({
   primaryObstacle: multi([
@@ -333,100 +225,52 @@ const allObstacles = deriveResetType({
   ]),
 });
 check(
-  'multi-choice cap: almost-starter from obstacles',
-  allObstacles.scores['almost-starter'] === MULTI_QUESTION_TYPE_CAPS.primaryObstacle,
-);
-check(
-  'multi-choice cap: fading-flame from obstacles',
-  allObstacles.scores['fading-flame'] === MULTI_QUESTION_TYPE_CAPS.primaryObstacle,
-);
-check(
-  'multi-choice cap: overloaded-dreamer from obstacles',
-  allObstacles.scores['overloaded-dreamer'] === MULTI_QUESTION_TYPE_CAPS.primaryObstacle,
-);
-check(
-  'multi-choice cap: restarter uncapped below cap',
-  allObstacles.scores['soft-restarter'] === 2,
+  'obstacle cap holds for Almost Starter',
+  allObstacles.scores['almost-starter'] <= (MULTI_QUESTION_TYPE_CAPS.primaryObstacle ?? 0),
 );
 check(
   'selecting every obstacle does not exceed cap',
-  Math.max(
-    allObstacles.scores['overloaded-dreamer'],
-    allObstacles.scores['soft-restarter'],
-    allObstacles.scores['almost-starter'],
-    allObstacles.scores['fading-flame'],
-  ) === MULTI_QUESTION_TYPE_CAPS.primaryObstacle,
-);
-
-const neverKnow = deriveResetType({ changePattern: single('never-know-start') });
-check(
-  'never-know-start maps to almost-starter and overloaded-dreamer',
-  neverKnow.scores['almost-starter'] === QUESTION_WEIGHTS.changePattern &&
-    neverKnow.scores['overloaded-dreamer'] === QUESTION_WEIGHTS.changePattern,
-);
-check(
-  'never-know-start tie prefers almost-starter (cleaner diagnostic)',
-  neverKnow.id === 'almost-starter',
+  Math.max(...Object.values(allObstacles.scores)) <=
+    (MULTI_QUESTION_TYPE_CAPS.primaryObstacle ?? 0),
 );
 
 const keywordDreamer = deriveResetType({
   resetReason: text('I try to change too much all at once'),
 });
-check('resetReason too much / all at once → dreamer', keywordDreamer.id === 'overloaded-dreamer');
-check('resetReason dreamer score is 1', keywordDreamer.scores['overloaded-dreamer'] === 1);
-
-const keywordRestarter = deriveResetType({
-  resetReason: text('I keep starting over after a bad day'),
-});
-check('resetReason starting over / bad day → restarter', keywordRestarter.id === 'soft-restarter');
+check('resetReason too much → dreamer', keywordDreamer.id === 'overloaded-dreamer');
 
 const keywordNoisy = deriveResetType({
   resetReason: text('I want to feel better and change my life'),
 });
 check('noisy resetReason is skipped', scoresEqual(keywordNoisy.scores, emptyResetTypeScores()));
-check('noisy resetReason uses tie priority', keywordNoisy.id === 'soft-restarter');
 
 check(
   'resolve: valid stored id is kept even if answers would differ',
   resolveStoredResetTypeId('fading-flame', CLEARLY_ALMOST_STARTER) === 'fading-flame',
 );
 check(
-  'resolve: unknown id with answers derives once',
-  resolveStoredResetTypeId('unknown-old-type', CLEARLY_OVERLOADED) === 'overloaded-dreamer',
+  'resolve: new ids are valid stored types',
+  resolveStoredResetTypeId('quiet-drain', CLEARLY_OVERLOADED) === 'quiet-drain',
 );
 check(
-  'resolve: missing id with answers derives once',
-  resolveStoredResetTypeId('', SPARSE_STARTING) === 'almost-starter',
+  'resolve: unknown id with answers derives once',
+  resolveStoredResetTypeId('unknown-old-type', CLEARLY_OVERLOADED) === 'overloaded-dreamer',
 );
 check(
   'resolve: missing id with no answers uses legacy dreamer fallback',
   resolveStoredResetTypeId('', {}) === LEGACY_FALLBACK_RESET_TYPE_ID,
 );
 check(
-  'resolve: unknown id with no answers uses legacy dreamer fallback',
-  resolveStoredResetTypeId('not-a-type', {}) === LEGACY_FALLBACK_RESET_TYPE_ID,
-);
-check(
   'new classification of empty answers is restarter, not the legacy dreamer fallback',
   deriveResetType({}).id === 'soft-restarter',
 );
 
-check('question weights: changePattern is 3', QUESTION_WEIGHTS.changePattern === 3);
-check('question weights: consistencyStage is 3', QUESTION_WEIGHTS.consistencyStage === 3);
-check('question weights: primaryObstacle is 2', QUESTION_WEIGHTS.primaryObstacle === 2);
-check('question weights: outOfBalance is 1', QUESTION_WEIGHTS.outOfBalance === 1);
-check('question weights: recentFeeling is 1', QUESTION_WEIGHTS.recentFeeling === 1);
-check('question weights: resetReason is 1', QUESTION_WEIGHTS.resetReason === 1);
-
-const legacyParked = deriveResetType({
+const parked = deriveResetType({
   ...CLEARLY_OVERLOADED,
   recurringThought: single('further-ahead'),
   selfTalkAfterSlip: single('ruined-progress'),
 });
-check(
-  'parked recurringThought and selfTalkAfterSlip do not change scores',
-  scoresEqual(legacyParked.scores, overloaded.scores) && legacyParked.id === overloaded.id,
-);
+check('parked questions do not change scores', scoresEqual(parked.scores, overloaded.scores));
 
 if (failed > 0) {
   throw new Error(`${failed} reset-type check(s) failed`);

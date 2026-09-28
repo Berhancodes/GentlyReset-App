@@ -9,6 +9,7 @@ import {
   PLAN_DAY_TITLES,
   thirtyDayPlan,
 } from './resetPlan';
+import { getRoadmapPhaseForDay } from './roadmap';
 import type { ResetPersonalization } from './types';
 
 let failed = 0;
@@ -45,31 +46,37 @@ check(
 );
 check('B PLAN_DAY_COUNT aliases DEFAULT_CYCLE_LENGTH', PLAN_DAY_COUNT === DEFAULT_CYCLE_LENGTH);
 check('B there are 30 canonical titles', PLAN_DAY_TITLES.length === 30);
-check(
-  'B day 1 title matches onboarding companion preview',
-  getPlanDayTitle(1) === 'Start smaller than usual',
-);
-check(
-  'B day 3 title matches onboarding companion preview',
-  getPlanDayTitle(3) === 'Build one repeatable win',
-);
 
-const defaultTask = getTaskForDay(1, personalization());
-const twenty = getTaskForDay(4, personalization({ dailyCommitment: 'twenty' }));
-const tooMuch = getTaskForDay(2, personalization({ primaryObstacle: 'too-much' }));
+const defaultTask = getTaskForDay(1, personalization(), 'overloaded-dreamer');
+const twenty = getTaskForDay(4, personalization({ dailyCommitment: 'twenty' }), 'almost-starter');
+const tooMuch = getTaskForDay(
+  2,
+  personalization({ primaryObstacle: 'too-much' }),
+  'overloaded-dreamer',
+);
 
 check('B getTaskForDay uses local day', defaultTask.day === 1 && defaultTask.id === 'day-1');
-check('B getTaskForDay title is the plan title', defaultTask.title === getPlanDayTitle(1));
+check(
+  'B getTaskForDay title is the type playlist title',
+  defaultTask.title === getPlanDayTitle(1, 'overloaded-dreamer'),
+);
 check('B getTaskForDay minutes come from commitment', twenty.minutes === 20);
 check(
-  'B getTaskForDay description uses obstacle',
-  tooMuch.description === 'Smaller than you think. Then stop.',
+  'B getTaskForDay description uses obstacle modifier',
+  tooMuch.description.includes('Then stop.'),
 );
 check(
   'B getTaskForDay clamps above 30 to the same day-30 task',
-  getTaskForDay(31, personalization()).day === 30 &&
-    getTaskForDay(31, personalization()).title === getPlanDayTitle(30),
+  getTaskForDay(31, personalization(), 'overloaded-dreamer').day === 30 &&
+    getTaskForDay(31, personalization(), 'overloaded-dreamer').title ===
+      getPlanDayTitle(30, 'overloaded-dreamer'),
 );
+check(
+  'B type-specific titles are not a single shared list',
+  getPlanDayTitle(1, 'soft-restarter') !== getPlanDayTitle(1, 'quiet-drain'),
+);
+check('B day 8 is the change phase', getRoadmapPhaseForDay(8) === 'change');
+check('B day 29 is the close phase', getRoadmapPhaseForDay(29) === 'close');
 
 let unknownPlanFailed = false;
 try {

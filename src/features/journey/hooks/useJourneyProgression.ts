@@ -43,6 +43,7 @@ type UseJourneyProgressionInput = {
   todayCompleted: boolean;
   currentTitle: string;
   focused: boolean;
+  resetTypeId?: string;
 };
 
 type ProgressionSequence = {
@@ -60,6 +61,7 @@ function idlePresentation(
   completedDays: readonly number[],
   todayCompleted: boolean,
   currentTitle: string,
+  resetTypeId?: string,
 ): JourneyProgressionPresentation {
   const visibleDays = getJourneyVisibleDays(displayDay);
 
@@ -70,7 +72,8 @@ function idlePresentation(
     toDay: displayDay,
     visibleDays,
     headingDay: displayDay,
-    headingTitle: displayDay === currentDay ? currentTitle : getPlanDayTitle(displayDay),
+    headingTitle:
+      displayDay === currentDay ? currentTitle : getPlanDayTitle(displayDay, resetTypeId),
     progressDay: displayDay,
     walkDirection: 1,
     showProgressMascot: false,
@@ -84,7 +87,10 @@ function idlePresentation(
   };
 }
 
-function progressingPresentation(sequence: ProgressionSequence): JourneyProgressionPresentation {
+function progressingPresentation(
+  sequence: ProgressionSequence,
+  resetTypeId?: string,
+): JourneyProgressionPresentation {
   const showingGif = sequence.phase === 'walking' || sequence.phase === 'celebrating';
   const headingDay = sequence.headingReady ? sequence.toDay : sequence.fromDay;
   const incomingDay = getJourneyIncomingDay(sequence.fromDay, sequence.toDay);
@@ -96,7 +102,7 @@ function progressingPresentation(sequence: ProgressionSequence): JourneyProgress
     toDay: sequence.toDay,
     visibleDays: incomingDay === undefined ? [sequence.fromDay] : [sequence.fromDay, incomingDay],
     headingDay,
-    headingTitle: getPlanDayTitle(headingDay),
+    headingTitle: getPlanDayTitle(headingDay, resetTypeId),
     progressDay: sequence.arrived ? sequence.toDay : sequence.fromDay,
     walkDirection: getJourneyWalkDirection(sequence.fromDay, sequence.toDay),
     showProgressMascot: showingGif,
@@ -122,6 +128,7 @@ export function useJourneyProgression({
   todayCompleted,
   currentTitle,
   focused,
+  resetTypeId,
 }: UseJourneyProgressionInput): JourneyProgressionPresentation {
   const reduceMotion = useReducedMotion() === true;
   const acknowledgedDay = useJourneyVisualStore((state) => state.acknowledgedDay);
@@ -294,9 +301,16 @@ export function useJourneyProgression({
   ]);
 
   if (sequence) {
-    return progressingPresentation(sequence);
+    return progressingPresentation(sequence, resetTypeId);
   }
 
   const displayDay = devPreview?.restDay ?? currentDay;
-  return idlePresentation(displayDay, currentDay, completedDays, todayCompleted, currentTitle);
+  return idlePresentation(
+    displayDay,
+    currentDay,
+    completedDays,
+    todayCompleted,
+    currentTitle,
+    resetTypeId,
+  );
 }

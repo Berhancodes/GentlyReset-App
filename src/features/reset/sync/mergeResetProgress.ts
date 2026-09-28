@@ -196,7 +196,7 @@ export function mergeResetProgress(
     completedDays,
     todayCompleted: flagSource.todayCompleted,
     todayStarted: flagSource.todayStarted,
-    todayTask: getTaskForDay(currentDay, cloudSnapshot.personalization),
+    todayTask: getTaskForDay(currentDay, cloudSnapshot.personalization, cloudSnapshot.resetTypeId),
     resetStartedOn,
     lastSeenOn,
     lastCompletedOn,
@@ -211,7 +211,7 @@ export function mergeResetProgress(
   const rolled = applyDateRollover(merged, timeZoneToday);
   const snapshot: ResetSnapshot = {
     ...rolled,
-    todayTask: getTaskForDay(rolled.currentDay, rolled.personalization),
+    todayTask: getTaskForDay(rolled.currentDay, rolled.personalization, rolled.resetTypeId),
     reflections: local.reflections.map((entry) => ({ ...entry })),
   };
 

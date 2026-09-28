@@ -32,11 +32,11 @@ import { getLegalUrls } from '@/features/subscription/utils/legalUrls';
 const CTA_SAFE_AREA_GAP = 12;
 
 const BENEFITS = [
-  'full 30-day reset plan',
-  'unlimited check-ins',
-  'ai guidance & insights',
-  'customize your companion',
-  'unlock new worlds',
+  'your personalized 30-day reset',
+  'daily steps built around your pattern',
+  'journal & track your progress',
+  'reset with friends',
+  'keep your journey synced',
   'support our small team',
 ] as const;
 

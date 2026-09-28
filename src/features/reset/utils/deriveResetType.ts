@@ -17,7 +17,12 @@ import {
 export { isResetTypeId, LEGACY_FALLBACK_RESET_TYPE_ID } from '../types';
 
 export type ScoredQuestionId =
-  'changePattern' | 'consistencyStage' | 'primaryObstacle' | 'outOfBalance' | 'recentFeeling';
+  | 'changePattern'
+  | 'consistencyStage'
+  | 'primaryObstacle'
+  | 'outOfBalance'
+  | 'recentFeeling'
+  | 'reason';
 
 export type ScoreContribution = {
   questionId: ScoredQuestionId | 'resetReason';
@@ -39,100 +44,93 @@ export type ResetTypeClassification = {
   breakdown: readonly ScoreContribution[];
 };
 
-export const QUESTION_WEIGHTS: Record<ScoredQuestionId | 'resetReason', number> = {
-  changePattern: 3,
-  consistencyStage: 3,
-  primaryObstacle: 2,
-  outOfBalance: 1,
-  recentFeeling: 1,
-  resetReason: 1,
+export type ScoreRule = {
+  typeId: ResetTypeId;
+  points: number;
 };
 
 /**
- * Cap per-type points from a multi-choice question so selecting every option
- * cannot drown out the 3-pt diagnostics. 2 options × question weight.
+ * Per-option points. Mechanics first (changePattern / consistencyStage),
+ * then obstacles, then reason, then state. Generic options are omitted.
  */
-export const MULTI_QUESTION_TYPE_CAPS: Partial<Record<ScoredQuestionId, number>> = {
-  primaryObstacle: 4,
-  outOfBalance: 2,
-};
-
-/**
- * Explicit option → type matrix. An option may map to more than one type.
- * Options omitted here are intentionally unscored (too noisy or not diagnostic).
- *
- * Ambiguous / leftover mappings (see also the report):
- * - `no-energy`: closest to fading-flame; could also be overload or post-slip crash.
- * - `dont-know`: no mechanic; leftover cluster → overloaded-dreamer.
- * - `just-lazy`: shame after a slip, not a mechanic → soft-restarter (question is post-slip).
- * - `miss-old-me`: nostalgia, not a change pattern → fading-flame (lost spark).
- * - `dont-know-life`: directionless leftover → overloaded-dreamer.
- * - `pretty-good`, `mostly-okay`, `relationships`: unscored.
- */
-export const OPTION_TYPE_MATRIX: Record<
-  ScoredQuestionId,
-  Record<string, readonly ResetTypeId[]>
-> = {
+export const OPTION_SCORE_MATRIX: Record<ScoredQuestionId, Record<string, readonly ScoreRule[]>> = {
   changePattern: {
-    'all-in-burn-out': ['overloaded-dreamer'],
-    'plan-dont-start': ['almost-starter'],
-    'start-strong-fall-off': ['fading-flame'],
-    'bad-day-week': ['soft-restarter'],
-    'keep-changing': ['overloaded-dreamer'],
-    'never-know-start': ['almost-starter', 'overloaded-dreamer'],
+    'all-in-burn-out': [{ typeId: 'all-in-heart', points: 4 }],
+    'plan-dont-start': [{ typeId: 'almost-starter', points: 4 }],
+    'start-strong-fall-off': [{ typeId: 'fading-flame', points: 4 }],
+    'bad-day-week': [{ typeId: 'soft-restarter', points: 4 }],
+    'keep-changing': [{ typeId: 'overloaded-dreamer', points: 4 }],
+    'never-know-start': [
+      { typeId: 'drifting-compass', points: 3 },
+      { typeId: 'almost-starter', points: 1 },
+    ],
   },
   consistencyStage: {
-    starting: ['almost-starter'],
-    'staying-consistent': ['fading-flame'],
-    restarting: ['soft-restarter'],
+    starting: [{ typeId: 'almost-starter', points: 4 }],
+    'staying-consistent': [{ typeId: 'fading-flame', points: 4 }],
+    restarting: [{ typeId: 'soft-restarter', points: 4 }],
   },
   primaryObstacle: {
-    overthink: ['almost-starter'],
-    'put-off': ['almost-starter'],
-    'no-energy': ['fading-flame'],
-    'too-much': ['overloaded-dreamer'],
-    'lose-motivation': ['fading-flame'],
-    'afraid-wont-stick': ['soft-restarter', 'fading-flame'],
-    distracted: ['almost-starter'],
-    'dont-know': ['overloaded-dreamer'],
+    'too-much': [{ typeId: 'overloaded-dreamer', points: 3 }],
+    'put-off': [{ typeId: 'almost-starter', points: 3 }],
+    overthink: [{ typeId: 'almost-starter', points: 2 }],
+    'no-energy': [{ typeId: 'quiet-drain', points: 3 }],
+    'lose-motivation': [{ typeId: 'fading-flame', points: 3 }],
+    'afraid-wont-stick': [{ typeId: 'soft-restarter', points: 2 }],
+    distracted: [{ typeId: 'soft-scatter', points: 3 }],
+    'dont-know': [{ typeId: 'drifting-compass', points: 2 }],
+  },
+  reason: {
+    'not-myself': [{ typeId: 'quiet-stranger', points: 3 }],
+    overwhelmed: [{ typeId: 'overloaded-dreamer', points: 2 }],
+    'lost-motivation': [{ typeId: 'fading-flame', points: 2 }],
+    stuck: [{ typeId: 'drifting-compass', points: 1 }],
+    'could-be-better': [{ typeId: 'overloaded-dreamer', points: 1 }],
+    // fresh-start: intentionally unscored
   },
   outOfBalance: {
-    mind: ['almost-starter', 'overloaded-dreamer'],
-    energy: ['fading-flame'],
-    habits: ['fading-flame'],
-    confidence: ['soft-restarter'],
-    direction: ['overloaded-dreamer'],
-    routine: ['fading-flame'],
-    everything: ['overloaded-dreamer'],
-    // relationships: unscored — not a change mechanic.
+    energy: [{ typeId: 'quiet-drain', points: 2 }],
+    direction: [{ typeId: 'drifting-compass', points: 2 }],
+    routine: [{ typeId: 'soft-scatter', points: 2 }],
+    everything: [{ typeId: 'overloaded-dreamer', points: 2 }],
+    mind: [
+      { typeId: 'almost-starter', points: 1 },
+      { typeId: 'overloaded-dreamer', points: 1 },
+    ],
+    habits: [
+      { typeId: 'soft-scatter', points: 1 },
+      { typeId: 'fading-flame', points: 1 },
+    ],
+    confidence: [{ typeId: 'soft-restarter', points: 1 }],
+    // relationships: unscored
   },
   recentFeeling: {
-    drained: ['fading-flame'],
-    overwhelmed: ['overloaded-dreamer'],
-    disconnected: ['fading-flame'],
-    'getting-through': ['fading-flame'],
-    // mostly-okay, pretty-good: unscored — no change-pattern signal.
+    drained: [{ typeId: 'quiet-drain', points: 2 }],
+    overwhelmed: [{ typeId: 'overloaded-dreamer', points: 2 }],
+    disconnected: [{ typeId: 'quiet-stranger', points: 2 }],
+    'getting-through': [{ typeId: 'quiet-drain', points: 1 }],
+    // mostly-okay, pretty-good: unscored
   },
 };
 
-const SINGLE_CHOICE_QUESTIONS: readonly ScoredQuestionId[] = [
-  'changePattern',
-  'consistencyStage',
-  'recentFeeling',
-];
+/**
+ * Caps so multi-select cannot drown diagnostics.
+ * Obstacle: two strong options. Reason: two signals. Balance+feeling combined.
+ */
+export const MULTI_QUESTION_TYPE_CAPS: Partial<Record<ScoredQuestionId, number>> = {
+  primaryObstacle: 6,
+  reason: 4,
+};
 
-const MULTI_CHOICE_QUESTIONS: readonly ScoredQuestionId[] = ['primaryObstacle', 'outOfBalance'];
+export const STATE_QUESTION_TYPE_CAP = 4;
 
 const DIAGNOSTIC_TIE_QUESTIONS: readonly ScoredQuestionId[] = [
   'changePattern',
   'consistencyStage',
   'primaryObstacle',
+  'reason',
 ];
 
-/**
- * Conservative phrase matches only. Generic words like "better", "change",
- * "start", or "everything" are too noisy and are not scored.
- */
 const RESET_REASON_KEYWORD_RULES: readonly {
   typeId: ResetTypeId;
   phrases: readonly string[];
@@ -178,6 +176,26 @@ const RESET_REASON_KEYWORD_RULES: readonly {
       'wont stick',
     ],
   },
+  {
+    typeId: 'all-in-heart',
+    phrases: ['burned out', 'burn out', 'all in', 'all-in'],
+  },
+  {
+    typeId: 'quiet-drain',
+    phrases: ['no energy', 'exhausted', "don't have the energy", 'dont have the energy'],
+  },
+  {
+    typeId: 'drifting-compass',
+    phrases: ["don't know where", 'dont know where', 'no direction', "don't know what I'm doing"],
+  },
+  {
+    typeId: 'quiet-stranger',
+    phrases: ["don't feel like myself", 'dont feel like myself', 'not myself', 'feel like myself'],
+  },
+  {
+    typeId: 'soft-scatter',
+    phrases: ['distracted', 'no routine', 'no structure'],
+  },
 ];
 
 export function emptyResetTypeScores(): ResetTypeScores {
@@ -186,6 +204,11 @@ export function emptyResetTypeScores(): ResetTypeScores {
     'soft-restarter': 0,
     'almost-starter': 0,
     'fading-flame': 0,
+    'all-in-heart': 0,
+    'quiet-drain': 0,
+    'drifting-compass': 0,
+    'quiet-stranger': 0,
+    'soft-scatter': 0,
   };
 }
 
@@ -203,14 +226,12 @@ function typesIndicatedByQuestion(
 }
 
 /**
- * Higher score first. When scores tie, prefer the type indicated by the
- * strongest diagnostic answers in this order:
- * 1. changePattern (3pt)
- * 2. consistencyStage (3pt)
- * 3. primaryObstacle (2pt)
- *
- * If still tied — including all scores 0 — use RESET_TYPE_TIE_PRIORITY:
- * soft-restarter > almost-starter > fading-flame > overloaded-dreamer.
+ * Highest score first. Exact ties prefer the type indicated by:
+ * 1. changePattern
+ * 2. consistencyStage
+ * 3. primaryObstacle
+ * 4. reason
+ * then RESET_TYPE_TIE_PRIORITY.
  */
 function compareResetTypes(
   left: ResetTypeId,
@@ -245,17 +266,16 @@ function rankResetTypes(
 }
 
 function applyOption(questionId: ScoredQuestionId, optionId: string): ScoreContribution[] {
-  const types = OPTION_TYPE_MATRIX[questionId][optionId];
-  if (!types || types.length === 0) {
+  const rules = OPTION_SCORE_MATRIX[questionId][optionId];
+  if (!rules || rules.length === 0) {
     return [];
   }
 
-  const points = QUESTION_WEIGHTS[questionId];
-  return types.map((typeId) => ({
+  return rules.map((rule) => ({
     questionId,
     optionId,
-    typeId,
-    points,
+    typeId: rule.typeId,
+    points: rule.points,
   }));
 }
 
@@ -303,7 +323,7 @@ function scoreResetReason(value: string): ScoreContribution[] {
       questionId: 'resetReason',
       optionId: matchedPhrase,
       typeId: rule.typeId,
-      points: QUESTION_WEIGHTS.resetReason,
+      points: 1,
     });
   }
 
@@ -312,11 +332,8 @@ function scoreResetReason(value: string): ScoreContribution[] {
 
 /**
  * Weighted reset-type classifier. Pure: same answers always produce the same
- * result. Parked questions (`recurringThought`, `selfTalkAfterSlip`, and the
- * other retired onboarding items) are ignored even if still present in
- * persisted answers. Unscored live questions (dailyCommitment, desiredIdentity,
- * supportStyle, supportTiming, thirtyDayOutcome, missedDayResponse, and
- * `reason`) are also ignored.
+ * result. Parked questions are ignored. Wishes (outcomes, identity, support,
+ * commitment, missed-day, profileAccuracy) do not elect a type.
  */
 export function deriveResetType(
   answers: Record<string, OnboardingAnswer>,
@@ -324,19 +341,49 @@ export function deriveResetType(
   const scores = emptyResetTypeScores();
   const breakdown: ScoreContribution[] = [];
 
-  for (const questionId of SINGLE_CHOICE_QUESTIONS) {
-    const optionId = getSingleChoiceId(answers, questionId);
-    if (!optionId) {
-      continue;
-    }
-    addCappedContributions(scores, breakdown, applyOption(questionId, optionId), undefined);
+  const changePattern = getSingleChoiceId(answers, 'changePattern');
+  if (changePattern) {
+    addCappedContributions(
+      scores,
+      breakdown,
+      applyOption('changePattern', changePattern),
+      undefined,
+    );
   }
 
-  for (const questionId of MULTI_CHOICE_QUESTIONS) {
-    const optionIds = getMultiChoiceIds(answers, questionId);
-    const contributions = optionIds.flatMap((optionId) => applyOption(questionId, optionId));
-    addCappedContributions(scores, breakdown, contributions, MULTI_QUESTION_TYPE_CAPS[questionId]);
+  const consistencyStage = getSingleChoiceId(answers, 'consistencyStage');
+  if (consistencyStage) {
+    addCappedContributions(
+      scores,
+      breakdown,
+      applyOption('consistencyStage', consistencyStage),
+      undefined,
+    );
   }
+
+  const obstacleIds = getMultiChoiceIds(answers, 'primaryObstacle');
+  addCappedContributions(
+    scores,
+    breakdown,
+    obstacleIds.flatMap((optionId) => applyOption('primaryObstacle', optionId)),
+    MULTI_QUESTION_TYPE_CAPS.primaryObstacle,
+  );
+
+  const reasonIds = getMultiChoiceIds(answers, 'reason');
+  addCappedContributions(
+    scores,
+    breakdown,
+    reasonIds.flatMap((optionId) => applyOption('reason', optionId)),
+    MULTI_QUESTION_TYPE_CAPS.reason,
+  );
+
+  const balanceIds = getMultiChoiceIds(answers, 'outOfBalance');
+  const feelingId = getSingleChoiceId(answers, 'recentFeeling');
+  const stateContributions = [
+    ...balanceIds.flatMap((optionId) => applyOption('outOfBalance', optionId)),
+    ...(feelingId ? applyOption('recentFeeling', feelingId) : []),
+  ];
+  addCappedContributions(scores, breakdown, stateContributions, STATE_QUESTION_TYPE_CAP);
 
   const resetReason = getTextInputValue(answers, 'resetReason');
   if (resetReason) {

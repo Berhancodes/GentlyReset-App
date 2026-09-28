@@ -60,12 +60,6 @@ const CTA_DESTINATION_BY_STATE: Record<CompanionState, CompanionCtaDestination> 
   cycle_complete: 'home',
 };
 
-const MILESTONE_MESSAGE_BY_DAY: Record<number, string> = {
-  7: 'one week of showing up. that counts.',
-  14: 'two weeks in. you are still here.',
-  21: 'three weeks. the ordinary days are the win.',
-};
-
 function firstNameToken(firstName: string | undefined): string | undefined {
   if (firstName == null) {
     return undefined;
@@ -100,18 +94,27 @@ function supportingMessageForState(
     return profile.homeSupportLine;
   }
   if (state === 'started') {
-    return 'take it slowly. I will be right here.';
+    return profile.startedLine;
   }
   if (state === 'returned_after_miss') {
     return profile.missedDayLine;
   }
   if (state === 'milestone') {
-    return MILESTONE_MESSAGE_BY_DAY[currentDay] ?? 'look at that. you showed up again.';
+    if (currentDay === 7) {
+      return profile.milestoneDay7Line;
+    }
+    if (currentDay === 14) {
+      return profile.milestoneDay14Line;
+    }
+    if (currentDay === 21) {
+      return profile.milestoneDay21Line;
+    }
+    return 'look at that. you showed up again.';
   }
   if (state === 'cycle_complete') {
-    return 'thirty days. you kept the promise.';
+    return profile.cycleCompleteLine;
   }
-  return "that's a real day. I'm proud of you.";
+  return profile.completedLine;
 }
 
 /**

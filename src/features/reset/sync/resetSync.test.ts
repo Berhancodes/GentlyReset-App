@@ -586,6 +586,50 @@ async function run(): Promise<void> {
     );
   }
 
+  {
+    const cloud = cloudRecord(
+      {
+        currentDay: 5,
+        resetStartedOn: '2026-09-20',
+        lastSeenOn: '2026-09-24',
+        resetTypeId: 'quiet-drain',
+      },
+      [{ localDay: 1, completedOn: '2026-09-20' }],
+    );
+    const mapped = mapSnapshotToCloudPayload(
+      snapshot({
+        currentDay: 5,
+        resetStartedOn: '2026-09-20',
+        lastSeenOn: '2026-09-24',
+        resetTypeId: 'all-in-heart',
+        completedDays: [1],
+      }),
+    );
+    check(
+      'new reset type ids round-trip as text',
+      mapped.cycle.resetTypeId === 'all-in-heart' && mapped.cycle.planVersion === 1,
+    );
+    check(
+      'task catalog is not uploaded',
+      !JSON.stringify(mapped).includes('primitiveId') &&
+        !JSON.stringify(mapped).includes('TYPE_PLAYLISTS'),
+    );
+    const memory = createMemoryGateway({ record: cloud });
+    const repository = memoryRepository(snapshot());
+    const result = await syncResetWithCloud({
+      userId: 'user-a',
+      repository,
+      ownership: ownership(),
+      gateway: memory.gateway,
+      now: new Date('2026-09-27T15:00:00.000Z'),
+    });
+    check('new type ids restore from cloud', result.kind === 'restore');
+    check(
+      'quiet-drain is preserved through restore',
+      repository.getSnapshot().resetTypeId === 'quiet-drain',
+    );
+  }
+
   if (failed > 0) {
     throw new Error(`${failed} reset sync check(s) failed`);
   }

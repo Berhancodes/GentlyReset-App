@@ -32,7 +32,7 @@ export function getResetDay(cycle: ResetCycle, plan: ResetPlan, dayNumber: numbe
     cycleId: cycle.id,
     dayNumber: localDay,
     overallDayNumber: getOverallDayNumber(cycle.sequence, localDay, plan.length),
-    task: getTaskForDay(localDay, cycle.personalization),
+    task: getTaskForDay(localDay, cycle.personalization, cycle.resetTypeId),
     status,
     ...(isCurrentLocalDay ? { started: cycle.todayStarted } : {}),
   };

@@ -40,6 +40,7 @@ export type JourneySheetInput = {
   todayCompleted: boolean;
   personalization: ResetPersonalization;
   rememberLine: string;
+  resetTypeId?: string;
 };
 
 export function getJourneySheetModel(input: JourneySheetInput): JourneySheetModel {
@@ -49,7 +50,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
     input.completedDays,
     input.todayCompleted,
   );
-  const task = getTaskForDay(input.day, input.personalization);
+  const task = getTaskForDay(input.day, input.personalization, input.resetTypeId);
   const chapter = getJourneyChapterForDay(input.day);
   const weekDots =
     chapter?.startDay !== undefined

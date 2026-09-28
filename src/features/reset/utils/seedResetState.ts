@@ -58,7 +58,11 @@ export function createSeededResetState(
     completedDays: [],
     todayCompleted: false,
     todayStarted: false,
-    todayTask: getCurrentResetTask({ currentDay: 1, personalization }),
+    todayTask: getCurrentResetTask({
+      currentDay: 1,
+      personalization,
+      resetTypeId: classification.id,
+    }),
     resetStartedOn: today,
     lastSeenOn: today,
     lastCompletedOn: null,

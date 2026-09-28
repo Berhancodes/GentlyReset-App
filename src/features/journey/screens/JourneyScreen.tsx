@@ -56,13 +56,14 @@ export function JourneyScreen() {
   const completeToday = useResetStore((state) => state.completeToday);
 
   const rememberLine = getResetProfile(resetTypeId).homeSupportLine;
-  const currentTask = getCurrentResetTask({ currentDay, personalization });
+  const currentTask = getCurrentResetTask({ currentDay, personalization, resetTypeId });
   const progression = useJourneyProgression({
     currentDay,
     completedDays,
     todayCompleted,
     currentTitle: currentTask.title,
     focused: journeyFocused,
+    resetTypeId,
   });
   const chapter = getJourneyChapterForDay(progression.headingDay);
   const completedCount = getCompletedDayCount({ completedDays });
@@ -79,6 +80,7 @@ export function JourneyScreen() {
           todayCompleted,
           personalization,
           rememberLine,
+          resetTypeId,
         });
 
   const onPressDay = useCallback((day: number) => {

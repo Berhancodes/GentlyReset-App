@@ -43,6 +43,7 @@ export function applyDateRollover(state: ResetSnapshot, today: string): ResetSna
       todayTask: getCurrentResetTask({
         currentDay: PLAN_DAY_COUNT,
         personalization: snapshot.personalization,
+        resetTypeId: snapshot.resetTypeId,
       }),
     };
   }
@@ -60,6 +61,7 @@ export function applyDateRollover(state: ResetSnapshot, today: string): ResetSna
       todayTask: getCurrentResetTask({
         currentDay: nextDay,
         personalization: snapshot.personalization,
+        resetTypeId: snapshot.resetTypeId,
       }),
     };
   }

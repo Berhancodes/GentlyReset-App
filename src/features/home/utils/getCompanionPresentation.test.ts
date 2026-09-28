@@ -53,7 +53,7 @@ check(
   'task started uses encourage',
   started.state === 'started' &&
     started.animationId === 'encourage' &&
-    started.supportingMessage === 'take it slowly. I will be right here.' &&
+    started.supportingMessage === 'this is still the same plan. keep going.' &&
     started.primaryCtaLabel === "continue today's reset" &&
     started.primaryCtaDestination === 'journey',
 );
@@ -70,7 +70,7 @@ check(
   'task completed uses celebrate',
   completed.state === 'completed' &&
     completed.animationId === 'celebrate' &&
-    completed.supportingMessage === "that's a real day. I'm proud of you." &&
+    completed.supportingMessage === 'you continued. that is the whole skill.' &&
     completed.primaryCtaDestination === 'journey',
 );
 
@@ -113,7 +113,7 @@ check(
   'ordinary milestone copy and animation',
   milestone.state === 'milestone' &&
     milestone.animationId === 'milestone' &&
-    milestone.supportingMessage === 'one week of showing up. that counts.' &&
+    milestone.supportingMessage === 'you stayed with the same plan.' &&
     milestone.primaryCtaDestination === 'journey',
 );
 
@@ -129,11 +129,26 @@ check(
   'Day 30 completed presentation',
   cycleComplete.state === 'cycle_complete' &&
     cycleComplete.animationId === 'milestone' &&
-    cycleComplete.supportingMessage === 'thirty days. you kept the promise.' &&
+    cycleComplete.supportingMessage === "you continued. you didn't restart your life." &&
     cycleComplete.primaryCtaLabel === "that's enough for today" &&
     cycleComplete.primaryCtaDestination === 'home',
 );
 
+const drainReady = getCompanionPresentation(input({ resetTypeId: 'quiet-drain' }));
+check(
+  'new reset types personalize the ready line',
+  drainReady.supportingMessage === 'a tiny day still counts.' &&
+    drainReady.supportingMessage !== day1Ready.supportingMessage,
+);
+
+const allInMissed = getCompanionPresentation(
+  input({ missedYesterday: true, resetTypeId: 'all-in-heart' }),
+);
+check(
+  'new reset types personalize the missed-day line',
+  allInMissed.supportingMessage ===
+    "a crash isn't a character flaw. come back smaller than yesterday.",
+);
 const named = getCompanionPresentation(input({ firstName: 'Maya' }));
 check('first name is added to the greeting', named.greeting === 'good morning, Maya');
 

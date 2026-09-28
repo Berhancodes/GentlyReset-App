@@ -43,10 +43,11 @@ export function ReflectScreen() {
 
   const currentDay = useResetStore((state) => state.currentDay);
   const personalization = useResetStore((state) => state.personalization);
+  const resetTypeId = useResetStore((state) => state.resetTypeId);
   const reflections = useResetStore((state) => state.reflections);
   const saveReflection = useResetStore((state) => state.saveReflection);
-  const todayTask = getCurrentResetTask({ currentDay, personalization });
-  const prompt = getJournalPrompt(todayTask.title, personalization);
+  const todayTask = getCurrentResetTask({ currentDay, personalization, resetTypeId });
+  const prompt = getJournalPrompt(todayTask.title, personalization, resetTypeId, currentDay);
   const savedToday = reflections.find((entry) => entry.day === currentDay);
   const recent = useMemo(() => latestReflection(reflections), [reflections]);
 

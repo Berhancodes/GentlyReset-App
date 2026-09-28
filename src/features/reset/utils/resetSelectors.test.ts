@@ -35,7 +35,7 @@ function snapshot(overrides: Partial<ResetSnapshot> = {}): ResetSnapshot {
     completedDays: [],
     todayCompleted: false,
     todayStarted: false,
-    todayTask: getTaskForDay(currentDay, nextPersonalization),
+    todayTask: getTaskForDay(currentDay, nextPersonalization, 'soft-restarter'),
     resetStartedOn: '2026-09-19',
     lastSeenOn: '2026-09-19',
     lastCompletedOn: null,
@@ -65,17 +65,18 @@ check(
 );
 check(
   'current task comes from currentDay + personalization + the plan',
-  homeTask.title === getTaskForDay(1, defaultPersonalization).title && homeTask.day === 1,
+  homeTask.title === getTaskForDay(1, defaultPersonalization, 'soft-restarter').title &&
+    homeTask.day === 1,
 );
 
 const stale = snapshot({
   currentDay: 3,
   personalization: twentyMinutes,
-  todayTask: getTaskForDay(1, defaultPersonalization),
+  todayTask: getTaskForDay(1, defaultPersonalization, 'soft-restarter'),
 });
 check(
   'getCurrentResetTask does not read persisted todayTask',
-  getCurrentResetTask(stale).title === getTaskForDay(3, twentyMinutes).title &&
+  getCurrentResetTask(stale).title === getTaskForDay(3, twentyMinutes, 'soft-restarter').title &&
     getCurrentResetTask(stale).minutes === 20 &&
     getCurrentResetTask(stale).title !== stale.todayTask.title,
 );

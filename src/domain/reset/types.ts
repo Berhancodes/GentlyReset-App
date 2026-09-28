@@ -3,6 +3,11 @@ export const RESET_TYPE_IDS = [
   'soft-restarter',
   'almost-starter',
   'fading-flame',
+  'all-in-heart',
+  'quiet-drain',
+  'drifting-compass',
+  'quiet-stranger',
+  'soft-scatter',
 ] as const;
 
 export type ResetTypeId = (typeof RESET_TYPE_IDS)[number];
@@ -12,18 +17,27 @@ export const RESET_TYPE_NAMES: Record<ResetTypeId, string> = {
   'soft-restarter': 'The Soft Restarter',
   'almost-starter': 'The Almost Starter',
   'fading-flame': 'The Fading Flame',
+  'all-in-heart': 'The All-In Heart',
+  'quiet-drain': 'The Quiet Drain',
+  'drifting-compass': 'The Drifting Compass',
+  'quiet-stranger': 'The Quiet Stranger',
+  'soft-scatter': 'The Soft Scatter',
 };
 
 /**
  * When top scores are equal (including all-zero sparse answers), prefer this
- * order. Restarter and Almost Starter have the cleanest single-question
- * diagnostics; Dreamer is the broad leftover cluster — not first just because
- * it was the old mock.
+ * order. Specific mechanics before leftover ambition. Dreamer is last so it
+ * is no longer a generic bucket.
  */
 export const RESET_TYPE_TIE_PRIORITY: readonly ResetTypeId[] = [
   'soft-restarter',
   'almost-starter',
+  'quiet-drain',
+  'all-in-heart',
   'fading-flame',
+  'quiet-stranger',
+  'soft-scatter',
+  'drifting-compass',
   'overloaded-dreamer',
 ];
 
@@ -124,6 +138,12 @@ export type ResetProfile = {
   resetApproach: string;
   homeSupportLine: string;
   missedDayLine: string;
+  startedLine: string;
+  completedLine: string;
+  milestoneDay7Line: string;
+  milestoneDay14Line: string;
+  milestoneDay21Line: string;
+  cycleCompleteLine: string;
   strengths: readonly string[];
   challenges: readonly string[];
   shareQuote: string;
