@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
@@ -27,6 +27,12 @@ export function SignUpScreen() {
   const [errors, setErrors] = useState<SignUpErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [confirmationRequired, setConfirmationRequired] = useState(false);
+
+  useEffect(() => {
+    if (!hasCompletedOnboarding) {
+      router.replace(getRootHref({ hasCompletedOnboarding, isPro }));
+    }
+  }, [hasCompletedOnboarding, isPro, router]);
 
   const updateField = <Field extends keyof SignUpValues>(
     field: Field,
@@ -77,13 +83,17 @@ export function SignUpScreen() {
       });
   };
 
+  if (!hasCompletedOnboarding) {
+    return null;
+  }
+
   if (confirmationRequired) {
     return (
       <OnboardingScreenLayout
         tone="question"
         hideProgress
         title={'check\nyour email'}
-        subtitle="confirm this account, then sign in."
+        subtitle="confirm this account, then come back to unlock."
         onBack={() => router.replace('/(auth)/sign-in')}
         footer={
           <PrimaryButton
@@ -93,8 +103,8 @@ export function SignUpScreen() {
         }
       >
         <AppText variant="body" color="secondary">
-          we sent a confirmation link to {values.email.trim().toLowerCase()}. creating an account
-          does not change your local reset.
+          we sent a confirmation link to {values.email.trim().toLowerCase()}. after you confirm,
+          return here to unlock Gently Reset Pro.
         </AppText>
       </OnboardingScreenLayout>
     );
@@ -105,7 +115,7 @@ export function SignUpScreen() {
       tone="question"
       hideProgress
       title={'create\naccount'}
-      subtitle="save your identity. your reset stays on this device for now."
+      subtitle="this is the last step before you unlock Gently Reset Pro."
       onBack={() => router.back()}
       avoidKeyboard
       footer={
@@ -159,7 +169,7 @@ export function SignUpScreen() {
           </AppText>
         ) : (
           <AppText variant="caption" color="helper">
-            an account is not a subscription. your reset stays local.
+            create this now so your purchase and reset backup have a home.
           </AppText>
         )}
       </View>

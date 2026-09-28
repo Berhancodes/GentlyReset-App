@@ -89,19 +89,6 @@ export function SignInScreen() {
           />
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Create an account"
-            onPress={() => router.push('/(auth)/sign-up')}
-            style={({ pressed }) => [styles.switchRow, pressed ? styles.pressed : null]}
-          >
-            <AppText variant="caption" color="helper">
-              new here?
-            </AppText>
-            <AppText variant="caption" color="gold">
-              create an account
-            </AppText>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
             accessibilityLabel="Begin a new reset"
             onPress={goToAccessDestination}
             style={({ pressed }) => [styles.switchRow, pressed ? styles.pressed : null]}

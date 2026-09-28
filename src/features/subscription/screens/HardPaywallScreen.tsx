@@ -14,8 +14,10 @@ import {
   spacing,
   textVariants,
 } from '@/design-system';
+import { useAuth } from '@/features/auth/session/useAuth';
 import { PAYWALL_NIGHT_ART } from '@/features/onboarding/data/onboardingAssets';
 import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
+import { getPaywallPrimaryAction } from '@/features/subscription/access/getPaywallPrimaryAction';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
 import type { PresentedPackage } from '@/features/subscription/types';
 import { getLegalUrls } from '@/features/subscription/utils/legalUrls';
@@ -34,6 +36,8 @@ const BENEFITS = [
 export function HardPaywallScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const primaryAction = getPaywallPrimaryAction(isAuthenticated);
   const { available, packages, unexpectedTrial, purchasePackage, restorePurchases } =
     useSubscription();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -43,7 +47,12 @@ export function HardPaywallScreen() {
 
   const selected = selectPackage(packages, selectedId);
 
-  const purchase = () => {
+  const beginUnlock = () => {
+    if (primaryAction === 'create-account') {
+      router.push('/(auth)/sign-up');
+      return;
+    }
+
     if (!selected || busy || unexpectedTrial) {
       return;
     }
@@ -159,14 +168,20 @@ export function HardPaywallScreen() {
           ) : null}
           <PrimaryButton
             label={
-              busy === 'purchase'
-                ? 'purchasing…'
-                : selected
-                  ? `unlock ${selected.priceString}`
-                  : 'unlock Gently Reset Pro'
+              primaryAction === 'create-account'
+                ? 'create account to unlock'
+                : busy === 'purchase'
+                  ? 'purchasing…'
+                  : selected
+                    ? `unlock ${selected.priceString}`
+                    : 'unlock Gently Reset Pro'
             }
-            disabled={!selected || busy !== null || unexpectedTrial}
-            onPress={purchase}
+            disabled={
+              primaryAction === 'create-account'
+                ? false
+                : !selected || busy !== null || unexpectedTrial
+            }
+            onPress={beginUnlock}
           />
           <Pressable
             accessibilityRole="button"

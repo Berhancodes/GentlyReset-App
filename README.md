@@ -116,7 +116,7 @@ There is no free trial, skip, or continue-free path. Authentication is not the p
 
 ## Accounts
 
-Welcome's "Sign in" opens `/sign-in`. Create Account is `/sign-up`. Both use Supabase email/password auth. Sessions persist in AsyncStorage and restore when the app reopens.
+Welcome and Sign in are for returning users only. New accounts are created at the hard paywall, when the person is ready to unlock Gently Reset Pro. `/sign-up` is gated until onboarding is complete. Sessions persist in AsyncStorage and restore when the app reopens.
 
 Authentication answers "who is this user?" RevenueCat answers "is Pro active?" Completing onboarding without Pro opens the hard paywall, not Home.
 

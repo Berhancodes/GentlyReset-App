@@ -1,4 +1,5 @@
 import { getAccessDestination } from './getAccessDestination';
+import { getPaywallPrimaryAction } from './getPaywallPrimaryAction';
 import { isProEntitlementActive } from './isProEntitlementActive';
 import { offeringHasUnexpectedTrial } from './packageHasUnexpectedTrial';
 import { PRO_ENTITLEMENT_ID } from '../constants';
@@ -101,6 +102,13 @@ check(
     isPro: isProEntitlementActive({ entitlements: { active: {} } }),
   }) === 'paywall',
 );
+
+check(
+  'unauthenticated paywall asks for an account first',
+  getPaywallPrimaryAction(false) === 'create-account',
+);
+
+check('authenticated paywall purchases next', getPaywallPrimaryAction(true) === 'purchase');
 
 check('null customer info is not Pro', isProEntitlementActive(null) === false);
 
