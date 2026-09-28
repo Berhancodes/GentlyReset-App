@@ -1,6 +1,8 @@
 import { localResetRepository } from '@/data/reset/localResetRepository';
 import { isSupabaseConfigured, supabase } from '@/features/auth/supabase/client';
 
+import { requestJournalCloudSync } from '@/features/reflect/sync/requestJournalCloudSync';
+
 import { syncResetWithCloud } from './createResetSyncService';
 import { createSupabaseResetCloudGateway } from './resetCloudApi';
 import { readSyncOwnership, useResetSyncStore } from './useResetSyncStore';
@@ -33,6 +35,9 @@ export async function requestResetCloudSync(userId: string | null): Promise<void
       gateway: createSupabaseResetCloudGateway(),
     });
     useResetSyncStore.getState().replaceOwnership(result.ownership);
+    if (result.kind !== 'conflict' && result.kind !== 'skipped') {
+      void requestJournalCloudSync(userId);
+    }
   } finally {
     inFlight = false;
     if (queuedUserId) {

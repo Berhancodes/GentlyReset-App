@@ -19,6 +19,8 @@ const forbidden = [
   [/from\s+['"]@supabase\//, 'supabase'],
   [/from\s+['"]@\/features\/reset\/sync/, 'reset sync'],
   [/from\s+['"][^'"]*features\/reset\/sync/, 'reset sync'],
+  [/from\s+['"]@\/features\/reflect\/sync/, 'journal sync'],
+  [/from\s+['"][^'"]*features\/reflect\/sync/, 'journal sync'],
 ];
 
 function listTypeScriptFiles(directory) {

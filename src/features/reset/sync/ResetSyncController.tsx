@@ -5,6 +5,9 @@ import { useAuth } from '@/features/auth/session/useAuth';
 import { isSupabaseConfigured } from '@/features/auth/supabase/client';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 
+import { journalFingerprint } from '@/features/reflect/sync/mapJournal';
+import { requestJournalCloudSync } from '@/features/reflect/sync/requestJournalCloudSync';
+
 import { cloudRelevantFingerprint } from './mapSnapshotToCloud';
 import { requestResetCloudSync } from './requestResetCloudSync';
 
@@ -31,14 +34,22 @@ export function ResetSyncController() {
     }
 
     const unsubscribe = useResetStore.subscribe((state, previous) => {
-      if (cloudRelevantFingerprint(state) === cloudRelevantFingerprint(previous)) {
+      const resetChanged = cloudRelevantFingerprint(state) !== cloudRelevantFingerprint(previous);
+      const journalChanged =
+        journalFingerprint(state.reflections ?? []) !==
+        journalFingerprint(previous.reflections ?? []);
+      if (!resetChanged && !journalChanged) {
         return;
       }
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
       }
       debounceTimer.current = setTimeout(() => {
-        void requestResetCloudSync(userId);
+        if (resetChanged) {
+          void requestResetCloudSync(userId);
+          return;
+        }
+        void requestJournalCloudSync(userId);
       }, SNAPSHOT_SYNC_DEBOUNCE_MS);
     });
 
