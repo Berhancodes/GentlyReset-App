@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     marginTop: -7,
-    marginLeft: MASCOT_INTRO_LAYOUT.bubbleTailInset - 6,
+    marginLeft: MASCOT_INTRO_LAYOUT.bubbleTailInset - 4,
     borderRightWidth: 1,
     borderBottomWidth: 1,
     borderColor: colors.border.default,

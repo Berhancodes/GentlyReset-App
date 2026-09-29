@@ -46,7 +46,7 @@ const MASCOT_RUN_FINAL = require('../../../../assets/images/onboarding/mascot-ru
 
 const LAST_FRAME_MS = 100;
 const ASK_GREETING = 'hey 👋';
-const ASK_LINES = ['before we start,', 'what should I call you?'] as const;
+const ASK_LINES = ['before we start,', 'what should I', 'call you?'] as const;
 
 const bubbleEasing = Easing.bezier(
   MOTION_EASING_STANDARD[0],

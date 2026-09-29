@@ -19,16 +19,16 @@ const MASCOT_BOUNDS = {
 } as const;
 
 export const MASCOT_INTRO_LAYOUT = {
-  settleScale: 0.85,
-  translateXRatio: 0.108,
+  settleScale: 0.84,
+  translateXRatio: 0.12,
   translateXMin: 36,
-  translateXMax: 48,
-  bubbleWidthRatio: 0.6,
-  bubbleMaxWidth: 248,
-  bubbleTailGap: 20,
-  bubbleTailInset: 28,
-  estimatedBubbleHeight: 118,
-  characterToForm: 20,
+  translateXMax: 50,
+  bubbleWidthRatio: 0.54,
+  bubbleMaxWidth: 204,
+  bubbleTailGap: 16,
+  bubbleTailInset: 22,
+  estimatedBubbleHeight: 126,
+  characterToForm: 18,
   formGap: 12,
   fieldHeight: 56,
   buttonHeight: 64,
@@ -101,7 +101,7 @@ export function getMascotIntroLayout(
   const imageY = (ratio: number) => imageTop + ratio * imageHeight;
 
   const margin = spacing.md;
-  const bubbleMaxWidth = Math.min(
+  const visualBubbleMaxWidth = Math.min(
     Math.round(viewWidth * MASCOT_INTRO_LAYOUT.bubbleWidthRatio),
     MASCOT_INTRO_LAYOUT.bubbleMaxWidth,
     viewWidth - margin * 2,
@@ -126,9 +126,8 @@ export function getMascotIntroLayout(
     settleY,
   );
 
-  const unclampedBubbleLeft = hat.x - MASCOT_INTRO_LAYOUT.bubbleTailInset - spacing.xs;
-  const bubbleLeft = clamp(unclampedBubbleLeft, margin, viewWidth - bubbleMaxWidth - margin);
-
+  const desiredBubbleLeft = hat.x - MASCOT_INTRO_LAYOUT.bubbleTailInset + spacing.xs;
+  const bubbleLeft = clamp(desiredBubbleLeft, margin, viewWidth - visualBubbleMaxWidth - margin);
   const desiredBubbleBottom = viewHeight - hat.y + MASCOT_INTRO_LAYOUT.bubbleTailGap;
   const maxBubbleBottom =
     viewHeight - (insets.top + spacing.xs + MASCOT_INTRO_LAYOUT.estimatedBubbleHeight);
@@ -145,7 +144,7 @@ export function getMascotIntroLayout(
     settleScale,
     settleX,
     settleY,
-    bubbleMaxWidth,
+    bubbleMaxWidth: visualBubbleMaxWidth,
     bubbleLeft,
     bubbleBottom,
     formWidth,
