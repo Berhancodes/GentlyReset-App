@@ -2,11 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Image,
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   StyleSheet,
   TextInput,
+  useWindowDimensions,
   View,
+  type KeyboardEvent,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +16,7 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withDelay,
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
@@ -25,7 +27,6 @@ import {
   MOTION_EASING_STANDARD,
   motion,
   radius,
-  shadows,
   spacing,
   textVariants,
 } from '@/design-system';
@@ -33,13 +34,19 @@ import { MascotSpeechBubble } from '@/features/onboarding/components/MascotSpeec
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { MascotIntroStep, OnboardingAnswer } from '@/features/onboarding/types/onboarding';
+import {
+  getMascotIntroKeyboardLift,
+  getMascotIntroLayout,
+  MASCOT_INTRO_LAYOUT,
+} from '@/features/onboarding/utils/mascotIntroLayout';
 import { hapticImpact } from '@/utils/haptics';
 
 const MASCOT_RUN = require('../../../../assets/images/onboarding/mascot-run-intro.gif');
 const MASCOT_RUN_FINAL = require('../../../../assets/images/onboarding/mascot-run-intro-final.png');
 
 const LAST_FRAME_MS = 100;
-const ASK_LINES = ['hey 👋', 'before we start, what should I call you?'] as const;
+const ASK_GREETING = 'hey 👋';
+const ASK_LINES = ['before we start,', 'what should I call you?'] as const;
 
 const bubbleEasing = Easing.bezier(
   MOTION_EASING_STANDARD[0],
@@ -66,6 +73,7 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
   const goToNextRef = useRef(goToNext);
   const submittedRef = useRef(false);
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   const reduceMotion = useReducedMotion();
   const storedAnswer = useOnboardingStore((state) => state.answers[step.id]);
   const setAnswer = useOnboardingStore((state) => state.setAnswer);
@@ -73,19 +81,35 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
   const [phase, setPhase] = useState<IntroPhase>('running');
   const [name, setName] = useState(() => storedIntroName(storedAnswer));
   const [committedName, setCommittedName] = useState('');
+  const [inputFocused, setInputFocused] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
+  const layout = getMascotIntroLayout(width, height, insets);
+  const layoutRef = useRef(layout);
+
+  const mascotTranslateX = useSharedValue(0);
+  const mascotTranslateY = useSharedValue(0);
+  const mascotSettleScale = useSharedValue(1);
+  const mascotHelloScale = useSharedValue(1);
+  const keyboardScale = useSharedValue(1);
+  const keyboardLift = useSharedValue(0);
   const bubbleOpacity = useSharedValue(0);
   const bubbleTranslateY = useSharedValue<number>(motion.offset.bubble);
   const bubbleScale = useSharedValue<number>(motion.scale.bubbleFrom);
   const askOpacity = useSharedValue(1);
   const replyOpacity = useSharedValue(0);
-  const formOpacity = useSharedValue(0);
-  const formTranslateY = useSharedValue<number>(motion.offset.formExit);
-  const mascotScale = useSharedValue(1);
+  const inputOpacity = useSharedValue(0);
+  const inputTranslateY = useSharedValue<number>(motion.offset.inputReveal);
+  const buttonOpacity = useSharedValue(0);
+  const buttonTranslateY = useSharedValue<number>(motion.offset.buttonReveal);
 
   useEffect(() => {
     goToNextRef.current = goToNext;
   }, [goToNext]);
+
+  useEffect(() => {
+    layoutRef.current = layout;
+  }, [layout]);
 
   useEffect(() => {
     const freezeAtMs = Math.max(0, step.durationMs - LAST_FRAME_MS);
@@ -111,6 +135,25 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
     };
   }, [step.durationMs, step.holdMs]);
 
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const onShow = (event: KeyboardEvent) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    };
+    const onHide = () => {
+      setKeyboardHeight(0);
+    };
+
+    const showSubscription = Keyboard.addListener(showEvent, onShow);
+    const hideSubscription = Keyboard.addListener(hideEvent, onHide);
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
   const trimmedName = name.trim();
   const canContinue = trimmedName.length > 0;
   const reply = committedName.length > 0 ? `nice to meet you, ${committedName} :)` : '';
@@ -128,41 +171,59 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
   }, [setAnswer, step.id, trimmedName]);
 
   useEffect(() => {
-    if (phase === 'asking') {
-      if (reduceMotion) {
-        bubbleOpacity.value = 1;
-        bubbleTranslateY.value = 0;
-        bubbleScale.value = 1;
-        formOpacity.value = 1;
-        formTranslateY.value = 0;
-        return;
-      }
-
-      const timing = { duration: motion.duration.bubble, easing: bubbleEasing };
-      bubbleOpacity.value = withTiming(1, timing);
-      bubbleTranslateY.value = withTiming(0, timing);
-      bubbleScale.value = withTiming(1, timing);
-      formOpacity.value = withTiming(1, timing);
-      formTranslateY.value = withTiming(0, timing);
+    if (phase === 'running') {
       return;
     }
 
-    if (phase !== 'responding') {
+    const currentLayout = layoutRef.current;
+    const settleTiming = { duration: motion.duration.mascotSettle, easing: bubbleEasing };
+    const bubbleTiming = { duration: motion.duration.bubble, easing: bubbleEasing };
+    const inputTiming = { duration: motion.duration.inputReveal, easing: bubbleEasing };
+    const buttonTiming = { duration: motion.duration.buttonReveal, easing: bubbleEasing };
+
+    if (phase === 'asking') {
+      if (reduceMotion) {
+        mascotTranslateX.value = currentLayout.settleX;
+        mascotTranslateY.value = currentLayout.settleY;
+        mascotSettleScale.value = currentLayout.settleScale;
+        bubbleOpacity.value = 1;
+        bubbleTranslateY.value = 0;
+        bubbleScale.value = 1;
+        inputOpacity.value = 1;
+        inputTranslateY.value = 0;
+        buttonOpacity.value = 1;
+        buttonTranslateY.value = 0;
+        return;
+      }
+
+      mascotTranslateX.value = withTiming(currentLayout.settleX, settleTiming);
+      mascotTranslateY.value = withTiming(currentLayout.settleY, settleTiming);
+      mascotSettleScale.value = withTiming(currentLayout.settleScale, settleTiming);
+      bubbleOpacity.value = withDelay(motion.delay.bubbleReveal, withTiming(1, bubbleTiming));
+      bubbleTranslateY.value = withDelay(motion.delay.bubbleReveal, withTiming(0, bubbleTiming));
+      bubbleScale.value = withDelay(motion.delay.bubbleReveal, withTiming(1, bubbleTiming));
+      inputOpacity.value = withDelay(motion.delay.inputReveal, withTiming(1, inputTiming));
+      inputTranslateY.value = withDelay(motion.delay.inputReveal, withTiming(0, inputTiming));
+      buttonOpacity.value = withDelay(motion.delay.buttonReveal, withTiming(1, buttonTiming));
+      buttonTranslateY.value = withDelay(motion.delay.buttonReveal, withTiming(0, buttonTiming));
       return;
     }
 
     if (reduceMotion) {
       askOpacity.value = 0;
       replyOpacity.value = 1;
-      formOpacity.value = 0;
+      inputOpacity.value = 0;
+      buttonOpacity.value = 0;
     } else {
       const fade = { duration: motion.duration.bubbleText, easing: bubbleEasing };
       const exit = { duration: motion.duration.formExit, easing: bubbleEasing };
       askOpacity.value = withTiming(0, fade);
       replyOpacity.value = withTiming(1, fade);
-      formOpacity.value = withTiming(0, exit);
-      formTranslateY.value = withTiming(motion.offset.formExit, exit);
-      mascotScale.value = withSequence(
+      inputOpacity.value = withTiming(0, exit);
+      inputTranslateY.value = withTiming(motion.offset.formExit, exit);
+      buttonOpacity.value = withTiming(0, exit);
+      buttonTranslateY.value = withTiming(motion.offset.formExit, exit);
+      mascotHelloScale.value = withSequence(
         withTiming(motion.scale.mascotHello, {
           duration: motion.duration.mascotHello,
           easing: Easing.out(Easing.cubic),
@@ -186,14 +247,50 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
     bubbleOpacity,
     bubbleScale,
     bubbleTranslateY,
-    formOpacity,
-    formTranslateY,
-    mascotScale,
+    buttonOpacity,
+    buttonTranslateY,
+    inputOpacity,
+    inputTranslateY,
+    mascotHelloScale,
+    mascotSettleScale,
+    mascotTranslateX,
+    mascotTranslateY,
     phase,
     reduceMotion,
     replyOpacity,
   ]);
 
+  useEffect(() => {
+    if (phase === 'running') {
+      return;
+    }
+
+    const currentLayout = layoutRef.current;
+    const lift = getMascotIntroKeyboardLift(currentLayout, height, keyboardHeight);
+    const extraShrink = keyboardHeight > 0 && height < 720 ? 0.05 : 0;
+    const timing = { duration: motion.duration.screen, easing: bubbleEasing };
+    const nextKeyboardScale = 1 - extraShrink;
+
+    if (reduceMotion) {
+      keyboardLift.value = lift;
+      keyboardScale.value = nextKeyboardScale;
+      return;
+    }
+
+    keyboardLift.value = withTiming(lift, timing);
+    keyboardScale.value = withTiming(nextKeyboardScale, timing);
+  }, [height, keyboardHeight, keyboardLift, keyboardScale, phase, reduceMotion]);
+
+  const compositionStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -keyboardLift.value }],
+  }));
+  const mascotStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: mascotTranslateX.value },
+      { translateY: mascotTranslateY.value },
+      { scale: mascotSettleScale.value * mascotHelloScale.value * keyboardScale.value },
+    ],
+  }));
   const bubbleEntranceStyle = useAnimatedStyle(() => ({
     opacity: bubbleOpacity.value,
     transform: [{ translateY: bubbleTranslateY.value }, { scale: bubbleScale.value }],
@@ -204,12 +301,13 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
   const replyStyle = useAnimatedStyle(() => ({
     opacity: replyOpacity.value,
   }));
-  const formStyle = useAnimatedStyle(() => ({
-    opacity: formOpacity.value,
-    transform: [{ translateY: formTranslateY.value }],
+  const inputStyle = useAnimatedStyle(() => ({
+    opacity: inputOpacity.value,
+    transform: [{ translateY: inputTranslateY.value }],
   }));
-  const mascotStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: mascotScale.value }],
+  const buttonStyle = useAnimatedStyle(() => ({
+    opacity: buttonOpacity.value,
+    transform: [{ translateY: buttonTranslateY.value }],
   }));
 
   const interactionVisible = phase !== 'running';
@@ -217,49 +315,57 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
   return (
     <View style={styles.root}>
       <StatusBar style="dark" />
-      <Animated.View style={[styles.mascotStage, mascotStyle]}>
-        <Image
-          source={showFinalFrame ? MASCOT_RUN_FINAL : MASCOT_RUN}
-          resizeMode="contain"
-          fadeDuration={0}
-          accessibilityIgnoresInvertColors
-          accessibilityElementsHidden
-          importantForAccessibility="no"
-          style={styles.art}
-        />
-      </Animated.View>
+      <Animated.View pointerEvents="box-none" style={[styles.composition, compositionStyle]}>
+        <Animated.View pointerEvents="none" style={[styles.mascotStage, mascotStyle]}>
+          <Image
+            source={showFinalFrame ? MASCOT_RUN_FINAL : MASCOT_RUN}
+            resizeMode="contain"
+            fadeDuration={0}
+            accessibilityIgnoresInvertColors
+            accessibilityElementsHidden
+            importantForAccessibility="no"
+            style={styles.art}
+          />
+        </Animated.View>
 
-      <KeyboardAvoidingView
-        pointerEvents={interactionVisible ? 'box-none' : 'none'}
-        style={styles.overlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <Animated.View
-          pointerEvents={interactionVisible ? 'auto' : 'none'}
-          style={[
-            styles.bubbleWrap,
-            { paddingTop: Math.max(insets.top, spacing.md) },
-            bubbleEntranceStyle,
-          ]}
-        >
-          {interactionVisible ? (
+        {interactionVisible ? (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.bubbleAnchor,
+              {
+                left: layout.bubbleLeft,
+                bottom: layout.bubbleBottom,
+                maxWidth: layout.bubbleMaxWidth,
+              },
+              bubbleEntranceStyle,
+            ]}
+          >
             <MascotSpeechBubble
+              askGreeting={ASK_GREETING}
               askLines={ASK_LINES}
               reply={reply}
               showingReply={phase === 'responding'}
               askStyle={askStyle}
               replyStyle={replyStyle}
             />
-          ) : null}
-        </Animated.View>
+          </Animated.View>
+        ) : null}
 
-        <View pointerEvents="none" style={styles.flex} />
-
-        <Animated.View
-          pointerEvents={phase === 'asking' ? 'auto' : 'none'}
-          style={[styles.form, { paddingBottom: Math.max(insets.bottom, spacing.lg) }, formStyle]}
-        >
-          <View style={styles.inputWrap}>
+        {interactionVisible ? (
+          <Animated.View
+            pointerEvents={phase === 'asking' ? 'auto' : 'none'}
+            style={[
+              styles.fieldAnchor,
+              {
+                top: layout.formTop,
+                left: layout.formLeft,
+                width: layout.formWidth,
+                height: layout.fieldHeight,
+              },
+              inputStyle,
+            ]}
+          >
             <TextInput
               accessibilityLabel="your name"
               placeholder="your name"
@@ -273,6 +379,8 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
               returnKeyType="done"
               enablesReturnKeyAutomatically
               underlineColorAndroid="transparent"
+              onFocus={() => setInputFocused(true)}
+              onBlur={() => setInputFocused(false)}
               onChangeText={(nextValue) => {
                 setName(nextValue);
                 setAnswer(step.id, { type: 'mascotIntro', name: nextValue });
@@ -280,12 +388,28 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
               onSubmitEditing={handleContinue}
               allowFontScaling
               maxFontSizeMultiplier={1.4}
-              style={styles.input}
+              style={[styles.input, inputFocused ? styles.inputFocused : null]}
             />
-          </View>
-          <PrimaryButton label="continue" disabled={!canContinue} onPress={handleContinue} />
-        </Animated.View>
-      </KeyboardAvoidingView>
+          </Animated.View>
+        ) : null}
+
+        {interactionVisible ? (
+          <Animated.View
+            pointerEvents={phase === 'asking' ? 'auto' : 'none'}
+            style={[
+              styles.buttonAnchor,
+              {
+                top: layout.buttonTop,
+                left: layout.formLeft,
+                width: layout.formWidth,
+              },
+              buttonStyle,
+            ]}
+          >
+            <PrimaryButton label="continue" disabled={!canContinue} onPress={handleContinue} />
+          </Animated.View>
+        ) : null}
+      </Animated.View>
     </View>
   );
 }
@@ -296,6 +420,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: colors.background.primary,
   },
+  composition: {
+    flex: 1,
+  },
   mascotStage: {
     ...StyleSheet.absoluteFill,
   },
@@ -303,35 +430,30 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  overlay: {
-    ...StyleSheet.absoluteFill,
+  bubbleAnchor: {
+    position: 'absolute',
   },
-  flex: {
-    flex: 1,
+  fieldAnchor: {
+    position: 'absolute',
   },
-  bubbleWrap: {
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  form: {
-    paddingHorizontal: spacing.lg,
-    gap: spacing.md,
-  },
-  inputWrap: {
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-    backgroundColor: colors.surface.raised,
-    ...shadows.whisper,
+  buttonAnchor: {
+    position: 'absolute',
   },
   input: {
     ...textVariants.body,
-    minHeight: 56,
-    borderRadius: radius.pill,
+    height: MASCOT_INTRO_LAYOUT.fieldHeight,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    backgroundColor: colors.surface.primary,
     color: colors.text.primary,
-    textAlign: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    textAlign: 'left',
+    paddingHorizontal: spacing.md + spacing.xxs,
+    paddingVertical: spacing.sm,
     ...(Platform.OS === 'web' ? ({ outlineWidth: 0 } as const) : null),
+  },
+  inputFocused: {
+    borderColor: colors.border.gold,
+    backgroundColor: colors.surface.selected,
   },
 });

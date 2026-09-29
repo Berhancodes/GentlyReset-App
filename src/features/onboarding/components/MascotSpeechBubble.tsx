@@ -3,9 +3,11 @@ import Animated, { type AnimatedStyle } from 'react-native-reanimated';
 
 import { AppText } from '@/components/ui';
 import { colors, radius, shadows, spacing } from '@/design-system';
+import { MASCOT_INTRO_LAYOUT } from '@/features/onboarding/utils/mascotIntroLayout';
 
 type MascotSpeechBubbleProps = {
-  askLines: readonly [string, string];
+  askGreeting: string;
+  askLines: readonly string[];
   reply: string;
   showingReply: boolean;
   askStyle: AnimatedStyle<{ opacity: number }>;
@@ -13,6 +15,7 @@ type MascotSpeechBubbleProps = {
 };
 
 export function MascotSpeechBubble({
+  askGreeting,
   askLines,
   reply,
   showingReply,
@@ -24,23 +27,25 @@ export function MascotSpeechBubble({
       accessible
       accessibilityRole="text"
       accessibilityLiveRegion="polite"
-      accessibilityLabel={showingReply ? reply : `${askLines[0]}. ${askLines[1]}`}
+      accessibilityLabel={showingReply ? reply : `${askGreeting}. ${askLines.join(' ')}`}
       style={styles.root}
     >
       <View style={styles.card}>
         <Animated.View style={[styles.copyLayer, askStyle]}>
-          <AppText variant="onboardingChoiceTitle" color="primary" align="center">
-            {askLines[0]}
+          <AppText variant="onboardingChoiceTitle" color="primary" align="left">
+            {askGreeting}
           </AppText>
-          <AppText variant="onboardingHelper" color="primary" align="center">
-            {askLines[1]}
-          </AppText>
+          {askLines.map((line) => (
+            <AppText key={line} variant="onboardingChoiceSubtitle" color="primary" align="left">
+              {line}
+            </AppText>
+          ))}
         </Animated.View>
         <Animated.View
           pointerEvents={showingReply ? 'auto' : 'none'}
           style={[styles.copyLayer, styles.replyLayer, replyStyle]}
         >
-          <AppText variant="onboardingChoiceTitle" color="primary" align="center">
+          <AppText variant="onboardingChoiceTitle" color="primary" align="left">
             {reply}
           </AppText>
         </Animated.View>
@@ -52,35 +57,31 @@ export function MascotSpeechBubble({
 
 const styles = StyleSheet.create({
   root: {
-    alignItems: 'center',
-    maxWidth: 320,
-    width: '100%',
+    alignItems: 'flex-start',
   },
   card: {
-    width: '100%',
-    borderRadius: radius.xl,
+    borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colors.border.default,
     backgroundColor: colors.surface.raised,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    minHeight: 92,
-    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     ...shadows.whisper,
   },
   copyLayer: {
-    gap: spacing.xs,
+    gap: spacing.xxs,
   },
   replyLayer: {
     ...StyleSheet.absoluteFill,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     justifyContent: 'center',
   },
   tail: {
-    width: 14,
-    height: 14,
-    marginTop: -8,
+    width: 12,
+    height: 12,
+    marginTop: -7,
+    marginLeft: MASCOT_INTRO_LAYOUT.bubbleTailInset - 6,
     borderRightWidth: 1,
     borderBottomWidth: 1,
     borderColor: colors.border.default,
