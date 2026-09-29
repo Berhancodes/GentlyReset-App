@@ -25,7 +25,7 @@ export const MASCOT_INTRO_LAYOUT = {
   translateXMax: 48,
   bubbleWidthRatio: 0.6,
   bubbleMaxWidth: 248,
-  bubbleTailGap: 14,
+  bubbleTailGap: 20,
   bubbleTailInset: 28,
   estimatedBubbleHeight: 118,
   characterToForm: 20,
