@@ -13,7 +13,6 @@ import { StoryScreen } from '@/features/onboarding/screens/StoryScreen';
 import { TextInputScreen } from '@/features/onboarding/screens/TextInputScreen';
 import { WelcomeScreen } from '@/features/onboarding/screens/WelcomeScreen';
 import type { OnboardingStep } from '@/features/onboarding/types/onboarding';
-
 import { assertNever } from '@/utils/assertNever';
 
 type OnboardingRendererProps = {
