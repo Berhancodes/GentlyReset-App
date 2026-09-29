@@ -85,6 +85,14 @@ export type WelcomeStep = BaseOnboardingStep & {
   signInLabel?: string;
 };
 
+export type MascotIntroStep = BaseOnboardingStep & {
+  type: 'mascotIntro';
+  /** One complete playthrough of the source GIF, in milliseconds. */
+  durationMs: number;
+  /** Hold the final frame after playback before advancing. */
+  holdMs: number;
+};
+
 export type SingleChoiceStep = BaseOnboardingStep & {
   type: 'singleChoice';
   options: readonly OnboardingOption[];
@@ -172,6 +180,7 @@ export type PaywallStep = BaseOnboardingStep & {
 
 export type OnboardingStep =
   | WelcomeStep
+  | MascotIntroStep
   | SingleChoiceStep
   | MultiChoiceStep
   | ScaleStep
@@ -187,6 +196,7 @@ export type OnboardingStep =
 
 export type OnboardingAnswer =
   | { type: 'welcome' }
+  | { type: 'mascotIntro' }
   | { type: 'singleChoice'; optionId: string }
   | { type: 'multiChoice'; optionIds: readonly string[] }
   | { type: 'scale'; value: number }

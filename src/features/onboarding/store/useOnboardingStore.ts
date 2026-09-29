@@ -73,9 +73,16 @@ export const useOnboardingStore = create<OnboardingState & OnboardingActions>()(
           currentStepIndex: clampStepIndex(state.currentStepIndex + 1),
         })),
       back: () =>
-        set((state) => ({
-          currentStepIndex: clampStepIndex(state.currentStepIndex - 1),
-        })),
+        set((state) => {
+          let nextIndex = clampStepIndex(state.currentStepIndex - 1);
+          while (nextIndex > 0 && ONBOARDING_STEPS[nextIndex]?.type === 'mascotIntro') {
+            nextIndex -= 1;
+          }
+          if (ONBOARDING_STEPS[nextIndex]?.type === 'mascotIntro') {
+            nextIndex = 0;
+          }
+          return { currentStepIndex: nextIndex };
+        }),
       goToStep: (index) => set({ currentStepIndex: clampStepIndex(index) }),
       canContinue: (step) => canProceed(step, get().answers[step.id]),
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),

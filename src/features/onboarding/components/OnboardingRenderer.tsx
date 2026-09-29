@@ -1,6 +1,7 @@
 import { BeforeAfterScreen } from '@/features/onboarding/screens/BeforeAfterScreen';
 import { FinalScreen } from '@/features/onboarding/screens/FinalScreen';
 import { LoadingScreen } from '@/features/onboarding/screens/LoadingScreen';
+import { MascotRunIntroScreen } from '@/features/onboarding/screens/MascotRunIntroScreen';
 import { MultiChoiceScreen } from '@/features/onboarding/screens/MultiChoiceScreen';
 import { PaywallScreen } from '@/features/onboarding/screens/PaywallScreen';
 import { ResultDetailsScreen } from '@/features/onboarding/screens/ResultDetailsScreen';
@@ -12,6 +13,7 @@ import { StoryScreen } from '@/features/onboarding/screens/StoryScreen';
 import { TextInputScreen } from '@/features/onboarding/screens/TextInputScreen';
 import { WelcomeScreen } from '@/features/onboarding/screens/WelcomeScreen';
 import type { OnboardingStep } from '@/features/onboarding/types/onboarding';
+
 import { assertNever } from '@/utils/assertNever';
 
 type OnboardingRendererProps = {
@@ -22,6 +24,8 @@ export function OnboardingRenderer({ step }: OnboardingRendererProps) {
   switch (step.type) {
     case 'welcome':
       return <WelcomeScreen step={step} />;
+    case 'mascotIntro':
+      return <MascotRunIntroScreen step={step} />;
     case 'singleChoice':
       return <SingleChoiceScreen step={step} />;
     case 'multiChoice':
