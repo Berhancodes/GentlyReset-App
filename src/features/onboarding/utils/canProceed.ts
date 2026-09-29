@@ -10,7 +10,6 @@ export function canProceed(step: OnboardingStep, answer: OnboardingAnswer | unde
 
   switch (step.type) {
     case 'welcome':
-    case 'mascotIntro':
     case 'story':
     case 'beforeAfter':
     case 'loading':
@@ -38,6 +37,8 @@ export function canProceed(step: OnboardingStep, answer: OnboardingAnswer | unde
     }
     case 'textInput':
       return answer?.type === 'textInput' && answer.value.trim().length > 0;
+    case 'mascotIntro':
+      return answer?.type === 'mascotIntro' && answer.name.trim().length > 0;
     default: {
       const exhaustive: never = step;
       return exhaustive;

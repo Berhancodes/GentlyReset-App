@@ -89,8 +89,9 @@ export type MascotIntroStep = BaseOnboardingStep & {
   type: 'mascotIntro';
   /** One complete playthrough of the source GIF, in milliseconds. */
   durationMs: number;
-  /** Hold the final frame after playback before advancing. */
+  /** Pause after arrival before the name prompt appears. */
   holdMs: number;
+  nameMaxLength: number;
 };
 
 export type SingleChoiceStep = BaseOnboardingStep & {
@@ -196,7 +197,7 @@ export type OnboardingStep =
 
 export type OnboardingAnswer =
   | { type: 'welcome' }
-  | { type: 'mascotIntro' }
+  | { type: 'mascotIntro'; name: string }
   | { type: 'singleChoice'; optionId: string }
   | { type: 'multiChoice'; optionIds: readonly string[] }
   | { type: 'scale'; value: number }

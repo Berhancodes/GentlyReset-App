@@ -29,6 +29,19 @@ export function getTextInputValue(
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
+export function getMascotIntroName(
+  answers: Record<string, OnboardingAnswer>,
+  stepId = 'mascotRunIntro',
+): string | undefined {
+  const answer = answers[stepId];
+  if (answer?.type !== 'mascotIntro') {
+    return undefined;
+  }
+
+  const trimmed = answer.name.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 export function joinNatural(items: readonly string[]): string {
   if (items.length === 0) {
     return '';

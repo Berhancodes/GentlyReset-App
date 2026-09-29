@@ -56,10 +56,11 @@ export const ONBOARDING_STEPS = [
     type: 'mascotIntro',
     title: 'mascot run',
     hideProgress: true,
-    required: false,
+    required: true,
     // Source GIF: 40 frames × 100ms, inspected from mascot-run-intro.gif.
     durationMs: 4000,
-    holdMs: 400,
+    holdMs: 200,
+    nameMaxLength: 36,
   },
   {
     id: 'reason',
