@@ -61,11 +61,13 @@ export function MascotSpeechBubble({
 const styles = StyleSheet.create({
   root: {
     alignItems: 'flex-start',
-    alignSelf: 'flex-start',
     flexDirection: 'row',
+    width: '100%',
   },
   card: {
-    alignSelf: 'flex-start',
+    flexGrow: 1,
+    flexShrink: 1,
+    minWidth: 0,
     borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colors.border.subtle,
@@ -75,6 +77,7 @@ const styles = StyleSheet.create({
   },
   copyLayer: {
     gap: spacing.xxs,
+    width: '100%',
   },
   replyLayer: {
     ...StyleSheet.absoluteFill,
