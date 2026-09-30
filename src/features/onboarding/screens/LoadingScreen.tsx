@@ -57,7 +57,6 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
       tone="story"
       title={showGotYou ? GOT_YOU_TITLE : step.title}
       subtitle={showGotYou ? undefined : step.subtitle}
-      showTitle={showGotYou}
       illustrationKey={showGotYou ? 'gotYou' : showBuildingScene ? undefined : step.illustrationKey}
       illustrationSize="large"
       illustrationPlacement={showGotYou ? 'end' : 'afterHero'}
@@ -90,8 +89,7 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
 
 const styles = StyleSheet.create({
   list: {
-    gap: spacing.sm,
+    gap: spacing.md,
     paddingTop: spacing.sm,
-    flexGrow: 1,
   },
 });

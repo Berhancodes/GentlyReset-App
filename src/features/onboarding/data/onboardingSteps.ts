@@ -325,8 +325,8 @@ export const ONBOARDING_STEPS = [
   {
     id: 'buildingResetLoading',
     type: 'loading',
-    title: "okay. let's build your reset.",
-    subtitle: 'give me a second...',
+    title: 'okay, give me a second...',
+    subtitle: "i'm putting your reset together",
     scene: 'building',
     hideProgress: true,
     required: false,

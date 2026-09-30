@@ -22,7 +22,7 @@ type LoadingStageRowProps = {
   active: boolean;
 };
 
-const MARK_SIZE = 24;
+const MARK_SIZE = 28;
 
 /**
  * One personalization stage. Fills and pops when it completes; the active
@@ -87,14 +87,14 @@ export function LoadingStageRow({ label, done, active }: LoadingStageRowProps) {
     backgroundColor: interpolateColor(
       progress.value,
       [0, 1],
-      [colors.surface.choice, colors.text.primary],
+      [colors.surface.raised, colors.accent.gold],
     ),
     borderColor: interpolateColor(
       progress.value,
       [0, 1],
       [
         interpolateColor(pulse.value, [0, 1], [colors.border.default, colors.border.gold]),
-        colors.text.primary,
+        colors.accent.gold,
       ],
     ),
     transform: [
@@ -151,16 +151,16 @@ const styles = StyleSheet.create({
     width: MARK_SIZE,
     height: MARK_SIZE,
     borderRadius: radius.pill,
-    borderWidth: 1.5,
+    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
   check: {
-    width: 9,
-    height: 5,
+    width: 10,
+    height: 6,
     marginTop: -1,
-    borderLeftWidth: 1.8,
-    borderBottomWidth: 1.8,
+    borderLeftWidth: 2,
+    borderBottomWidth: 2,
     borderColor: colors.action.primaryText,
     transform: [{ rotate: '-45deg' }],
   },
