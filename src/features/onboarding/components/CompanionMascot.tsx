@@ -62,6 +62,7 @@ export function CompanionMascot() {
         <Image
           source={reduceMotion ? WAVE_STILL : WAVE_LOOP}
           resizeMode="contain"
+          fadeDuration={0}
           accessibilityElementsHidden
           importantForAccessibility="no"
           style={{ width: artWidth, height: artHeight, backgroundColor: 'transparent' }}

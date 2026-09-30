@@ -1,3 +1,5 @@
+import { waitForOnboardingStepAssets } from '@/features/onboarding/utils/preloadOnboardingAssets';
+
 export type OnboardingShiftDirection = 'forward' | 'back';
 
 type OnboardingShiftHandler = (
@@ -17,6 +19,16 @@ export function releaseOnboardingPageShift() {
   shiftBusy = false;
 }
 
+function startShift(direction: OnboardingShiftDirection, commit: () => void, toIndex?: number) {
+  if (!shiftHandler) {
+    commit();
+    shiftBusy = false;
+    return;
+  }
+
+  shiftHandler(direction, commit, toIndex);
+}
+
 export function runOnboardingPageShift(
   direction: OnboardingShiftDirection,
   commit: () => void,
@@ -26,11 +38,19 @@ export function runOnboardingPageShift(
     return;
   }
 
-  if (!shiftHandler) {
-    commit();
+  shiftBusy = true;
+
+  if (toIndex === undefined) {
+    startShift(direction, commit, toIndex);
     return;
   }
 
-  shiftBusy = true;
-  shiftHandler(direction, commit, toIndex);
+  void waitForOnboardingStepAssets(toIndex).then(
+    () => {
+      startShift(direction, commit, toIndex);
+    },
+    () => {
+      startShift(direction, commit, toIndex);
+    },
+  );
 }

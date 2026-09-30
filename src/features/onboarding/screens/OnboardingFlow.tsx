@@ -14,6 +14,7 @@ import { AppText, Screen } from '@/components/ui';
 import { colors } from '@/design-system';
 import { MOTION_EASING_STANDARD, motion } from '@/design-system/motion';
 import { DevStepJumper } from '@/features/onboarding/components/DevStepJumper';
+import { OnboardingAssetWarmup } from '@/features/onboarding/components/OnboardingAssetWarmup';
 import { OnboardingQuestionNav } from '@/features/onboarding/components/OnboardingQuestionNav';
 import { OnboardingQuestionnaireShellProvider } from '@/features/onboarding/components/OnboardingQuestionnaireShell';
 import { OnboardingRenderer } from '@/features/onboarding/components/OnboardingRenderer';
@@ -144,6 +145,7 @@ export function OnboardingFlow() {
           <OnboardingRenderer step={step} />
         )}
       </Animated.View>
+      <OnboardingAssetWarmup currentStepIndex={currentStepIndex} />
       <DevStepJumper />
     </View>
   );

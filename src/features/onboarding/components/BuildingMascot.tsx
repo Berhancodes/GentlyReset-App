@@ -37,6 +37,7 @@ export function BuildingMascot() {
       <Image
         source={reduceMotion ? BUILD_STILL : BUILD_LOOP}
         resizeMode="contain"
+        fadeDuration={0}
         accessibilityElementsHidden
         importantForAccessibility="no"
         style={{ width: artWidth, height: artHeight }}

@@ -64,6 +64,7 @@ export function BreathingMascot() {
         <Image
           source={reduceMotion ? BREATHE_STILL : BREATHE_LOOP}
           resizeMode="contain"
+          fadeDuration={0}
           accessibilityElementsHidden
           importantForAccessibility="no"
           style={{ width: artWidth, height: artHeight }}
