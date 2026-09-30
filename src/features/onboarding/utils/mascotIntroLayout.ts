@@ -24,15 +24,18 @@ const MASCOT_BOUNDS = {
 
 export const MASCOT_INTRO_LAYOUT = {
   settleScale: 0.5,
-  clusterCenterRatio: 0.39,
-  bubbleMaxWidth: 138,
-  bubbleHeadGap: 16,
-  bubbleLift: 26,
-  estimatedBubbleHeight: 104,
-  characterToForm: 36,
-  fieldHeight: 54,
-  submitSize: 40,
-  formWidthRatio: 0.83,
+  mascotNudgeXRatio: 0.06,
+  mascotNudgeXMin: 18,
+  mascotNudgeXMax: 28,
+  clusterCenterRatio: 0.35,
+  bubbleMaxWidth: 168,
+  bubbleHeadGap: 4,
+  bubbleLift: 10,
+  estimatedBubbleHeight: 86,
+  characterToForm: 40,
+  fieldHeight: 60,
+  submitSize: 36,
+  formWidthRatio: 0.84,
 } as const;
 
 export type MascotIntroLayout = {
@@ -95,7 +98,12 @@ export function getMascotIntroLayout(
   const formLeft = (viewWidth - formWidth) / 2;
   const formCenterX = formLeft + formWidth / 2;
   const unshiftedMascotX = (imageX(MASCOT_BOUNDS.centerX) - originX) * settleScale + originX;
-  const settleX = formCenterX - unshiftedMascotX;
+  const mascotNudgeX = -clamp(
+    viewWidth * MASCOT_INTRO_LAYOUT.mascotNudgeXRatio,
+    MASCOT_INTRO_LAYOUT.mascotNudgeXMin,
+    MASCOT_INTRO_LAYOUT.mascotNudgeXMax,
+  );
+  const settleX = formCenterX - unshiftedMascotX + mascotNudgeX;
 
   const applySettle = (x: number, y: number, extraY: number) => ({
     x: (x - originX) * settleScale + originX + settleX,

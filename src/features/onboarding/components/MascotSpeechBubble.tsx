@@ -25,8 +25,8 @@ type MascotSpeechBubbleProps = {
   onReplyComplete: () => void;
 };
 
-const bubblePaddingHorizontal = spacing.xs + spacing.xxs / 2;
-const bubblePaddingVertical = spacing.xs;
+const bubblePaddingHorizontal = spacing.sm;
+const bubblePaddingVertical = spacing.xs - 2;
 const typingStartDelayMs = motion.delay.bubbleReveal + 80;
 
 export function MascotSpeechBubble({
@@ -198,15 +198,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tail: {
-    width: 10,
-    height: 10,
-    alignSelf: 'flex-end',
-    marginBottom: 8,
-    marginRight: -5,
+    width: 11,
+    height: 11,
+    marginTop: 30,
+    marginRight: -6,
     borderLeftWidth: StyleSheet.hairlineWidth,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border.whisper,
     backgroundColor: colors.surface.raised,
-    transform: [{ rotate: '52deg' }],
+    transform: [{ rotate: '40deg' }],
   },
 });

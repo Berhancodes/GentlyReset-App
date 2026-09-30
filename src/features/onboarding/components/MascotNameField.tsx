@@ -1,6 +1,6 @@
 import { Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
-import { colors, radius, spacing, textVariants } from '@/design-system';
+import { colors, radius, shadows, spacing, textVariants } from '@/design-system';
 import { MASCOT_INTRO_LAYOUT } from '@/features/onboarding/utils/mascotIntroLayout';
 
 type MascotNameFieldProps = {
@@ -80,16 +80,17 @@ const styles = StyleSheet.create({
     height: MASCOT_INTRO_LAYOUT.fieldHeight,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border.whisper,
     backgroundColor: colors.surface.primary,
     paddingLeft: spacing.md + spacing.xxs,
-    paddingRight: spacing.sm,
+    paddingRight: spacing.xs,
+    ...shadows.whisper,
   },
   fieldFocused: {
-    borderColor: colors.border.whisper,
-    backgroundColor: colors.surface.selected,
+    borderColor: colors.border.subtle,
+    backgroundColor: colors.surface.primary,
   },
   input: {
     ...textVariants.body,
@@ -119,8 +120,8 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
   arrow: {
-    width: 8,
-    height: 8,
+    width: 7,
+    height: 7,
     marginLeft: -1,
     borderRightWidth: 1.5,
     borderTopWidth: 1.5,
