@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { StyleSheet } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import Animated, {
   Easing,
   interpolate,
@@ -127,7 +128,9 @@ export function LoadingStageRow({ label, done, active }: LoadingStageRowProps) {
   return (
     <Animated.View style={styles.row}>
       <Animated.View style={[styles.mark, markStyle]}>
-        <Animated.View style={[styles.check, checkStyle]} />
+        <Animated.View style={[styles.checkWrap, checkStyle]}>
+          <Ionicons name="checkmark" size={16} color={colors.action.primaryText} />
+        </Animated.View>
       </Animated.View>
       <Animated.Text
         allowFontScaling
@@ -155,14 +158,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  check: {
-    width: 10,
-    height: 6,
-    marginTop: -1,
-    borderLeftWidth: 2,
-    borderBottomWidth: 2,
-    borderColor: colors.action.primaryText,
-    transform: [{ rotate: '-45deg' }],
+  checkWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   label: {
     flex: 1,
