@@ -48,6 +48,7 @@ const REMOVED_STEP_SUCCESSOR: Record<string, string> = {
   desiredFeelings: 'desiredIdentity',
   desiredDailyLife: 'desiredIdentity',
   successStatement: 'newLifeStory',
+  beforeAfterSummary: 'dailyCommitment',
   churnRisk: 'resetReason',
   readiness: 'resetReason',
   thirtyDayCommitment: 'buildingResetLoading',

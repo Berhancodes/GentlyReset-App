@@ -252,15 +252,6 @@ export const ONBOARDING_STEPS = [
     required: false,
   },
   {
-    id: 'beforeAfterSummary',
-    type: 'beforeAfter',
-    eyebrow: "where you're headed",
-    title: "where you're headed",
-    ctaLabel: "that's what I want",
-    hideProgress: true,
-    required: false,
-  },
-  {
     id: 'dailyCommitment',
     type: 'singleChoice',
     chapter: 'your-reset',

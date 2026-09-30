@@ -130,11 +130,6 @@ export type StoryStep = BaseOnboardingStep & {
   scene?: 'breathing' | 'noticing' | 'companion';
 };
 
-export type BeforeAfterStep = BaseOnboardingStep & {
-  type: 'beforeAfter';
-  ctaLabel: string;
-};
-
 export type LoadingStep = BaseOnboardingStep & {
   type: 'loading';
   stages: readonly LoadingStage[];
@@ -187,7 +182,6 @@ export type OnboardingStep =
   | ScaleStep
   | TextInputStep
   | StoryStep
-  | BeforeAfterStep
   | LoadingStep
   | ResultStep
   | ResultDetailsStep
@@ -203,7 +197,6 @@ export type OnboardingAnswer =
   | { type: 'scale'; value: number }
   | { type: 'textInput'; value: string }
   | { type: 'story' }
-  | { type: 'beforeAfter' }
   | { type: 'loading' }
   | { type: 'result' }
   | { type: 'resultDetails' }

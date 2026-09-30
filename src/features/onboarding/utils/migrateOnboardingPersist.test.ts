@@ -16,18 +16,20 @@ function check(label: string, condition: boolean, detail?: string) {
   console.error(`fail  ${label}${detail ? ` — ${detail}` : ''}`);
 }
 
-check('active flow has 26 screens', ONBOARDING_STEPS.length === 26);
+check('active flow has 25 screens', ONBOARDING_STEPS.length === 25);
 check('welcome is dest 1', getOnboardingStepIndex('welcome') === 0);
 check('mascotRunIntro is dest 2', getOnboardingStepIndex('mascotRunIntro') === 1);
 check('reason is dest 3', getOnboardingStepIndex('reason') === 2);
 check('carryingStory is dest 6', getOnboardingStepIndex('carryingStory') === 5);
 check('noticingStory is dest 10', getOnboardingStepIndex('noticingStory') === 9);
 check('newLifeStory is dest 13', getOnboardingStepIndex('newLifeStory') === 12);
-check('buildingResetLoading is dest 20', getOnboardingStepIndex('buildingResetLoading') === 19);
-check('companionStory is dest 25', getOnboardingStepIndex('companionStory') === 24);
-check('paywall is dest 26', getOnboardingStepIndex('paywall') === 25);
+check('dailyCommitment follows newLifeStory', getOnboardingStepIndex('dailyCommitment') === 13);
+check('buildingResetLoading is dest 19', getOnboardingStepIndex('buildingResetLoading') === 18);
+check('companionStory is dest 24', getOnboardingStepIndex('companionStory') === 23);
+check('paywall is dest 25', getOnboardingStepIndex('paywall') === 24);
 check('mascot intro is not a core question', ONBOARDING_STEPS[1]?.id === 'mascotRunIntro');
 check('reason still follows mascot intro', ONBOARDING_STEPS[2]?.id === 'reason');
+check('removed beforeAfterSummary is absent', getOnboardingStepIndex('beforeAfterSummary') === -1);
 check('removed recurringThought is absent', getOnboardingStepIndex('recurringThought') === -1);
 check(
   'removed thirtyDayCommitment is absent',
@@ -50,6 +52,10 @@ check(
   'removed thirtyDayCommitment maps to buildingResetLoading',
   resolveOnboardingStepIndex('thirtyDayCommitment') ===
     getOnboardingStepIndex('buildingResetLoading'),
+);
+check(
+  'removed beforeAfterSummary maps to dailyCommitment',
+  resolveOnboardingStepIndex('beforeAfterSummary') === getOnboardingStepIndex('dailyCommitment'),
 );
 
 const fromOldIndex = migrateOnboardingPersist(

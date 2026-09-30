@@ -1,4 +1,3 @@
-import { BeforeAfterScreen } from '@/features/onboarding/screens/BeforeAfterScreen';
 import { FinalScreen } from '@/features/onboarding/screens/FinalScreen';
 import { LoadingScreen } from '@/features/onboarding/screens/LoadingScreen';
 import { MascotRunIntroScreen } from '@/features/onboarding/screens/MascotRunIntroScreen';
@@ -35,8 +34,6 @@ export function OnboardingRenderer({ step }: OnboardingRendererProps) {
       return <TextInputScreen step={step} />;
     case 'story':
       return <StoryScreen step={step} />;
-    case 'beforeAfter':
-      return <BeforeAfterScreen step={step} />;
     case 'loading':
       return <LoadingScreen step={step} />;
     case 'result':
