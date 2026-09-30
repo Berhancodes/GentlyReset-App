@@ -64,10 +64,13 @@ const bubblePaddingVertical = spacing.xs;
 const styles = StyleSheet.create({
   root: {
     alignItems: 'flex-start',
-    alignSelf: 'flex-start',
     flexDirection: 'row',
+    width: '100%',
   },
   card: {
+    flexGrow: 1,
+    flexShrink: 1,
+    minWidth: 0,
     borderRadius: radius.card,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border.whisper,
@@ -78,6 +81,7 @@ const styles = StyleSheet.create({
   },
   copyLayer: {
     gap: spacing.none,
+    minWidth: 0,
     width: '100%',
   },
   replyLayer: {
