@@ -31,7 +31,7 @@ export const MASCOT_INTRO_LAYOUT = {
   bubbleMaxWidth: 126,
   bubbleHeadGap: 2,
   bubbleLift: 22,
-  estimatedBubbleHeight: 92,
+  estimatedBubbleHeight: 104,
   characterToForm: 36,
   fieldHeight: 54,
   submitSize: 40,
