@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   tail: {
     width: 10,
     height: 10,
-    marginTop: 28,
+    marginTop: 16,
     marginRight: -5,
     borderLeftWidth: StyleSheet.hairlineWidth,
     borderBottomWidth: StyleSheet.hairlineWidth,
