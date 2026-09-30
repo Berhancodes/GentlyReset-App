@@ -23,6 +23,7 @@ import Animated, {
 import { MOTION_EASING_STANDARD, colors, motion } from '@/design-system';
 import { MascotNameField } from '@/features/onboarding/components/MascotNameField';
 import { MascotSpeechBubble } from '@/features/onboarding/components/MascotSpeechBubble';
+import { getTypewriterDuration } from '@/features/onboarding/hooks/useStagedTypewriter';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { MascotIntroStep, OnboardingAnswer } from '@/features/onboarding/types/onboarding';
@@ -38,6 +39,11 @@ const MASCOT_RUN_FINAL = require('../../../../assets/images/onboarding/mascot-ru
 const LAST_FRAME_MS = 100;
 const ASK_GREETING = 'hey 👋';
 const ASK_QUESTION = 'what should I call you?';
+const BUBBLE_TYPING_DELAY_MS = motion.delay.bubbleReveal + 80;
+const ASK_TYPEWRITER_MS = getTypewriterDuration([
+  { id: 'greeting', text: ASK_GREETING },
+  { id: 'question', text: ASK_QUESTION },
+]);
 
 const bubbleEasing = Easing.bezier(
   MOTION_EASING_STANDARD[0],
@@ -88,10 +94,10 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
   const bubbleTranslateY = useSharedValue<number>(motion.offset.bubble);
   const bubbleScale = useSharedValue<number>(motion.scale.bubbleFrom);
   const askOpacity = useSharedValue(1);
-  const questionOpacity = useSharedValue(0);
   const replyOpacity = useSharedValue(0);
   const inputOpacity = useSharedValue(0);
   const inputTranslateY = useSharedValue<number>(motion.offset.inputReveal);
+  const [replyTyped, setReplyTyped] = useState(false);
 
   useEffect(() => {
     goToNextRef.current = goToNext;
@@ -161,6 +167,10 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
     setPhase('responding');
   }, [setAnswer, step.id, trimmedName]);
 
+  const handleReplyComplete = useCallback(() => {
+    setReplyTyped(true);
+  }, []);
+
   useEffect(() => {
     if (phase === 'running') {
       return;
@@ -169,9 +179,11 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
     const currentLayout = layoutRef.current;
     const settleTiming = { duration: motion.duration.mascotSettle, easing: bubbleEasing };
     const bubbleTiming = { duration: motion.duration.bubble, easing: bubbleEasing };
-    const inputTiming = { duration: motion.duration.inputReveal, easing: bubbleEasing };
 
     if (phase === 'asking') {
+      const inputTiming = { duration: motion.duration.inputReveal, easing: bubbleEasing };
+      const inputDelay = reduceMotion ? 0 : BUBBLE_TYPING_DELAY_MS + ASK_TYPEWRITER_MS;
+
       if (reduceMotion) {
         mascotTranslateX.value = currentLayout.settleX;
         mascotTranslateY.value = currentLayout.settleY;
@@ -179,7 +191,6 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
         bubbleOpacity.value = 1;
         bubbleTranslateY.value = 0;
         bubbleScale.value = 1;
-        questionOpacity.value = 1;
         inputOpacity.value = 1;
         inputTranslateY.value = 0;
         return;
@@ -191,47 +202,34 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
       bubbleOpacity.value = withDelay(motion.delay.bubbleReveal, withTiming(1, bubbleTiming));
       bubbleTranslateY.value = withDelay(motion.delay.bubbleReveal, withTiming(0, bubbleTiming));
       bubbleScale.value = withDelay(motion.delay.bubbleReveal, withTiming(1, bubbleTiming));
-      questionOpacity.value = withDelay(
-        motion.delay.bubbleQuestion,
-        withTiming(1, { duration: motion.duration.bubbleText, easing: bubbleEasing }),
-      );
-      inputOpacity.value = withDelay(motion.delay.inputReveal, withTiming(1, inputTiming));
-      inputTranslateY.value = withDelay(motion.delay.inputReveal, withTiming(0, inputTiming));
+      inputOpacity.value = withDelay(inputDelay, withTiming(1, inputTiming));
+      inputTranslateY.value = withDelay(inputDelay, withTiming(0, inputTiming));
       return;
     }
 
     if (reduceMotion) {
       askOpacity.value = 0;
-      questionOpacity.value = 0;
       replyOpacity.value = 1;
       inputOpacity.value = 0;
-    } else {
-      const fade = { duration: motion.duration.bubbleText, easing: bubbleEasing };
-      const exit = { duration: motion.duration.formExit, easing: bubbleEasing };
-      askOpacity.value = withTiming(0, fade);
-      questionOpacity.value = withTiming(0, fade);
-      replyOpacity.value = withTiming(1, fade);
-      inputOpacity.value = withTiming(0, exit);
-      inputTranslateY.value = withTiming(motion.offset.formExit, exit);
-      mascotHelloScale.value = withSequence(
-        withTiming(motion.scale.mascotHello, {
-          duration: motion.duration.mascotHello,
-          easing: Easing.out(Easing.cubic),
-        }),
-        withTiming(1, {
-          duration: motion.duration.bubbleText,
-          easing: Easing.inOut(Easing.cubic),
-        }),
-      );
+      return;
     }
 
-    const advanceId = setTimeout(() => {
-      goToNextRef.current();
-    }, motion.duration.bubbleText + motion.duration.nameResponseHold);
-
-    return () => {
-      clearTimeout(advanceId);
-    };
+    const fade = { duration: motion.duration.bubbleText, easing: bubbleEasing };
+    const exit = { duration: motion.duration.formExit, easing: bubbleEasing };
+    askOpacity.value = withTiming(0, fade);
+    replyOpacity.value = withTiming(1, fade);
+    inputOpacity.value = withTiming(0, exit);
+    inputTranslateY.value = withTiming(motion.offset.formExit, exit);
+    mascotHelloScale.value = withSequence(
+      withTiming(motion.scale.mascotHello, {
+        duration: motion.duration.mascotHello,
+        easing: Easing.out(Easing.cubic),
+      }),
+      withTiming(1, {
+        duration: motion.duration.bubbleText,
+        easing: Easing.inOut(Easing.cubic),
+      }),
+    );
   }, [
     askOpacity,
     bubbleOpacity,
@@ -244,10 +242,23 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
     mascotTranslateX,
     mascotTranslateY,
     phase,
-    questionOpacity,
     reduceMotion,
     replyOpacity,
   ]);
+
+  useEffect(() => {
+    if (phase !== 'responding' || !replyTyped) {
+      return;
+    }
+
+    const advanceId = setTimeout(() => {
+      goToNextRef.current();
+    }, motion.duration.nameResponseHold);
+
+    return () => {
+      clearTimeout(advanceId);
+    };
+  }, [phase, replyTyped]);
 
   useEffect(() => {
     if (phase === 'running') {
@@ -286,9 +297,6 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
   }));
   const askStyle = useAnimatedStyle(() => ({
     opacity: askOpacity.value,
-  }));
-  const questionStyle = useAnimatedStyle(() => ({
-    opacity: questionOpacity.value,
   }));
   const replyStyle = useAnimatedStyle(() => ({
     opacity: replyOpacity.value,
@@ -334,9 +342,9 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
               askQuestion={ASK_QUESTION}
               reply={reply}
               showingReply={phase === 'responding'}
-              greetingStyle={askStyle}
-              questionStyle={questionStyle}
+              askStyle={askStyle}
               replyStyle={replyStyle}
+              onReplyComplete={handleReplyComplete}
             />
           </Animated.View>
         ) : null}

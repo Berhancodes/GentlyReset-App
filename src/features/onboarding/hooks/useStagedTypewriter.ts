@@ -13,6 +13,10 @@ type TypedSnapshot = {
   charCount: number;
 };
 
+function charactersOf(text: string): readonly string[] {
+  return [...text];
+}
+
 function durationForCharacter(character: string): number {
   if (character === ' ' || character === '\n') {
     return Math.round(motion.typewriter.charMs * 0.55);
@@ -31,13 +35,28 @@ function buildLineTimings(lines: readonly TypewriterLine[]): readonly (readonly 
     const appearAt: number[] = [];
     let elapsed = 0;
 
-    for (const character of line.text) {
+    for (const character of charactersOf(line.text)) {
       elapsed += durationForCharacter(character);
       appearAt.push(elapsed);
     }
 
     return appearAt;
   });
+}
+
+export function getTypewriterDuration(lines: readonly TypewriterLine[]): number {
+  const timings = buildLineTimings(lines);
+  let total = 0;
+
+  for (let lineIndex = 0; lineIndex < timings.length; lineIndex += 1) {
+    const appearAt = timings[lineIndex];
+    total += appearAt?.[appearAt.length - 1] ?? 0;
+    if (lineIndex < timings.length - 1) {
+      total += motion.typewriter.linePauseMs;
+    }
+  }
+
+  return total;
 }
 
 function snapshotAt(
@@ -78,13 +97,17 @@ function snapshotAt(
   }
 
   const lastIndex = Math.max(0, lines.length - 1);
-  return { lineIndex: lastIndex, charCount: lines[lastIndex]?.text.length ?? 0 };
+  return {
+    lineIndex: lastIndex,
+    charCount: charactersOf(lines[lastIndex]?.text ?? '').length,
+  };
 }
 
 function isSnapshotComplete(lines: readonly TypewriterLine[], snapshot: TypedSnapshot): boolean {
   const lastLine = lines[lines.length - 1];
   return (
-    snapshot.lineIndex >= lines.length - 1 && snapshot.charCount >= (lastLine?.text.length ?? 0)
+    snapshot.lineIndex >= lines.length - 1 &&
+    snapshot.charCount >= charactersOf(lastLine?.text ?? '').length
   );
 }
 
@@ -148,7 +171,7 @@ export function useStagedTypewriter(lines: readonly TypewriterLine[]) {
         continue;
       }
 
-      if (snapshot.charCount < line.text.length) {
+      if (snapshot.charCount < charactersOf(line.text).length) {
         targetElapsed += duration;
       } else {
         for (let remaining = lineIndex; remaining < lines.length; remaining += 1) {
@@ -179,7 +202,7 @@ export function useStagedTypewriter(lines: readonly TypewriterLine[]) {
       if (index > snapshot.lineIndex) {
         return '';
       }
-      return line.text.slice(0, snapshot.charCount);
+      return charactersOf(line.text).slice(0, snapshot.charCount).join('');
     },
     [lines, reduceMotion, snapshot.charCount, snapshot.lineIndex],
   );

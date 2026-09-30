@@ -1,28 +1,71 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { type AnimatedStyle } from 'react-native-reanimated';
+import Animated, { type AnimatedStyle, useReducedMotion } from 'react-native-reanimated';
 
 import { AppText } from '@/components/ui';
-import { colors, radius, shadows, spacing } from '@/design-system';
+import { colors, motion, radius, shadows, spacing, type TextVariant } from '@/design-system';
+import {
+  type TypewriterLine,
+  useStagedTypewriter,
+} from '@/features/onboarding/hooks/useStagedTypewriter';
+import { hapticTypewriterTick } from '@/utils/haptics';
+
+type BubbleLine = TypewriterLine & {
+  variant: TextVariant;
+};
 
 type MascotSpeechBubbleProps = {
   askGreeting: string;
   askQuestion: string;
   reply: string;
   showingReply: boolean;
-  greetingStyle: AnimatedStyle<{ opacity: number }>;
-  questionStyle: AnimatedStyle<{ opacity: number }>;
+  askStyle: AnimatedStyle<{ opacity: number }>;
   replyStyle: AnimatedStyle<{ opacity: number }>;
+  onAskComplete?: () => void;
+  onReplyComplete: () => void;
 };
+
+const bubblePaddingHorizontal = spacing.xs + spacing.xxs / 2;
+const bubblePaddingVertical = spacing.xs;
+const typingStartDelayMs = motion.delay.bubbleReveal + 80;
 
 export function MascotSpeechBubble({
   askGreeting,
   askQuestion,
   reply,
   showingReply,
-  greetingStyle,
-  questionStyle,
+  askStyle,
   replyStyle,
+  onAskComplete,
+  onReplyComplete,
 }: MascotSpeechBubbleProps) {
+  const reduceMotion = useReducedMotion();
+  const [canType, setCanType] = useState(reduceMotion === true);
+  const askLines = useMemo<readonly BubbleLine[]>(
+    () => [
+      { id: 'greeting', text: askGreeting, variant: 'mascotSpeechGreeting' },
+      { id: 'question', text: askQuestion, variant: 'body' },
+    ],
+    [askGreeting, askQuestion],
+  );
+  const replyLines = useMemo<readonly BubbleLine[]>(
+    () => [{ id: 'reply', text: reply, variant: 'body' }],
+    [reply],
+  );
+
+  useEffect(() => {
+    const timeoutId = setTimeout(
+      () => {
+        setCanType(true);
+      },
+      reduceMotion ? 0 : typingStartDelayMs,
+    );
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [reduceMotion]);
+
   return (
     <View
       accessible
@@ -33,33 +76,91 @@ export function MascotSpeechBubble({
     >
       <View accessibilityElementsHidden importantForAccessibility="no" style={styles.tail} />
       <View style={styles.card}>
-        <View style={styles.copyLayer}>
-          <Animated.View style={greetingStyle}>
-            <AppText variant="mascotSpeechGreeting" color="primary" align="left">
-              {askGreeting}
-            </AppText>
-          </Animated.View>
-          <Animated.View style={questionStyle}>
-            <AppText variant="body" color="primary" align="left">
-              {askQuestion}
-            </AppText>
-          </Animated.View>
-        </View>
+        <Animated.View style={[styles.copyLayer, askStyle]}>
+          <View accessibilityElementsHidden importantForAccessibility="no" style={styles.reserve}>
+            {askLines.map((line) => (
+              <AppText
+                key={`reserve-${line.id}`}
+                variant={line.variant}
+                color="primary"
+                align="left"
+              >
+                {line.text}
+              </AppText>
+            ))}
+          </View>
+          <View pointerEvents="none" style={styles.typedOverlay}>
+            {canType ? (
+              <TypedBubbleLines
+                lines={askLines}
+                haptic={!showingReply}
+                onComplete={onAskComplete}
+              />
+            ) : null}
+          </View>
+        </Animated.View>
         <Animated.View
           pointerEvents={showingReply ? 'auto' : 'none'}
           style={[styles.copyLayer, styles.replyLayer, replyStyle]}
         >
-          <AppText variant="body" color="primary" align="left">
-            {reply}
-          </AppText>
+          {canType && showingReply && reply.length > 0 ? (
+            <TypedBubbleLines key={reply} lines={replyLines} haptic onComplete={onReplyComplete} />
+          ) : null}
         </Animated.View>
       </View>
     </View>
   );
 }
 
-const bubblePaddingHorizontal = spacing.xs + spacing.xxs / 2;
-const bubblePaddingVertical = spacing.xs;
+function TypedBubbleLines({
+  lines,
+  haptic,
+  onComplete,
+}: {
+  lines: readonly BubbleLine[];
+  haptic: boolean;
+  onComplete?: () => void;
+}) {
+  const { isComplete, visibleText } = useStagedTypewriter(lines);
+  const spoken = lines.map((_line, index) => visibleText(index)).join('');
+  const previousSpoken = useRef('');
+  const completedRef = useRef(false);
+
+  useEffect(() => {
+    if (!haptic) {
+      previousSpoken.current = spoken;
+      return;
+    }
+
+    if (spoken.length <= previousSpoken.current.length) {
+      previousSpoken.current = spoken;
+      return;
+    }
+
+    const added = spoken.slice(previousSpoken.current.length);
+    previousSpoken.current = spoken;
+    if ([...added].some((character) => character.trim() !== '')) {
+      void hapticTypewriterTick();
+    }
+  }, [haptic, spoken]);
+
+  useEffect(() => {
+    if (isComplete && !completedRef.current) {
+      completedRef.current = true;
+      onComplete?.();
+    }
+  }, [isComplete, onComplete]);
+
+  return (
+    <View accessibilityElementsHidden importantForAccessibility="no">
+      {lines.map((line, index) => (
+        <AppText key={line.id} variant={line.variant} color="primary" align="left">
+          {visibleText(index)}
+        </AppText>
+      ))}
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   root: {
@@ -83,6 +184,12 @@ const styles = StyleSheet.create({
     gap: spacing.none,
     minWidth: 0,
     width: '100%',
+  },
+  reserve: {
+    opacity: 0,
+  },
+  typedOverlay: {
+    ...StyleSheet.absoluteFill,
   },
   replyLayer: {
     ...StyleSheet.absoluteFill,
