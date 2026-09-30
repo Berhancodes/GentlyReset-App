@@ -43,7 +43,7 @@ export function AnimatedChoiceCard({
 }: ChoiceCardProps) {
   const isTile = variant === 'tile';
   const isIllustrated = variant === 'illustrated';
-  const idleBackground = isIllustrated ? colors.surface.raised : colors.surface.choice;
+  const idleBackground = colors.surface.raised;
   const { onPressIn, onPressOut, cardMotionStyle, checkMotionStyle, iconMotionStyle } =
     useSelectionFeedback({
       selected,

@@ -81,11 +81,11 @@ const styles = StyleSheet.create({
     ...shadows.soft,
   },
   chipStrength: {
-    backgroundColor: colors.surface.choiceSelected,
+    backgroundColor: colors.surface.raised,
     borderColor: colors.accent.gold,
   },
   chipChallenge: {
-    backgroundColor: colors.surface.choice,
+    backgroundColor: colors.surface.raised,
     borderColor: colors.border.default,
   },
 });
