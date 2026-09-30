@@ -309,7 +309,6 @@ export const ONBOARDING_STEPS = [
       { id: 'easier-day', label: 'give me an easier day' },
       { id: 'remind-why', label: 'remind me why I started' },
       { id: 'ask-what-happened', label: 'ask me what happened' },
-      { id: 'little-push', label: 'give me a little push' },
     ],
   },
   {

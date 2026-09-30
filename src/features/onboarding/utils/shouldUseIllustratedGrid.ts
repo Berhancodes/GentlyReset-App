@@ -8,11 +8,15 @@ const SHORT_LABEL_LIMIT = 36;
  * Longer sentence answers stay as horizontal cards.
  */
 export function shouldUseIllustratedGrid(step: MultiChoiceStep | SingleChoiceStep): boolean {
+  const { options } = step;
+  if (options.length % 2 !== 0) {
+    return false;
+  }
+
   if (step.id === 'reason') {
     return true;
   }
 
-  const { options } = step;
   if (options.length < 4 || options.length > 8) {
     return false;
   }

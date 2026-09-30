@@ -30,6 +30,31 @@ check('paywall is dest 25', getOnboardingStepIndex('paywall') === 24);
 check('mascot intro is not a core question', ONBOARDING_STEPS[1]?.id === 'mascotRunIntro');
 check('reason still follows mascot intro', ONBOARDING_STEPS[2]?.id === 'reason');
 check('removed beforeAfterSummary is absent', getOnboardingStepIndex('beforeAfterSummary') === -1);
+
+for (const step of ONBOARDING_STEPS) {
+  if (!('options' in step) || step.options.length < 4) {
+    continue;
+  }
+
+  const hasDescriptions = step.options.some(
+    (option) => 'description' in option && Boolean(option.description),
+  );
+  if (hasDescriptions) {
+    continue;
+  }
+
+  check(
+    `${step.id} card count is even`,
+    step.options.length % 2 === 0,
+    `count=${step.options.length}`,
+  );
+}
+
+const missedDay = ONBOARDING_STEPS.find((step) => step.id === 'missedDayResponse');
+check(
+  'missedDayResponse has four cards',
+  Boolean(missedDay && 'options' in missedDay && missedDay.options.length === 4),
+);
 check('removed recurringThought is absent', getOnboardingStepIndex('recurringThought') === -1);
 check(
   'removed thirtyDayCommitment is absent',
