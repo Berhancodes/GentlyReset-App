@@ -200,12 +200,13 @@ const styles = StyleSheet.create({
   tail: {
     width: 10,
     height: 10,
-    marginTop: 22,
+    alignSelf: 'flex-end',
+    marginBottom: 8,
     marginRight: -5,
     borderLeftWidth: StyleSheet.hairlineWidth,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border.whisper,
     backgroundColor: colors.surface.raised,
-    transform: [{ rotate: '48deg' }],
+    transform: [{ rotate: '52deg' }],
   },
 });
