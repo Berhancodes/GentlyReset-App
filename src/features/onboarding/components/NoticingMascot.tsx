@@ -2,57 +2,75 @@ import { memo, useMemo } from 'react';
 import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
-import { colors, spacing } from '@/design-system';
+import { spacing } from '@/design-system';
 
-const NOTICE_LOOP = require('../../../../assets/images/mascot/mascot-noticing-loop.gif');
-const NOTICE_STILL = require('../../../../assets/images/mascot/mascot-noticing-still.png');
+const BOBA_LOOP = require('../../../../assets/images/onboarding/noticing/noticing-mascot-boba.gif');
+const BOBA_STILL = require('../../../../assets/images/onboarding/noticing/noticing-mascot-boba-still.png');
 
-const ART_WIDTH = 400;
-const ART_HEIGHT = 415;
-const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
+const GIF_WIDTH = 720;
+const GIF_HEIGHT = 1280;
+const GIF_ASPECT = GIF_WIDTH / GIF_HEIGHT;
+/** Opaque mascot, measured from noticing-mascot-boba-still.png. */
+const CONTENT_TOP = 200;
+const CONTENT_BOTTOM = 1148;
+const CONTENT_HEIGHT = CONTENT_BOTTOM - CONTENT_TOP;
 const MASCOT_MAX_WIDTH = 280;
-const MASCOT_HEIGHT_FRACTION = 0.32;
+const MASCOT_HEIGHT_FRACTION = 0.34;
 
 /**
- * Noticing-story mascot. Plays the supplied detective loop unless Reduce Motion is on.
+ * Noticing-story mascot. Plays the boba sip loop unless Reduce Motion is on.
  */
 export const NoticingMascot = memo(function NoticingMascot() {
   const reduceMotion = useReducedMotion();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const availableWidth = Math.round(windowWidth - spacing.lg * 2);
-  const maxHeight = Math.round(windowHeight * MASCOT_HEIGHT_FRACTION);
-  const widthFromHeight = Math.round(maxHeight * ART_ASPECT);
+  const maxVisibleHeight = Math.round(windowHeight * MASCOT_HEIGHT_FRACTION);
+  const widthFromVisible = Math.round(maxVisibleHeight * (GIF_WIDTH / CONTENT_HEIGHT));
   const artWidth = Math.max(
     spacing.xxxl,
-    Math.min(availableWidth, widthFromHeight, MASCOT_MAX_WIDTH),
+    Math.min(availableWidth, widthFromVisible, MASCOT_MAX_WIDTH),
   );
-  const artHeight = Math.round(artWidth / ART_ASPECT);
-  const imageSize = useMemo(() => ({ width: artWidth, height: artHeight }), [artHeight, artWidth]);
+  const fullHeight = Math.round(artWidth / GIF_ASPECT);
+  const cropTop = Math.round(fullHeight * (CONTENT_TOP / GIF_HEIGHT));
+  const visibleHeight = Math.round(fullHeight * (CONTENT_HEIGHT / GIF_HEIGHT));
+  const imageSize = useMemo(
+    () => ({ width: artWidth, height: fullHeight, marginTop: -cropTop }),
+    [artWidth, cropTop, fullHeight],
+  );
+  const frameSize = useMemo(
+    () => ({ width: artWidth, height: visibleHeight }),
+    [artWidth, visibleHeight],
+  );
 
   return (
     <View
       accessible
       accessibilityRole="image"
-      accessibilityLabel="Mascot noticing a small pattern"
-      style={styles.root}
+      accessibilityLabel="Mascot sipping a drink"
+      style={styles.wrap}
     >
-      <Image
-        source={reduceMotion ? NOTICE_STILL : NOTICE_LOOP}
-        resizeMode="contain"
-        fadeDuration={0}
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-        style={imageSize}
-      />
+      <View style={[styles.frame, frameSize]}>
+        <Image
+          source={reduceMotion ? BOBA_STILL : BOBA_LOOP}
+          resizeMode="contain"
+          fadeDuration={0}
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+          style={imageSize}
+        />
+      </View>
     </View>
   );
 });
 
 const styles = StyleSheet.create({
-  root: {
+  wrap: {
     alignItems: 'center',
     width: '100%',
-    backgroundColor: colors.background.primary,
+    marginTop: spacing.xs,
     pointerEvents: 'none',
+  },
+  frame: {
+    overflow: 'hidden',
   },
 });
