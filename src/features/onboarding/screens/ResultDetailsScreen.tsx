@@ -1,8 +1,10 @@
 import { StyleSheet, View } from 'react-native';
 
 import { AppText, PrimaryButton } from '@/components/ui';
-import { colors, radius, shadows, spacing } from '@/design-system';
+import { colors, radius, spacing } from '@/design-system';
+import { NoticedMascot } from '@/features/onboarding/components/NoticedMascot';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
+import { getNoticedCopy } from '@/features/onboarding/data/noticedCopy';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { ResultDetailsStep } from '@/features/onboarding/types/onboarding';
@@ -16,76 +18,96 @@ export function ResultDetailsScreen({ step }: ResultDetailsScreenProps) {
   const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
   const answers = useOnboardingStore((state) => state.answers);
   const profile = getResetProfileForAnswers(answers);
+  const copy = getNoticedCopy(profile.id);
 
   return (
     <OnboardingScreenLayout
       tone="story"
       title={step.title}
+      subtitle={copy.insight}
       hideProgress
+      skipStorySpacer
       onBack={canGoBack ? goBack : undefined}
-      footer={<PrimaryButton label={step.ctaLabel} onPress={goToNext} />}
+      footer={<PrimaryButton label={step.ctaLabel} showArrow onPress={goToNext} />}
     >
-      <View style={styles.sections}>
-        <TraitGroup eyebrow="strengths" values={profile.strengths} tone="strength" />
-        <TraitGroup eyebrow="challenges" values={profile.challenges} tone="challenge" />
+      <View style={styles.body}>
+        <NoticedMascot />
+        <View style={styles.section}>
+          <AppText variant="storyEyebrow" color="helper" align="center">
+            {"what's already there"}
+          </AppText>
+          <View style={styles.chips}>
+            {profile.strengths.map((value) => (
+              <View key={value} style={styles.chip}>
+                <AppText variant="caption">{value}</AppText>
+              </View>
+            ))}
+          </View>
+        </View>
+        <View style={styles.section}>
+          <AppText variant="storyEyebrow" color="helper" align="center">
+            the pattern
+          </AppText>
+          <View style={styles.pattern}>
+            {copy.pattern.map((paragraph) => (
+              <AppText key={paragraph} variant="body" align="center">
+                {paragraph}
+              </AppText>
+            ))}
+          </View>
+        </View>
+        <View style={styles.divider} />
+        <View style={styles.closer} accessibilityRole="text">
+          <AppText variant="title" align="center">
+            {copy.closerLead}
+          </AppText>
+          <AppText variant="title" align="center">
+            {copy.closerEmphasis}
+          </AppText>
+          <AppText variant="title" color="secondary" align="center">
+            {copy.closerRest}
+          </AppText>
+        </View>
       </View>
     </OnboardingScreenLayout>
   );
 }
 
-function TraitGroup({
-  eyebrow,
-  values,
-  tone,
-}: {
-  eyebrow: string;
-  values: readonly string[];
-  tone: 'strength' | 'challenge';
-}) {
-  return (
-    <View style={styles.group}>
-      <AppText variant="label" color="muted">
-        {eyebrow}
-      </AppText>
-      <View style={styles.chips}>
-        {values.map((value) => (
-          <View
-            key={value}
-            style={[styles.chip, tone === 'strength' ? styles.chipStrength : styles.chipChallenge]}
-          >
-            <AppText variant="body">{value}</AppText>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  sections: {
-    gap: spacing.xl,
+  body: {
+    gap: spacing.lg,
   },
-  group: {
+  section: {
     gap: spacing.sm,
+    alignItems: 'center',
   },
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'center',
     gap: spacing.sm,
+    maxWidth: 280,
   },
   chip: {
     borderRadius: radius.pill,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderWidth: 1,
-    ...shadows.soft,
-  },
-  chipStrength: {
+    borderWidth: 1.5,
     backgroundColor: colors.surface.raised,
     borderColor: colors.accent.gold,
   },
-  chipChallenge: {
-    backgroundColor: colors.surface.raised,
-    borderColor: colors.border.default,
+  pattern: {
+    gap: spacing.md,
+    paddingHorizontal: spacing.sm,
+  },
+  divider: {
+    alignSelf: 'center',
+    width: spacing.xxl,
+    height: 1,
+    backgroundColor: colors.accent.gold,
+  },
+  closer: {
+    gap: 0,
+    paddingHorizontal: spacing.sm,
   },
 });

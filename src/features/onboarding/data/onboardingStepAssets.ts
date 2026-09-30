@@ -26,6 +26,7 @@ const BUILD_LOOP = require('../../../../assets/images/mascot/mascot-building-loo
 const BUILD_STILL = require('../../../../assets/images/mascot/mascot-building-still.png');
 const WAVE_LOOP = require('../../../../assets/images/mascot/mascot-companion-loop.gif');
 const WAVE_STILL = require('../../../../assets/images/mascot/mascot-companion-still.png');
+const NOTICED_ART = require('../../../../assets/images/onboarding/noticed/noticed-mascot.png');
 
 function pushSource(sources: ImageSourcePropType[], source: ImageSourcePropType | undefined) {
   if (source) {
@@ -47,6 +48,8 @@ function getSceneSources(step: OnboardingStep): ImageSourcePropType[] {
       return [WORRIED_ART];
     case 'resetReason':
       return [STAR_ART];
+    case 'noticedDetails':
+      return [NOTICED_ART];
     default:
       break;
   }

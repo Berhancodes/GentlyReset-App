@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, shadows, spacing, textVariants } from '@/design-system';
@@ -14,6 +15,8 @@ type PrimaryButtonProps = {
   disabled?: boolean;
   accessibilityHint?: string;
   haptic?: 'light' | 'success' | 'none';
+  /** Trailing arrow, kept off the centered label (noticed-page continue). */
+  showArrow?: boolean;
 };
 
 export function PrimaryButton({
@@ -22,6 +25,7 @@ export function PrimaryButton({
   disabled = false,
   accessibilityHint,
   haptic = 'light',
+  showArrow = false,
 }: PrimaryButtonProps) {
   return (
     <Pressable
@@ -67,6 +71,15 @@ export function PrimaryButton({
               >
                 {label}
               </Text>
+              {showArrow ? (
+                <View pointerEvents="none" style={styles.arrow}>
+                  <Ionicons
+                    name="arrow-forward"
+                    size={20}
+                    color={disabled ? colors.action.primaryTextDisabled : colors.action.primaryText}
+                  />
+                </View>
+              ) : null}
             </View>
           </>
         );
@@ -114,6 +127,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     ...webPressTransition,
+  },
+  arrow: {
+    position: 'absolute',
+    right: spacing.md,
   },
   faceEnabled: {
     backgroundColor: colors.action.primaryBackground,
