@@ -93,12 +93,12 @@ const styles = StyleSheet.create({
   tail: {
     width: 10,
     height: 10,
-    marginTop: 16,
+    marginTop: 22,
     marginRight: -5,
     borderLeftWidth: StyleSheet.hairlineWidth,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border.whisper,
     backgroundColor: colors.surface.raised,
-    transform: [{ rotate: '38deg' }],
+    transform: [{ rotate: '48deg' }],
   },
 });

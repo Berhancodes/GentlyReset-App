@@ -29,8 +29,8 @@ export const MASCOT_INTRO_LAYOUT = {
   translateXMax: 56,
   clusterCenterRatio: 0.39,
   bubbleMaxWidth: 138,
-  bubbleHeadGap: 2,
-  bubbleLift: 22,
+  bubbleHeadGap: 4,
+  bubbleLift: 14,
   estimatedBubbleHeight: 104,
   characterToForm: 36,
   fieldHeight: 54,
@@ -119,14 +119,14 @@ export function getMascotIntroLayout(
     settleY -= overflow;
   }
 
-  const head = applySettle(imageX(MASCOT_BOUNDS.headRight), imageY(MASCOT_BOUNDS.faceTop), settleY);
+  const hat = applySettle(imageX(MASCOT_BOUNDS.hatRight), imageY(MASCOT_BOUNDS.hatTop), settleY);
   const feet = applySettle(imageX(MASCOT_BOUNDS.centerX), imageY(MASCOT_BOUNDS.bottom), settleY);
 
   const margin = spacing.md;
   const bubbleMaxWidth = Math.min(MASCOT_INTRO_LAYOUT.bubbleMaxWidth, viewWidth - margin * 2);
-  const desiredBubbleLeft = head.x + MASCOT_INTRO_LAYOUT.bubbleHeadGap;
+  const desiredBubbleLeft = hat.x + MASCOT_INTRO_LAYOUT.bubbleHeadGap;
   const bubbleLeft = clamp(desiredBubbleLeft, margin, viewWidth - bubbleMaxWidth - margin);
-  const desiredBubbleTop = head.y - MASCOT_INTRO_LAYOUT.bubbleLift;
+  const desiredBubbleTop = hat.y - MASCOT_INTRO_LAYOUT.bubbleLift;
   const bubbleTop = clamp(
     desiredBubbleTop,
     insets.top + spacing.sm,
