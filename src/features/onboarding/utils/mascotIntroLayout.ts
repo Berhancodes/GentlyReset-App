@@ -24,9 +24,6 @@ const MASCOT_BOUNDS = {
 
 export const MASCOT_INTRO_LAYOUT = {
   settleScale: 0.5,
-  translateXRatio: 0.13,
-  translateXMin: 40,
-  translateXMax: 56,
   clusterCenterRatio: 0.39,
   bubbleMaxWidth: 138,
   bubbleHeadGap: 16,
@@ -86,19 +83,8 @@ export function getMascotIntroLayout(
 ): MascotIntroLayout {
   const { imageWidth, imageHeight, imageLeft, imageTop } = containImageRect(viewWidth, viewHeight);
   const settleScale = MASCOT_INTRO_LAYOUT.settleScale;
-  const settleX = -clamp(
-    viewWidth * MASCOT_INTRO_LAYOUT.translateXRatio,
-    MASCOT_INTRO_LAYOUT.translateXMin,
-    MASCOT_INTRO_LAYOUT.translateXMax,
-  );
-
   const originX = viewWidth / 2;
   const originY = viewHeight / 2;
-  const applySettle = (x: number, y: number, extraY: number) => ({
-    x: (x - originX) * settleScale + originX + settleX,
-    y: (y - originY) * settleScale + originY + extraY,
-  });
-
   const imageX = (ratio: number) => imageLeft + ratio * imageWidth;
   const imageY = (ratio: number) => imageTop + ratio * imageHeight;
 
@@ -106,6 +92,15 @@ export function getMascotIntroLayout(
     Math.round(viewWidth * MASCOT_INTRO_LAYOUT.formWidthRatio),
     viewWidth - spacing.lg * 2,
   );
+  const formLeft = (viewWidth - formWidth) / 2;
+  const formCenterX = formLeft + formWidth / 2;
+  const unshiftedMascotX = (imageX(MASCOT_BOUNDS.centerX) - originX) * settleScale + originX;
+  const settleX = formCenterX - unshiftedMascotX;
+
+  const applySettle = (x: number, y: number, extraY: number) => ({
+    x: (x - originX) * settleScale + originX + settleX,
+    y: (y - originY) * settleScale + originY + extraY,
+  });
   const formHeight = MASCOT_INTRO_LAYOUT.fieldHeight;
   const maxFormTop = viewHeight - formHeight - Math.max(insets.bottom, spacing.lg);
 
@@ -141,7 +136,7 @@ export function getMascotIntroLayout(
     bubbleLeft,
     bubbleTop,
     formWidth,
-    formLeft: (viewWidth - formWidth) / 2,
+    formLeft,
     formTop: Math.min(feet.y + MASCOT_INTRO_LAYOUT.characterToForm, maxFormTop),
     fieldHeight: MASCOT_INTRO_LAYOUT.fieldHeight,
     submitSize: MASCOT_INTRO_LAYOUT.submitSize,
