@@ -23,16 +23,16 @@ export const MASCOT_INTRO_LAYOUT = {
   translateXRatio: 0.12,
   translateXMin: 36,
   translateXMax: 50,
-  bubbleWidthRatio: 0.54,
-  bubbleMaxWidth: 204,
-  bubbleTailGap: 16,
+  bubbleWidthRatio: 0.58,
+  bubbleMaxWidth: 228,
+  bubbleTailGap: 8,
   bubbleTailInset: 22,
-  estimatedBubbleHeight: 126,
-  characterToForm: 18,
+  estimatedBubbleHeight: 108,
+  characterToForm: 14,
   formGap: 12,
   fieldHeight: 56,
   buttonHeight: 64,
-  formMaxWidth: 286,
+  formMaxWidth: 232,
 } as const;
 
 export type MascotIntroLayout = {

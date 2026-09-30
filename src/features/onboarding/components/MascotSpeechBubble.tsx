@@ -7,19 +7,21 @@ import { MASCOT_INTRO_LAYOUT } from '@/features/onboarding/utils/mascotIntroLayo
 
 type MascotSpeechBubbleProps = {
   askGreeting: string;
-  askLines: readonly string[];
+  askQuestion: string;
   reply: string;
   showingReply: boolean;
-  askStyle: AnimatedStyle<{ opacity: number }>;
+  greetingStyle: AnimatedStyle<{ opacity: number }>;
+  questionStyle: AnimatedStyle<{ opacity: number }>;
   replyStyle: AnimatedStyle<{ opacity: number }>;
 };
 
 export function MascotSpeechBubble({
   askGreeting,
-  askLines,
+  askQuestion,
   reply,
   showingReply,
-  askStyle,
+  greetingStyle,
+  questionStyle,
   replyStyle,
 }: MascotSpeechBubbleProps) {
   return (
@@ -27,20 +29,22 @@ export function MascotSpeechBubble({
       accessible
       accessibilityRole="text"
       accessibilityLiveRegion="polite"
-      accessibilityLabel={showingReply ? reply : `${askGreeting}. ${askLines.join(' ')}`}
+      accessibilityLabel={showingReply ? reply : `${askGreeting}. ${askQuestion}`}
       style={styles.root}
     >
       <View style={styles.card}>
-        <Animated.View style={[styles.copyLayer, askStyle]}>
-          <AppText variant="onboardingChoiceTitle" color="primary" align="left">
-            {askGreeting}
-          </AppText>
-          {askLines.map((line) => (
-            <AppText key={line} variant="onboardingChoiceSubtitle" color="primary" align="left">
-              {line}
+        <View style={styles.copyLayer}>
+          <Animated.View style={greetingStyle}>
+            <AppText variant="onboardingChoiceTitle" color="primary" align="left">
+              {askGreeting}
             </AppText>
-          ))}
-        </Animated.View>
+          </Animated.View>
+          <Animated.View style={questionStyle}>
+            <AppText variant="caption" color="primary" align="left">
+              {askQuestion}
+            </AppText>
+          </Animated.View>
+        </View>
         <Animated.View
           pointerEvents={showingReply ? 'auto' : 'none'}
           style={[styles.copyLayer, styles.replyLayer, replyStyle]}
@@ -65,16 +69,16 @@ const styles = StyleSheet.create({
     borderColor: colors.border.default,
     backgroundColor: colors.surface.raised,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.sm + spacing.xxs,
     ...shadows.whisper,
   },
   copyLayer: {
-    gap: spacing.xxs,
+    gap: spacing.xs,
   },
   replyLayer: {
     ...StyleSheet.absoluteFill,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.sm + spacing.xxs,
     justifyContent: 'center',
   },
   tail: {

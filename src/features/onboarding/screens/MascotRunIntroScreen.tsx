@@ -46,7 +46,7 @@ const MASCOT_RUN_FINAL = require('../../../../assets/images/onboarding/mascot-ru
 
 const LAST_FRAME_MS = 100;
 const ASK_GREETING = 'hey 👋';
-const ASK_LINES = ['before we start,', 'what should I', 'call you?'] as const;
+const ASK_QUESTION = 'before we start, what should I call you?';
 
 const bubbleEasing = Easing.bezier(
   MOTION_EASING_STANDARD[0],
@@ -97,6 +97,7 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
   const bubbleTranslateY = useSharedValue<number>(motion.offset.bubble);
   const bubbleScale = useSharedValue<number>(motion.scale.bubbleFrom);
   const askOpacity = useSharedValue(1);
+  const questionOpacity = useSharedValue(0);
   const replyOpacity = useSharedValue(0);
   const inputOpacity = useSharedValue(0);
   const inputTranslateY = useSharedValue<number>(motion.offset.inputReveal);
@@ -189,6 +190,7 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
         bubbleOpacity.value = 1;
         bubbleTranslateY.value = 0;
         bubbleScale.value = 1;
+        questionOpacity.value = 1;
         inputOpacity.value = 1;
         inputTranslateY.value = 0;
         buttonOpacity.value = 1;
@@ -202,6 +204,10 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
       bubbleOpacity.value = withDelay(motion.delay.bubbleReveal, withTiming(1, bubbleTiming));
       bubbleTranslateY.value = withDelay(motion.delay.bubbleReveal, withTiming(0, bubbleTiming));
       bubbleScale.value = withDelay(motion.delay.bubbleReveal, withTiming(1, bubbleTiming));
+      questionOpacity.value = withDelay(
+        motion.delay.bubbleQuestion,
+        withTiming(1, { duration: motion.duration.bubbleText, easing: bubbleEasing }),
+      );
       inputOpacity.value = withDelay(motion.delay.inputReveal, withTiming(1, inputTiming));
       inputTranslateY.value = withDelay(motion.delay.inputReveal, withTiming(0, inputTiming));
       buttonOpacity.value = withDelay(motion.delay.buttonReveal, withTiming(1, buttonTiming));
@@ -211,6 +217,7 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
 
     if (reduceMotion) {
       askOpacity.value = 0;
+      questionOpacity.value = 0;
       replyOpacity.value = 1;
       inputOpacity.value = 0;
       buttonOpacity.value = 0;
@@ -218,6 +225,7 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
       const fade = { duration: motion.duration.bubbleText, easing: bubbleEasing };
       const exit = { duration: motion.duration.formExit, easing: bubbleEasing };
       askOpacity.value = withTiming(0, fade);
+      questionOpacity.value = withTiming(0, fade);
       replyOpacity.value = withTiming(1, fade);
       inputOpacity.value = withTiming(0, exit);
       inputTranslateY.value = withTiming(motion.offset.formExit, exit);
@@ -256,6 +264,7 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
     mascotTranslateX,
     mascotTranslateY,
     phase,
+    questionOpacity,
     reduceMotion,
     replyOpacity,
   ]);
@@ -297,6 +306,9 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
   }));
   const askStyle = useAnimatedStyle(() => ({
     opacity: askOpacity.value,
+  }));
+  const questionStyle = useAnimatedStyle(() => ({
+    opacity: questionOpacity.value,
   }));
   const replyStyle = useAnimatedStyle(() => ({
     opacity: replyOpacity.value,
@@ -343,10 +355,11 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
           >
             <MascotSpeechBubble
               askGreeting={ASK_GREETING}
-              askLines={ASK_LINES}
+              askQuestion={ASK_QUESTION}
               reply={reply}
               showingReply={phase === 'responding'}
-              askStyle={askStyle}
+              greetingStyle={askStyle}
+              questionStyle={questionStyle}
               replyStyle={replyStyle}
             />
           </Animated.View>

@@ -72,6 +72,7 @@ export const motion = {
   },
   delay: {
     bubbleReveal: 100,
+    bubbleQuestion: 180,
     inputReveal: 220,
     buttonReveal: 280,
     journeyLeftCloud: 50,
