@@ -35,7 +35,7 @@ export function MascotSpeechBubble({
       <View style={styles.card}>
         <View style={styles.copyLayer}>
           <Animated.View style={greetingStyle}>
-            <AppText variant="onboardingChoiceTitle" color="primary" align="left">
+            <AppText variant="optionTitle" color="primary" align="left">
               {askGreeting}
             </AppText>
           </Animated.View>
@@ -61,35 +61,36 @@ export function MascotSpeechBubble({
 const styles = StyleSheet.create({
   root: {
     alignItems: 'flex-start',
+    alignSelf: 'flex-start',
     flexDirection: 'row',
   },
   card: {
+    alignSelf: 'flex-start',
     borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colors.border.subtle,
     backgroundColor: colors.surface.raised,
-    paddingHorizontal: spacing.sm + spacing.xxs,
-    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm - spacing.xxs / 2,
   },
   copyLayer: {
     gap: spacing.xxs,
   },
   replyLayer: {
     ...StyleSheet.absoluteFill,
-    paddingHorizontal: spacing.sm + spacing.xxs,
-    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm - spacing.xxs / 2,
     justifyContent: 'center',
   },
   tail: {
-    width: 10,
-    height: 10,
-    alignSelf: 'flex-end',
+    width: 11,
+    height: 11,
+    marginTop: 38,
     marginRight: -6,
-    marginBottom: spacing.md,
     borderLeftWidth: 1,
     borderBottomWidth: 1,
     borderColor: colors.border.subtle,
     backgroundColor: colors.surface.raised,
-    transform: [{ rotate: '45deg' }],
+    transform: [{ rotate: '38deg' }],
   },
 });

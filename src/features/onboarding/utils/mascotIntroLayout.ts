@@ -16,6 +16,10 @@ const MASCOT_BOUNDS = {
   centerX: 359 / FRAME_WIDTH,
   hatRight: 511 / FRAME_WIDTH,
   hatTop: 423 / FRAME_HEIGHT,
+  /** Right edge of the brown head at face height, not the hat brim. */
+  headRight: 482 / FRAME_WIDTH,
+  /** Where the hat meets the face. */
+  faceTop: 640 / FRAME_HEIGHT,
 } as const;
 
 export const MASCOT_INTRO_LAYOUT = {
@@ -24,11 +28,11 @@ export const MASCOT_INTRO_LAYOUT = {
   translateXMin: 40,
   translateXMax: 56,
   clusterCenterRatio: 0.44,
-  bubbleMaxWidth: 176,
-  bubbleHeadGap: 10,
-  bubbleLift: 6,
-  estimatedBubbleHeight: 92,
-  characterToForm: 40,
+  bubbleMaxWidth: 132,
+  bubbleHeadGap: 8,
+  bubbleLift: 4,
+  estimatedBubbleHeight: 108,
+  characterToForm: 48,
   labelGap: 8,
   labelHeight: 20,
   fieldHeight: 56,
@@ -120,14 +124,14 @@ export function getMascotIntroLayout(
     settleY -= overflow;
   }
 
-  const hat = applySettle(imageX(MASCOT_BOUNDS.hatRight), imageY(MASCOT_BOUNDS.hatTop), settleY);
+  const head = applySettle(imageX(MASCOT_BOUNDS.headRight), imageY(MASCOT_BOUNDS.faceTop), settleY);
   const feet = applySettle(imageX(MASCOT_BOUNDS.centerX), imageY(MASCOT_BOUNDS.bottom), settleY);
 
   const margin = spacing.md;
   const bubbleMaxWidth = Math.min(MASCOT_INTRO_LAYOUT.bubbleMaxWidth, viewWidth - margin * 2);
-  const desiredBubbleLeft = hat.x + MASCOT_INTRO_LAYOUT.bubbleHeadGap;
+  const desiredBubbleLeft = head.x + MASCOT_INTRO_LAYOUT.bubbleHeadGap;
   const bubbleLeft = clamp(desiredBubbleLeft, margin, viewWidth - bubbleMaxWidth - margin);
-  const desiredBubbleTop = hat.y - MASCOT_INTRO_LAYOUT.bubbleLift;
+  const desiredBubbleTop = head.y - MASCOT_INTRO_LAYOUT.bubbleLift;
   const bubbleTop = clamp(
     desiredBubbleTop,
     insets.top + spacing.sm,
