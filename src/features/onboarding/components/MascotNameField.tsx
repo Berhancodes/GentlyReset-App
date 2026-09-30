@@ -98,14 +98,8 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     textAlign: 'left',
     paddingRight: spacing.sm,
-    ...(Platform.OS === 'web'
-      ? ({
-          outlineWidth: 0,
-          outlineStyle: 'none',
-          outlineColor: 'transparent',
-          boxShadow: 'none',
-        } as const)
-      : null),
+    borderWidth: 0,
+    ...(Platform.OS === 'web' ? ({ outlineWidth: 0 } as const) : null),
   },
   submit: {
     width: MASCOT_INTRO_LAYOUT.submitSize,
