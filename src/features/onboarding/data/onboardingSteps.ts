@@ -278,7 +278,6 @@ export const ONBOARDING_STEPS = [
       { id: 'during-day', label: 'during the day' },
       { id: 'after-work', label: 'after work or school' },
       { id: 'before-bed', label: 'before bed' },
-      { id: 'whenever-struggling', label: "whenever I'm struggling" },
     ],
   },
   {
