@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { type AnimatedStyle } from 'react-native-reanimated';
 
 import { AppText } from '@/components/ui';
-import { colors, radius, spacing } from '@/design-system';
+import { colors, radius, shadows, spacing } from '@/design-system';
 
 type MascotSpeechBubbleProps = {
   askGreeting: string;
@@ -35,12 +35,12 @@ export function MascotSpeechBubble({
       <View style={styles.card}>
         <View style={styles.copyLayer}>
           <Animated.View style={greetingStyle}>
-            <AppText variant="optionTitle" color="primary" align="left">
+            <AppText variant="mascotSpeechGreeting" color="primary" align="left">
               {askGreeting}
             </AppText>
           </Animated.View>
           <Animated.View style={questionStyle}>
-            <AppText variant="caption" color="primary" align="left">
+            <AppText variant="body" color="primary" align="left">
               {askQuestion}
             </AppText>
           </Animated.View>
@@ -49,7 +49,7 @@ export function MascotSpeechBubble({
           pointerEvents={showingReply ? 'auto' : 'none'}
           style={[styles.copyLayer, styles.replyLayer, replyStyle]}
         >
-          <AppText variant="caption" color="primary" align="left">
+          <AppText variant="body" color="primary" align="left">
             {reply}
           </AppText>
         </Animated.View>
@@ -58,41 +58,42 @@ export function MascotSpeechBubble({
   );
 }
 
+const bubblePaddingHorizontal = spacing.xs + spacing.xxs / 2;
+const bubblePaddingVertical = spacing.xs;
+
 const styles = StyleSheet.create({
   root: {
     alignItems: 'flex-start',
+    alignSelf: 'flex-start',
     flexDirection: 'row',
-    width: '100%',
   },
   card: {
-    flexGrow: 1,
-    flexShrink: 1,
-    minWidth: 0,
     borderRadius: radius.card,
-    borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border.whisper,
     backgroundColor: colors.surface.raised,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm - spacing.xxs / 2,
+    paddingHorizontal: bubblePaddingHorizontal,
+    paddingVertical: bubblePaddingVertical,
+    ...shadows.whisper,
   },
   copyLayer: {
-    gap: spacing.xxs,
-    width: '100%',
+    gap: spacing.none,
+    maxWidth: '100%',
   },
   replyLayer: {
     ...StyleSheet.absoluteFill,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm - spacing.xxs / 2,
+    paddingHorizontal: bubblePaddingHorizontal,
+    paddingVertical: bubblePaddingVertical,
     justifyContent: 'center',
   },
   tail: {
-    width: 11,
-    height: 11,
-    marginTop: 38,
-    marginRight: -6,
-    borderLeftWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: colors.border.subtle,
+    width: 10,
+    height: 10,
+    marginTop: 28,
+    marginRight: -5,
+    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border.whisper,
     backgroundColor: colors.surface.raised,
     transform: [{ rotate: '38deg' }],
   },

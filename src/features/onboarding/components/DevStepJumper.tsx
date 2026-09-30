@@ -6,12 +6,14 @@ import { colors, radius, spacing } from '@/design-system';
 import { ONBOARDING_STEPS } from '@/features/onboarding/data/onboardingSteps';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 
+const SHOW_DEV_JUMPER = false;
+
 export function DevStepJumper() {
   const [open, setOpen] = useState(false);
   const goToStep = useOnboardingStore((state) => state.goToStep);
   const currentStepIndex = useOnboardingStore((state) => state.currentStepIndex);
 
-  if (!__DEV__) {
+  if (!__DEV__ || !SHOW_DEV_JUMPER) {
     return null;
   }
 

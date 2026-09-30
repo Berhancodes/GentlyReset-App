@@ -23,20 +23,18 @@ const MASCOT_BOUNDS = {
 } as const;
 
 export const MASCOT_INTRO_LAYOUT = {
-  settleScale: 0.58,
+  settleScale: 0.5,
   translateXRatio: 0.13,
   translateXMin: 40,
   translateXMax: 56,
-  clusterCenterRatio: 0.44,
-  bubbleMaxWidth: 132,
-  bubbleHeadGap: 8,
-  bubbleLift: 4,
-  estimatedBubbleHeight: 108,
-  characterToForm: 48,
-  labelGap: 8,
-  labelHeight: 20,
-  fieldHeight: 56,
-  submitSize: 44,
+  clusterCenterRatio: 0.39,
+  bubbleMaxWidth: 120,
+  bubbleHeadGap: 2,
+  bubbleLift: 18,
+  estimatedBubbleHeight: 92,
+  characterToForm: 36,
+  fieldHeight: 54,
+  submitSize: 40,
   formWidthRatio: 0.83,
 } as const;
 
@@ -108,10 +106,7 @@ export function getMascotIntroLayout(
     Math.round(viewWidth * MASCOT_INTRO_LAYOUT.formWidthRatio),
     viewWidth - spacing.lg * 2,
   );
-  const formHeight =
-    MASCOT_INTRO_LAYOUT.labelHeight +
-    MASCOT_INTRO_LAYOUT.labelGap +
-    MASCOT_INTRO_LAYOUT.fieldHeight;
+  const formHeight = MASCOT_INTRO_LAYOUT.fieldHeight;
   const maxFormTop = viewHeight - formHeight - Math.max(insets.bottom, spacing.lg);
 
   const unshiftedHat = applySettle(imageX(MASCOT_BOUNDS.hatRight), imageY(MASCOT_BOUNDS.hatTop), 0);
@@ -162,11 +157,7 @@ export function getMascotIntroKeyboardLift(
     return 0;
   }
 
-  const formBottom =
-    layout.formTop +
-    MASCOT_INTRO_LAYOUT.labelHeight +
-    MASCOT_INTRO_LAYOUT.labelGap +
-    layout.fieldHeight;
+  const formBottom = layout.formTop + layout.fieldHeight;
   const visibleBottom = viewHeight - keyboardHeight;
   return Math.max(0, formBottom - visibleBottom + spacing.md);
 }

@@ -1,6 +1,5 @@
 import { Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
-import { AppText } from '@/components/ui';
 import { colors, radius, spacing, textVariants } from '@/design-system';
 import { MASCOT_INTRO_LAYOUT } from '@/features/onboarding/utils/mascotIntroLayout';
 
@@ -26,14 +25,11 @@ export function MascotNameField({
   onSubmit,
 }: MascotNameFieldProps) {
   return (
-    <View style={styles.root}>
-      <AppText variant="label" color="helper" align="left">
-        your name
-      </AppText>
+    <View style={styles.fieldWrapper}>
       <View style={[styles.field, focused ? styles.fieldFocused : null]}>
         <TextInput
           accessibilityLabel="your name"
-          placeholder="type your name"
+          placeholder="your name"
           placeholderTextColor={colors.text.helper}
           value={value}
           maxLength={maxLength}
@@ -77,22 +73,22 @@ export function MascotNameField({
 }
 
 const styles = StyleSheet.create({
-  root: {
-    gap: MASCOT_INTRO_LAYOUT.labelGap,
+  fieldWrapper: {
+    width: '100%',
   },
   field: {
     height: MASCOT_INTRO_LAYOUT.fieldHeight,
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border.whisper,
     backgroundColor: colors.surface.primary,
     paddingLeft: spacing.md + spacing.xxs,
-    paddingRight: spacing.xxs,
+    paddingRight: spacing.sm,
   },
   fieldFocused: {
-    borderColor: colors.border.gold,
+    borderColor: colors.border.subtle,
     backgroundColor: colors.surface.selected,
   },
   input: {
@@ -115,24 +111,24 @@ const styles = StyleSheet.create({
     backgroundColor: colors.action.primaryBackground,
   },
   submitDisabled: {
-    backgroundColor: colors.action.primaryBackgroundDisabled,
+    backgroundColor: colors.surface.disabled,
   },
   submitPressed: {
     backgroundColor: colors.action.primaryBackgroundPressed,
     transform: [{ scale: 0.96 }],
   },
   arrow: {
-    width: 10,
-    height: 10,
-    marginLeft: -2,
-    borderRightWidth: 2,
-    borderTopWidth: 2,
+    width: 8,
+    height: 8,
+    marginLeft: -1,
+    borderRightWidth: 1.5,
+    borderTopWidth: 1.5,
     transform: [{ rotate: '45deg' }],
   },
   arrowEnabled: {
     borderColor: colors.action.primaryText,
   },
   arrowDisabled: {
-    borderColor: colors.action.primaryTextDisabled,
+    borderColor: colors.text.helper,
   },
 });

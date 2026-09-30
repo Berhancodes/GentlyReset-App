@@ -83,6 +83,7 @@ export const colors = {
     selected: palette.brown,
     choiceSelected: palette.goldAmber,
     subtle: palette.sandSubtle,
+    whisper: 'rgba(232, 215, 195, 0.38)',
     notebook: palette.sand,
     gold: palette.gold,
     badge: palette.brown,
