@@ -92,7 +92,9 @@ export function AnimatedChoiceCard({
             }
             color={disabled ? 'muted' : 'primary'}
             align={isTile || isIllustrated ? 'center' : 'left'}
+            fillWidth={isTile || isIllustrated}
             numberOfLines={isIllustrated ? 3 : undefined}
+            ellipsizeMode="tail"
           >
             {label}
           </AppText>
@@ -127,6 +129,7 @@ const styles = StyleSheet.create({
   },
   pressableFill: {
     flex: 1,
+    minWidth: 0,
   },
   card: {
     borderRadius: radius.card,
@@ -144,6 +147,7 @@ const styles = StyleSheet.create({
   tile: {
     minHeight: 129,
     flex: 1,
+    minWidth: 0,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.md,
     alignItems: 'center',
@@ -153,6 +157,7 @@ const styles = StyleSheet.create({
   illustrated: {
     minHeight: 124,
     flex: 1,
+    minWidth: 0,
     paddingTop: spacing.sm,
     paddingBottom: spacing.sm,
     paddingHorizontal: spacing.sm,
@@ -163,6 +168,7 @@ const styles = StyleSheet.create({
   illustratedCompact: {
     minHeight: 100,
     flex: 1,
+    minWidth: 0,
     paddingTop: spacing.xs,
     paddingBottom: spacing.xs,
     paddingHorizontal: spacing.sm,
@@ -183,9 +189,14 @@ const styles = StyleSheet.create({
     gap: spacing.xxs,
   },
   copyTile: {
-    flex: 0,
-    alignItems: 'center',
+    flexGrow: 0,
+    flexShrink: 1,
+    flexBasis: 'auto',
+    alignItems: 'stretch',
+    alignSelf: 'stretch',
     width: '100%',
+    minWidth: 0,
+    paddingHorizontal: spacing.xxs,
   },
   badge: {
     position: 'absolute',

@@ -43,5 +43,6 @@ const styles = StyleSheet.create({
   },
   cell: {
     flex: 1,
+    minWidth: 0,
   },
 });

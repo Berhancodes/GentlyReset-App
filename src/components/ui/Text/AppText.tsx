@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Text, type TextProps } from 'react-native';
+import { Text, StyleSheet, type TextProps } from 'react-native';
 
 import { colors, textVariants, type TextVariant } from '@/design-system';
 
@@ -19,6 +19,8 @@ type AppTextProps = Omit<TextProps, 'style'> & {
   variant?: TextVariant;
   color?: AppTextColor;
   align?: 'left' | 'center' | 'right';
+  /** Stretch to the parent width so long labels wrap instead of spilling. */
+  fillWidth?: boolean;
   children: ReactNode;
 };
 
@@ -36,6 +38,7 @@ export function AppText({
   variant = 'body',
   color = 'primary',
   align = 'left',
+  fillWidth = false,
   children,
   allowFontScaling = true,
   maxFontSizeMultiplier,
@@ -50,9 +53,20 @@ export function AppText({
       allowFontScaling={allowFontScaling}
       maxFontSizeMultiplier={maxFontSizeMultiplier ?? (isHeader ? 1.4 : 1.6)}
       accessibilityRole={accessibilityRole ?? (isHeader ? 'header' : undefined)}
-      style={[textVariants[variant], { color: colorMap[color], textAlign: align }]}
+      style={[
+        textVariants[variant],
+        { color: colorMap[color], textAlign: align },
+        fillWidth ? styles.fillWidth : null,
+      ]}
     >
       {children}
     </Text>
   );
 }
+
+const styles = StyleSheet.create({
+  fillWidth: {
+    width: '100%',
+    maxWidth: '100%',
+  },
+});
