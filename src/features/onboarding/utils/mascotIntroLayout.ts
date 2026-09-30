@@ -19,20 +19,21 @@ const MASCOT_BOUNDS = {
 } as const;
 
 export const MASCOT_INTRO_LAYOUT = {
-  settleScale: 0.84,
-  translateXRatio: 0.12,
-  translateXMin: 36,
-  translateXMax: 50,
-  bubbleWidthRatio: 0.58,
-  bubbleMaxWidth: 228,
-  bubbleTailGap: 8,
-  bubbleTailInset: 22,
-  estimatedBubbleHeight: 108,
-  characterToForm: 14,
-  formGap: 12,
+  settleScale: 0.58,
+  translateXRatio: 0.13,
+  translateXMin: 40,
+  translateXMax: 56,
+  clusterCenterRatio: 0.44,
+  bubbleMaxWidth: 176,
+  bubbleHeadGap: 10,
+  bubbleLift: 6,
+  estimatedBubbleHeight: 92,
+  characterToForm: 40,
+  labelGap: 8,
+  labelHeight: 20,
   fieldHeight: 56,
-  buttonHeight: 64,
-  formMaxWidth: 232,
+  submitSize: 44,
+  formWidthRatio: 0.83,
 } as const;
 
 export type MascotIntroLayout = {
@@ -41,13 +42,12 @@ export type MascotIntroLayout = {
   settleY: number;
   bubbleMaxWidth: number;
   bubbleLeft: number;
-  bubbleBottom: number;
+  bubbleTop: number;
   formWidth: number;
   formLeft: number;
   formTop: number;
-  formGap: number;
   fieldHeight: number;
-  buttonTop: number;
+  submitSize: number;
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -100,59 +100,52 @@ export function getMascotIntroLayout(
   const imageX = (ratio: number) => imageLeft + ratio * imageWidth;
   const imageY = (ratio: number) => imageTop + ratio * imageHeight;
 
-  const margin = spacing.md;
-  const visualBubbleMaxWidth = Math.min(
-    Math.round(viewWidth * MASCOT_INTRO_LAYOUT.bubbleWidthRatio),
-    MASCOT_INTRO_LAYOUT.bubbleMaxWidth,
-    viewWidth - margin * 2,
+  const formWidth = Math.min(
+    Math.round(viewWidth * MASCOT_INTRO_LAYOUT.formWidthRatio),
+    viewWidth - spacing.lg * 2,
   );
-
-  const formWidth = Math.min(viewWidth - spacing.lg * 2, MASCOT_INTRO_LAYOUT.formMaxWidth);
   const formHeight =
-    MASCOT_INTRO_LAYOUT.fieldHeight +
-    MASCOT_INTRO_LAYOUT.formGap +
-    MASCOT_INTRO_LAYOUT.buttonHeight;
-  const maxFormTop = viewHeight - formHeight - Math.max(insets.bottom, spacing.md);
+    MASCOT_INTRO_LAYOUT.labelHeight +
+    MASCOT_INTRO_LAYOUT.labelGap +
+    MASCOT_INTRO_LAYOUT.fieldHeight;
+  const maxFormTop = viewHeight - formHeight - Math.max(insets.bottom, spacing.lg);
 
+  const unshiftedHat = applySettle(imageX(MASCOT_BOUNDS.hatRight), imageY(MASCOT_BOUNDS.hatTop), 0);
   const unshiftedFeet = applySettle(imageX(MASCOT_BOUNDS.centerX), imageY(MASCOT_BOUNDS.bottom), 0);
-  const overflow = unshiftedFeet.y + MASCOT_INTRO_LAYOUT.characterToForm - maxFormTop;
-  const settleY = overflow > 0 ? -overflow : 0;
+  const clusterCenter = (unshiftedHat.y + unshiftedFeet.y) / 2;
+  const targetCenter = viewHeight * MASCOT_INTRO_LAYOUT.clusterCenterRatio;
+  let settleY = targetCenter - clusterCenter;
+  const overflow = unshiftedFeet.y + settleY + MASCOT_INTRO_LAYOUT.characterToForm - maxFormTop;
+  if (overflow > 0) {
+    settleY -= overflow;
+  }
 
   const hat = applySettle(imageX(MASCOT_BOUNDS.hatRight), imageY(MASCOT_BOUNDS.hatTop), settleY);
   const feet = applySettle(imageX(MASCOT_BOUNDS.centerX), imageY(MASCOT_BOUNDS.bottom), settleY);
-  const characterCenter = applySettle(
-    imageX(MASCOT_BOUNDS.centerX),
-    imageY((MASCOT_BOUNDS.top + MASCOT_BOUNDS.bottom) / 2),
-    settleY,
-  );
 
-  const desiredBubbleLeft = hat.x - MASCOT_INTRO_LAYOUT.bubbleTailInset + spacing.xs;
-  const bubbleLeft = clamp(desiredBubbleLeft, margin, viewWidth - visualBubbleMaxWidth - margin);
-  const desiredBubbleBottom = viewHeight - hat.y + MASCOT_INTRO_LAYOUT.bubbleTailGap;
-  const maxBubbleBottom =
-    viewHeight - (insets.top + spacing.xs + MASCOT_INTRO_LAYOUT.estimatedBubbleHeight);
-  const bubbleBottom = Math.min(desiredBubbleBottom, maxBubbleBottom);
-
-  const formLeft = clamp(
-    characterCenter.x - formWidth / 2,
-    spacing.lg,
-    Math.max(spacing.lg, viewWidth - formWidth - spacing.lg),
+  const margin = spacing.md;
+  const bubbleMaxWidth = Math.min(MASCOT_INTRO_LAYOUT.bubbleMaxWidth, viewWidth - margin * 2);
+  const desiredBubbleLeft = hat.x + MASCOT_INTRO_LAYOUT.bubbleHeadGap;
+  const bubbleLeft = clamp(desiredBubbleLeft, margin, viewWidth - bubbleMaxWidth - margin);
+  const desiredBubbleTop = hat.y - MASCOT_INTRO_LAYOUT.bubbleLift;
+  const bubbleTop = clamp(
+    desiredBubbleTop,
+    insets.top + spacing.sm,
+    viewHeight - MASCOT_INTRO_LAYOUT.estimatedBubbleHeight - spacing.lg,
   );
-  const formTop = Math.min(feet.y + MASCOT_INTRO_LAYOUT.characterToForm, maxFormTop);
 
   return {
     settleScale,
     settleX,
     settleY,
-    bubbleMaxWidth: visualBubbleMaxWidth,
+    bubbleMaxWidth,
     bubbleLeft,
-    bubbleBottom,
+    bubbleTop,
     formWidth,
-    formLeft,
-    formTop,
-    formGap: MASCOT_INTRO_LAYOUT.formGap,
+    formLeft: (viewWidth - formWidth) / 2,
+    formTop: Math.min(feet.y + MASCOT_INTRO_LAYOUT.characterToForm, maxFormTop),
     fieldHeight: MASCOT_INTRO_LAYOUT.fieldHeight,
-    buttonTop: formTop + MASCOT_INTRO_LAYOUT.fieldHeight + MASCOT_INTRO_LAYOUT.formGap,
+    submitSize: MASCOT_INTRO_LAYOUT.submitSize,
   };
 }
 
@@ -165,7 +158,11 @@ export function getMascotIntroKeyboardLift(
     return 0;
   }
 
-  const formBottom = layout.buttonTop + MASCOT_INTRO_LAYOUT.buttonHeight;
+  const formBottom =
+    layout.formTop +
+    MASCOT_INTRO_LAYOUT.labelHeight +
+    MASCOT_INTRO_LAYOUT.labelGap +
+    layout.fieldHeight;
   const visibleBottom = viewHeight - keyboardHeight;
   return Math.max(0, formBottom - visibleBottom + spacing.md);
 }

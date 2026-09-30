@@ -4,9 +4,8 @@ import {
   Keyboard,
   Platform,
   StyleSheet,
-  TextInput,
-  useWindowDimensions,
   View,
+  useWindowDimensions,
   type KeyboardEvent,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -21,15 +20,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { PrimaryButton } from '@/components/ui';
-import {
-  colors,
-  MOTION_EASING_STANDARD,
-  motion,
-  radius,
-  spacing,
-  textVariants,
-} from '@/design-system';
+import { MOTION_EASING_STANDARD, colors, motion } from '@/design-system';
+import { MascotNameField } from '@/features/onboarding/components/MascotNameField';
 import { MascotSpeechBubble } from '@/features/onboarding/components/MascotSpeechBubble';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
@@ -37,7 +29,6 @@ import type { MascotIntroStep, OnboardingAnswer } from '@/features/onboarding/ty
 import {
   getMascotIntroKeyboardLift,
   getMascotIntroLayout,
-  MASCOT_INTRO_LAYOUT,
 } from '@/features/onboarding/utils/mascotIntroLayout';
 import { hapticImpact } from '@/utils/haptics';
 
@@ -46,7 +37,7 @@ const MASCOT_RUN_FINAL = require('../../../../assets/images/onboarding/mascot-ru
 
 const LAST_FRAME_MS = 100;
 const ASK_GREETING = 'hey 👋';
-const ASK_QUESTION = 'before we start, what should I call you?';
+const ASK_QUESTION = 'what should I call you?';
 
 const bubbleEasing = Easing.bezier(
   MOTION_EASING_STANDARD[0],
@@ -101,8 +92,6 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
   const replyOpacity = useSharedValue(0);
   const inputOpacity = useSharedValue(0);
   const inputTranslateY = useSharedValue<number>(motion.offset.inputReveal);
-  const buttonOpacity = useSharedValue(0);
-  const buttonTranslateY = useSharedValue<number>(motion.offset.buttonReveal);
 
   useEffect(() => {
     goToNextRef.current = goToNext;
@@ -165,6 +154,7 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
     }
 
     submittedRef.current = true;
+    void hapticImpact();
     Keyboard.dismiss();
     setAnswer(step.id, { type: 'mascotIntro', name: trimmedName });
     setCommittedName(trimmedName);
@@ -180,7 +170,6 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
     const settleTiming = { duration: motion.duration.mascotSettle, easing: bubbleEasing };
     const bubbleTiming = { duration: motion.duration.bubble, easing: bubbleEasing };
     const inputTiming = { duration: motion.duration.inputReveal, easing: bubbleEasing };
-    const buttonTiming = { duration: motion.duration.buttonReveal, easing: bubbleEasing };
 
     if (phase === 'asking') {
       if (reduceMotion) {
@@ -193,8 +182,6 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
         questionOpacity.value = 1;
         inputOpacity.value = 1;
         inputTranslateY.value = 0;
-        buttonOpacity.value = 1;
-        buttonTranslateY.value = 0;
         return;
       }
 
@@ -210,8 +197,6 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
       );
       inputOpacity.value = withDelay(motion.delay.inputReveal, withTiming(1, inputTiming));
       inputTranslateY.value = withDelay(motion.delay.inputReveal, withTiming(0, inputTiming));
-      buttonOpacity.value = withDelay(motion.delay.buttonReveal, withTiming(1, buttonTiming));
-      buttonTranslateY.value = withDelay(motion.delay.buttonReveal, withTiming(0, buttonTiming));
       return;
     }
 
@@ -220,7 +205,6 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
       questionOpacity.value = 0;
       replyOpacity.value = 1;
       inputOpacity.value = 0;
-      buttonOpacity.value = 0;
     } else {
       const fade = { duration: motion.duration.bubbleText, easing: bubbleEasing };
       const exit = { duration: motion.duration.formExit, easing: bubbleEasing };
@@ -229,8 +213,6 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
       replyOpacity.value = withTiming(1, fade);
       inputOpacity.value = withTiming(0, exit);
       inputTranslateY.value = withTiming(motion.offset.formExit, exit);
-      buttonOpacity.value = withTiming(0, exit);
-      buttonTranslateY.value = withTiming(motion.offset.formExit, exit);
       mascotHelloScale.value = withSequence(
         withTiming(motion.scale.mascotHello, {
           duration: motion.duration.mascotHello,
@@ -255,8 +237,6 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
     bubbleOpacity,
     bubbleScale,
     bubbleTranslateY,
-    buttonOpacity,
-    buttonTranslateY,
     inputOpacity,
     inputTranslateY,
     mascotHelloScale,
@@ -317,10 +297,6 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
     opacity: inputOpacity.value,
     transform: [{ translateY: inputTranslateY.value }],
   }));
-  const buttonStyle = useAnimatedStyle(() => ({
-    opacity: buttonOpacity.value,
-    transform: [{ translateY: buttonTranslateY.value }],
-  }));
 
   const interactionVisible = phase !== 'running';
 
@@ -347,7 +323,7 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
               styles.bubbleAnchor,
               {
                 left: layout.bubbleLeft,
-                bottom: layout.bubbleBottom,
+                top: layout.bubbleTop,
                 maxWidth: layout.bubbleMaxWidth,
               },
               bubbleEntranceStyle,
@@ -374,52 +350,23 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
                 top: layout.formTop,
                 left: layout.formLeft,
                 width: layout.formWidth,
-                height: layout.fieldHeight,
               },
               inputStyle,
             ]}
           >
-            <TextInput
-              accessibilityLabel="your name"
-              placeholder="your name"
-              placeholderTextColor={colors.text.helper}
+            <MascotNameField
               value={name}
+              canSubmit={canContinue}
+              focused={inputFocused}
               maxLength={step.nameMaxLength}
-              autoCapitalize="words"
-              autoCorrect={false}
-              autoComplete="name"
-              textContentType="name"
-              returnKeyType="done"
-              enablesReturnKeyAutomatically
-              underlineColorAndroid="transparent"
-              onFocus={() => setInputFocused(true)}
-              onBlur={() => setInputFocused(false)}
               onChangeText={(nextValue) => {
                 setName(nextValue);
                 setAnswer(step.id, { type: 'mascotIntro', name: nextValue });
               }}
-              onSubmitEditing={handleContinue}
-              allowFontScaling
-              maxFontSizeMultiplier={1.4}
-              style={[styles.input, inputFocused ? styles.inputFocused : null]}
+              onFocus={() => setInputFocused(true)}
+              onBlur={() => setInputFocused(false)}
+              onSubmit={handleContinue}
             />
-          </Animated.View>
-        ) : null}
-
-        {interactionVisible ? (
-          <Animated.View
-            pointerEvents={phase === 'asking' ? 'auto' : 'none'}
-            style={[
-              styles.buttonAnchor,
-              {
-                top: layout.buttonTop,
-                left: layout.formLeft,
-                width: layout.formWidth,
-              },
-              buttonStyle,
-            ]}
-          >
-            <PrimaryButton label="continue" disabled={!canContinue} onPress={handleContinue} />
           </Animated.View>
         ) : null}
       </Animated.View>
@@ -448,25 +395,5 @@ const styles = StyleSheet.create({
   },
   fieldAnchor: {
     position: 'absolute',
-  },
-  buttonAnchor: {
-    position: 'absolute',
-  },
-  input: {
-    ...textVariants.body,
-    height: MASCOT_INTRO_LAYOUT.fieldHeight,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-    backgroundColor: colors.surface.primary,
-    color: colors.text.primary,
-    textAlign: 'left',
-    paddingHorizontal: spacing.md + spacing.xxs,
-    paddingVertical: spacing.sm,
-    ...(Platform.OS === 'web' ? ({ outlineWidth: 0 } as const) : null),
-  },
-  inputFocused: {
-    borderColor: colors.border.gold,
-    backgroundColor: colors.surface.selected,
   },
 });

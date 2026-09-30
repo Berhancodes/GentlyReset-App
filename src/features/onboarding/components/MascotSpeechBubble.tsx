@@ -2,8 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { type AnimatedStyle } from 'react-native-reanimated';
 
 import { AppText } from '@/components/ui';
-import { colors, radius, shadows, spacing } from '@/design-system';
-import { MASCOT_INTRO_LAYOUT } from '@/features/onboarding/utils/mascotIntroLayout';
+import { colors, radius, spacing } from '@/design-system';
 
 type MascotSpeechBubbleProps = {
   askGreeting: string;
@@ -32,6 +31,7 @@ export function MascotSpeechBubble({
       accessibilityLabel={showingReply ? reply : `${askGreeting}. ${askQuestion}`}
       style={styles.root}
     >
+      <View accessibilityElementsHidden importantForAccessibility="no" style={styles.tail} />
       <View style={styles.card}>
         <View style={styles.copyLayer}>
           <Animated.View style={greetingStyle}>
@@ -49,12 +49,11 @@ export function MascotSpeechBubble({
           pointerEvents={showingReply ? 'auto' : 'none'}
           style={[styles.copyLayer, styles.replyLayer, replyStyle]}
         >
-          <AppText variant="onboardingChoiceTitle" color="primary" align="left">
+          <AppText variant="caption" color="primary" align="left">
             {reply}
           </AppText>
         </Animated.View>
       </View>
-      <View accessibilityElementsHidden importantForAccessibility="no" style={styles.tail} />
     </View>
   );
 }
@@ -62,33 +61,34 @@ export function MascotSpeechBubble({
 const styles = StyleSheet.create({
   root: {
     alignItems: 'flex-start',
+    flexDirection: 'row',
   },
   card: {
     borderRadius: radius.card,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: colors.border.subtle,
     backgroundColor: colors.surface.raised,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + spacing.xxs,
-    ...shadows.whisper,
+    paddingHorizontal: spacing.sm + spacing.xxs,
+    paddingVertical: spacing.sm,
   },
   copyLayer: {
-    gap: spacing.xs,
+    gap: spacing.xxs,
   },
   replyLayer: {
     ...StyleSheet.absoluteFill,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + spacing.xxs,
+    paddingHorizontal: spacing.sm + spacing.xxs,
+    paddingVertical: spacing.sm,
     justifyContent: 'center',
   },
   tail: {
-    width: 12,
-    height: 12,
-    marginTop: -7,
-    marginLeft: MASCOT_INTRO_LAYOUT.bubbleTailInset - 4,
-    borderRightWidth: 1,
+    width: 10,
+    height: 10,
+    alignSelf: 'flex-end',
+    marginRight: -6,
+    marginBottom: spacing.md,
+    borderLeftWidth: 1,
     borderBottomWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: colors.border.subtle,
     backgroundColor: colors.surface.raised,
     transform: [{ rotate: '45deg' }],
   },
