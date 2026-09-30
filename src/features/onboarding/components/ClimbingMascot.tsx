@@ -14,8 +14,8 @@ const GIF_ASPECT = GIF_WIDTH / GIF_HEIGHT;
 const CONTENT_TOP = 343;
 const CONTENT_BOTTOM = 1257;
 const CONTENT_HEIGHT = CONTENT_BOTTOM - CONTENT_TOP;
-const MASCOT_MAX_WIDTH = 220;
-const MASCOT_HEIGHT_FRACTION = 0.3;
+const MASCOT_MAX_WIDTH = 280;
+const MASCOT_HEIGHT_FRACTION = 0.38;
 
 /**
  * "What's hardest" mascot. Plays the hang loop unless Reduce Motion is on.
