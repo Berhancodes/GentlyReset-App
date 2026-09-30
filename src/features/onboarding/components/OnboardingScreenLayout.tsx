@@ -9,11 +9,13 @@ import {
 } from 'react-native';
 
 import { AppText, Screen } from '@/components/ui';
+import { ChoiceEntranceScope } from '@/components/ui/ChoiceCard';
 import { colors, spacing } from '@/design-system';
-import { BackChevron } from '@/features/onboarding/components/BackChevron';
 import { IllustrationPlaceholder } from '@/features/onboarding/components/IllustrationPlaceholder';
 import { OnboardingHero } from '@/features/onboarding/components/OnboardingHero';
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
+import { OnboardingQuestionNav } from '@/features/onboarding/components/OnboardingQuestionNav';
+import { useOnboardingQuestionnaireShell } from '@/features/onboarding/components/OnboardingQuestionnaireShell';
 import type {
   OnboardingIllustrationKey,
   OnboardingIllustrationSize,
@@ -61,32 +63,69 @@ export function OnboardingScreenLayout({
   illustrationPlacement = 'start',
   skipStorySpacer = false,
 }: OnboardingScreenLayoutProps) {
+  const inQuestionnaireShell = useOnboardingQuestionnaireShell();
   const showProgress = !hideProgress;
   const isQuestion = tone === 'question';
   const isStory = tone === 'story';
   const useBrandNav = isQuestion || isStory;
   const progress = showProgress ? <OnboardingProgress /> : null;
 
-  const body = (
+  const scroll = (
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={[
+        styles.scrollContent,
+        isQuestion ? styles.questionScrollContent : null,
+        isStory ? styles.storyScrollContent : null,
+        compact ? styles.compactScrollContent : null,
+      ]}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      showsVerticalScrollIndicator={false}
+    >
+      {illustrationKey && illustrationPlacement === 'start' ? (
+        <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
+      ) : null}
+      <OnboardingHero
+        title={title}
+        subtitle={subtitle}
+        eyebrow={eyebrow}
+        showTitle={showTitle}
+        tone={tone}
+      />
+      {illustrationKey && illustrationPlacement === 'afterHero' ? (
+        <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
+      ) : null}
+      <ChoiceEntranceScope>{children}</ChoiceEntranceScope>
+      {illustrationKey && illustrationPlacement === 'end' ? (
+        <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
+      ) : null}
+      {isStory && !skipStorySpacer ? <View style={styles.storyFlex} /> : null}
+    </ScrollView>
+  );
+
+  const footerBlock = footer ? (
+    <View
+      style={[
+        styles.footer,
+        isQuestion ? styles.questionFooter : null,
+        isStory ? styles.questionFooter : null,
+        compact ? styles.compactFooter : null,
+      ]}
+    >
+      {footer}
+    </View>
+  ) : null;
+
+  const body = inQuestionnaireShell ? (
+    <View style={styles.flex}>
+      {scroll}
+      {footerBlock}
+    </View>
+  ) : (
     <Screen>
       {useBrandNav ? (
-        <View style={styles.questionNav}>
-          {onBack ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-              onPress={onBack}
-              hitSlop={spacing.sm}
-              style={styles.navSide}
-            >
-              <BackChevron />
-            </Pressable>
-          ) : (
-            <View style={styles.navSide} />
-          )}
-          <View style={styles.navCenter}>{progress}</View>
-          <View style={styles.navSide} />
-        </View>
+        <OnboardingQuestionNav onBack={onBack} hideProgress={!showProgress} />
       ) : (
         <View style={styles.header}>
           {progress ?? <View style={styles.progressSpacer} />}
@@ -105,51 +144,8 @@ export function OnboardingScreenLayout({
           ) : null}
         </View>
       )}
-
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[
-          styles.scrollContent,
-          isQuestion ? styles.questionScrollContent : null,
-          isStory ? styles.storyScrollContent : null,
-          compact ? styles.compactScrollContent : null,
-        ]}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-        showsVerticalScrollIndicator={false}
-      >
-        {illustrationKey && illustrationPlacement === 'start' ? (
-          <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
-        ) : null}
-        <OnboardingHero
-          title={title}
-          subtitle={subtitle}
-          eyebrow={eyebrow}
-          showTitle={showTitle}
-          tone={tone}
-        />
-        {illustrationKey && illustrationPlacement === 'afterHero' ? (
-          <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
-        ) : null}
-        {children}
-        {illustrationKey && illustrationPlacement === 'end' ? (
-          <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
-        ) : null}
-        {isStory && !skipStorySpacer ? <View style={styles.storyFlex} /> : null}
-      </ScrollView>
-
-      {footer ? (
-        <View
-          style={[
-            styles.footer,
-            isQuestion ? styles.questionFooter : null,
-            isStory ? styles.questionFooter : null,
-            compact ? styles.compactFooter : null,
-          ]}
-        >
-          {footer}
-        </View>
-      ) : null}
+      {scroll}
+      {footerBlock}
     </Screen>
   );
 
@@ -174,24 +170,6 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: spacing.xs,
     gap: spacing.sm,
-  },
-  questionNav: {
-    minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: spacing.xs,
-  },
-  navSide: {
-    width: 44,
-    height: 44,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-  },
-  navCenter: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.sm,
   },
   progressSpacer: {
     height: spacing.xs,

@@ -1,19 +1,13 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, {
-  Easing,
-  interpolate,
-  interpolateColor,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 
 import { AppText } from '@/components/ui/Text';
-import { colors, motion, radius, shadows, spacing } from '@/design-system';
-import { hapticSelection, hapticSuccess } from '@/utils/haptics';
+import { colors, radius, shadows, spacing } from '@/design-system';
+import {
+  useSelectionFeedback,
+  type SelectionHaptic,
+} from '@/components/ui/ChoiceCard/SelectionFeedback';
 
 export type ChoiceCardVariant = 'row' | 'tile' | 'illustrated';
 
@@ -29,15 +23,14 @@ export type ChoiceCardProps = {
    * Defaults stay unchanged for every other screen.
    */
   compact?: boolean;
-  haptic?: 'selection' | 'success' | 'none';
+  haptic?: SelectionHaptic;
   onPress: () => void;
 };
 
 const BADGE_SIZE = 20;
 const BORDER_WIDTH = 2;
-const CHECK_DURATION_MS = motion.duration.selection;
 
-export function ChoiceCard({
+export function AnimatedChoiceCard({
   label,
   description,
   selected = false,
@@ -51,71 +44,13 @@ export function ChoiceCard({
   const isTile = variant === 'tile';
   const isIllustrated = variant === 'illustrated';
   const idleBackground = isIllustrated ? colors.surface.raised : colors.surface.choice;
-  const reduceMotion = useReducedMotion();
-  const selectedProgress = useSharedValue(selected ? 1 : 0);
-  const pressScale = useSharedValue(1);
-  const previousSelected = useRef(selected);
-  const [pressed, setPressed] = useState(false);
-
-  useEffect(() => {
-    selectedProgress.value = withTiming(selected ? 1 : 0, {
-      duration: reduceMotion ? 0 : CHECK_DURATION_MS,
-      easing: Easing.out(Easing.cubic),
+  const { onPressIn, onPressOut, cardMotionStyle, checkMotionStyle, iconMotionStyle } =
+    useSelectionFeedback({
+      selected,
+      disabled,
+      haptic,
+      idleBackground,
     });
-  }, [reduceMotion, selected, selectedProgress]);
-
-  useEffect(() => {
-    if (reduceMotion) {
-      pressScale.value = withTiming(pressed ? motion.scale.press : 1, { duration: 0 });
-      return;
-    }
-
-    pressScale.value = pressed
-      ? withTiming(motion.scale.press, {
-          duration: motion.duration.press,
-          easing: Easing.out(Easing.quad),
-        })
-      : withSpring(1, motion.spring.release);
-  }, [pressScale, pressed, reduceMotion]);
-
-  useEffect(() => {
-    const becameSelected = selected && !previousSelected.current;
-    previousSelected.current = selected;
-
-    if (!becameSelected) {
-      return;
-    }
-
-    if (haptic === 'selection') {
-      void hapticSelection();
-    }
-    if (haptic === 'success') {
-      void hapticSuccess();
-    }
-  }, [haptic, selected]);
-
-  const cardMotionStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(
-      selectedProgress.value,
-      [0, 1],
-      [idleBackground, colors.surface.choiceSelected],
-    ),
-    borderColor: interpolateColor(
-      selectedProgress.value,
-      [0, 1],
-      [colors.border.default, colors.border.choiceSelected],
-    ),
-    transform: [{ scale: pressScale.value }],
-  }));
-
-  const badgeMotionStyle = useAnimatedStyle(() => ({
-    opacity: selectedProgress.value,
-    transform: [
-      {
-        scale: interpolate(selectedProgress.value, [0, 1], [motion.scale.checkFrom, 1]),
-      },
-    ],
-  }));
 
   return (
     <Pressable
@@ -123,14 +58,8 @@ export function ChoiceCard({
       accessibilityLabel={description ? `${label}. ${description}` : label}
       accessibilityState={{ selected, disabled }}
       disabled={disabled}
-      onPressIn={() => {
-        if (!disabled) {
-          setPressed(true);
-        }
-      }}
-      onPressOut={() => {
-        setPressed(false);
-      }}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
       onPress={onPress}
       style={[styles.pressable, (isTile || isIllustrated) && styles.pressableFill]}
     >
@@ -149,7 +78,9 @@ export function ChoiceCard({
           cardMotionStyle,
         ]}
       >
-        {leading ? <View style={styles.leading}>{leading}</View> : null}
+        {leading ? (
+          <Animated.View style={[styles.leading, iconMotionStyle]}>{leading}</Animated.View>
+        ) : null}
         <View style={[styles.copy, (isTile || isIllustrated) && styles.copyTile]}>
           <AppText
             variant={
@@ -178,7 +109,7 @@ export function ChoiceCard({
         <Animated.View
           accessibilityElementsHidden
           importantForAccessibility="no"
-          style={[styles.badge, badgeMotionStyle]}
+          style={[styles.badge, checkMotionStyle]}
         >
           <View style={styles.check} />
         </Animated.View>
@@ -186,6 +117,9 @@ export function ChoiceCard({
     </Pressable>
   );
 }
+
+/** Existing questionnaire screens import ChoiceCard; keep that name as the shared card. */
+export const ChoiceCard = AnimatedChoiceCard;
 
 const styles = StyleSheet.create({
   pressable: {

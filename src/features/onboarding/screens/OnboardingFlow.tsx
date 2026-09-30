@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -14,8 +14,15 @@ import { AppText, Screen } from '@/components/ui';
 import { colors } from '@/design-system';
 import { MOTION_EASING_STANDARD, motion } from '@/design-system/motion';
 import { DevStepJumper } from '@/features/onboarding/components/DevStepJumper';
+import { OnboardingQuestionNav } from '@/features/onboarding/components/OnboardingQuestionNav';
+import { OnboardingQuestionnaireShellProvider } from '@/features/onboarding/components/OnboardingQuestionnaireShell';
 import { OnboardingRenderer } from '@/features/onboarding/components/OnboardingRenderer';
+import { QuestionTransition } from '@/features/onboarding/components/QuestionTransition';
+import { ONBOARDING_STEPS } from '@/features/onboarding/data/onboardingSteps';
 import { useCurrentOnboardingStep } from '@/features/onboarding/hooks/useCurrentOnboardingStep';
+import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
+import type { OnboardingStep } from '@/features/onboarding/types/onboarding';
+import { isQuestionnaireStep } from '@/features/onboarding/utils/isQuestionnaireStep';
 import {
   registerOnboardingPageShift,
   releaseOnboardingPageShift,
@@ -31,10 +38,17 @@ const slideEasing = Easing.bezier(
 );
 
 export function OnboardingFlow() {
-  const { step } = useCurrentOnboardingStep();
+  const { step, currentStepIndex } = useCurrentOnboardingStep();
+  const { goBack, canGoBack } = useOnboardingNavigation();
   const reduceMotion = useReducedMotion();
   const { width } = useWindowDimensions();
   const shiftX = useSharedValue(0);
+  const [exitingStep, setExitingStep] = useState<OnboardingStep | null>(null);
+
+  const settleQuestionTransition = useCallback(() => {
+    setExitingStep(null);
+    releaseOnboardingPageShift();
+  }, []);
 
   useLayoutEffect(() => {
     cancelAnimation(shiftX);
@@ -42,9 +56,27 @@ export function OnboardingFlow() {
   }, [shiftX, step?.id]);
 
   useEffect(() => {
-    registerOnboardingPageShift((direction, commit) => {
+    registerOnboardingPageShift((direction, commit, toIndex) => {
+      const targetIndex =
+        toIndex ?? (direction === 'forward' ? currentStepIndex + 1 : currentStepIndex - 1);
+      const fromStep = ONBOARDING_STEPS[currentStepIndex];
+      const toStep = ONBOARDING_STEPS[targetIndex];
+      const useQuestionTransition = isQuestionnaireStep(fromStep) && isQuestionnaireStep(toStep);
+
+      if (useQuestionTransition) {
+        if (!reduceMotion && fromStep) {
+          setExitingStep(fromStep);
+        }
+        commit();
+        if (reduceMotion) {
+          releaseOnboardingPageShift();
+        }
+        return;
+      }
+
       if (reduceMotion || width <= 0) {
         commit();
+        releaseOnboardingPageShift();
         return;
       }
 
@@ -58,6 +90,7 @@ export function OnboardingFlow() {
         (finished) => {
           if (finished) {
             runOnJS(commit)();
+            runOnJS(releaseOnboardingPageShift)();
             return;
           }
 
@@ -69,7 +102,7 @@ export function OnboardingFlow() {
     return () => {
       registerOnboardingPageShift(null);
     };
-  }, [reduceMotion, shiftX, width]);
+  }, [currentStepIndex, reduceMotion, shiftX, width]);
 
   const shiftStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: shiftX.value }],
@@ -85,10 +118,31 @@ export function OnboardingFlow() {
     );
   }
 
+  const questionnaire = isQuestionnaireStep(step);
+
   return (
     <View style={styles.root}>
       <Animated.View style={[styles.frame, shiftStyle]}>
-        <OnboardingRenderer step={step} />
+        {questionnaire ? (
+          <OnboardingQuestionnaireShellProvider>
+            <Screen>
+              <OnboardingQuestionNav
+                onBack={canGoBack ? goBack : undefined}
+                hideProgress={step.hideProgress}
+              />
+              <QuestionTransition
+                contentKey={step.id}
+                outgoingKey={exitingStep?.id}
+                outgoing={exitingStep ? <OnboardingRenderer step={exitingStep} /> : null}
+                onSettled={settleQuestionTransition}
+              >
+                <OnboardingRenderer step={step} />
+              </QuestionTransition>
+            </Screen>
+          </OnboardingQuestionnaireShellProvider>
+        ) : (
+          <OnboardingRenderer step={step} />
+        )}
       </Animated.View>
       <DevStepJumper />
     </View>

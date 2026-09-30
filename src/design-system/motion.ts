@@ -8,7 +8,13 @@ export const MOTION_EASING_JOURNEY_WALK = [0.16, 0, 0.84, 1] as const;
 export const motion = {
   duration: {
     selection: 180,
+    choiceFill: 200,
+    iconReact: 180,
+    choiceEntrance: 220,
     press: 240,
+    pressDown: 100,
+    question: 280,
+    progress: 280,
     screen: 280,
     loadingMark: 240,
     loadingPulse: 900,
@@ -39,6 +45,7 @@ export const motion = {
   },
   scale: {
     press: 0.97,
+    iconSelect: 1.06,
     checkFrom: 0.7,
     loadingPop: 1.12,
     pillFrom: 0.98,
@@ -51,6 +58,9 @@ export const motion = {
   },
   offset: {
     press: 8,
+    pressDown: 1,
+    question: 8,
+    choiceEntrance: 8,
     journeySunRise: 12,
     journeyLeftCloudLift: 8,
     journeyRightCloudLift: -6,
@@ -71,6 +81,8 @@ export const motion = {
     buttonReveal: 8,
   },
   delay: {
+    choiceStagger: 36,
+    choiceStaggerMax: 144,
     bubbleReveal: 100,
     bubbleQuestion: 180,
     inputReveal: 220,
@@ -91,6 +103,12 @@ export const motion = {
       mass: 0.35,
       overshootClamping: true,
     },
+    check: {
+      damping: 14,
+      stiffness: 420,
+      mass: 0.25,
+      overshootClamping: false,
+    },
   },
   typewriter: {
     charMs: 52,
@@ -104,3 +122,12 @@ export const motion = {
 } as const;
 
 export type Motion = typeof motion;
+
+/** Card entrance delay. Capped so large grids still appear quickly. */
+export function getChoiceStaggerDelay(index: number, reduceMotion = false): number {
+  if (reduceMotion || index <= 0) {
+    return 0;
+  }
+
+  return Math.min(index * motion.delay.choiceStagger, motion.delay.choiceStaggerMax);
+}

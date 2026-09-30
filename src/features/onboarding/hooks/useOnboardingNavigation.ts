@@ -12,8 +12,8 @@ export function useOnboardingNavigation() {
   const goToStep = useOnboardingStore((state) => state.goToStep);
 
   const goToNext = useCallback(() => {
-    runOnboardingPageShift('forward', next);
-  }, [next]);
+    runOnboardingPageShift('forward', next, currentStepIndex + 1);
+  }, [currentStepIndex, next]);
 
   const goToIndex = useCallback(
     (index: number) => {
@@ -21,9 +21,13 @@ export function useOnboardingNavigation() {
         return;
       }
 
-      runOnboardingPageShift(index > currentStepIndex ? 'forward' : 'back', () => {
-        goToStep(index);
-      });
+      runOnboardingPageShift(
+        index > currentStepIndex ? 'forward' : 'back',
+        () => {
+          goToStep(index);
+        },
+        index,
+      );
     },
     [currentStepIndex, goToStep],
   );
@@ -33,7 +37,7 @@ export function useOnboardingNavigation() {
       return;
     }
 
-    runOnboardingPageShift('back', back);
+    runOnboardingPageShift('back', back, currentStepIndex - 1);
   }, [back, currentStepIndex]);
 
   return {

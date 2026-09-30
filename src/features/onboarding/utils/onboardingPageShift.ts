@@ -1,6 +1,10 @@
 export type OnboardingShiftDirection = 'forward' | 'back';
 
-type OnboardingShiftHandler = (direction: OnboardingShiftDirection, commit: () => void) => void;
+type OnboardingShiftHandler = (
+  direction: OnboardingShiftDirection,
+  commit: () => void,
+  toIndex?: number,
+) => void;
 
 let shiftHandler: OnboardingShiftHandler | null = null;
 let shiftBusy = false;
@@ -13,7 +17,11 @@ export function releaseOnboardingPageShift() {
   shiftBusy = false;
 }
 
-export function runOnboardingPageShift(direction: OnboardingShiftDirection, commit: () => void) {
+export function runOnboardingPageShift(
+  direction: OnboardingShiftDirection,
+  commit: () => void,
+  toIndex?: number,
+) {
   if (shiftBusy) {
     return;
   }
@@ -24,8 +32,5 @@ export function runOnboardingPageShift(direction: OnboardingShiftDirection, comm
   }
 
   shiftBusy = true;
-  shiftHandler(direction, () => {
-    commit();
-    shiftBusy = false;
-  });
+  shiftHandler(direction, commit, toIndex);
 }

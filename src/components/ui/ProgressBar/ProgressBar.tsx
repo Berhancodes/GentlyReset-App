@@ -12,7 +12,7 @@ import { colors, radius } from '@/design-system';
 
 const FILL_DURATION_MS = 300;
 
-type ProgressBarProps = {
+export type ProgressBarProps = {
   progress: number;
   /**
    * Where the fill should start after remounting, so step transitions
@@ -23,6 +23,7 @@ type ProgressBarProps = {
   fillColor?: string;
   trackColor?: string;
   thickness?: number;
+  durationMs?: number;
 };
 
 export function ProgressBar({
@@ -32,6 +33,7 @@ export function ProgressBar({
   fillColor = colors.progress.fill,
   trackColor = colors.progress.track,
   thickness,
+  durationMs = FILL_DURATION_MS,
 }: ProgressBarProps) {
   const clamped = Math.min(1, Math.max(0, progress));
   const clampedInitial = Math.min(1, Math.max(0, initialProgress));
@@ -51,10 +53,10 @@ export function ProgressBar({
     }
 
     fillWidth.value = withTiming(trackWidth * clamped, {
-      duration: reduceMotion ? 0 : FILL_DURATION_MS,
+      duration: reduceMotion ? 0 : durationMs,
       easing: Easing.out(Easing.cubic),
     });
-  }, [clamped, clampedInitial, fillWidth, reduceMotion, trackWidth]);
+  }, [clamped, clampedInitial, durationMs, fillWidth, reduceMotion, trackWidth]);
 
   const fillStyle = useAnimatedStyle(() => ({
     width: fillWidth.value,

@@ -17,6 +17,11 @@ export function hapticSelection(): Promise<void> {
   return play(() => Haptics.selectionAsync());
 }
 
+/** Quieter than selection — used when a choice is turned off. */
+export function hapticDeselection(): Promise<void> {
+  return play(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft));
+}
+
 /** Soft typewriter tick. Native uses selection haptics; web uses a tiny vibrate. */
 export function hapticTypewriterTick(): Promise<void> {
   if (Platform.OS === 'web') {

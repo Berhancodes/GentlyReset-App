@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { ProgressBar } from '@/components/ui';
+import { AnimatedProgress } from '@/components/ui';
 import { colors } from '@/design-system';
 import { useCurrentOnboardingStep } from '@/features/onboarding/hooks/useCurrentOnboardingStep';
 import { getCoreQuestionProgress } from '@/features/onboarding/utils/getCoreQuestionProgress';
@@ -22,7 +22,7 @@ export function OnboardingProgress() {
   return (
     <View style={styles.root}>
       <View style={styles.bar}>
-        <ProgressBar
+        <AnimatedProgress
           initialProgress={initialProgress}
           progress={progress}
           fillColor={colors.progress.fillOnboarding}
