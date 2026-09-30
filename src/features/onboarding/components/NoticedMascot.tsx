@@ -6,8 +6,8 @@ const NOTICED_ART = require('../../../../assets/images/onboarding/noticed/notice
 const ART_WIDTH = 597;
 const ART_HEIGHT = 331;
 const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
-const MASCOT_MAX_WIDTH = 320;
-const MASCOT_HEIGHT_FRACTION = 0.24;
+const MASCOT_MAX_WIDTH = 340;
+const MASCOT_HEIGHT_FRACTION = 0.32;
 
 /**
  * Decorative notepad mascot for the "here's what I noticed" screen.

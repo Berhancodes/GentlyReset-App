@@ -37,11 +37,22 @@ export function ResultDetailsScreen({ step }: ResultDetailsScreenProps) {
             {"what's already there"}
           </AppText>
           <View style={styles.chips}>
-            {profile.strengths.map((value) => (
-              <View key={value} style={styles.chip}>
-                <AppText variant="caption">{value}</AppText>
+            <View style={styles.chipRow}>
+              {profile.strengths.slice(0, 2).map((value) => (
+                <View key={value} style={styles.chip}>
+                  <AppText variant="caption">{value}</AppText>
+                </View>
+              ))}
+            </View>
+            {profile.strengths.length > 2 ? (
+              <View style={styles.chipRow}>
+                {profile.strengths.slice(2).map((value) => (
+                  <View key={value} style={styles.chip}>
+                    <AppText variant="caption">{value}</AppText>
+                  </View>
+                ))}
               </View>
-            ))}
+            ) : null}
           </View>
         </View>
         <View style={styles.section}>
@@ -75,29 +86,33 @@ export function ResultDetailsScreen({ step }: ResultDetailsScreenProps) {
 
 const styles = StyleSheet.create({
   body: {
-    gap: spacing.lg,
+    gap: spacing.md,
   },
   section: {
     gap: spacing.sm,
     alignItems: 'center',
   },
   chips: {
+    gap: spacing.sm,
+    alignItems: 'center',
+    width: '100%',
+  },
+  chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: spacing.sm,
-    maxWidth: 280,
   },
   chip: {
     borderRadius: radius.pill,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
     borderWidth: 1.5,
     backgroundColor: colors.surface.raised,
     borderColor: colors.accent.gold,
   },
   pattern: {
-    gap: spacing.md,
+    gap: spacing.sm,
     paddingHorizontal: spacing.sm,
   },
   divider: {
