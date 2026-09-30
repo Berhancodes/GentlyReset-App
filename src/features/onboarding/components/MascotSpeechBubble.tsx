@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
   copyLayer: {
     gap: spacing.none,
-    maxWidth: '100%',
+    width: '100%',
   },
   replyLayer: {
     ...StyleSheet.absoluteFill,

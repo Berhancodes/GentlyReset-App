@@ -324,7 +324,7 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
               {
                 left: layout.bubbleLeft,
                 top: layout.bubbleTop,
-                maxWidth: layout.bubbleMaxWidth,
+                width: layout.bubbleMaxWidth,
               },
               bubbleEntranceStyle,
             ]}

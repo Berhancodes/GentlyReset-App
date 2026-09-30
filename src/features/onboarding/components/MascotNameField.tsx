@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     paddingRight: spacing.sm,
   },
   fieldFocused: {
-    borderColor: colors.border.subtle,
+    borderColor: colors.border.whisper,
     backgroundColor: colors.surface.selected,
   },
   input: {
@@ -98,7 +98,14 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     textAlign: 'left',
     paddingRight: spacing.sm,
-    ...(Platform.OS === 'web' ? ({ outlineWidth: 0 } as const) : null),
+    ...(Platform.OS === 'web'
+      ? ({
+          outlineWidth: 0,
+          outlineStyle: 'none',
+          outlineColor: 'transparent',
+          boxShadow: 'none',
+        } as const)
+      : null),
   },
   submit: {
     width: MASCOT_INTRO_LAYOUT.submitSize,
