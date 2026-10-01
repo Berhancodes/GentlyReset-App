@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   divider: {
     alignSelf: 'center',
     width: spacing.xxl,
-    height: 1,
+    height: 2,
     backgroundColor: colors.accent.gold,
   },
   closer: {
