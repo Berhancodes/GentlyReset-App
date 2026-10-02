@@ -9,5 +9,5 @@ export function getPaywallUnlockNextStep(isAuthenticated: boolean): PaywallUnloc
 }
 
 export function getPaywallUnlockLabel(isPurchasing: boolean): string {
-  return isPurchasing ? 'purchasing…' : 'unlock my reset';
+  return isPurchasing ? 'Purchasing…' : 'Unlock My Reset';
 }

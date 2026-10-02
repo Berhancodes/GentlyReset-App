@@ -116,8 +116,8 @@ check(
 
 check('authenticated unlock purchases next', getPaywallUnlockNextStep(true) === 'purchase');
 
-check('paywall CTA stays unlock my reset', getPaywallUnlockLabel(false) === 'unlock my reset');
-check('paywall CTA shows purchasing while busy', getPaywallUnlockLabel(true) === 'purchasing…');
+check('paywall CTA stays Unlock My Reset', getPaywallUnlockLabel(false) === 'Unlock My Reset');
+check('paywall CTA shows Purchasing while busy', getPaywallUnlockLabel(true) === 'Purchasing…');
 
 rememberPaywallPackage('$rc_annual');
 check(

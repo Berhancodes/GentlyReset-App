@@ -17,6 +17,8 @@ type PrimaryButtonProps = {
   haptic?: 'light' | 'success' | 'none';
   /** Trailing arrow, kept off the centered label (noticed-page continue). */
   showArrow?: boolean;
+  /** Gold face for the paywall unlock CTA. Default stays the brown primary. */
+  tone?: 'primary' | 'gold';
 };
 
 export function PrimaryButton({
@@ -26,7 +28,14 @@ export function PrimaryButton({
   accessibilityHint,
   haptic = 'light',
   showArrow = false,
+  tone = 'primary',
 }: PrimaryButtonProps) {
+  const isGold = tone === 'gold';
+  const arrowColor = disabled
+    ? colors.action.primaryTextDisabled
+    : isGold
+      ? colors.action.saveText
+      : colors.action.primaryText;
   return (
     <Pressable
       accessibilityRole="button"
@@ -50,34 +59,39 @@ export function PrimaryButton({
 
         return (
           <>
-            {disabled ? null : <View pointerEvents="none" style={styles.lip} />}
+            {disabled ? null : (
+              <View pointerEvents="none" style={[styles.lip, isGold ? styles.lipGold : null]} />
+            )}
             {disabled ? null : (
               <View
                 pointerEvents="none"
-                style={[styles.shadow, isPressed ? styles.shadowPressed : null]}
+                style={[
+                  styles.shadow,
+                  isGold ? styles.shadowGold : null,
+                  isPressed ? styles.shadowPressed : null,
+                ]}
               />
             )}
             <View
               style={[
                 styles.face,
-                disabled ? styles.faceDisabled : styles.faceEnabled,
-                isPressed ? styles.facePressed : null,
+                disabled ? styles.faceDisabled : isGold ? styles.faceGold : styles.faceEnabled,
+                isPressed ? (isGold ? styles.faceGoldPressed : styles.facePressed) : null,
               ]}
             >
               <Text
                 allowFontScaling
                 maxFontSizeMultiplier={1.4}
-                style={[styles.label, disabled ? styles.labelDisabled : styles.labelEnabled]}
+                style={[
+                  styles.label,
+                  disabled ? styles.labelDisabled : isGold ? styles.labelGold : styles.labelEnabled,
+                ]}
               >
                 {label}
               </Text>
               {showArrow ? (
                 <View pointerEvents="none" style={styles.arrow}>
-                  <Ionicons
-                    name="arrow-forward"
-                    size={20}
-                    color={disabled ? colors.action.primaryTextDisabled : colors.action.primaryText}
-                  />
+                  <Ionicons name="arrow-forward" size={20} color={arrowColor} />
                 </View>
               ) : null}
             </View>
@@ -135,6 +149,9 @@ const styles = StyleSheet.create({
   faceEnabled: {
     backgroundColor: colors.action.primaryBackground,
   },
+  faceGold: {
+    backgroundColor: colors.action.saveBackground,
+  },
   faceDisabled: {
     backgroundColor: colors.action.primaryBackgroundDisabled,
   },
@@ -142,11 +159,24 @@ const styles = StyleSheet.create({
     backgroundColor: colors.action.primaryBackgroundPressed,
     transform: [{ translateY: PRESS_TRAVEL }, { scale: motion.scale.press }],
   },
+  faceGoldPressed: {
+    backgroundColor: colors.action.saveBackgroundPressed,
+    transform: [{ translateY: PRESS_TRAVEL }, { scale: motion.scale.press }],
+  },
+  lipGold: {
+    backgroundColor: colors.action.saveBackgroundPressed,
+  },
+  shadowGold: {
+    backgroundColor: colors.action.saveBackgroundPressed,
+  },
   label: {
     ...textVariants.button,
   },
   labelEnabled: {
     color: colors.action.primaryText,
+  },
+  labelGold: {
+    color: colors.action.saveText,
   },
   labelDisabled: {
     color: colors.action.primaryTextDisabled,

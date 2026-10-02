@@ -75,6 +75,10 @@ export function getOnboardingIllustrationSource(key: OnboardingIllustrationKey) 
 
 export const PAYWALL_REST_ART =
   require('../../../../assets/images/onboarding/paywall-rest.png') as ImageSourcePropType;
+export const PAYWALL_SKY_ART =
+  require('../../../../assets/images/onboarding/paywall-sky.png') as ImageSourcePropType;
+export const PAYWALL_MASCOT_ART =
+  require('../../../../assets/images/onboarding/paywall-mascot-rest.png') as ImageSourcePropType;
 
 /**
  * Illustrated icons for the "what brought you here today?" cards.
