@@ -5,6 +5,7 @@ import { spacing } from '@/design-system';
 import { ClimbingMascot } from '@/features/onboarding/components/ClimbingMascot';
 import { IllustratedChoiceCard } from '@/features/onboarding/components/IllustratedChoiceCard';
 import { IllustratedChoiceGrid } from '@/features/onboarding/components/IllustratedChoiceGrid';
+import { MissedDayChoices } from '@/features/onboarding/components/MissedDayChoices';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { OptionGrid } from '@/features/onboarding/components/OptionGrid';
 import { OptionIcon } from '@/features/onboarding/components/OptionIcon';
@@ -30,6 +31,7 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
   const illustratedGrid = shouldUseIllustratedGrid(step);
   const isHardestStep = step.id === 'consistencyStage';
   const isSupportTimingStep = step.id === 'supportTiming';
+  const isMissedDayStep = step.id === 'missedDayResponse';
   const useGrid = illustratedGrid || layout === 'grid2' || layout === 'grid3';
   const columns = illustratedGrid || layout === 'grid2' ? 2 : 3;
 
@@ -70,7 +72,10 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
     <OnboardingScreenLayout
       tone="question"
       compact={
-        isHardestStep || isSupportTimingStep || (illustratedGrid && step.options.length >= 8)
+        isHardestStep ||
+        isSupportTimingStep ||
+        isMissedDayStep ||
+        (illustratedGrid && step.options.length >= 8)
       }
       title={step.title}
       subtitle={getQuestionHelper(step)}
@@ -85,6 +90,14 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
     >
       {isSupportTimingStep ? (
         <SupportTimingChoices
+          options={step.options}
+          selectedId={selectedId}
+          onSelect={(optionId) => {
+            setAnswer(step.id, { type: 'singleChoice', optionId });
+          }}
+        />
+      ) : isMissedDayStep ? (
+        <MissedDayChoices
           options={step.options}
           selectedId={selectedId}
           onSelect={(optionId) => {
