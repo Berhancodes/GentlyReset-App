@@ -53,7 +53,7 @@ export function PaywallRestMascot() {
           style={{
             width: artWidth,
             height: artHeight,
-            transform: [{ translateY: spacing.lg }],
+            transform: [{ translateY: spacing.xxl }],
           }}
         />
       ) : null}
