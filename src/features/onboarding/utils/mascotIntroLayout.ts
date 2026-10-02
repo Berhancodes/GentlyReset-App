@@ -28,6 +28,8 @@ export const MASCOT_INTRO_LAYOUT = {
   mascotNudgeXMin: 18,
   mascotNudgeXMax: 28,
   clusterCenterRatio: 0.35,
+  mascotShiftX: 5,
+  mascotShiftY: 5,
   bubbleMaxWidth: 220,
   bubbleMinWidth: 136,
   /** Cream gap from the hat brim to the bubble body. */
@@ -154,8 +156,8 @@ export function getMascotIntroLayout(
 
   return {
     settleScale,
-    settleX,
-    settleY,
+    settleX: settleX + MASCOT_INTRO_LAYOUT.mascotShiftX,
+    settleY: settleY + MASCOT_INTRO_LAYOUT.mascotShiftY,
     bubbleMaxWidth,
     bubbleLeft,
     bubbleTop,
