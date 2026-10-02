@@ -5,6 +5,7 @@ import { motion, spacing } from '@/design-system';
 import { BuildingMascot } from '@/features/onboarding/components/BuildingMascot';
 import { LoadingStageRow } from '@/features/onboarding/components/LoadingStageRow';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
+import { StoryCopy, type StoryCopyLine } from '@/features/onboarding/components/StoryCopy';
 import { getOnboardingStepIndex } from '@/features/onboarding/data/onboardingSteps';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useStagedLoading } from '@/features/onboarding/hooks/useStagedLoading';
@@ -18,15 +19,28 @@ type LoadingScreenProps = {
 type LoadingPhase = 'checks' | 'gotYou';
 
 const GOT_YOU_TITLE = "I think I've got you.";
+const GOT_YOU_LINES: readonly StoryCopyLine[] = [
+  {
+    id: 'got-you',
+    text: GOT_YOU_TITLE,
+    variant: 'display',
+    color: 'primary',
+  },
+];
 
 export function LoadingScreen({ step }: LoadingScreenProps) {
   const { goToIndex, goBack, canGoBack } = useOnboardingNavigation();
   const [phase, setPhase] = useState<LoadingPhase>('checks');
+  const [gotYouTyped, setGotYouTyped] = useState(false);
   const showBuildingScene = step.scene === 'building';
   const showGotYou = phase === 'gotYou';
 
   const handleChecksComplete = useCallback(() => {
     setPhase('gotYou');
+  }, []);
+
+  const handleGotYouFinished = useCallback(() => {
+    setGotYouTyped(true);
   }, []);
 
   const completedCount = useStagedLoading({
@@ -37,18 +51,18 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
   });
 
   useEffect(() => {
-    if (phase !== 'gotYou') {
+    if (!gotYouTyped) {
       return;
     }
 
     const timeoutId = setTimeout(() => {
       goToIndex(getOnboardingStepIndex('resetReveal'));
-    }, motion.duration.storyHold);
+    }, motion.duration.nameResponseHold);
 
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [goToIndex, phase]);
+  }, [goToIndex, gotYouTyped]);
 
   const stageTotal = step.stages.length;
 
@@ -57,13 +71,16 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
       tone="story"
       title={showGotYou ? GOT_YOU_TITLE : step.title}
       subtitle={showGotYou ? undefined : step.subtitle}
+      showTitle={!showGotYou}
       illustrationKey={showGotYou ? 'gotYou' : showBuildingScene ? undefined : step.illustrationKey}
       illustrationSize="large"
       illustrationPlacement={showGotYou ? 'end' : 'afterHero'}
       hideProgress
       onBack={canGoBack ? goBack : undefined}
     >
-      {showGotYou ? null : (
+      {showGotYou ? (
+        <StoryCopy lines={GOT_YOU_LINES} onFinished={handleGotYouFinished} />
+      ) : (
         <>
           {showBuildingScene ? <BuildingMascot /> : null}
           <View
