@@ -25,6 +25,7 @@ const MASCOT_BOUNDS = {
 export const MASCOT_INTRO_LAYOUT = {
   settleScale: 0.5,
   clusterCenterRatio: 0.5,
+  clusterNudgeY: -5,
   bubbleMaxWidth: 220,
   bubbleMinWidth: 136,
   /** Cream gap from the hat brim to the bubble body. */
@@ -115,6 +116,7 @@ export function getMascotIntroLayout(
   if (overflow > 0) {
     settleY -= overflow;
   }
+  settleY += MASCOT_INTRO_LAYOUT.clusterNudgeY;
 
   const hat = applySettle(imageX(MASCOT_BOUNDS.hatRight), imageY(MASCOT_BOUNDS.hatTop), settleY);
   const feet = applySettle(imageX(MASCOT_BOUNDS.centerX), imageY(MASCOT_BOUNDS.bottom), settleY);
