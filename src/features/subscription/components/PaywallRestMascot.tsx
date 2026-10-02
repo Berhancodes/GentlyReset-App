@@ -50,7 +50,11 @@ export function PaywallRestMascot() {
           resizeMode="contain"
           accessibilityElementsHidden
           importantForAccessibility="no"
-          style={{ width: artWidth, height: artHeight }}
+          style={{
+            width: artWidth,
+            height: artHeight,
+            transform: [{ translateY: -spacing.xxl }],
+          }}
         />
       ) : null}
     </View>
