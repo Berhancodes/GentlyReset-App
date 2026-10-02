@@ -27,6 +27,8 @@ const BUILD_STILL = require('../../../../assets/images/mascot/mascot-building-st
 const WAVE_LOOP = require('../../../../assets/images/mascot/mascot-companion-loop.gif');
 const WAVE_STILL = require('../../../../assets/images/mascot/mascot-companion-still.png');
 const NOTICED_ART = require('../../../../assets/images/onboarding/noticed/noticed-mascot.png');
+const NEW_LIFE_LOOP = require('../../../../assets/images/onboarding/new-life/new-life-mascot-box.gif');
+const NEW_LIFE_STILL = require('../../../../assets/images/onboarding/new-life/new-life-mascot-box-still.png');
 
 function pushSource(sources: ImageSourcePropType[], source: ImageSourcePropType | undefined) {
   if (source) {
@@ -60,6 +62,9 @@ function getSceneSources(step: OnboardingStep): ImageSourcePropType[] {
     }
     if (step.scene === 'noticing') {
       return [NOTICE_LOOP, NOTICE_STILL];
+    }
+    if (step.scene === 'newLife') {
+      return [NEW_LIFE_LOOP, NEW_LIFE_STILL];
     }
     if (step.scene === 'companion') {
       return [WAVE_LOOP, WAVE_STILL];

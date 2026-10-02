@@ -12,6 +12,7 @@ import { AppText, PrimaryButton } from '@/components/ui';
 import { motion, spacing } from '@/design-system';
 import { BreathingMascot } from '@/features/onboarding/components/BreathingMascot';
 import { CompanionMascot } from '@/features/onboarding/components/CompanionMascot';
+import { NewLifeMascot } from '@/features/onboarding/components/NewLifeMascot';
 import { NoticingMascot } from '@/features/onboarding/components/NoticingMascot';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { PlanPreviewList } from '@/features/onboarding/components/PlanPreviewList';
@@ -122,8 +123,10 @@ export function StoryScreen({ step }: StoryScreenProps) {
 
   const showBreathingScene = step.scene === 'breathing';
   const showNoticingScene = step.scene === 'noticing';
+  const showNewLifeScene = step.scene === 'newLife';
   const showCompanionScene = step.scene === 'companion';
-  const hideStillIllustration = showBreathingScene || showNoticingScene || showCompanionScene;
+  const hideStillIllustration =
+    showBreathingScene || showNoticingScene || showNewLifeScene || showCompanionScene;
   const companionOpacity = useSharedValue(1);
 
   const handleCompanionFinished = useCallback(() => {
@@ -224,6 +227,7 @@ export function StoryScreen({ step }: StoryScreenProps) {
       )}
       {showBreathingScene ? <BreathingMascot /> : null}
       {showNoticingScene ? <NoticingMascot /> : null}
+      {showNewLifeScene ? <NewLifeMascot /> : null}
       {showCompanionScene ? (
         <View style={styles.companionStage}>
           <View style={styles.mascotSlot}>
