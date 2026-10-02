@@ -1,13 +1,5 @@
 import { useMemo, useState } from 'react';
-import {
-  Image,
-  Linking,
-  Pressable,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
@@ -44,7 +36,6 @@ import {
   buildPaywallPlans,
   type PaywallPlan,
 } from '@/features/subscription/utils/buildPaywallPlans';
-import { getLegalUrls } from '@/features/subscription/utils/legalUrls';
 
 const COMPACT_HEIGHT = 720;
 const ROOMY_HEIGHT = 900;
@@ -73,14 +64,13 @@ export function HardPaywallScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const unlockNextStep = getPaywallUnlockNextStep(isAuthenticated);
-  const { packages, unexpectedTrial, purchasePackage, restorePurchases } = useSubscription();
+  const { packages, unexpectedTrial, purchasePackage } = useSubscription();
   const plans = useMemo(() => buildPaywallPlans(packages), [packages]);
   const [selectedId, setSelectedId] = useState<string | null>(
     () => peekPaywallUnlock()?.packageIdentifier ?? ANNUAL_PACKAGE_ID,
   );
-  const [busy, setBusy] = useState<'purchase' | 'restore' | null>(null);
+  const [busy, setBusy] = useState<'purchase' | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const legal = getLegalUrls();
 
   const selected = plans.find((plan) => plan.identifier === selectedId) ?? plans[0];
 
@@ -124,27 +114,6 @@ export function HardPaywallScreen() {
     }
 
     startPurchase(storePackage);
-  };
-
-  const restore = () => {
-    if (busy) {
-      return;
-    }
-    setBusy('restore');
-    setMessage(null);
-    void restorePurchases()
-      .then((result) => {
-        if (!result.ok) {
-          setMessage(result.message);
-          return;
-        }
-        if (!result.unlocked) {
-          setMessage('no eligible purchase was found for this account.');
-        }
-      })
-      .finally(() => {
-        setBusy(null);
-      });
   };
 
   const canUnlock = Boolean(selected?.purchasable) && busy === null && !unexpectedTrial;
@@ -256,21 +225,6 @@ export function HardPaywallScreen() {
             disabled={!canUnlock}
             onPress={beginUnlock}
           />
-          <View style={[styles.legalRow, { minHeight: layout.footerLinkMinHeight }]}>
-            <LegalLabel label="Terms of Use" url={legal.termsOfUse} />
-            <Text style={styles.legalDot}>·</Text>
-            <LegalLabel label="Privacy Policy" url={legal.privacyPolicy} />
-            <Text style={styles.legalDot}>·</Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Restore Purchases"
-              disabled={busy !== null}
-              onPress={restore}
-              hitSlop={spacing.sm}
-            >
-              <Text style={styles.legalLink}>Restore Purchases</Text>
-            </Pressable>
-          </View>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Sign in"
@@ -334,29 +288,6 @@ function PlanCard({
           </View>
         ) : null}
       </View>
-    </Pressable>
-  );
-}
-
-function LegalLabel({ label, url }: { label: string; url: string | null }) {
-  if (!url) {
-    return (
-      <Text style={styles.legalMuted} accessibilityLabel={`${label} coming before production`}>
-        {label}
-      </Text>
-    );
-  }
-
-  return (
-    <Pressable
-      accessibilityRole="link"
-      accessibilityLabel={label}
-      onPress={() => {
-        void Linking.openURL(url);
-      }}
-      hitSlop={spacing.sm}
-    >
-      <Text style={styles.legalLink}>{label}</Text>
     </Pressable>
   );
 }
@@ -583,38 +514,13 @@ const styles = StyleSheet.create({
     flexGrow: 0,
     flexShrink: 0,
     zIndex: 1,
+    backgroundColor: colors.background.primary,
   },
   status: {
     ...textVariants.caption,
     color: colors.text.secondary,
     textAlign: 'center',
     marginBottom: spacing.xs,
-  },
-  legalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexWrap: 'nowrap',
-    gap: spacing.xs,
-  },
-  legalLink: {
-    fontFamily: fontFamilies.sans,
-    fontSize: fontSizes.xs,
-    lineHeight: lineHeights.xs,
-    color: colors.text.secondary,
-    textDecorationLine: 'underline',
-  },
-  legalMuted: {
-    fontFamily: fontFamilies.sans,
-    fontSize: fontSizes.xs,
-    lineHeight: lineHeights.xs,
-    color: colors.text.helper,
-  },
-  legalDot: {
-    fontFamily: fontFamilies.sans,
-    fontSize: fontSizes.xs,
-    lineHeight: lineHeights.xs,
-    color: colors.text.helper,
   },
   signIn: {
     alignItems: 'center',

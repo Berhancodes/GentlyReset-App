@@ -50,11 +50,7 @@ export function PaywallRestMascot() {
           resizeMode="contain"
           accessibilityElementsHidden
           importantForAccessibility="no"
-          style={{
-            width: artWidth,
-            height: artHeight,
-            transform: [{ translateY: spacing.xxl }],
-          }}
+          style={{ width: artWidth, height: artHeight }}
         />
       ) : null}
     </View>
@@ -67,7 +63,7 @@ const styles = StyleSheet.create({
     minHeight: 0,
     alignItems: 'center',
     justifyContent: 'flex-end',
-    overflow: 'visible',
+    overflow: 'hidden',
     pointerEvents: 'none',
   },
 });
