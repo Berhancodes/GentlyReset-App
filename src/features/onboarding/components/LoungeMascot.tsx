@@ -9,9 +9,9 @@ const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 
 const SHORT_PHONE_HEIGHT = 680;
 const REGULAR_PHONE_HEIGHT = 800;
-const MASCOT_HEIGHT_SHORT = 132;
-const MASCOT_HEIGHT_REGULAR = 155;
-const MASCOT_HEIGHT_TALL = 168;
+const MASCOT_HEIGHT_SHORT = 160;
+const MASCOT_HEIGHT_REGULAR = 190;
+const MASCOT_HEIGHT_TALL = 205;
 
 function mascotHeightForWindow(windowHeight: number): number {
   if (windowHeight < SHORT_PHONE_HEIGHT) {
