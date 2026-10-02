@@ -2,16 +2,16 @@ import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { spacing } from '@/design-system';
 
-const STAR_ART = require('../../../../assets/images/onboarding/reset-reason/reset-mascot-star.png');
-const ART_WIDTH = 1165;
-const ART_HEIGHT = 1218;
+const JOURNAL_ART = require('../../../../assets/images/onboarding/reset-reason/reset-mascot-journal.png');
+const ART_WIDTH = 587;
+const ART_HEIGHT = 656;
 const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 
 /**
- * Decorative illustration for the "I'm doing this because..." question.
+ * Decorative journal mascot under the "I'm doing this because..." field.
  * Not interactive — does not participate in text entry.
  */
-export function StarMascot() {
+export function JournalMascot() {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const availableWidth = Math.round(windowWidth - spacing.lg * 2);
   const maxHeight = Math.round(windowHeight * 0.28);
@@ -27,7 +27,7 @@ export function StarMascot() {
       style={styles.wrap}
     >
       <Image
-        source={STAR_ART}
+        source={JOURNAL_ART}
         resizeMode="contain"
         accessibilityElementsHidden
         importantForAccessibility="no"

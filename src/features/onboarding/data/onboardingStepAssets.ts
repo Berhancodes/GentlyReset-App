@@ -18,7 +18,7 @@ const HANG_LOOP = require('../../../../assets/images/onboarding/consistency/hard
 const HANG_STILL = require('../../../../assets/images/onboarding/consistency/hardest-mascot-hang-still.png');
 const LOUNGE_ART = require('../../../../assets/images/onboarding/support-timing/support-mascot-lounge.png');
 const BELT_ART = require('../../../../assets/images/onboarding/missed-day/missed-mascot-belt.png');
-const STAR_ART = require('../../../../assets/images/onboarding/reset-reason/reset-mascot-star.png');
+const JOURNAL_ART = require('../../../../assets/images/onboarding/reset-reason/reset-mascot-journal.png');
 const BREATHE_LOOP = require('../../../../assets/images/mascot/mascot-breathe.gif');
 const BREATHE_STILL = require('../../../../assets/images/mascot/mascot-breathe-still.png');
 const NOTICE_LOOP = require('../../../../assets/images/onboarding/noticing/noticing-mascot-boba.gif');
@@ -52,7 +52,7 @@ function getSceneSources(step: OnboardingStep): ImageSourcePropType[] {
     case 'missedDayResponse':
       return [BELT_ART];
     case 'resetReason':
-      return [STAR_ART];
+      return [JOURNAL_ART];
     case 'noticedDetails':
       return [NOTICED_ART];
     default:

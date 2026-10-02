@@ -4,7 +4,7 @@ import { PrimaryButton } from '@/components/ui';
 import { colors, radius, shadows, spacing, textVariants } from '@/design-system';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { OnboardingTextButton } from '@/features/onboarding/components/OnboardingTextButton';
-import { StarMascot } from '@/features/onboarding/components/StarMascot';
+import { JournalMascot } from '@/features/onboarding/components/JournalMascot';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { TextInputStep } from '@/features/onboarding/types/onboarding';
@@ -79,7 +79,7 @@ export function TextInputScreen({ step }: TextInputScreenProps) {
       {isResetReasonStep ? (
         <View style={styles.resetReasonBlock}>
           {input}
-          <StarMascot />
+          <JournalMascot />
         </View>
       ) : (
         input
