@@ -7,6 +7,8 @@ import { PAYWALL_MASCOT_ART } from '@/features/onboarding/data/onboardingAssets'
 
 const ART_WIDTH = 854;
 const ART_HEIGHT = 472;
+/** Keep the rest scene inside the slot so the CTA sits between the plants. */
+const FIT_SCALE = 0.82;
 
 /**
  * Full-bleed rest scene between the plans and the unlock button.
@@ -20,7 +22,7 @@ export function PaywallRestMascot() {
 
   const widthScale = windowWidth / ART_WIDTH;
   const heightScale = slotHeight > 0 ? slotHeight / ART_HEIGHT : widthScale;
-  const scale = Math.min(widthScale, heightScale);
+  const scale = Math.min(widthScale, heightScale) * FIT_SCALE;
   const artWidth = Math.round(ART_WIDTH * scale);
   const artHeight = Math.round(ART_HEIGHT * scale);
 
