@@ -2,9 +2,9 @@ import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { ChoiceCard } from '@/components/ui';
 import { spacing } from '@/design-system';
+import { LoungeMascot } from '@/features/onboarding/components/LoungeMascot';
 import { OptionGrid } from '@/features/onboarding/components/OptionGrid';
 import { OptionIcon } from '@/features/onboarding/components/OptionIcon';
-import { WorriedMascot } from '@/features/onboarding/components/WorriedMascot';
 import { getOptionIconSource } from '@/features/onboarding/data/onboardingAssets';
 import type { OnboardingOption } from '@/features/onboarding/types/onboarding';
 
@@ -17,7 +17,7 @@ type SupportTimingChoicesProps = {
 };
 
 /**
- * Timing question layout: 2×2 compact tiles, then the worried mascot.
+ * Timing question layout: 2×2 compact tiles, then the lounge mascot.
  */
 export function SupportTimingChoices({ options, selectedId, onSelect }: SupportTimingChoicesProps) {
   const { height: windowHeight } = useWindowDimensions();
@@ -46,7 +46,7 @@ export function SupportTimingChoices({ options, selectedId, onSelect }: SupportT
       <View style={[styles.choices, isShortPhone ? styles.choicesShort : null]}>
         <OptionGrid columns={2}>{gridCards}</OptionGrid>
       </View>
-      <WorriedMascot />
+      <LoungeMascot />
     </View>
   );
 }

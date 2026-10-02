@@ -16,7 +16,7 @@ const MASCOT_RUN_FINAL = require('../../../../assets/images/onboarding/mascot-ru
 const THINKING_ART = require('../../../../assets/images/onboarding/reason/reason-mascot-thinking.png');
 const HANG_LOOP = require('../../../../assets/images/onboarding/consistency/hardest-mascot-hang.gif');
 const HANG_STILL = require('../../../../assets/images/onboarding/consistency/hardest-mascot-hang-still.png');
-const WORRIED_ART = require('../../../../assets/images/onboarding/support-timing/support-mascot-worried.png');
+const LOUNGE_ART = require('../../../../assets/images/onboarding/support-timing/support-mascot-lounge.png');
 const STAR_ART = require('../../../../assets/images/onboarding/reset-reason/reset-mascot-star.png');
 const BREATHE_LOOP = require('../../../../assets/images/mascot/mascot-breathe.gif');
 const BREATHE_STILL = require('../../../../assets/images/mascot/mascot-breathe-still.png');
@@ -47,7 +47,7 @@ function getSceneSources(step: OnboardingStep): ImageSourcePropType[] {
     case 'consistencyStage':
       return [HANG_LOOP, HANG_STILL];
     case 'supportTiming':
-      return [WORRIED_ART];
+      return [LOUNGE_ART];
     case 'resetReason':
       return [STAR_ART];
     case 'noticedDetails':
