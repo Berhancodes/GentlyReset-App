@@ -9,13 +9,15 @@ const BOX_STILL = require('../../../../assets/images/onboarding/new-life/new-lif
 
 const GIF_WIDTH = 720;
 const GIF_HEIGHT = 1280;
-const GIF_ASPECT = GIF_WIDTH / GIF_HEIGHT;
 /** Opaque boxing mascot, measured from new-life-mascot-box-still.png. */
+const CONTENT_LEFT = 130;
+const CONTENT_RIGHT = 620;
 const CONTENT_TOP = 380;
 const CONTENT_BOTTOM = 870;
+const CONTENT_WIDTH = CONTENT_RIGHT - CONTENT_LEFT;
 const CONTENT_HEIGHT = CONTENT_BOTTOM - CONTENT_TOP;
-const MASCOT_MAX_WIDTH = 340;
-const MASCOT_HEIGHT_FRACTION = 0.32;
+const MASCOT_MAX_WIDTH = 300;
+const MASCOT_HEIGHT_FRACTION = 0.34;
 
 /**
  * New-life story mascot. Plays the boxing loop unless Reduce Motion is on.
@@ -25,21 +27,29 @@ export const NewLifeMascot = memo(function NewLifeMascot() {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const availableWidth = Math.round(windowWidth - spacing.lg * 2);
   const maxVisibleHeight = Math.round(windowHeight * MASCOT_HEIGHT_FRACTION);
-  const widthFromVisible = Math.round(maxVisibleHeight * (GIF_WIDTH / CONTENT_HEIGHT));
-  const artWidth = Math.max(
+  const widthFromVisible = Math.round(maxVisibleHeight * (CONTENT_WIDTH / CONTENT_HEIGHT));
+  const visibleWidth = Math.max(
     spacing.xxxl,
     Math.min(availableWidth, widthFromVisible, MASCOT_MAX_WIDTH),
   );
-  const fullHeight = Math.round(artWidth / GIF_ASPECT);
-  const cropTop = Math.round(fullHeight * (CONTENT_TOP / GIF_HEIGHT));
-  const visibleHeight = Math.round(fullHeight * (CONTENT_HEIGHT / GIF_HEIGHT));
+  const scale = visibleWidth / CONTENT_WIDTH;
+  const fullWidth = Math.round(GIF_WIDTH * scale);
+  const fullHeight = Math.round(GIF_HEIGHT * scale);
+  const cropLeft = Math.round(CONTENT_LEFT * scale);
+  const cropTop = Math.round(CONTENT_TOP * scale);
+  const visibleHeight = Math.round(CONTENT_HEIGHT * scale);
   const imageSize = useMemo(
-    () => ({ width: artWidth, height: fullHeight, marginTop: -cropTop }),
-    [artWidth, cropTop, fullHeight],
+    () => ({
+      width: fullWidth,
+      height: fullHeight,
+      marginTop: -cropTop,
+      marginLeft: -cropLeft,
+    }),
+    [cropLeft, cropTop, fullHeight, fullWidth],
   );
   const frameSize = useMemo(
-    () => ({ width: artWidth, height: visibleHeight }),
-    [artWidth, visibleHeight],
+    () => ({ width: visibleWidth, height: visibleHeight }),
+    [visibleHeight, visibleWidth],
   );
 
   return (
