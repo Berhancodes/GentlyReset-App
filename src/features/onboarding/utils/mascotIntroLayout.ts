@@ -24,12 +24,7 @@ const MASCOT_BOUNDS = {
 
 export const MASCOT_INTRO_LAYOUT = {
   settleScale: 0.5,
-  mascotNudgeXRatio: 0.06,
-  mascotNudgeXMin: 18,
-  mascotNudgeXMax: 28,
-  clusterCenterRatio: 0.35,
-  mascotShiftX: 5,
-  mascotShiftY: 5,
+  clusterCenterRatio: 0.5,
   bubbleMaxWidth: 220,
   bubbleMinWidth: 136,
   /** Cream gap from the hat brim to the bubble body. */
@@ -101,14 +96,8 @@ export function getMascotIntroLayout(
     viewWidth - spacing.lg * 2,
   );
   const formLeft = (viewWidth - formWidth) / 2;
-  const formCenterX = formLeft + formWidth / 2;
   const unshiftedMascotX = (imageX(MASCOT_BOUNDS.centerX) - originX) * settleScale + originX;
-  const mascotNudgeX = -clamp(
-    viewWidth * MASCOT_INTRO_LAYOUT.mascotNudgeXRatio,
-    MASCOT_INTRO_LAYOUT.mascotNudgeXMin,
-    MASCOT_INTRO_LAYOUT.mascotNudgeXMax,
-  );
-  const settleX = formCenterX - unshiftedMascotX + mascotNudgeX;
+  const settleX = originX - unshiftedMascotX;
 
   const applySettle = (x: number, y: number, extraY: number) => ({
     x: (x - originX) * settleScale + originX + settleX,
@@ -156,8 +145,8 @@ export function getMascotIntroLayout(
 
   return {
     settleScale,
-    settleX: settleX + MASCOT_INTRO_LAYOUT.mascotShiftX,
-    settleY: settleY + MASCOT_INTRO_LAYOUT.mascotShiftY,
+    settleX,
+    settleY,
     bubbleMaxWidth,
     bubbleLeft,
     bubbleTop,
