@@ -37,7 +37,7 @@ const MASCOT_RUN = require('../../../../assets/images/onboarding/mascot-run-intr
 const MASCOT_RUN_FINAL = require('../../../../assets/images/onboarding/mascot-run-intro-final.png');
 
 const LAST_FRAME_MS = 100;
-const ASK_GREETING = 'hey 👋';
+const ASK_GREETING = 'Hey 👋';
 const ASK_QUESTION = 'what should I call you?';
 const BUBBLE_TYPING_DELAY_MS = motion.delay.bubbleReveal + 80;
 const ASK_TYPEWRITER_MS = getTypewriterDuration([
