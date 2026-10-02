@@ -319,7 +319,7 @@ export const ONBOARDING_STEPS = [
     subtitle: "I'll hold onto this for the days you forget.",
     placeholder: 'I want to...',
     multiline: true,
-    required: false,
+    required: true,
   },
   {
     id: 'buildingResetLoading',
