@@ -19,6 +19,8 @@ type PrimaryButtonProps = {
   showArrow?: boolean;
   /** Gold face for the paywall unlock CTA. Default stays the brown primary. */
   tone?: 'primary' | 'gold';
+  /** Compact height for the paywall unlock button. */
+  size?: 'default' | 'compact';
 };
 
 export function PrimaryButton({
@@ -29,14 +31,17 @@ export function PrimaryButton({
   haptic = 'light',
   showArrow = false,
   tone = 'primary',
+  size = 'default',
 }: PrimaryButtonProps) {
   const isGold = tone === 'gold';
+  const isCompact = size === 'compact';
   const showDepth = isGold || !disabled;
   const arrowColor = isGold
     ? colors.action.saveText
     : disabled
       ? colors.action.primaryTextDisabled
       : colors.action.primaryText;
+  const arrowSize = isCompact ? 18 : 20;
   return (
     <Pressable
       accessibilityRole="button"
@@ -76,6 +81,7 @@ export function PrimaryButton({
             <View
               style={[
                 styles.face,
+                isCompact ? styles.faceCompact : null,
                 disabled
                   ? isGold
                     ? styles.faceGoldDisabled
@@ -104,7 +110,7 @@ export function PrimaryButton({
               </Text>
               {showArrow ? (
                 <View pointerEvents="none" style={styles.arrow}>
-                  <Ionicons name="arrow-forward" size={20} color={arrowColor} />
+                  <Ionicons name="arrow-forward" size={arrowSize} color={arrowColor} />
                 </View>
               ) : null}
             </View>
@@ -154,6 +160,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     ...webPressTransition,
+  },
+  faceCompact: {
+    minHeight: spacing.hitTarget,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
   },
   arrow: {
     position: 'absolute',

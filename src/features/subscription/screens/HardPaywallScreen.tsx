@@ -222,6 +222,7 @@ export function HardPaywallScreen() {
             <PrimaryButton
               label={getPaywallUnlockLabel(busy === 'purchase')}
               tone="gold"
+              size="compact"
               showArrow
               disabled={!canUnlock}
               onPress={beginUnlock}
