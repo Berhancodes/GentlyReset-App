@@ -25,7 +25,7 @@ const MASCOT_BOUNDS = {
 export const MASCOT_INTRO_LAYOUT = {
   settleScale: 0.5,
   clusterCenterRatio: 0.5,
-  clusterNudgeY: -5,
+  clusterNudgeY: -10,
   bubbleMaxWidth: 220,
   bubbleMinWidth: 136,
   /** Cream gap from the hat brim to the bubble body. */
