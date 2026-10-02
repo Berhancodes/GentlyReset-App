@@ -27,6 +27,7 @@ type MascotSpeechBubbleProps = {
 
 const bubblePaddingHorizontal = spacing.md;
 const bubblePaddingVertical = spacing.sm;
+const bubbleFill = colors.surface.raised;
 const typingStartDelayMs = motion.delay.bubbleReveal + 80;
 
 export function MascotSpeechBubble({
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     minWidth: 0,
     borderRadius: radius.xl,
-    backgroundColor: colors.surface.raised,
+    backgroundColor: bubbleFill,
     paddingHorizontal: bubblePaddingHorizontal,
     paddingVertical: bubblePaddingVertical,
     ...shadows.whisper,
@@ -196,17 +197,18 @@ const styles = StyleSheet.create({
   tail: {
     position: 'absolute',
     zIndex: 0,
-    left: 14,
-    bottom: -13,
+    left: 8,
+    bottom: -10,
     width: 0,
     height: 0,
+    backgroundColor: bubbleFill,
     borderStyle: 'solid',
-    borderLeftWidth: 18,
-    borderRightWidth: 4,
+    borderLeftWidth: 4,
+    borderRightWidth: 18,
     borderTopWidth: 18,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderTopColor: colors.surface.raised,
-    transform: [{ rotate: '-10deg' }],
+    borderTopColor: bubbleFill,
+    transform: [{ rotate: '10deg' }],
   },
 });
