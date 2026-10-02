@@ -39,6 +39,8 @@ import {
 
 const COMPACT_HEIGHT = 720;
 const ROOMY_HEIGHT = 900;
+const CTA_WIDTH_RATIO = 0.8;
+const CTA_MAX_WIDTH = 344;
 
 function layoutForHeight(windowHeight: number) {
   const compact = windowHeight < COMPACT_HEIGHT;
@@ -59,7 +61,7 @@ function layoutForHeight(windowHeight: number) {
 
 export function HardPaywallScreen() {
   const insets = useSafeAreaInsets();
-  const { height: windowHeight } = useWindowDimensions();
+  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const layout = layoutForHeight(windowHeight);
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -218,7 +220,9 @@ export function HardPaywallScreen() {
               {message}
             </Text>
           ) : null}
-          <View style={styles.cta}>
+          <View
+            style={[styles.cta, { width: windowWidth * CTA_WIDTH_RATIO, maxWidth: CTA_MAX_WIDTH }]}
+          >
             <PrimaryButton
               label={getPaywallUnlockLabel(busy === 'purchase')}
               tone="gold"
@@ -520,6 +524,7 @@ const styles = StyleSheet.create({
   },
   cta: {
     marginTop: -spacing.xxxl,
+    alignSelf: 'center',
   },
   status: {
     ...textVariants.caption,
