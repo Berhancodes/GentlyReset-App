@@ -42,6 +42,8 @@ export const motion = {
     inputReveal: 280,
     buttonReveal: 260,
     nameResponseHold: 800,
+    reveal: 480,
+    revealCopy: 360,
   },
   scale: {
     press: 0.97,
@@ -87,6 +89,8 @@ export const motion = {
     bubbleQuestion: 180,
     inputReveal: 220,
     buttonReveal: 280,
+    revealCopy: 120,
+    revealFooter: 260,
     journeyLeftCloud: 50,
     journeySun: 100,
     journeyRightCloud: 140,

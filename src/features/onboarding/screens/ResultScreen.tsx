@@ -1,7 +1,16 @@
+import { useEffect, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { AppText, PrimaryButton } from '@/components/ui';
-import { spacing } from '@/design-system';
+import { MOTION_EASING_STANDARD, motion, spacing } from '@/design-system';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { OnboardingTextButton } from '@/features/onboarding/components/OnboardingTextButton';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
@@ -13,6 +22,37 @@ import { getResetProfileForAnswers } from '@/features/reset/data/resetProfiles';
 type ResultScreenProps = {
   step: ResultStep;
 };
+
+const revealEasing = Easing.bezier(
+  MOTION_EASING_STANDARD[0],
+  MOTION_EASING_STANDARD[1],
+  MOTION_EASING_STANDARD[2],
+  MOTION_EASING_STANDARD[3],
+);
+
+function RevealBlock({ delayMs, children }: { delayMs: number; children: ReactNode }) {
+  const reduceMotion = useReducedMotion();
+  const progress = useSharedValue(reduceMotion ? 1 : 0);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      progress.value = 1;
+      return;
+    }
+
+    progress.value = withDelay(
+      delayMs,
+      withTiming(1, { duration: motion.duration.revealCopy, easing: revealEasing }),
+    );
+  }, [delayMs, progress, reduceMotion]);
+
+  const revealStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ translateY: (1 - progress.value) * motion.offset.question }],
+  }));
+
+  return <Animated.View style={revealStyle}>{children}</Animated.View>;
+}
 
 export function ResultScreen({ step }: ResultScreenProps) {
   const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
@@ -34,38 +74,42 @@ export function ResultScreen({ step }: ResultScreenProps) {
       hideProgress
       onBack={canGoBack ? goBack : undefined}
       footer={
-        <View style={styles.footer}>
-          <PrimaryButton label={step.ctaLabel} haptic="success" onPress={goToNext} />
-          {step.secondaryCtaLabel ? (
-            <OnboardingTextButton label={step.secondaryCtaLabel} onPress={goToNext} />
-          ) : null}
-        </View>
+        <RevealBlock delayMs={motion.delay.revealFooter}>
+          <View style={styles.footer}>
+            <PrimaryButton label={step.ctaLabel} haptic="success" onPress={goToNext} />
+            {step.secondaryCtaLabel ? (
+              <OnboardingTextButton label={step.secondaryCtaLabel} onPress={goToNext} />
+            ) : null}
+          </View>
+        </RevealBlock>
       }
     >
-      <View style={styles.copy}>
-        <AppText variant="title">{profile.summary}</AppText>
-        <AppText variant="body" color="secondary">
-          {profile.description}
-        </AppText>
-        <ProfileSection label="your biggest pattern" value={profile.biggestPattern} />
-        <ProfileSection label="what usually helps" value={profile.whatUsuallyHelps} />
-        {approachLines.length > 0 ? (
-          <View style={styles.section}>
-            <AppText variant="label" color="helper">
-              your Gently Reset approach
-            </AppText>
-            {approachLines.map((line) => (
-              <AppText key={line} variant="body">
-                {line}
+      <RevealBlock delayMs={motion.delay.revealCopy}>
+        <View style={styles.copy}>
+          <AppText variant="title">{profile.summary}</AppText>
+          <AppText variant="body" color="secondary">
+            {profile.description}
+          </AppText>
+          <ProfileSection label="your biggest pattern" value={profile.biggestPattern} />
+          <ProfileSection label="what usually helps" value={profile.whatUsuallyHelps} />
+          {approachLines.length > 0 ? (
+            <View style={styles.section}>
+              <AppText variant="label" color="helper">
+                your Gently Reset approach
               </AppText>
-            ))}
-          </View>
-        ) : null}
-        <AppText variant="body" color="secondary">
-          {profile.advice}
-        </AppText>
-        <AppText variant="title">{profile.emphasized}</AppText>
-      </View>
+              {approachLines.map((line) => (
+                <AppText key={line} variant="body">
+                  {line}
+                </AppText>
+              ))}
+            </View>
+          ) : null}
+          <AppText variant="body" color="secondary">
+            {profile.advice}
+          </AppText>
+          <AppText variant="title">{profile.emphasized}</AppText>
+        </View>
+      </RevealBlock>
     </OnboardingScreenLayout>
   );
 }

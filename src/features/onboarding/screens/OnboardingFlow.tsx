@@ -19,6 +19,7 @@ import { OnboardingQuestionNav } from '@/features/onboarding/components/Onboardi
 import { OnboardingQuestionnaireShellProvider } from '@/features/onboarding/components/OnboardingQuestionnaireShell';
 import { OnboardingRenderer } from '@/features/onboarding/components/OnboardingRenderer';
 import { QuestionTransition } from '@/features/onboarding/components/QuestionTransition';
+import { ResetRevealHandoff } from '@/features/onboarding/components/ResetRevealHandoff';
 import { ONBOARDING_STEPS } from '@/features/onboarding/data/onboardingSteps';
 import { useCurrentOnboardingStep } from '@/features/onboarding/hooks/useCurrentOnboardingStep';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
@@ -63,6 +64,9 @@ export function OnboardingFlow() {
       const fromStep = ONBOARDING_STEPS[currentStepIndex];
       const toStep = ONBOARDING_STEPS[targetIndex];
       const useQuestionTransition = isQuestionnaireStep(fromStep) && isQuestionnaireStep(toStep);
+      const useRevealHandoff =
+        (fromStep?.id === 'buildingResetLoading' && toStep?.id === 'resetReveal') ||
+        (fromStep?.id === 'resetReveal' && toStep?.id === 'buildingResetLoading');
 
       if (useQuestionTransition) {
         if (!reduceMotion && fromStep) {
@@ -75,7 +79,7 @@ export function OnboardingFlow() {
         return;
       }
 
-      if (reduceMotion || width <= 0) {
+      if (useRevealHandoff || reduceMotion || width <= 0) {
         commit();
         releaseOnboardingPageShift();
         return;
@@ -141,6 +145,8 @@ export function OnboardingFlow() {
               </QuestionTransition>
             </Screen>
           </OnboardingQuestionnaireShellProvider>
+        ) : step.type === 'loading' || step.type === 'result' ? (
+          <ResetRevealHandoff step={step} />
         ) : (
           <OnboardingRenderer step={step} />
         )}
