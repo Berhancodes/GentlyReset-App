@@ -218,13 +218,15 @@ export function HardPaywallScreen() {
               {message}
             </Text>
           ) : null}
-          <PrimaryButton
-            label={getPaywallUnlockLabel(busy === 'purchase')}
-            tone="gold"
-            showArrow
-            disabled={!canUnlock}
-            onPress={beginUnlock}
-          />
+          <View style={styles.cta}>
+            <PrimaryButton
+              label={getPaywallUnlockLabel(busy === 'purchase')}
+              tone="gold"
+              showArrow
+              disabled={!canUnlock}
+              onPress={beginUnlock}
+            />
+          </View>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Sign in"
@@ -514,7 +516,9 @@ const styles = StyleSheet.create({
     flexGrow: 0,
     flexShrink: 0,
     zIndex: 1,
-    backgroundColor: colors.background.primary,
+  },
+  cta: {
+    marginTop: -spacing.xxxl,
   },
   status: {
     ...textVariants.caption,

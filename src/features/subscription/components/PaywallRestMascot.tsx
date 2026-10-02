@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     minHeight: 0,
     alignItems: 'center',
     justifyContent: 'flex-end',
-    overflow: 'hidden',
+    overflow: 'visible',
     pointerEvents: 'none',
   },
 });
