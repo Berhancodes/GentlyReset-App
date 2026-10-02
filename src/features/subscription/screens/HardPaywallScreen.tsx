@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   cta: {
-    marginTop: -(spacing.xxxl + spacing.lg),
+    marginTop: -(spacing.xxxl + spacing.xl),
     alignSelf: 'center',
   },
   status: {
