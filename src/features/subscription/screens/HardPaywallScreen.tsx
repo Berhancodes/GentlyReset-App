@@ -1,5 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Image,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
@@ -38,10 +46,29 @@ import {
 } from '@/features/subscription/utils/buildPaywallPlans';
 import { getLegalUrls } from '@/features/subscription/utils/legalUrls';
 
-const CTA_SAFE_AREA_GAP = 12;
+const COMPACT_HEIGHT = 720;
+const ROOMY_HEIGHT = 900;
+
+function layoutForHeight(windowHeight: number) {
+  const compact = windowHeight < COMPACT_HEIGHT;
+  const roomy = windowHeight >= ROOMY_HEIGHT;
+  return {
+    compact,
+    headerTop: compact ? spacing.xxs : roomy ? spacing.md : spacing.sm,
+    headerGap: compact ? spacing.xxs : spacing.xs,
+    sectionGap: compact ? spacing.xs : spacing.sm,
+    benefitGap: compact ? spacing.xs : roomy ? spacing.sm : spacing.xs,
+    planGap: compact ? spacing.xs : spacing.sm,
+    planPaddingVertical: compact ? spacing.xs : roomy ? spacing.sm : spacing.xs,
+    footerLinkMinHeight: compact ? spacing.xl : spacing.hitTarget,
+    bottomPad: compact ? spacing.xs : spacing.sm,
+  };
+}
 
 export function HardPaywallScreen() {
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const layout = layoutForHeight(windowHeight);
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const unlockNextStep = getPaywallUnlockNextStep(isAuthenticated);
@@ -132,72 +159,90 @@ export function HardPaywallScreen() {
         style={styles.sky}
       />
       <SafeAreaView edges={['top', 'right', 'left']} style={styles.safe}>
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
+        <View style={[styles.header, { marginTop: layout.headerTop, gap: layout.headerGap }]}>
           <View style={styles.sprout} accessibilityElementsHidden>
             <Ionicons name="leaf" size={18} color={colors.accent.gold} />
             <Ionicons name="leaf" size={18} color={colors.accent.gold} style={styles.sproutLeaf} />
           </View>
           <View style={styles.titleRow} accessibilityRole="header">
-            <Text allowFontScaling maxFontSizeMultiplier={1.25} style={styles.title}>
+            <Text
+              allowFontScaling
+              maxFontSizeMultiplier={1.25}
+              style={[styles.title, layout.compact ? styles.titleCompact : null]}
+            >
               Gently Reset{' '}
             </Text>
-            <Text allowFontScaling maxFontSizeMultiplier={1.25} style={styles.titlePro}>
+            <Text
+              allowFontScaling
+              maxFontSizeMultiplier={1.25}
+              style={[styles.titlePro, layout.compact ? styles.titleCompact : null]}
+            >
               Pro
             </Text>
             <Text style={styles.titleSpark}>✦</Text>
           </View>
-          <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.subtitle}>
+          <Text
+            allowFontScaling
+            maxFontSizeMultiplier={1.3}
+            style={[styles.subtitle, layout.compact ? styles.subtitleCompact : null]}
+          >
             {PAYWALL_SUBTITLE}
           </Text>
+        </View>
 
-          <View style={styles.benefits}>
-            {PAYWALL_BENEFITS.map((benefit) => (
-              <View key={benefit.title} style={styles.benefitRow}>
-                <View style={styles.check}>
-                  <Text style={styles.checkMark}>✓</Text>
-                </View>
-                <View style={styles.benefitCopy}>
-                  <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.benefitTitle}>
-                    {benefit.title}
-                  </Text>
-                  <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.benefitDetail}>
-                    {benefit.detail}
-                  </Text>
-                </View>
+        <View style={[styles.benefits, { marginTop: layout.sectionGap, gap: layout.benefitGap }]}>
+          {PAYWALL_BENEFITS.map((benefit) => (
+            <View key={benefit.title} style={styles.benefitRow}>
+              <View style={styles.check}>
+                <Text style={styles.checkMark}>✓</Text>
               </View>
+              <View style={styles.benefitCopy}>
+                <Text
+                  allowFontScaling
+                  maxFontSizeMultiplier={1.3}
+                  style={[styles.benefitTitle, layout.compact ? styles.benefitTitleCompact : null]}
+                >
+                  {benefit.title}
+                </Text>
+                <Text
+                  allowFontScaling
+                  maxFontSizeMultiplier={1.3}
+                  style={[
+                    styles.benefitDetail,
+                    layout.compact ? styles.benefitDetailCompact : null,
+                  ]}
+                >
+                  {benefit.detail}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {unexpectedTrial ? (
+          <Text
+            style={[styles.status, { marginTop: layout.sectionGap }]}
+            accessibilityLiveRegion="polite"
+          >
+            a trial offer appeared in the store. Gently Reset does not sell trials.
+          </Text>
+        ) : (
+          <View style={[styles.plans, { marginTop: layout.sectionGap, gap: layout.planGap }]}>
+            {plans.map((plan) => (
+              <PlanCard
+                key={plan.identifier}
+                plan={plan}
+                selected={selected?.identifier === plan.identifier}
+                paddingVertical={layout.planPaddingVertical}
+                onPress={() => choosePackage(plan.identifier)}
+              />
             ))}
           </View>
-
-          {unexpectedTrial ? (
-            <Text style={styles.status} accessibilityLiveRegion="polite">
-              a trial offer appeared in the store. Gently Reset does not sell trials.
-            </Text>
-          ) : (
-            <View style={styles.plans}>
-              {plans.map((plan) => (
-                <PlanCard
-                  key={plan.identifier}
-                  plan={plan}
-                  selected={selected?.identifier === plan.identifier}
-                  onPress={() => choosePackage(plan.identifier)}
-                />
-              ))}
-            </View>
-          )}
-        </ScrollView>
+        )}
 
         <PaywallRestMascot />
 
-        <View
-          style={[
-            styles.footer,
-            { paddingBottom: Math.max(insets.bottom, spacing.sm) + CTA_SAFE_AREA_GAP },
-          ]}
-        >
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, layout.bottomPad) }]}>
           {message ? (
             <Text style={styles.status} accessibilityLiveRegion="polite">
               {message}
@@ -210,7 +255,7 @@ export function HardPaywallScreen() {
             disabled={!canUnlock}
             onPress={beginUnlock}
           />
-          <View style={styles.legalRow}>
+          <View style={[styles.legalRow, { minHeight: layout.footerLinkMinHeight }]}>
             <LegalLabel label="Terms of Use" url={legal.termsOfUse} />
             <Text style={styles.legalDot}>·</Text>
             <LegalLabel label="Privacy Policy" url={legal.privacyPolicy} />
@@ -220,7 +265,7 @@ export function HardPaywallScreen() {
               accessibilityLabel="Restore Purchases"
               disabled={busy !== null}
               onPress={restore}
-              hitSlop={spacing.xs}
+              hitSlop={spacing.sm}
             >
               <Text style={styles.legalLink}>Restore Purchases</Text>
             </Pressable>
@@ -229,7 +274,12 @@ export function HardPaywallScreen() {
             accessibilityRole="button"
             accessibilityLabel="Sign in"
             onPress={() => router.push('/(auth)/sign-in')}
-            style={({ pressed }) => [styles.signIn, pressed && styles.pressed]}
+            hitSlop={spacing.sm}
+            style={({ pressed }) => [
+              styles.signIn,
+              { minHeight: layout.footerLinkMinHeight },
+              pressed && styles.pressed,
+            ]}
           >
             <Text style={styles.signInLabel}>
               Already have an account? <Text style={styles.signInEmphasis}>Sign In</Text>
@@ -244,10 +294,12 @@ export function HardPaywallScreen() {
 function PlanCard({
   plan,
   selected,
+  paddingVertical,
   onPress,
 }: {
   plan: PaywallPlan;
   selected: boolean;
+  paddingVertical: number;
   onPress: () => void;
 }) {
   return (
@@ -256,7 +308,7 @@ function PlanCard({
       accessibilityState={{ selected }}
       accessibilityLabel={`${plan.title}, ${plan.priceString} per ${plan.billingPeriod}`}
       onPress={onPress}
-      style={[styles.plan, selected ? styles.planSelected : null]}
+      style={[styles.plan, selected ? styles.planSelected : null, { paddingVertical }]}
     >
       {plan.bestValue ? (
         <View style={styles.badge}>
@@ -301,7 +353,7 @@ function LegalLabel({ label, url }: { label: string; url: string | null }) {
       onPress={() => {
         void Linking.openURL(url);
       }}
-      hitSlop={spacing.xs}
+      hitSlop={spacing.sm}
     >
       <Text style={styles.legalLink}>{label}</Text>
     </Pressable>
@@ -324,20 +376,16 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     paddingHorizontal: spacing.lg,
+    overflow: 'hidden',
   },
-  scroll: {
-    flex: 1,
-    minHeight: 0,
-  },
-  scrollContent: {
+  header: {
+    flexGrow: 0,
+    flexShrink: 0,
     alignItems: 'center',
-    paddingBottom: spacing.md,
-    gap: spacing.sm,
   },
   sprout: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: spacing.md,
   },
   sproutLeaf: {
     marginLeft: -spacing.xxs,
@@ -366,6 +414,10 @@ const styles = StyleSheet.create({
     color: colors.accent.gold,
     letterSpacing: -0.6,
   },
+  titleCompact: {
+    fontSize: fontSizes.xl,
+    lineHeight: lineHeights.xl,
+  },
   titleSpark: {
     fontFamily: fontFamilies.rounded,
     fontSize: fontSizes.sm,
@@ -379,11 +431,15 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     textAlign: 'center',
   },
+  subtitleCompact: {
+    lineHeight: lineHeights.sm,
+  },
   benefits: {
+    flexGrow: 0,
+    flexShrink: 0,
     width: '100%',
     maxWidth: 340,
-    gap: spacing.sm,
-    paddingTop: spacing.sm,
+    alignSelf: 'center',
     paddingHorizontal: spacing.sm,
   },
   benefitRow: {
@@ -416,17 +472,23 @@ const styles = StyleSheet.create({
     ...textVariants.optionTitle,
     color: colors.text.primary,
   },
+  benefitTitleCompact: {
+    lineHeight: lineHeights.sm,
+  },
   benefitDetail: {
     ...textVariants.caption,
     color: colors.text.secondary,
   },
+  benefitDetailCompact: {
+    lineHeight: lineHeights.xs,
+  },
   plans: {
+    flexGrow: 0,
+    flexShrink: 0,
     width: '100%',
-    gap: spacing.sm,
     paddingTop: spacing.sm,
   },
   plan: {
-    minHeight: 72,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
@@ -435,7 +497,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border.default,
     backgroundColor: colors.surface.raised,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
     ...shadows.whisper,
   },
   planSelected: {
@@ -517,6 +578,8 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.semibold,
   },
   footer: {
+    flexGrow: 0,
+    flexShrink: 0,
     zIndex: 1,
   },
   status: {
@@ -526,13 +589,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   legalRow: {
-    minHeight: spacing.hitTarget,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     flexWrap: 'wrap',
     gap: spacing.xs,
-    paddingTop: spacing.xs,
   },
   legalLink: {
     ...textVariants.caption,
@@ -548,7 +609,6 @@ const styles = StyleSheet.create({
     color: colors.text.helper,
   },
   signIn: {
-    minHeight: spacing.hitTarget,
     alignItems: 'center',
     justifyContent: 'center',
   },
