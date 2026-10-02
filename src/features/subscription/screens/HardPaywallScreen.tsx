@@ -377,10 +377,8 @@ const styles = StyleSheet.create({
   benefits: {
     flexGrow: 0,
     flexShrink: 0,
-    width: '100%',
-    maxWidth: 340,
     alignSelf: 'center',
-    paddingHorizontal: spacing.sm,
+    alignItems: 'flex-start',
   },
   benefitRow: {
     flexDirection: 'row',
@@ -388,12 +386,11 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   check: {
-    width: 22,
-    height: 22,
-    marginTop: 2,
+    width: 28,
+    height: 28,
+    marginTop: 1,
     borderRadius: radius.pill,
-    borderWidth: 2,
-    borderColor: colors.accent.gold,
+    backgroundColor: colors.tint.gold,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -402,10 +399,9 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.xs,
     lineHeight: fontSizes.xs + 1,
     fontWeight: fontWeights.bold,
-    color: colors.accent.gold,
+    color: colors.text.primary,
   },
   benefitCopy: {
-    flex: 1,
     gap: 1,
   },
   benefitTitle: {
