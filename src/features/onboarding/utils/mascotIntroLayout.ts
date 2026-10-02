@@ -30,7 +30,7 @@ export const MASCOT_INTRO_LAYOUT = {
   /** Cream gap from the hat brim to the bubble body. */
   bubbleHeadGap: 24,
   /** How far the bubble sits above the hat top. */
-  bubbleLift: 44,
+  bubbleLift: 60,
   estimatedBubbleHeight: 108,
   characterToForm: 40,
   fieldHeight: 60,
