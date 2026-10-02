@@ -54,13 +54,13 @@ function layoutForHeight(windowHeight: number) {
   const roomy = windowHeight >= ROOMY_HEIGHT;
   return {
     compact,
-    headerTop: compact ? spacing.xxs : roomy ? spacing.md : spacing.sm,
+    headerTop: compact ? spacing.xxs : roomy ? spacing.md : spacing.xs,
     headerGap: compact ? spacing.xxs : spacing.xs,
     sectionGap: compact ? spacing.xs : spacing.sm,
     benefitGap: compact ? spacing.xs : roomy ? spacing.sm : spacing.xs,
     planGap: compact ? spacing.xs : spacing.sm,
     planPaddingVertical: compact ? spacing.xs : roomy ? spacing.sm : spacing.xs,
-    footerLinkMinHeight: compact ? spacing.xl : spacing.hitTarget,
+    footerLinkMinHeight: spacing.xl,
     bottomPad: compact ? spacing.xs : spacing.sm,
   };
 }
@@ -369,14 +369,15 @@ const styles = StyleSheet.create({
   sky: {
     position: 'absolute',
     top: 0,
-    right: 0,
     left: 0,
+    width: '100%',
     height: 280,
+    resizeMode: 'cover',
   },
   safe: {
     flex: 1,
     paddingHorizontal: spacing.lg,
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   header: {
     flexGrow: 0,
@@ -592,20 +593,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
     gap: spacing.xs,
   },
   legalLink: {
-    ...textVariants.caption,
+    fontFamily: fontFamilies.sans,
+    fontSize: fontSizes.xs,
+    lineHeight: lineHeights.xs,
     color: colors.text.secondary,
     textDecorationLine: 'underline',
   },
   legalMuted: {
-    ...textVariants.caption,
+    fontFamily: fontFamilies.sans,
+    fontSize: fontSizes.xs,
+    lineHeight: lineHeights.xs,
     color: colors.text.helper,
   },
   legalDot: {
-    ...textVariants.caption,
+    fontFamily: fontFamilies.sans,
+    fontSize: fontSizes.xs,
+    lineHeight: lineHeights.xs,
     color: colors.text.helper,
   },
   signIn: {
@@ -613,11 +620,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   signInLabel: {
-    ...textVariants.caption,
+    fontFamily: fontFamilies.sans,
+    fontSize: fontSizes.xs,
+    lineHeight: lineHeights.xs,
     color: colors.text.secondary,
   },
   signInEmphasis: {
-    ...textVariants.caption,
+    fontFamily: fontFamilies.sans,
+    fontSize: fontSizes.xs,
+    lineHeight: lineHeights.xs,
     color: colors.text.primary,
     fontWeight: fontWeights.semibold,
     textDecorationLine: 'underline',
