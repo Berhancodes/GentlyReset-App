@@ -25,8 +25,8 @@ type MascotSpeechBubbleProps = {
   onReplyComplete: () => void;
 };
 
-const bubblePaddingHorizontal = spacing.sm;
-const bubblePaddingVertical = spacing.xs - 2;
+const bubblePaddingHorizontal = spacing.md;
+const bubblePaddingVertical = spacing.sm;
 const typingStartDelayMs = motion.delay.bubbleReveal + 80;
 
 export function MascotSpeechBubble({
@@ -170,9 +170,7 @@ const styles = StyleSheet.create({
   card: {
     zIndex: 1,
     minWidth: 0,
-    borderRadius: radius.card,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border.whisper,
+    borderRadius: radius.xl,
     backgroundColor: colors.surface.raised,
     paddingHorizontal: bubblePaddingHorizontal,
     paddingVertical: bubblePaddingVertical,
@@ -198,11 +196,17 @@ const styles = StyleSheet.create({
   tail: {
     position: 'absolute',
     zIndex: 0,
-    width: 10,
-    height: 10,
-    left: spacing.sm,
-    bottom: -5,
-    backgroundColor: colors.surface.raised,
-    transform: [{ rotate: '40deg' }],
+    left: radius.xl,
+    bottom: -10,
+    width: 0,
+    height: 0,
+    borderStyle: 'solid',
+    borderLeftWidth: 7,
+    borderRightWidth: 13,
+    borderTopWidth: 15,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: colors.surface.raised,
+    transform: [{ rotate: '-22deg' }],
   },
 });

@@ -28,12 +28,13 @@ export const MASCOT_INTRO_LAYOUT = {
   mascotNudgeXMin: 18,
   mascotNudgeXMax: 28,
   clusterCenterRatio: 0.35,
-  bubbleMaxWidth: 168,
-  /** Cream gap from the hat brim to the bubble body. Clamped on narrow phones. */
-  bubbleHeadGap: 22,
+  bubbleMaxWidth: 220,
+  bubbleMinWidth: 136,
+  /** Cream gap from the hat brim to the bubble body. */
+  bubbleHeadGap: 24,
   /** How far the bubble sits above the hat top. */
-  bubbleLift: 33,
-  estimatedBubbleHeight: 86,
+  bubbleLift: 44,
+  estimatedBubbleHeight: 108,
   characterToForm: 40,
   fieldHeight: 60,
   submitSize: 36,
@@ -128,8 +129,21 @@ export function getMascotIntroLayout(
   const feet = applySettle(imageX(MASCOT_BOUNDS.centerX), imageY(MASCOT_BOUNDS.bottom), settleY);
 
   const margin = spacing.md;
-  const bubbleMaxWidth = Math.min(MASCOT_INTRO_LAYOUT.bubbleMaxWidth, viewWidth - margin * 2);
-  const desiredBubbleLeft = hat.x + MASCOT_INTRO_LAYOUT.bubbleHeadGap;
+  const gap = MASCOT_INTRO_LAYOUT.bubbleHeadGap;
+  const widthLimit = viewWidth - margin * 2;
+  const widthBesideMascot = viewWidth - margin - hat.x - gap;
+  const bubbleMaxWidth = clamp(
+    Math.round(
+      Math.min(
+        MASCOT_INTRO_LAYOUT.bubbleMaxWidth,
+        widthLimit,
+        Math.max(widthBesideMascot, MASCOT_INTRO_LAYOUT.bubbleMinWidth),
+      ),
+    ),
+    MASCOT_INTRO_LAYOUT.bubbleMinWidth,
+    widthLimit,
+  );
+  const desiredBubbleLeft = hat.x + gap;
   const bubbleLeft = clamp(desiredBubbleLeft, margin, viewWidth - bubbleMaxWidth - margin);
   const desiredBubbleTop = hat.y - MASCOT_INTRO_LAYOUT.bubbleLift;
   const bubbleTop = clamp(
