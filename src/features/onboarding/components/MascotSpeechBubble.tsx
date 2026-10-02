@@ -196,8 +196,8 @@ const styles = StyleSheet.create({
   tail: {
     position: 'absolute',
     zIndex: 0,
-    left: radius.xl,
-    bottom: -10,
+    left: 12,
+    bottom: -11,
     width: 0,
     height: 0,
     borderStyle: 'solid',
@@ -207,6 +207,6 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderTopColor: colors.surface.raised,
-    transform: [{ rotate: '-22deg' }],
+    transform: [{ rotate: '-18deg' }],
   },
 });
