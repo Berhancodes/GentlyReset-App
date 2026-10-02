@@ -39,8 +39,8 @@ import {
 
 const COMPACT_HEIGHT = 720;
 const ROOMY_HEIGHT = 900;
-const CTA_WIDTH_RATIO = 0.8;
-const CTA_MAX_WIDTH = 344;
+const CTA_WIDTH_RATIO = 0.76;
+const CTA_MAX_WIDTH = 327;
 
 function layoutForHeight(windowHeight: number) {
   const compact = windowHeight < COMPACT_HEIGHT;
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   cta: {
-    marginTop: -(spacing.xxxl + spacing.sm),
+    marginTop: -(spacing.xxxl + spacing.lg),
     alignSelf: 'center',
   },
   status: {
