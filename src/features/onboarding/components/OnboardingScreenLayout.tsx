@@ -36,6 +36,8 @@ type OnboardingScreenLayoutProps = {
   tone?: 'default' | 'question' | 'story';
   /** Tighter vertical gaps so a compact question can fit on one phone screen. */
   compact?: boolean;
+  /** When false, the page cannot scroll. Use for one-screen questions with a peeking mascot. */
+  scrollEnabled?: boolean;
   /**
    * start: art above copy (questions).
    * afterHero: title then art then extra content (reveal, plan).
@@ -60,6 +62,7 @@ export function OnboardingScreenLayout({
   showTitle = true,
   tone = 'default',
   compact = false,
+  scrollEnabled = true,
   illustrationPlacement = 'start',
   skipStorySpacer = false,
 }: OnboardingScreenLayoutProps) {
@@ -82,6 +85,7 @@ export function OnboardingScreenLayout({
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
       showsVerticalScrollIndicator={false}
+      scrollEnabled={scrollEnabled}
     >
       {illustrationKey && illustrationPlacement === 'start' ? (
         <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />

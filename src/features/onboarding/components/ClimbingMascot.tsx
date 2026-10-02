@@ -16,6 +16,8 @@ const CONTENT_BOTTOM = 1257;
 const CONTENT_HEIGHT = CONTENT_BOTTOM - CONTENT_TOP;
 const MASCOT_MAX_WIDTH = 280;
 const MASCOT_HEIGHT_FRACTION = 0.38;
+/** How much of the hang loop stays in view under the last choice card. */
+const PEEK_FRACTION = 0.5;
 
 /**
  * "What's hardest" mascot. Plays the hang loop unless Reduce Motion is on.
@@ -32,7 +34,7 @@ export const ClimbingMascot = memo(function ClimbingMascot() {
   );
   const fullHeight = Math.round(artWidth / GIF_ASPECT);
   const cropTop = Math.round(fullHeight * (CONTENT_TOP / GIF_HEIGHT));
-  const visibleHeight = Math.round(fullHeight * (CONTENT_HEIGHT / GIF_HEIGHT));
+  const visibleHeight = Math.round(fullHeight * (CONTENT_HEIGHT / GIF_HEIGHT) * PEEK_FRACTION);
   const imageSize = useMemo(
     () => ({ width: artWidth, height: fullHeight, marginTop: -cropTop }),
     [artWidth, cropTop, fullHeight],

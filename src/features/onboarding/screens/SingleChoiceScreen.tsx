@@ -77,6 +77,7 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
         isMissedDayStep ||
         (illustratedGrid && step.options.length >= 8)
       }
+      scrollEnabled={!isHardestStep}
       title={step.title}
       subtitle={getQuestionHelper(step)}
       eyebrow={step.eyebrow}
@@ -126,7 +127,5 @@ const styles = StyleSheet.create({
   },
   hardestBlock: {
     gap: spacing.sm,
-    flexGrow: 1,
-    justifyContent: 'space-between',
   },
 });
