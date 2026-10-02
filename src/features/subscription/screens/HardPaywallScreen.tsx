@@ -15,7 +15,7 @@ import {
   textVariants,
 } from '@/design-system';
 import { useAuth } from '@/features/auth/session/useAuth';
-import { PAYWALL_NIGHT_ART } from '@/features/onboarding/data/onboardingAssets';
+import { PAYWALL_REST_ART } from '@/features/onboarding/data/onboardingAssets';
 import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
 import {
   getPaywallUnlockLabel,
@@ -116,9 +116,9 @@ export function HardPaywallScreen() {
 
   return (
     <View style={styles.root} testID="hard-paywall">
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <Image
-        source={PAYWALL_NIGHT_ART}
+        source={PAYWALL_REST_ART}
         resizeMode="cover"
         accessibilityIgnoresInvertColors
         importantForAccessibility="no"
@@ -259,7 +259,7 @@ function LegalLabel({ label, url }: { label: string; url: string | null }) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.background.night,
+    backgroundColor: colors.background.primary,
     overflow: 'hidden',
   },
   background: {
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.display,
     lineHeight: fontSizes.display + 6,
     fontWeight: fontWeights.bold,
-    color: colors.text.inverse,
+    color: colors.text.primary,
     textAlign: 'center',
     letterSpacing: -0.6,
   },
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     ...textVariants.subtitle,
     fontFamily: fontFamilies.rounded,
     fontWeight: fontWeights.semibold,
-    color: colors.text.inverse,
+    color: colors.text.secondary,
     textAlign: 'center',
   },
   benefits: {
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: radius.pill,
-    backgroundColor: colors.text.inverse,
+    backgroundColor: colors.accent.gold,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -317,11 +317,11 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.xs,
     lineHeight: fontSizes.xs + 2,
     fontWeight: fontWeights.bold,
-    color: colors.action.primaryBackground,
+    color: colors.text.primary,
   },
   benefit: {
     ...textVariants.body,
-    color: colors.text.inverse,
+    color: colors.text.primary,
     flex: 1,
   },
   plans: {
@@ -335,24 +335,25 @@ const styles = StyleSheet.create({
     borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colors.border.default,
-    backgroundColor: colors.overlay.scrim,
+    backgroundColor: colors.surface.raised,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
   planSelected: {
-    borderColor: colors.text.inverse,
+    borderColor: colors.border.gold,
+    backgroundColor: colors.surface.choiceSelected,
   },
   planTitle: {
     ...textVariants.optionTitle,
-    color: colors.text.inverse,
+    color: colors.text.primary,
   },
   planPrice: {
     ...textVariants.body,
-    color: colors.text.inverse,
+    color: colors.text.secondary,
   },
   status: {
     ...textVariants.caption,
-    color: colors.text.inverse,
+    color: colors.text.secondary,
     textAlign: 'center',
     marginBottom: spacing.xs,
   },
@@ -364,7 +365,7 @@ const styles = StyleSheet.create({
   },
   restoreLabel: {
     ...textVariants.button,
-    color: colors.text.inverse,
+    color: colors.text.secondary,
   },
   legalRow: {
     minHeight: spacing.hitTarget,
@@ -375,17 +376,16 @@ const styles = StyleSheet.create({
   },
   legalLink: {
     ...textVariants.caption,
-    color: colors.text.inverse,
+    color: colors.text.secondary,
     textDecorationLine: 'underline',
   },
   legalMuted: {
     ...textVariants.caption,
-    color: colors.text.inverse,
-    opacity: 0.7,
+    color: colors.text.helper,
   },
   legalDot: {
     ...textVariants.caption,
-    color: colors.text.inverse,
+    color: colors.text.helper,
   },
   signIn: {
     minHeight: spacing.hitTarget,

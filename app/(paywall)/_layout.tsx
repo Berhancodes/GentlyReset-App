@@ -9,7 +9,7 @@ export default function PaywallLayout() {
         headerShown: false,
         animation: 'fade',
         gestureEnabled: false,
-        contentStyle: { backgroundColor: colors.background.night },
+        contentStyle: { backgroundColor: colors.background.primary },
       }}
     />
   );

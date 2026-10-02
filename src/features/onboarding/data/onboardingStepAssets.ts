@@ -4,7 +4,7 @@ import {
   getOnboardingIllustrationSource,
   getOptionIconSource,
   ONBOARDING_ILLUSTRATION_SOURCES,
-  PAYWALL_NIGHT_ART,
+  PAYWALL_REST_ART,
   SCALE_ICON_SOURCES,
 } from '@/features/onboarding/data/onboardingAssets';
 import { ONBOARDING_STEPS } from '@/features/onboarding/data/onboardingSteps';
@@ -79,7 +79,7 @@ function getSceneSources(step: OnboardingStep): ImageSourcePropType[] {
   }
 
   if (step.type === 'paywall') {
-    return [PAYWALL_NIGHT_ART];
+    return [PAYWALL_REST_ART];
   }
 
   return [];
