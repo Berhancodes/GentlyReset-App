@@ -400,6 +400,7 @@ const styles = StyleSheet.create({
   },
   bubbleAnchor: {
     position: 'absolute',
+    overflow: 'visible',
   },
   fieldAnchor: {
     position: 'absolute',

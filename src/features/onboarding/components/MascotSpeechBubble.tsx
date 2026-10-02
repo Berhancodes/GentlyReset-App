@@ -164,13 +164,11 @@ function TypedBubbleLines({
 
 const styles = StyleSheet.create({
   root: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
     width: '100%',
+    overflow: 'visible',
   },
   card: {
-    flexGrow: 1,
-    flexShrink: 1,
+    zIndex: 1,
     minWidth: 0,
     borderRadius: radius.card,
     borderWidth: StyleSheet.hairlineWidth,
@@ -198,14 +196,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tail: {
-    width: 12,
-    height: 12,
-    marginTop: 26,
-    marginRight: -7,
-    borderLeftWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border.whisper,
+    position: 'absolute',
+    zIndex: 0,
+    width: 10,
+    height: 10,
+    left: spacing.sm,
+    bottom: -5,
     backgroundColor: colors.surface.raised,
-    transform: [{ rotate: '36deg' }],
+    transform: [{ rotate: '40deg' }],
   },
 });

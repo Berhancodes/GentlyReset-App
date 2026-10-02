@@ -29,8 +29,10 @@ export const MASCOT_INTRO_LAYOUT = {
   mascotNudgeXMax: 28,
   clusterCenterRatio: 0.35,
   bubbleMaxWidth: 168,
-  bubbleHeadGap: -2,
-  bubbleLift: 12,
+  /** Cream gap from the hat brim to the bubble body. Clamped on narrow phones. */
+  bubbleHeadGap: 22,
+  /** How far the bubble sits above the hat top. */
+  bubbleLift: 33,
   estimatedBubbleHeight: 86,
   characterToForm: 40,
   fieldHeight: 60,
