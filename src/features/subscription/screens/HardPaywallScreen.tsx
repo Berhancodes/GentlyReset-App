@@ -54,9 +54,10 @@ function layoutForHeight(windowHeight: number) {
   const roomy = windowHeight >= ROOMY_HEIGHT;
   return {
     compact,
-    headerTop: compact ? spacing.xxs : roomy ? spacing.md : spacing.xs,
+    headerTop: compact ? spacing.sm : roomy ? spacing.xl : spacing.lg,
     headerGap: compact ? spacing.xxs : spacing.xs,
     sectionGap: compact ? spacing.xs : spacing.sm,
+    planSectionGap: compact ? spacing.sm : spacing.md,
     benefitGap: compact ? spacing.xs : roomy ? spacing.sm : spacing.xs,
     planGap: compact ? spacing.xs : spacing.sm,
     planPaddingVertical: compact ? spacing.xs : roomy ? spacing.sm : spacing.xs,
@@ -227,7 +228,7 @@ export function HardPaywallScreen() {
             a trial offer appeared in the store. Gently Reset does not sell trials.
           </Text>
         ) : (
-          <View style={[styles.plans, { marginTop: layout.sectionGap, gap: layout.planGap }]}>
+          <View style={[styles.plans, { marginTop: layout.planSectionGap, gap: layout.planGap }]}>
             {plans.map((plan) => (
               <PlanCard
                 key={plan.identifier}
