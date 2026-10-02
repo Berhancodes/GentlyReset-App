@@ -45,8 +45,7 @@ export function HardPaywallScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const unlockNextStep = getPaywallUnlockNextStep(isAuthenticated);
-  const { available, packages, unexpectedTrial, purchasePackage, restorePurchases } =
-    useSubscription();
+  const { packages, unexpectedTrial, purchasePackage, restorePurchases } = useSubscription();
   const plans = useMemo(() => buildPaywallPlans(packages), [packages]);
   const [selectedId, setSelectedId] = useState<string | null>(
     () => peekPaywallUnlock()?.packageIdentifier ?? ANNUAL_PACKAGE_ID,
@@ -133,22 +132,6 @@ export function HardPaywallScreen() {
         style={styles.sky}
       />
       <SafeAreaView edges={['top', 'right', 'left']} style={styles.safe}>
-        <View style={styles.header}>
-          <View style={styles.headerSpacer} />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Restore Purchases"
-            disabled={busy !== null}
-            onPress={restore}
-            hitSlop={spacing.sm}
-            style={({ pressed }) => [styles.headerRestore, pressed && styles.pressed]}
-          >
-            <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.headerRestoreLabel}>
-              {busy === 'restore' ? 'Restoring…' : 'Restore Purchases'}
-            </Text>
-          </Pressable>
-        </View>
-
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
@@ -205,20 +188,19 @@ export function HardPaywallScreen() {
               ))}
             </View>
           )}
-
-          <PaywallRestMascot />
         </ScrollView>
 
-        <View style={{ paddingBottom: Math.max(insets.bottom, spacing.sm) + CTA_SAFE_AREA_GAP }}>
+        <PaywallRestMascot />
+
+        <View
+          style={[
+            styles.footer,
+            { paddingBottom: Math.max(insets.bottom, spacing.sm) + CTA_SAFE_AREA_GAP },
+          ]}
+        >
           {message ? (
             <Text style={styles.status} accessibilityLiveRegion="polite">
               {message}
-            </Text>
-          ) : packages.length === 0 && !unexpectedTrial ? (
-            <Text style={styles.status} accessibilityLiveRegion="polite">
-              {available
-                ? 'subscription options aren’t ready yet. try again in a moment.'
-                : 'Test Store purchases need an iOS development build. this preview cannot take payment.'}
             </Text>
           ) : null}
           <PrimaryButton
@@ -343,25 +325,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: spacing.lg,
   },
-  header: {
-    minHeight: spacing.hitTarget,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerSpacer: {
-    width: spacing.hitTarget,
-  },
-  headerRestore: {
-    minHeight: spacing.hitTarget,
-    justifyContent: 'center',
-    paddingLeft: spacing.sm,
-  },
-  headerRestoreLabel: {
-    ...textVariants.caption,
-    color: colors.text.secondary,
-    textDecorationLine: 'underline',
-  },
   scroll: {
     flex: 1,
     minHeight: 0,
@@ -374,7 +337,7 @@ const styles = StyleSheet.create({
   sprout: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: spacing.xs,
+    marginTop: spacing.md,
   },
   sproutLeaf: {
     marginLeft: -spacing.xxs,
@@ -553,6 +516,9 @@ const styles = StyleSheet.create({
     color: colors.accent.gold,
     fontWeight: fontWeights.semibold,
   },
+  footer: {
+    zIndex: 1,
+  },
   status: {
     ...textVariants.caption,
     color: colors.text.secondary,
@@ -566,6 +532,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexWrap: 'wrap',
     gap: spacing.xs,
+    paddingTop: spacing.xs,
   },
   legalLink: {
     ...textVariants.caption,

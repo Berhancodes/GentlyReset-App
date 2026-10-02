@@ -31,10 +31,11 @@ export function PrimaryButton({
   tone = 'primary',
 }: PrimaryButtonProps) {
   const isGold = tone === 'gold';
-  const arrowColor = disabled
-    ? colors.action.primaryTextDisabled
-    : isGold
-      ? colors.action.saveText
+  const showDepth = isGold || !disabled;
+  const arrowColor = isGold
+    ? colors.action.saveText
+    : disabled
+      ? colors.action.primaryTextDisabled
       : colors.action.primaryText;
   return (
     <Pressable
@@ -59,10 +60,10 @@ export function PrimaryButton({
 
         return (
           <>
-            {disabled ? null : (
+            {showDepth ? (
               <View pointerEvents="none" style={[styles.lip, isGold ? styles.lipGold : null]} />
-            )}
-            {disabled ? null : (
+            ) : null}
+            {showDepth ? (
               <View
                 pointerEvents="none"
                 style={[
@@ -71,11 +72,17 @@ export function PrimaryButton({
                   isPressed ? styles.shadowPressed : null,
                 ]}
               />
-            )}
+            ) : null}
             <View
               style={[
                 styles.face,
-                disabled ? styles.faceDisabled : isGold ? styles.faceGold : styles.faceEnabled,
+                disabled
+                  ? isGold
+                    ? styles.faceGoldDisabled
+                    : styles.faceDisabled
+                  : isGold
+                    ? styles.faceGold
+                    : styles.faceEnabled,
                 isPressed ? (isGold ? styles.faceGoldPressed : styles.facePressed) : null,
               ]}
             >
@@ -84,7 +91,13 @@ export function PrimaryButton({
                 maxFontSizeMultiplier={1.4}
                 style={[
                   styles.label,
-                  disabled ? styles.labelDisabled : isGold ? styles.labelGold : styles.labelEnabled,
+                  disabled
+                    ? isGold
+                      ? styles.labelGold
+                      : styles.labelDisabled
+                    : isGold
+                      ? styles.labelGold
+                      : styles.labelEnabled,
                 ]}
               >
                 {label}
@@ -150,6 +163,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.action.primaryBackground,
   },
   faceGold: {
+    backgroundColor: colors.action.saveBackground,
+  },
+  faceGoldDisabled: {
     backgroundColor: colors.action.saveBackground,
   },
   faceDisabled: {
