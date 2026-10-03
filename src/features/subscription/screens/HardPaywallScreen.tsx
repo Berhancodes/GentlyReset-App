@@ -1,5 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import {
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
@@ -84,7 +92,11 @@ export function HardPaywallScreen() {
     setMessage(null);
     void purchasePackage(subscriptionPackage.identifier)
       .then((result) => {
-        if (!result.ok && result.kind !== 'cancelled') {
+        if (result.ok) {
+          router.replace('/(app)/(tabs)/home');
+          return;
+        }
+        if (result.kind !== 'cancelled') {
           setMessage(result.message);
         }
       })
@@ -99,26 +111,40 @@ export function HardPaywallScreen() {
   };
 
   const beginUnlock = () => {
-    if (!selected?.purchasable || busy || unexpectedTrial) {
+    if (!selected || busy || unexpectedTrial) {
+      return;
+    }
+
+    const storePackage = packages.find((item) => item.identifier === selected.identifier);
+    const canPurchaseNow = Boolean(storePackage) || Platform.OS === 'web';
+    if (!canPurchaseNow && !selected.purchasable) {
       return;
     }
 
     rememberPaywallPackage(selected.identifier);
 
-    if (unlockNextStep === 'create-account') {
+    if (unlockNextStep === 'create-account' && Platform.OS !== 'web') {
       router.push('/(auth)/sign-up');
       return;
     }
 
-    const storePackage = packages.find((item) => item.identifier === selected.identifier);
-    if (!storePackage) {
+    if (!storePackage && Platform.OS !== 'web') {
       return;
     }
 
-    startPurchase(storePackage);
+    startPurchase(
+      storePackage ?? {
+        identifier: selected.identifier,
+        title: selected.title,
+        priceString: selected.priceString,
+        billingPeriod: selected.billingPeriod,
+        hasIntroOffer: false,
+      },
+    );
   };
 
-  const canUnlock = Boolean(selected?.purchasable) && busy === null && !unexpectedTrial;
+  const canUnlock =
+    (Boolean(selected?.purchasable) || Platform.OS === 'web') && busy === null && !unexpectedTrial;
 
   return (
     <View style={styles.root} testID="hard-paywall">

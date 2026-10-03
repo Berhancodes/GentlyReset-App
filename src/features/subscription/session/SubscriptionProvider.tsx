@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { Platform } from 'react-native';
 
 import { useAuth } from '@/features/auth/session/useAuth';
 import { isProEntitlementActive } from '@/features/subscription/access/isProEntitlementActive';
@@ -63,7 +64,11 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     const client = createPurchasesClient();
     clientRef.current = client;
 
-    if (!apiKey || !client.available) {
+    if (!client.available) {
+      return;
+    }
+
+    if (!apiKey && Platform.OS !== 'web') {
       return;
     }
 
@@ -74,7 +79,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 
     void (async () => {
       try {
-        await client.configure(apiKey);
+        await client.configure(apiKey || 'web-preview');
         if (!active) {
           return;
         }
