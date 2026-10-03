@@ -18,6 +18,14 @@ export type OnboardingIllustrationKey =
   | 'buildingReset'
   | 'gotYou'
   | 'overloadedDreamer'
+  | 'softRestarter'
+  | 'almostStarter'
+  | 'fadingFlame'
+  | 'allInHeart'
+  | 'quietDrain'
+  | 'driftingCompass'
+  | 'quietStranger'
+  | 'softScatter'
   | 'companion'
   | 'journey';
 

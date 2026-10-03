@@ -45,6 +45,15 @@ check(
   'D lookup is not a classifier — same id in, same id out',
   getResetProfile('overloaded-dreamer').id === 'overloaded-dreamer',
 );
+check(
+  'D each type has its own illustration',
+  new Set(RESET_TYPE_IDS.map((typeId) => RESET_PROFILES[typeId].illustrationKey)).size ===
+    RESET_TYPE_IDS.length,
+);
+check(
+  'D overloaded dreamer uses the carrying illustration',
+  RESET_PROFILES['overloaded-dreamer'].illustrationKey === 'overloadedDreamer',
+);
 
 if (failed > 0) {
   throw new Error(`${failed} domain resetProfile D check(s) failed`);

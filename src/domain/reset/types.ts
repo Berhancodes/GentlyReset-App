@@ -147,5 +147,16 @@ export type ResetProfile = {
   strengths: readonly string[];
   challenges: readonly string[];
   shareQuote: string;
-  illustrationKey: 'overloadedDreamer';
+  illustrationKey: ResetIllustrationKey;
 };
+
+export type ResetIllustrationKey =
+  | 'overloadedDreamer'
+  | 'softRestarter'
+  | 'almostStarter'
+  | 'fadingFlame'
+  | 'allInHeart'
+  | 'quietDrain'
+  | 'driftingCompass'
+  | 'quietStranger'
+  | 'softScatter';

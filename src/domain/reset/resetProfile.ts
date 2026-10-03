@@ -2,11 +2,22 @@ import {
   isResetTypeId,
   LEGACY_FALLBACK_RESET_TYPE_ID,
   RESET_TYPE_NAMES,
+  type ResetIllustrationKey,
   type ResetProfile,
   type ResetTypeId,
 } from './types';
 
-const SHARED_ILLUSTRATION = 'overloadedDreamer' as const;
+const RESET_ILLUSTRATION_KEYS: Record<ResetTypeId, ResetIllustrationKey> = {
+  'overloaded-dreamer': 'overloadedDreamer',
+  'soft-restarter': 'softRestarter',
+  'almost-starter': 'almostStarter',
+  'fading-flame': 'fadingFlame',
+  'all-in-heart': 'allInHeart',
+  'quiet-drain': 'quietDrain',
+  'drifting-compass': 'driftingCompass',
+  'quiet-stranger': 'quietStranger',
+  'soft-scatter': 'softScatter',
+};
 
 function profile(
   fields: Omit<ResetProfile, 'illustrationKey' | 'name'> & { id: ResetTypeId },
@@ -14,7 +25,7 @@ function profile(
   return {
     ...fields,
     name: RESET_TYPE_NAMES[fields.id],
-    illustrationKey: SHARED_ILLUSTRATION,
+    illustrationKey: RESET_ILLUSTRATION_KEYS[fields.id],
   };
 }
 
