@@ -14,7 +14,7 @@ const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 export function ThinkingLogMascot() {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const availableWidth = Math.round(windowWidth - spacing.lg * 2);
-  const maxHeight = Math.round(windowHeight * 0.28);
+  const maxHeight = Math.round(windowHeight * 0.2);
   const widthFromHeight = Math.round(maxHeight * ART_ASPECT);
   const artWidth = Math.max(spacing.xxxl, Math.min(availableWidth, widthFromHeight));
   const artHeight = Math.round(artWidth / ART_ASPECT);
@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
     marginTop: spacing.xs,
+    flexShrink: 0,
     pointerEvents: 'none',
   },
 });

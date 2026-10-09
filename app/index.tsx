@@ -6,7 +6,8 @@ import { getRootHref } from '@/navigation/getRootHref';
 
 export default function Index() {
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
+  const hasLocalAppAccess = useOnboardingStore((state) => state.hasLocalAppAccess);
   const { isPro } = useSubscription();
 
-  return <Redirect href={getRootHref({ hasCompletedOnboarding, isPro })} />;
+  return <Redirect href={getRootHref({ hasCompletedOnboarding, isPro, hasLocalAppAccess })} />;
 }

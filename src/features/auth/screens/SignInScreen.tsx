@@ -24,6 +24,7 @@ export function SignInScreen() {
   const { signIn } = useAuth();
   const { isPro } = useSubscription();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
+  const hasLocalAppAccess = useOnboardingStore((state) => state.hasLocalAppAccess);
   const [values, setValues] = useState<SignInValues>(EMPTY_VALUES);
   const [errors, setErrors] = useState<SignInErrors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -44,7 +45,7 @@ export function SignInScreen() {
   };
 
   const goToAccessDestination = () => {
-    router.replace(getRootHref({ hasCompletedOnboarding, isPro }));
+    router.replace(getRootHref({ hasCompletedOnboarding, isPro, hasLocalAppAccess }));
   };
 
   const submit = () => {

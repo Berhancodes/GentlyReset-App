@@ -22,10 +22,12 @@ export function FriendInviteScreen() {
   const { user } = useAuth();
   const { isPro } = useSubscription();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
+  const hasLocalAppAccess = useOnboardingStore((state) => state.hasLocalAppAccess);
+  const canEnterApp = isPro || hasLocalAppAccess;
   const [identity, setIdentity] = useState<PublicFriendIdentity | null>(null);
   const [message, setMessage] = useState('opening invite…');
   const [sending, setSending] = useState(false);
-  const canOpenInvite = hasCompletedOnboarding && isPro;
+  const canOpenInvite = hasCompletedOnboarding && canEnterApp;
 
   useEffect(() => {
     if (token) {
@@ -52,7 +54,7 @@ export function FriendInviteScreen() {
   }, [canOpenInvite, token, user?.id]);
 
   if (!canOpenInvite) {
-    return <Redirect href={getRootHref({ hasCompletedOnboarding, isPro })} />;
+    return <Redirect href={getRootHref({ hasCompletedOnboarding, isPro, hasLocalAppAccess })} />;
   }
 
   const connect = () => {

@@ -29,7 +29,12 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
   const selectedId = answer?.type === 'singleChoice' ? answer.optionId : undefined;
   const layout = step.layout ?? 'stacked';
   const illustratedGrid = shouldUseIllustratedGrid(step);
+  const denseGrid = illustratedGrid && step.options.length >= 8;
   const isHardestStep = step.id === 'consistencyStage';
+  const isChangePatternStep = step.id === 'changePattern';
+  const isDesiredIdentityStep = step.id === 'desiredIdentity';
+  const isDailyCommitmentStep = step.id === 'dailyCommitment';
+  const isSupportStyleStep = step.id === 'supportStyle';
   const isSupportTimingStep = step.id === 'supportTiming';
   const isMissedDayStep = step.id === 'missedDayResponse';
   const useGrid = illustratedGrid || layout === 'grid2' || layout === 'grid3';
@@ -46,8 +51,16 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
       return (
         <IllustratedChoiceCard
           key={option.id}
+          compact={denseGrid || isDesiredIdentityStep || isSupportStyleStep}
           label={option.label}
-          leading={icon ? <OptionIcon source={icon} /> : undefined}
+          leading={
+            icon ? (
+              <OptionIcon
+                source={icon}
+                size={denseGrid || isDesiredIdentityStep || isSupportStyleStep ? 32 : 40}
+              />
+            ) : undefined
+          }
           selected={selected}
           haptic={option.selectHaptic ?? 'selection'}
           onPress={onPress}
@@ -58,9 +71,16 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
     return (
       <ChoiceCard
         key={option.id}
+        compact={
+          isHardestStep ||
+          isChangePatternStep ||
+          isDailyCommitmentStep ||
+          Boolean(step.illustrationKey)
+        }
+        tight={isHardestStep}
         label={option.label}
         description={option.description}
-        leading={icon ? <OptionIcon source={icon} size={40} /> : undefined}
+        leading={icon ? <OptionIcon source={icon} size={isHardestStep ? 28 : 40} /> : undefined}
         selected={selected}
         haptic={option.selectHaptic ?? 'selection'}
         onPress={onPress}
@@ -71,13 +91,11 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
   return (
     <OnboardingScreenLayout
       tone="question"
-      compact={
-        isHardestStep ||
-        isSupportTimingStep ||
-        isMissedDayStep ||
-        (illustratedGrid && step.options.length >= 8)
+      compact
+      compactTitle={
+        isChangePatternStep || isDesiredIdentityStep || isDailyCommitmentStep || isSupportStyleStep
       }
-      scrollEnabled={!isHardestStep}
+      scrollEnabled={false}
       title={step.title}
       subtitle={getQuestionHelper(step)}
       eyebrow={step.eyebrow}
@@ -107,13 +125,17 @@ export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
         />
       ) : isHardestStep ? (
         <View style={styles.hardestBlock}>
-          <View style={styles.list}>{cards}</View>
+          <View style={styles.hardestChoices}>{cards}</View>
           <ClimbingMascot />
         </View>
       ) : illustratedGrid ? (
-        <IllustratedChoiceGrid>{cards}</IllustratedChoiceGrid>
+        <IllustratedChoiceGrid compact={denseGrid || isDesiredIdentityStep || isSupportStyleStep}>
+          {cards}
+        </IllustratedChoiceGrid>
       ) : useGrid ? (
-        <OptionGrid columns={columns}>{cards}</OptionGrid>
+        <OptionGrid columns={columns} compact={denseGrid}>
+          {cards}
+        </OptionGrid>
       ) : (
         <View style={styles.list}>{cards}</View>
       )}
@@ -126,6 +148,13 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   hardestBlock: {
-    gap: spacing.sm,
+    flex: 1,
+    minHeight: 0,
+    gap: spacing.xs,
+    justifyContent: 'space-between',
+  },
+  hardestChoices: {
+    gap: spacing.xxs,
+    flexShrink: 1,
   },
 });

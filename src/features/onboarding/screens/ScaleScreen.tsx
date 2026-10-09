@@ -24,6 +24,8 @@ export function ScaleScreen({ step }: ScaleScreenProps) {
   return (
     <OnboardingScreenLayout
       tone="question"
+      compact
+      scrollEnabled={false}
       title={step.title}
       subtitle={getQuestionHelper(step)}
       hideProgress={step.hideProgress}

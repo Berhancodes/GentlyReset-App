@@ -8,6 +8,7 @@ export type ResetPersistedSlice = Pick<
   ResetSnapshot,
   | 'currentDay'
   | 'completedDays'
+  | 'completionDates'
   | 'todayCompleted'
   | 'todayStarted'
   | 'todayTask'
@@ -39,6 +40,7 @@ export function partializeResetState(state: ResetSnapshot): ResetPersistedSlice 
   return {
     currentDay: state.currentDay,
     completedDays: state.completedDays,
+    completionDates: state.completionDates,
     todayCompleted: state.todayCompleted,
     todayStarted: state.todayStarted,
     todayTask: state.todayTask,

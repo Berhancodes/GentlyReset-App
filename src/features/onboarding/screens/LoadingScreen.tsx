@@ -72,14 +72,17 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
       title={showGotYou ? GOT_YOU_TITLE : step.title}
       subtitle={showGotYou ? undefined : step.subtitle}
       showTitle={!showGotYou}
-      illustrationKey={showGotYou ? 'gotYou' : showBuildingScene ? undefined : step.illustrationKey}
+      illustrationKey={showGotYou || showBuildingScene ? undefined : step.illustrationKey}
       illustrationSize="large"
-      illustrationPlacement={showGotYou ? 'end' : 'afterHero'}
+      illustrationPlacement="afterHero"
+      skipStorySpacer={showGotYou}
       hideProgress
       onBack={canGoBack ? goBack : undefined}
     >
       {showGotYou ? (
-        <StoryCopy lines={GOT_YOU_LINES} onFinished={handleGotYouFinished} />
+        <View style={styles.gotYou}>
+          <StoryCopy lines={GOT_YOU_LINES} onFinished={handleGotYouFinished} />
+        </View>
       ) : (
         <>
           {showBuildingScene ? <BuildingMascot /> : null}
@@ -108,5 +111,11 @@ const styles = StyleSheet.create({
   list: {
     gap: spacing.md,
     paddingTop: spacing.sm,
+  },
+  gotYou: {
+    flexGrow: 1,
+    minHeight: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

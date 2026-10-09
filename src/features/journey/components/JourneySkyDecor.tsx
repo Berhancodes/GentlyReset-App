@@ -224,64 +224,15 @@ export function JourneySkyDecor({
       { translateY: sunY.value },
     ],
   }));
-  const leftStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateX:
-          leftX.value - walkProgress.value * JOURNEY_WALK_LAYERS.cloud * walkDirection.value,
-      },
-      { translateY: leftY.value },
-    ],
-  }));
-  const rightStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateX:
-          rightX.value - walkProgress.value * JOURNEY_WALK_LAYERS.cloud * walkDirection.value,
-      },
-      { translateY: rightY.value },
-    ],
-  }));
-  const upperStyle = useAnimatedStyle(() => ({
-    opacity: upperOpacity.value,
-    transform: [
-      {
-        translateX:
-          upperX.value - walkProgress.value * JOURNEY_WALK_LAYERS.cloudFar * walkDirection.value,
-      },
-      { translateY: upperY.value },
-    ],
-  }));
-
   const pieces = getJourneySkyPieces(layout);
 
   return (
     <Animated.View
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
+      pointerEvents="none"
       style={styles.sky}
     >
-      {pieces.leftCloud ? (
-        <JourneySkyPiece
-          source={JOURNEY_SPRITES.cloud}
-          rect={pieces.leftCloud}
-          animatedStyle={leftStyle}
-        />
-      ) : null}
-      {pieces.upperCloud ? (
-        <JourneySkyPiece
-          source={JOURNEY_SPRITES.cloud}
-          rect={pieces.upperCloud}
-          animatedStyle={upperStyle}
-        />
-      ) : null}
-      {pieces.rightCloud ? (
-        <JourneySkyPiece
-          source={JOURNEY_SPRITES.cloud}
-          rect={pieces.rightCloud}
-          animatedStyle={rightStyle}
-        />
-      ) : null}
       <JourneySkyPiece source={JOURNEY_SPRITES.sun} rect={pieces.sun} animatedStyle={sunStyle} />
     </Animated.View>
   );

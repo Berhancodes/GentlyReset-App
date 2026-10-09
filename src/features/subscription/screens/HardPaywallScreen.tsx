@@ -1,13 +1,5 @@
 import { useMemo, useState } from 'react';
-import {
-  Image,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
@@ -25,12 +17,9 @@ import {
   spacing,
   textVariants,
 } from '@/design-system';
-import { useAuth } from '@/features/auth/session/useAuth';
 import { PAYWALL_SKY_ART } from '@/features/onboarding/data/onboardingAssets';
-import {
-  getPaywallUnlockLabel,
-  getPaywallUnlockNextStep,
-} from '@/features/subscription/access/getPaywallPrimaryAction';
+import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { getPaywallUnlockLabel } from '@/features/subscription/access/getPaywallPrimaryAction';
 import {
   peekPaywallUnlock,
   rememberPaywallPackage,
@@ -39,7 +28,6 @@ import { PaywallRestMascot } from '@/features/subscription/components/PaywallRes
 import { ANNUAL_PACKAGE_ID } from '@/features/subscription/constants';
 import { PAYWALL_BENEFITS, PAYWALL_SUBTITLE } from '@/features/subscription/data/paywallCopy';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
-import type { PresentedPackage } from '@/features/subscription/types';
 import {
   buildPaywallPlans,
   type PaywallPlan,
@@ -72,38 +60,15 @@ export function HardPaywallScreen() {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const layout = layoutForHeight(windowHeight);
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
-  const unlockNextStep = getPaywallUnlockNextStep(isAuthenticated);
-  const { packages, unexpectedTrial, purchasePackage } = useSubscription();
+  const grantLocalAppAccess = useOnboardingStore((state) => state.grantLocalAppAccess);
+  const { packages, unexpectedTrial } = useSubscription();
   const plans = useMemo(() => buildPaywallPlans(packages), [packages]);
   const [selectedId, setSelectedId] = useState<string | null>(
     () => peekPaywallUnlock()?.packageIdentifier ?? ANNUAL_PACKAGE_ID,
   );
   const [busy, setBusy] = useState<'purchase' | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
 
   const selected = plans.find((plan) => plan.identifier === selectedId) ?? plans[0];
-
-  const startPurchase = (subscriptionPackage: PresentedPackage) => {
-    if (busy || unexpectedTrial) {
-      return;
-    }
-    setBusy('purchase');
-    setMessage(null);
-    void purchasePackage(subscriptionPackage.identifier)
-      .then((result) => {
-        if (result.ok) {
-          router.replace('/(app)/(tabs)/home');
-          return;
-        }
-        if (result.kind !== 'cancelled') {
-          setMessage(result.message);
-        }
-      })
-      .finally(() => {
-        setBusy(null);
-      });
-  };
 
   const choosePackage = (packageIdentifier: string) => {
     rememberPaywallPackage(packageIdentifier);
@@ -111,40 +76,16 @@ export function HardPaywallScreen() {
   };
 
   const beginUnlock = () => {
-    if (!selected || busy || unexpectedTrial) {
+    if (busy) {
       return;
     }
-
-    const storePackage = packages.find((item) => item.identifier === selected.identifier);
-    const canPurchaseNow = Boolean(storePackage) || Platform.OS === 'web';
-    if (!canPurchaseNow && !selected.purchasable) {
-      return;
-    }
-
-    rememberPaywallPackage(selected.identifier);
-
-    if (unlockNextStep === 'create-account' && Platform.OS !== 'web') {
-      router.push('/(auth)/sign-up');
-      return;
-    }
-
-    if (!storePackage && Platform.OS !== 'web') {
-      return;
-    }
-
-    startPurchase(
-      storePackage ?? {
-        identifier: selected.identifier,
-        title: selected.title,
-        priceString: selected.priceString,
-        billingPeriod: selected.billingPeriod,
-        hasIntroOffer: false,
-      },
-    );
+    setBusy('purchase');
+    grantLocalAppAccess();
+    router.replace('/(app)/(tabs)/home');
+    setBusy(null);
   };
 
-  const canUnlock =
-    (Boolean(selected?.purchasable) || Platform.OS === 'web') && busy === null && !unexpectedTrial;
+  const canUnlock = busy === null;
 
   return (
     <View style={styles.root} testID="hard-paywall">
@@ -156,6 +97,7 @@ export function HardPaywallScreen() {
         importantForAccessibility="no"
         style={styles.sky}
       />
+      <PaywallRestMascot />
       <SafeAreaView edges={['top', 'right', 'left']} style={styles.safe}>
         <View style={[styles.header, { marginTop: layout.headerTop, gap: layout.headerGap }]}>
           <View style={styles.sprout} accessibilityElementsHidden>
@@ -238,14 +180,9 @@ export function HardPaywallScreen() {
           </View>
         )}
 
-        <PaywallRestMascot />
+        <View style={styles.sceneSpacer} />
 
         <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, layout.bottomPad) }]}>
-          {message ? (
-            <Text style={styles.status} accessibilityLiveRegion="polite">
-              {message}
-            </Text>
-          ) : null}
           <View
             style={[styles.cta, { width: windowWidth * CTA_WIDTH_RATIO, maxWidth: CTA_MAX_WIDTH }]}
           >
@@ -539,13 +476,16 @@ const styles = StyleSheet.create({
     color: colors.accent.gold,
     fontWeight: fontWeights.semibold,
   },
+  sceneSpacer: {
+    flex: 1,
+    minHeight: 0,
+  },
   footer: {
     flexGrow: 0,
     flexShrink: 0,
     zIndex: 1,
   },
   cta: {
-    marginTop: -(spacing.xxxl + spacing.xl),
     alignSelf: 'center',
   },
   status: {

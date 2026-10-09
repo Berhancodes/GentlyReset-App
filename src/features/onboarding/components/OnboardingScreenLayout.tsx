@@ -36,6 +36,8 @@ type OnboardingScreenLayoutProps = {
   tone?: 'default' | 'question' | 'story';
   /** Tighter vertical gaps so a compact question can fit on one phone screen. */
   compact?: boolean;
+  /** Smaller question title for long headers that would push cards off-screen. */
+  compactTitle?: boolean;
   /** When false, the page cannot scroll. Use for one-screen questions with a peeking mascot. */
   scrollEnabled?: boolean;
   /**
@@ -62,6 +64,7 @@ export function OnboardingScreenLayout({
   showTitle = true,
   tone = 'default',
   compact = false,
+  compactTitle = false,
   scrollEnabled = true,
   illustrationPlacement = 'start',
   skipStorySpacer = false,
@@ -96,6 +99,7 @@ export function OnboardingScreenLayout({
         eyebrow={eyebrow}
         showTitle={showTitle}
         tone={tone}
+        compactTitle={compactTitle}
       />
       {illustrationKey && illustrationPlacement === 'afterHero' ? (
         <IllustrationPlaceholder illustrationKey={illustrationKey} size={illustrationSize} />
@@ -194,12 +198,12 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   questionScrollContent: {
-    paddingTop: spacing.xl,
+    paddingTop: spacing.md,
     paddingBottom: spacing.lg,
     gap: spacing.lg,
   },
   storyScrollContent: {
-    paddingTop: spacing.md,
+    paddingTop: spacing.xs,
     paddingBottom: spacing.md,
     gap: spacing.lg,
   },
@@ -218,7 +222,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
   },
   compactScrollContent: {
-    paddingTop: spacing.md,
+    paddingTop: spacing.none,
     paddingBottom: 0,
     gap: spacing.md,
   },

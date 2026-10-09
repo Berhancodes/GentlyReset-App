@@ -8,10 +8,10 @@ const ART_HEIGHT = 767;
 const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 
 const SHORT_PHONE_HEIGHT = 680;
-const REGULAR_PHONE_HEIGHT = 800;
-const MASCOT_HEIGHT_SHORT = 200;
-const MASCOT_HEIGHT_REGULAR = 236;
-const MASCOT_HEIGHT_TALL = 256;
+const REGULAR_PHONE_HEIGHT = 900;
+const MASCOT_HEIGHT_SHORT = 180;
+const MASCOT_HEIGHT_REGULAR = 210;
+const MASCOT_HEIGHT_TALL = 236;
 
 function mascotHeightForWindow(windowHeight: number): number {
   if (windowHeight < SHORT_PHONE_HEIGHT) {
@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
     marginTop: spacing.xs,
+    flexShrink: 0,
     pointerEvents: 'none',
   },
 });

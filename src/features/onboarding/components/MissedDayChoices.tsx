@@ -53,7 +53,8 @@ export function MissedDayChoices({ options, selectedId, onSelect }: MissedDayCho
 
 const styles = StyleSheet.create({
   block: {
-    flexGrow: 1,
+    flex: 1,
+    minHeight: 0,
   },
   blockShort: {
     gap: spacing.xs,

@@ -1,181 +1,228 @@
-import { useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useEffect, useState, type RefObject } from 'react';
+import { Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Animated, {
+  interpolateColor,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { AppText } from '@/components/ui';
 import { colors, radius, shadows, spacing, textVariants } from '@/design-system';
-import { JournalSprite } from '@/features/reflect/components/JournalSprite';
-import {
-  JOURNAL_MASCOT_WRITING_ASPECT,
-  JOURNAL_MASCOT_WRITING_LAYOUT,
-  JOURNAL_WRITING_CARD,
-  toPercent,
-} from '@/features/reflect/layout/journalLayout';
+import { JOURNEY_SEASON_SCENES } from '@/features/journey/data/journeySeasonScenes';
+import type { JourneySeason } from '@/features/journey/utils/getJourneySeason';
+import { JournalMoodRow } from '@/features/reflect/components/JournalMoodRow';
+import { JOURNAL_STARTERS } from '@/features/reflect/data/journalStarters';
+import type { JournalMood } from '@/features/reset/types';
 
-const MASCOT_ART = require('../../../../assets/images/app/journal-mascot-writing.png');
-
-const ICON_SIZE = 28;
+const FOCUS_MS = 200;
+/** How far the card lifts while you write. */
+const FOCUS_LIFT = 2;
+const RING_WIDTH = 1.5;
+/** Seasonal piece tucked into the top-right corner. */
+const CORNER_DECOR_SIZE = 26;
 
 type JournalWritingCardProps = {
   value: string;
   onChangeText: (text: string) => void;
-  moodSelected: boolean;
+  mood: JournalMood | undefined;
+  onChangeMood: (mood: JournalMood) => void;
   minHeight: number;
-  onPressMood: () => void;
-  onPressPhoto: () => void;
+  season: JourneySeason;
+  /** The text is safely kept as a draft (shown after a short pause in typing). */
+  draftSaved: boolean;
+  /** Lets the screen move focus into the text box. */
+  inputRef?: RefObject<TextInput | null>;
 };
 
 export function JournalWritingCard({
   value,
   onChangeText,
-  moodSelected,
+  mood,
+  onChangeMood,
   minHeight,
-  onPressMood,
-  onPressPhoto,
+  season,
+  draftSaved,
+  inputRef,
 }: JournalWritingCardProps) {
-  const [cardHeight, setCardHeight] = useState(0);
-  const lineGap = JOURNAL_WRITING_CARD.lineGap;
-  const firstLine = spacing.md + lineGap;
-  const footerReserve = spacing.xxxl + spacing.sm;
-  const lineCount =
-    cardHeight > 0
-      ? Math.max(4, Math.floor((cardHeight - firstLine - footerReserve) / lineGap))
-      : 6;
+  const reduceMotion = useReducedMotion();
+  const [focused, setFocused] = useState(false);
+  const focus = useSharedValue(0);
+
+  useEffect(() => {
+    focus.value = withTiming(focused ? 1 : 0, { duration: reduceMotion ? 0 : FOCUS_MS });
+  }, [focus, focused, reduceMotion]);
+
+  const cardStyle = useAnimatedStyle(() => ({
+    borderColor: interpolateColor(
+      focus.value,
+      [0, 1],
+      [colors.overlay.clear, colors.journal.focusRing],
+    ),
+    transform: [{ translateY: -FOCUS_LIFT * focus.value }],
+  }));
+
+  const words = value.trim().split(/\s+/).filter(Boolean).length;
+
+  const addStarter = (text: string) => {
+    const trimmed = value.trimEnd();
+    onChangeText(trimmed.length === 0 ? text : `${trimmed}\n${text}`);
+    inputRef?.current?.focus();
+  };
 
   return (
-    <View
-      style={[styles.card, { minHeight }]}
-      onLayout={(event) => {
-        setCardHeight(event.nativeEvent.layout.height);
-      }}
-    >
-      <View pointerEvents="none" style={styles.lines}>
-        {Array.from({ length: lineCount }, (_, lineIndex) => (
-          <View key={lineIndex} style={[styles.line, { top: firstLine + lineIndex * lineGap }]} />
+    <Animated.View style={[styles.card, { minHeight }, cardStyle]}>
+      <CornerDecor season={season} />
+
+      <View style={styles.starters}>
+        {JOURNAL_STARTERS.map((starter) => (
+          <Pressable
+            key={starter.label}
+            accessibilityRole="button"
+            accessibilityLabel={`Start with: ${starter.label}`}
+            onPress={() => addStarter(starter.text)}
+            style={({ pressed }) => [styles.starter, pressed ? styles.starterPressed : null]}
+          >
+            <AppText variant="label" color="secondary">
+              {starter.label}
+            </AppText>
+          </Pressable>
         ))}
       </View>
 
       <TextInput
+        ref={inputRef}
         testID="journal-input"
         accessibilityLabel="journal entry"
-        placeholder="write anything..."
+        placeholder="Write anything..."
         placeholderTextColor={colors.text.helper}
         value={value}
         onChangeText={onChangeText}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         multiline
         textAlignVertical="top"
         scrollEnabled
         underlineColorAndroid={colors.overlay.clear}
         allowFontScaling
         maxFontSizeMultiplier={1.15}
-        style={[styles.input, { lineHeight: lineGap }]}
+        style={styles.input}
       />
 
       <View style={styles.footer}>
-        <ComposerIconButton
-          icon="happy-outline"
-          label="mood"
-          selected={moodSelected}
-          onPress={onPressMood}
-        />
-        <ComposerIconButton icon="image-outline" label="add photo" onPress={onPressPhoto} />
+        <AppText variant="label" color="helper">
+          {words === 0 ? 'One line is enough.' : `${words} ${words === 1 ? 'word' : 'words'}`}
+        </AppText>
+        {draftSaved && words > 0 ? (
+          <View style={styles.saved} accessibilityLabel="Draft saved">
+            <Ionicons name="checkmark-circle" size={14} color={colors.journal.savedCheck} />
+            <AppText variant="label" color="helper">
+              Draft saved
+            </AppText>
+          </View>
+        ) : null}
       </View>
 
-      <JournalSprite
-        source={MASCOT_ART}
-        width={toPercent(JOURNAL_MASCOT_WRITING_LAYOUT.width)}
-        aspectRatio={JOURNAL_MASCOT_WRITING_ASPECT}
-        right={toPercent(JOURNAL_MASCOT_WRITING_LAYOUT.right)}
-        bottom={toPercent(JOURNAL_MASCOT_WRITING_LAYOUT.bottom)}
-        zIndex={1}
-      />
-    </View>
+      <View style={styles.moodBlock}>
+        <AppText variant="label" color="secondary">
+          How are you feeling?
+        </AppText>
+        <JournalMoodRow value={mood} onChange={onChangeMood} />
+      </View>
+    </Animated.View>
   );
 }
 
-function ComposerIconButton({
-  icon,
-  label,
-  selected = false,
-  onPress,
-}: {
-  icon: 'happy-outline' | 'image-outline';
-  label: string;
-  selected?: boolean;
-  onPress: () => void;
-}) {
-  const color = selected ? colors.text.primary : colors.text.secondary;
-
+/** The season's leaf, petal or snowflake, resting in the card's top-right corner. */
+function CornerDecor({ season }: { season: JourneySeason }) {
+  const particles = JOURNEY_SEASON_SCENES[season].particles;
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ selected }}
-      onPress={onPress}
-      style={({ pressed }) => [styles.iconButton, pressed ? styles.iconPressed : null]}
+    <View
+      pointerEvents="none"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={styles.corner}
     >
-      <Ionicons name={icon} size={ICON_SIZE} color={color} />
-      <AppText variant="moodLabel" color={selected ? 'primary' : 'secondary'} align="center">
-        {label}
-      </AppText>
-    </Pressable>
+      {particles.kind === 'snow' ? (
+        <Ionicons
+          name="snow-outline"
+          size={CORNER_DECOR_SIZE * 0.8}
+          color={colors.journeyShadow.cool}
+        />
+      ) : (
+        <Image
+          source={particles.source}
+          style={{
+            width: CORNER_DECOR_SIZE,
+            height: CORNER_DECOR_SIZE * particles.aspect,
+            transform: [{ rotate: '-24deg' }],
+          }}
+        />
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
     width: '100%',
+    gap: spacing.md,
+    padding: spacing.lg,
     borderRadius: radius.xxl,
-    backgroundColor: colors.surface.primary,
-    overflow: 'hidden',
+    borderWidth: RING_WIDTH,
+    backgroundColor: colors.journal.card,
     ...shadows.soft,
   },
-  lines: {
-    ...StyleSheet.absoluteFill,
-    zIndex: 0,
-  },
-  line: {
+  corner: {
     position: 'absolute',
-    left: spacing.md,
+    top: spacing.md,
     right: spacing.md,
-    height: 1,
-    backgroundColor: colors.border.notebook,
+    opacity: 0.85,
+  },
+  starters: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    // Leave the corner decoration its space.
+    paddingRight: spacing.xl,
+  },
+  starter: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xxs + 2,
+    borderRadius: radius.pill,
+    backgroundColor: colors.journal.chip,
+  },
+  starterPressed: {
+    opacity: 0.75,
   },
   input: {
     flexGrow: 1,
-    flexShrink: 1,
-    minHeight: spacing.xxl,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xs,
+    minHeight: spacing.xxxl + spacing.xl,
+    padding: 0,
     color: colors.text.primary,
     backgroundColor: colors.overlay.clear,
-    ...textVariants.body,
-    zIndex: 2,
+    ...textVariants.journalInput,
     borderWidth: 0,
     includeFontPadding: false,
     outlineWidth: 0,
     outlineColor: colors.overlay.clear,
   },
   footer: {
-    zIndex: 3,
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: spacing.md,
-    paddingLeft: spacing.sm,
-    paddingBottom: spacing.sm,
-    paddingRight: toPercent(JOURNAL_MASCOT_WRITING_LAYOUT.width),
-    minHeight: spacing.xxl + spacing.sm,
-  },
-  iconButton: {
-    minWidth: spacing.hitTarget,
-    minHeight: spacing.hitTarget,
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: spacing.xxs,
-    paddingVertical: spacing.xxs,
+    justifyContent: 'space-between',
   },
-  iconPressed: {
-    opacity: 0.7,
+  saved: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxs,
+  },
+  moodBlock: {
+    gap: spacing.xs,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.journal.divider,
   },
 });

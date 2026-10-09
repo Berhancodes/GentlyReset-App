@@ -11,7 +11,10 @@ import {
   getJourneyDayState,
   type JourneyDayState,
 } from '@/features/journey/utils/getJourneyDayState';
-import { getJourneyProgression } from '@/features/journey/utils/getJourneyProgression';
+import {
+  getJourneyProgression,
+  getJourneyVisualTargetDay,
+} from '@/features/journey/utils/getJourneyProgression';
 import { getJourneyIncomingDay } from '@/features/journey/utils/getJourneyTimelineMotion';
 import {
   getJourneyWalkDirection,
@@ -71,15 +74,14 @@ function idlePresentation(
     fromDay: displayDay,
     toDay: displayDay,
     visibleDays,
-    headingDay: displayDay,
-    headingTitle:
-      displayDay === currentDay ? currentTitle : getPlanDayTitle(displayDay, resetTypeId),
-    progressDay: displayDay,
+    headingDay: currentDay,
+    headingTitle: currentTitle,
+    progressDay: currentDay,
     walkDirection: 1,
     showProgressMascot: false,
     outgoingNode: getJourneyDayState(
       displayDay,
-      displayDay,
+      currentDay,
       completedDays,
       displayDay === currentDay && todayCompleted,
     ),
@@ -89,10 +91,12 @@ function idlePresentation(
 
 function progressingPresentation(
   sequence: ProgressionSequence,
+  currentDay: number,
   resetTypeId?: string,
 ): JourneyProgressionPresentation {
   const showingGif = sequence.phase === 'walking' || sequence.phase === 'celebrating';
-  const headingDay = sequence.headingReady ? sequence.toDay : sequence.fromDay;
+  const headingDay =
+    sequence.headingReady && sequence.toDay === currentDay ? sequence.toDay : sequence.fromDay;
   const incomingDay = getJourneyIncomingDay(sequence.fromDay, sequence.toDay);
 
   return {
@@ -103,7 +107,8 @@ function progressingPresentation(
     visibleDays: incomingDay === undefined ? [sequence.fromDay] : [sequence.fromDay, incomingDay],
     headingDay,
     headingTitle: getPlanDayTitle(headingDay, resetTypeId),
-    progressDay: sequence.arrived ? sequence.toDay : sequence.fromDay,
+    progressDay:
+      sequence.arrived && sequence.toDay === currentDay ? sequence.toDay : sequence.fromDay,
     walkDirection: getJourneyWalkDirection(sequence.fromDay, sequence.toDay),
     showProgressMascot: showingGif,
     outgoingNode: {
@@ -116,7 +121,7 @@ function progressingPresentation(
         ? undefined
         : {
             day: incomingDay,
-            kind: sequence.arrived ? 'current' : 'future',
+            kind: sequence.arrived && incomingDay === currentDay ? 'current' : 'future',
             todayCompleted: false,
           },
   };
@@ -169,7 +174,7 @@ export function useJourneyProgression({
             restDevSideScroll(toDay);
             return;
           }
-          acknowledgeDay(currentDay);
+          acknowledgeDay(toDay);
         }, motion.duration.journeyProgressSettle);
         timersRef.current = [settle];
         return;
@@ -229,7 +234,7 @@ export function useJourneyProgression({
           restDevSideScroll(toDay);
           return;
         }
-        acknowledgeDay(currentDay);
+        acknowledgeDay(toDay);
       }, motion.duration.journeyProgressHold + motion.duration.journeyProgressTotal);
 
       timersRef.current = [walkTimer, arriveTimer, headingTimer, doneTimer];
@@ -243,7 +248,12 @@ export function useJourneyProgression({
         if (devPreview) {
           clearDevSideScroll();
         }
-        acknowledgeDay(currentDay);
+        acknowledgeDay(
+          getJourneyVisualTargetDay({
+            currentDay,
+            todayCompleted,
+          }),
+        );
       }
       return;
     }
@@ -267,6 +277,7 @@ export function useJourneyProgression({
     const decision = getJourneyProgression({
       currentDay,
       acknowledgedDay,
+      todayCompleted,
     });
 
     if (decision.kind === 'bootstrap') {
@@ -298,13 +309,14 @@ export function useJourneyProgression({
     focused,
     reduceMotion,
     restDevSideScroll,
+    todayCompleted,
   ]);
 
   if (sequence) {
-    return progressingPresentation(sequence, resetTypeId);
+    return progressingPresentation(sequence, currentDay, resetTypeId);
   }
 
-  const displayDay = devPreview?.restDay ?? currentDay;
+  const displayDay = devPreview?.restDay ?? acknowledgedDay ?? currentDay;
   return idlePresentation(
     displayDay,
     currentDay,

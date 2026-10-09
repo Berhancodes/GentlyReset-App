@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useJourneyVisualStore } from '@/features/journey/store/useJourneyVisualStore';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { useJournalDraftStore } from '@/features/reflect/store/useJournalDraftStore';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { useResetSyncStore } from '@/features/reset/sync/useResetSyncStore';
 
@@ -10,7 +11,8 @@ function bothHydrated(): boolean {
     useOnboardingStore.persist.hasHydrated() &&
     useResetStore.persist.hasHydrated() &&
     useJourneyVisualStore.persist.hasHydrated() &&
-    useResetSyncStore.persist.hasHydrated()
+    useResetSyncStore.persist.hasHydrated() &&
+    useJournalDraftStore.persist.hasHydrated()
   );
 }
 
@@ -28,6 +30,8 @@ function bothHydrated(): boolean {
  *   user with defaults.
  * - Onboarding remains `gently-reset-onboarding`. ResetRepository
  *   is not the onboarding store.
+ * - The journal draft (`gently-reset-journal-draft`) loads first so an
+ *   unsaved entry is there when the journal opens.
  */
 export function usePersistedStoresHydrated(): boolean {
   const [hydrated, setHydrated] = useState(bothHydrated);
@@ -43,6 +47,7 @@ export function usePersistedStoresHydrated(): boolean {
     const unsubscribeReset = useResetStore.persist.onFinishHydration(update);
     const unsubscribeJourneyVisual = useJourneyVisualStore.persist.onFinishHydration(update);
     const unsubscribeResetSync = useResetSyncStore.persist.onFinishHydration(update);
+    const unsubscribeJournalDraft = useJournalDraftStore.persist.onFinishHydration(update);
     update();
 
     return () => {
@@ -50,6 +55,7 @@ export function usePersistedStoresHydrated(): boolean {
       unsubscribeReset();
       unsubscribeJourneyVisual();
       unsubscribeResetSync();
+      unsubscribeJournalDraft();
     };
   }, []);
 

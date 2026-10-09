@@ -28,6 +28,7 @@ export function SignUpScreen() {
   const { signUp } = useAuth();
   const { isPro, purchasePackage } = useSubscription();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
+  const hasLocalAppAccess = useOnboardingStore((state) => state.hasLocalAppAccess);
   const [values, setValues] = useState<SignUpValues>(EMPTY_VALUES);
   const [errors, setErrors] = useState<SignUpErrors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -35,9 +36,9 @@ export function SignUpScreen() {
 
   useEffect(() => {
     if (!hasCompletedOnboarding) {
-      router.replace(getRootHref({ hasCompletedOnboarding, isPro }));
+      router.replace(getRootHref({ hasCompletedOnboarding, isPro, hasLocalAppAccess }));
     }
-  }, [hasCompletedOnboarding, isPro, router]);
+  }, [hasCompletedOnboarding, hasLocalAppAccess, isPro, router]);
 
   const updateField = <Field extends keyof SignUpValues>(
     field: Field,
@@ -58,7 +59,7 @@ export function SignUpScreen() {
     markPaywallPurchaseReady();
     const packageIdentifier = peekPaywallUnlock()?.packageIdentifier;
     requestResetCloudSyncForCurrentUser();
-    router.replace(getRootHref({ hasCompletedOnboarding, isPro }));
+    router.replace(getRootHref({ hasCompletedOnboarding, isPro, hasLocalAppAccess }));
     if (packageIdentifier && !isPro) {
       void purchasePackage(packageIdentifier);
     }

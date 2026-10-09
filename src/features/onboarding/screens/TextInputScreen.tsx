@@ -48,6 +48,8 @@ export function TextInputScreen({ step }: TextInputScreenProps) {
   return (
     <OnboardingScreenLayout
       tone="question"
+      compact
+      scrollEnabled={false}
       title={step.title}
       subtitle={getQuestionHelper(step)}
       eyebrow={step.eyebrow}
@@ -113,7 +115,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   multiline: {
-    minHeight: 168,
+    minHeight: 140,
     paddingTop: spacing.md,
   },
 });

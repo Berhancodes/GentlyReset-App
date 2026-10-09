@@ -10,12 +10,21 @@ import { getCompanionState } from '../../../domain/reset/companionState';
 import { completeResetDay } from '../../../application/reset/completeResetDay';
 import { getJourneyQuote, getJourneySignLine } from '../data/journeyCopy';
 import {
+  getJourneyMountainRect,
   getJourneyStageLayout,
+  getJourneyTreeLeftRect,
+  getJourneyTreeRightRect,
   getJourneyVisibleDays,
   JOURNEY_BUSH_ART,
   JOURNEY_DAY1_ANCHORS,
   JOURNEY_MASCOT_ART,
+  JOURNEY_MOUNTAIN_ART,
+  JOURNEY_MOUNTAIN_LAYOUT,
   JOURNEY_SIGN_ART,
+  JOURNEY_TREE_LEFT_ART,
+  JOURNEY_TREE_LEFT_LAYOUT,
+  JOURNEY_TREE_RIGHT_ART,
+  JOURNEY_TREE_RIGHT_LAYOUT,
   splitJourneyTaskTitle,
 } from '../layout/journeyStageLayout';
 import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
@@ -34,6 +43,15 @@ import {
   getJourneySkyRest,
 } from './getJourneySkyEntrance';
 import { getJourneyDayState } from './getJourneyDayState';
+import { getJourneySeason } from './getJourneySeason';
+import { shortenSheetDescription } from './shortenSheetDescription';
+import {
+  getJourneyCheckInDates,
+  getJourneyHeatmap,
+  getJourneyMilestoneTrack,
+  getJourneyShowUpMessage,
+  getJourneyStats,
+} from './getJourneyStats';
 import { getJourneyProgression } from './getJourneyProgression';
 import {
   getJourneyParallaxOffset,
@@ -245,7 +263,7 @@ const startedModel = getJourneySheetModel({
 });
 check(
   '13. started current CTA is Complete',
-  startedModel.cta === 'complete' && startedModel.ctaLabel === "complete today's reset →",
+  startedModel.cta === 'complete' && startedModel.ctaLabel === "Complete today's reset",
 );
 
 const completedCurrentModel = getJourneySheetModel({
@@ -386,6 +404,86 @@ check(
   ),
 );
 
+const mountains390 = getJourneyMountainRect(390, 500);
+const mountains430 = getJourneyMountainRect(430, 560);
+const mountainsShort = getJourneyMountainRect(320, 400);
+check(
+  'mountains stay 14% wider than the environment and keep the art aspect',
+  Math.abs(mountains390.width / 390 - JOURNEY_MOUNTAIN_LAYOUT.widthScale) < 1e-9 &&
+    Math.abs(mountains390.left - (390 - mountains390.width) / 2) < 1e-9 &&
+    Math.abs(
+      mountains390.width / mountains390.height -
+        JOURNEY_MOUNTAIN_ART.width / JOURNEY_MOUNTAIN_ART.height,
+    ) < 1e-9,
+);
+
+check(
+  'mountains lift into the lower-middle and stay behind the center opening',
+  Math.abs(mountains390.bottom / 500 - JOURNEY_MOUNTAIN_LAYOUT.bottom) < 1e-9 &&
+    mountains390.bottom > 0 &&
+    500 - mountains390.bottom - mountains390.height > 500 * 0.14,
+);
+
+check(
+  'wide phones crop the mountain sides without changing the composition',
+  Math.abs(mountains430.width / 430 - mountains390.width / 390) < 1e-9 &&
+    Math.abs(mountains430.left / 430 - mountains390.left / 390) < 1e-9 &&
+    mountains430.left < 0 &&
+    Math.abs(mountainsShort.width / 320 - mountains390.width / 390) < 1e-9,
+);
+
+const treeLeft320 = getJourneyTreeLeftRect(320, 400);
+const treeLeft390 = getJourneyTreeLeftRect(390, 500);
+const treeLeft430 = getJourneyTreeLeftRect(430, 560);
+const treeVisibleRight = (tree: { left: number; width: number }) =>
+  tree.left + tree.width * JOURNEY_TREE_LEFT_ART.contentRight;
+check(
+  'left tree stays 90% of the environment, lifted, and keeps the art aspect',
+  Math.abs(treeLeft390.width / 390 - JOURNEY_TREE_LEFT_LAYOUT.widthScale) < 1e-9 &&
+    treeLeft390.left < 0 &&
+    Math.abs(
+      treeLeft390.width / treeLeft390.height -
+        JOURNEY_TREE_LEFT_ART.width / JOURNEY_TREE_LEFT_ART.height,
+    ) < 1e-9,
+);
+
+check(
+  'narrow phones crop more of the left tree; wide phones reveal more without shrinking it',
+  Math.abs(treeLeft320.width / 320 - treeLeft390.width / 390) < 1e-9 &&
+    Math.abs(treeLeft430.width / 430 - treeLeft390.width / 390) < 1e-9 &&
+    treeLeft320.left / treeLeft320.width < treeLeft390.left / treeLeft390.width &&
+    treeVisibleRight(treeLeft430) / 430 > treeVisibleRight(treeLeft390) / 390 &&
+    treeVisibleRight(treeLeft390) / 390 < JOURNEY_DAY1_ANCHORS.day1X,
+);
+
+const treeRight320 = getJourneyTreeRightRect(320, 400);
+const treeRight390 = getJourneyTreeRightRect(390, 500);
+const treeRight430 = getJourneyTreeRightRect(430, 560);
+const treeVisibleLeft = (environmentWidth: number, tree: { right: number; width: number }) =>
+  environmentWidth - tree.width - tree.right + tree.width * JOURNEY_TREE_RIGHT_ART.contentLeft;
+check(
+  'right foliage stays 52% of the environment, lifted lower than the left tree, and keeps the art aspect',
+  Math.abs(treeRight390.width / 390 - JOURNEY_TREE_RIGHT_LAYOUT.widthScale) < 1e-9 &&
+    treeRight390.bottom > 0 &&
+    treeRight390.right < 0 &&
+    treeRight390.height < treeLeft390.height &&
+    500 - treeRight390.bottom - treeRight390.height >
+      500 - treeLeft390.bottom - treeLeft390.height &&
+    Math.abs(
+      treeRight390.width / treeRight390.height -
+        JOURNEY_TREE_RIGHT_ART.width / JOURNEY_TREE_RIGHT_ART.height,
+    ) < 1e-9,
+);
+
+check(
+  'narrow phones crop more of the right foliage; wide phones reveal more without shrinking it',
+  Math.abs(treeRight320.width / 320 - treeRight390.width / 390) < 1e-9 &&
+    Math.abs(treeRight430.width / 430 - treeRight390.width / 390) < 1e-9 &&
+    treeRight320.right / treeRight320.width < treeRight390.right / treeRight390.width &&
+    treeVisibleLeft(430, treeRight430) / 430 < treeVisibleLeft(390, treeRight390) / 390 &&
+    treeVisibleLeft(390, treeRight390) / 390 > JOURNEY_DAY1_ANCHORS.day1X,
+);
+
 check(
   'wide phones scale the mascot without changing the composition',
   stage430.mascot.height > stage390.mascot.height &&
@@ -417,7 +515,7 @@ const idleModel = getJourneySheetModel({
 });
 check(
   'unstarted current CTA is Start',
-  idleModel.cta === 'start' && idleModel.ctaLabel === "start today's reset →",
+  idleModel.cta === 'start' && idleModel.ctaLabel === "Start today's reset",
 );
 
 check(
@@ -482,9 +580,50 @@ check(
   getJourneyProgression({ currentDay: 5, acknowledgedDay: 1 }).kind === 'snap',
 );
 
+const completeWalk = getJourneyProgression({
+  currentDay: 3,
+  acknowledgedDay: 3,
+  todayCompleted: true,
+});
 check(
-  'completing today is not a visual day advance',
-  getJourneyProgression({ currentDay: 3, acknowledgedDay: 3 }).kind === 'idle',
+  'completing today walks to the next day',
+  completeWalk.kind === 'advance' && completeWalk.fromDay === 3 && completeWalk.toDay === 4,
+);
+
+check(
+  'first Journey visit after completing today walks instead of bootstrapping',
+  getJourneyProgression({
+    currentDay: 1,
+    acknowledgedDay: null,
+    todayCompleted: true,
+  }).kind === 'advance',
+);
+
+check(
+  'completing day 30 stays idle',
+  getJourneyProgression({
+    currentDay: 30,
+    acknowledgedDay: 30,
+    todayCompleted: true,
+  }).kind === 'idle',
+);
+
+check(
+  'after the completion walk, the mascot rests',
+  getJourneyProgression({
+    currentDay: 1,
+    acknowledgedDay: 2,
+    todayCompleted: true,
+  }).kind === 'idle',
+);
+
+check(
+  'next calendar day stays idle after the completion walk',
+  getJourneyProgression({
+    currentDay: 2,
+    acknowledgedDay: 2,
+    todayCompleted: false,
+  }).kind === 'idle',
 );
 
 check(
@@ -565,7 +704,7 @@ const readyModel = getJourneySheetModel({
 });
 check(
   'READY current day exposes Start',
-  readyModel.cta === 'start' && readyModel.ctaLabel === "start today's reset →",
+  readyModel.cta === 'start' && readyModel.ctaLabel === "Start today's reset",
 );
 
 const startedOnceMore = applyJourneySheetAction(startedBySheet, 'start');
@@ -623,12 +762,28 @@ check(
   getCompanionState(completedBySheet) === 'completed',
 );
 
+const afterCompleteWalk = getJourneyProgression({
+  currentDay: completedBySheet.currentDay,
+  acknowledgedDay: completedBySheet.currentDay,
+  todayCompleted: completedBySheet.todayCompleted,
+});
+const nextDayModel = getJourneySheetModel({
+  day: 2,
+  currentDay: completedBySheet.currentDay,
+  completedDays: completedBySheet.completedDays,
+  todayStarted: completedBySheet.todayStarted,
+  todayCompleted: completedBySheet.todayCompleted,
+  personalization: defaultPersonalization,
+  rememberLine: SOFT_RESTARTER_LINE,
+});
 check(
-  'completing today is still not a visual day advance',
-  getJourneyProgression({
-    currentDay: completedBySheet.currentDay,
-    acknowledgedDay: completedBySheet.currentDay,
-  }).kind === 'idle',
+  'completing today walks the mascot without unlocking tomorrow',
+  afterCompleteWalk.kind === 'advance' &&
+    afterCompleteWalk.fromDay === 1 &&
+    afterCompleteWalk.toDay === 2 &&
+    completedBySheet.currentDay === 1 &&
+    nextDayModel.kind === 'future' &&
+    nextDayModel.cta === 'none',
 );
 
 function completeCurrentDay(
@@ -714,6 +869,89 @@ check(
     afterJournal.currentDay === 1 &&
     afterJournal.completedDays.length === 0 &&
     afterJournal.reflections.length === 1,
+);
+
+check(
+  'season follows Northern Hemisphere months',
+  getJourneySeason(new Date(2026, 2, 1)) === 'spring' &&
+    getJourneySeason(new Date(2026, 4, 31)) === 'spring' &&
+    getJourneySeason(new Date(2026, 5, 1)) === 'summer' &&
+    getJourneySeason(new Date(2026, 7, 31)) === 'summer' &&
+    getJourneySeason(new Date(2026, 8, 1)) === 'autumn' &&
+    getJourneySeason(new Date(2026, 9, 5)) === 'autumn' &&
+    getJourneySeason(new Date(2026, 10, 30)) === 'autumn' &&
+    getJourneySeason(new Date(2026, 11, 1)) === 'winter' &&
+    getJourneySeason(new Date(2027, 1, 28)) === 'winter',
+);
+
+const statsInput = {
+  completedDays: [1, 2, 3, 4],
+  completionDates: { 2: '2026-10-03', 3: '2026-10-04', 4: '2026-10-05' },
+  lastCompletedOn: '2026-10-05',
+  streak: 3,
+  resetStartedOn: '2026-09-29',
+  today: '2026-10-06',
+};
+const stats = getJourneyStats(statsInput);
+check(
+  'stats: live streak, check-ins from plan days, consistency over elapsed days',
+  stats.streak === 3 && stats.checkIns === 4 && stats.consistency === 50,
+);
+check(
+  'stats: a streak whose last check-in is older than yesterday shows 0',
+  getJourneyStats({ ...statsInput, today: '2026-10-08' }).streak === 0,
+);
+check(
+  'stats: no start date means 0% consistency',
+  getJourneyStats({ ...statsInput, resetStartedOn: null }).consistency === 0,
+);
+const heatmap = getJourneyHeatmap(getJourneyCheckInDates(statsInput), '2026-10-06', 6);
+const lastWeek = heatmap[heatmap.length - 1];
+const filledKeys = heatmap.flatMap((week) =>
+  week.cells.flatMap((cell) => (cell.kind === 'day' && cell.checkedIn ? [cell.dateKey] : [])),
+);
+check(
+  'heatmap: columns end on the current week, future days are blank, only real dates fill',
+  heatmap.length === 6 &&
+    lastWeek?.cells[1]?.kind === 'day' &&
+    lastWeek.cells[1].isToday &&
+    lastWeek.cells[2]?.kind === 'future' &&
+    filledKeys.join(',') === '2026-10-03,2026-10-04,2026-10-05',
+);
+check(
+  'heatmap: month labels mark new months and drop one crowded by the next',
+  heatmap[0]?.monthLabel === null &&
+    heatmap
+      .filter((week) => week.monthLabel !== null)
+      .map((week) => week.monthLabel)
+      .join(',') === 'Sep,Oct',
+);
+
+const twoDays = getJourneyMilestoneTrack(2);
+check(
+  'milestones: current count, then 7 and 30 days; lines fill toward the next one',
+  twoDays.milestones.map((m) => `${m.days}:${m.reached}`).join(',') === '2:true,7:false,30:false' &&
+    Math.abs((twoDays.segmentFill[0] ?? 0) - 2 / 7) < 1e-9 &&
+    twoDays.segmentFill[1] === 0 &&
+    getJourneyMilestoneTrack(0).milestones[0]?.label === 'Start today' &&
+    getJourneyMilestoneTrack(30).milestones.every((m) => m.reached),
+);
+check(
+  'show-up message counts once, twice, then numbers',
+  getJourneyShowUpMessage(1).title === "You've shown up once." &&
+    getJourneyShowUpMessage(2).title === "You've shown up twice." &&
+    getJourneyShowUpMessage(5).title === "You've shown up 5 times.",
+);
+
+check(
+  'pop-up description keeps one sentence, or two when the first is very short',
+  shortenSheetDescription(
+    'Use this reset as-is. Do not start a better version of it today. Showing up once still counts.',
+  ) === 'Use this reset as-is. Do not start a better version of it today.' &&
+    shortenSheetDescription(
+      'Change one thing so coming back tomorrow does not need a fresh start. Keep it small.',
+    ) === 'Change one thing so coming back tomorrow does not need a fresh start.' &&
+    shortenSheetDescription('No ending punctuation here') === 'No ending punctuation here',
 );
 
 if (failed > 0) {

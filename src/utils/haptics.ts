@@ -22,8 +22,17 @@ export function hapticDeselection(): Promise<void> {
   return play(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft));
 }
 
-/** Soft typewriter tick. Native uses selection haptics; web uses a tiny vibrate. */
+const TYPEWRITER_TICK_GAP_MS = 100;
+let lastTypewriterTickAt = 0;
+
+/** Light typewriter tap. Throttled so iOS does not drop back-to-back ticks. */
 export function hapticTypewriterTick(): Promise<void> {
+  const now = Date.now();
+  if (now - lastTypewriterTickAt < TYPEWRITER_TICK_GAP_MS) {
+    return Promise.resolve();
+  }
+  lastTypewriterTickAt = now;
+
   if (Platform.OS === 'web') {
     if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
       navigator.vibrate(12);
@@ -31,7 +40,35 @@ export function hapticTypewriterTick(): Promise<void> {
     return Promise.resolve();
   }
 
-  return play(() => Haptics.selectionAsync());
+  return play(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light));
+}
+
+const EXCITEMENT_TICK_GAP_MS = 70;
+let lastExcitementTickAt = 0;
+let excitementTickCount = 0;
+
+/** Stronger typewriter rumble for an excited reply. */
+export function hapticTypewriterExcitement(): Promise<void> {
+  const now = Date.now();
+  if (now - lastExcitementTickAt < EXCITEMENT_TICK_GAP_MS) {
+    return Promise.resolve();
+  }
+  lastExcitementTickAt = now;
+  excitementTickCount += 1;
+
+  if (Platform.OS === 'web') {
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      navigator.vibrate([16, 18, 24]);
+    }
+    return Promise.resolve();
+  }
+
+  const style =
+    excitementTickCount % 2 === 0
+      ? Haptics.ImpactFeedbackStyle.Medium
+      : Haptics.ImpactFeedbackStyle.Heavy;
+
+  return play(() => Haptics.impactAsync(style));
 }
 
 export function hapticImpact(

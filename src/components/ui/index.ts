@@ -1,7 +1,7 @@
 export { AppHeader } from './AppHeader';
 export { NoticeDialog } from './NoticeDialog';
 export { IconRow } from './IconRow';
-export { AppTabBar, getTabBarScenePadding } from './AppTabBar';
+export { AppTabBar, getTabBarScenePadding, TAB_BAR_CONTENT_INSET } from './AppTabBar';
 export { PrimaryButton } from './Button';
 export { AnimatedChoiceCard, ChoiceCard } from './ChoiceCard';
 export { MainTabHeader } from './MainTabHeader';

@@ -52,6 +52,7 @@ export function mapSnapshotToCycleWrite(snapshot: ResetSnapshot): CloudCycleWrit
  * Completion date rule (Phase 4D):
  *
  * - One row per local day in completedDays.
+ * - A day with a recorded `completionDates` entry sends that real date.
  * - Historical `completed_on` is NULL when the real calendar date is unknown.
  * - If `lastCompletedOn` is a valid YYYY-MM-DD and the latest completed day
  *   (`max(completedDays)`) is known, that single latest row may receive
@@ -61,15 +62,19 @@ export function mapSnapshotToCycleWrite(snapshot: ResetSnapshot): CloudCycleWrit
 export function mapCompletedDaysToCloud(
   completedDays: readonly number[],
   lastCompletedOn: string | null,
+  completionDates?: Partial<Record<number, string>>,
 ): CloudCompletionWrite[] {
   const days = uniquePlanDays(completedDays);
   const latestDay = days[days.length - 1];
   const latestDate = isValidCalendarDate(lastCompletedOn) ? lastCompletedOn : null;
 
-  return days.map((localDay) => ({
-    localDay,
-    completedOn: latestDay === localDay ? latestDate : null,
-  }));
+  return days.map((localDay) => {
+    const recorded = completionDates?.[localDay];
+    if (isValidCalendarDate(recorded)) {
+      return { localDay, completedOn: recorded };
+    }
+    return { localDay, completedOn: latestDay === localDay ? latestDate : null };
+  });
 }
 
 export function mapSnapshotToCloudPayload(snapshot: ResetSnapshot): {
@@ -78,7 +83,11 @@ export function mapSnapshotToCloudPayload(snapshot: ResetSnapshot): {
 } {
   return {
     cycle: mapSnapshotToCycleWrite(snapshot),
-    completions: mapCompletedDaysToCloud(snapshot.completedDays, snapshot.lastCompletedOn),
+    completions: mapCompletedDaysToCloud(
+      snapshot.completedDays,
+      snapshot.lastCompletedOn,
+      snapshot.completionDates,
+    ),
   };
 }
 

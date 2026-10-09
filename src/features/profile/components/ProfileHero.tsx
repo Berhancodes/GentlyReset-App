@@ -1,40 +1,38 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { AppText, ProgressBar } from '@/components/ui';
-import { colors, radius, spacing } from '@/design-system';
+import { colors, spacing } from '@/design-system';
 import { PLAN_DAY_COUNT } from '@/features/reset/data/thirtyDayPlan';
 
-const YOU_MASCOT = require('../../../../assets/images/app/you-mascot.png');
-const MASCOT_ASPECT_RATIO = 1536 / 1024;
+/** Autumn scene with the mascot, cut from the "you" mockup (572 x 174). */
+const YOU_HERO = require('../../../../assets/profile/you-hero-autumn.png');
+const HERO_ASPECT_RATIO = 572 / 174;
+/** Same cap as the profile column. */
+const HERO_MAX_WIDTH = 430;
 
 type ProfileHeroProps = {
   name: string;
   shortSummary: string;
-  resetApproach: string;
   currentDay: number;
   progress: number;
 };
 
-export function ProfileHero({
-  name,
-  shortSummary,
-  resetApproach,
-  currentDay,
-  progress,
-}: ProfileHeroProps) {
+export function ProfileHero({ name, shortSummary, currentDay, progress }: ProfileHeroProps) {
   const safeDay = Math.min(PLAN_DAY_COUNT, Math.max(1, currentDay));
-  const approach = resetApproach.trim().length > 0 ? resetApproach : 'one thing at a time';
+  const { width: windowWidth } = useWindowDimensions();
+  // Full screen width so the hills reach both edges, past the column padding.
+  const heroWidth = Math.min(windowWidth, HERO_MAX_WIDTH);
 
   return (
     <View style={styles.root}>
       <Image
-        source={YOU_MASCOT}
+        source={YOU_HERO}
         accessibilityLabel={`${name} artwork`}
         accessibilityIgnoresInvertColors
         resizeMode="contain"
-        style={styles.mascot}
+        style={[styles.hero, { width: heroWidth, height: heroWidth / HERO_ASPECT_RATIO }]}
       />
-      <AppText variant="title" align="center">
+      <AppText variant="profileName" align="center">
         {name}
       </AppText>
       <View style={styles.progressBlock}>
@@ -46,26 +44,21 @@ export function ProfileHero({
           accessibilityLabel="30-day reset progress"
           fillColor={colors.progress.fillGold}
           trackColor={colors.progress.trackStrong}
-          thickness={spacing.xxs}
+          thickness={spacing.xs}
         />
       </View>
       <AppText variant="body" color="secondary" align="center">
-        {shortSummary}
+        {toSentenceCase(shortSummary)}
       </AppText>
-      <View
-        style={styles.pill}
-        accessibilityRole="text"
-        accessibilityLabel={`your reset. ${approach}`}
-      >
-        <AppText variant="label" color="gold" align="center">
-          YOUR RESET
-        </AppText>
-        <AppText variant="caption" color="primary" align="center">
-          {approach}
-        </AppText>
-      </View>
     </View>
   );
+}
+
+/** Capitalizes the first letter of each sentence; profile copy is stored lowercase. */
+function toSentenceCase(text: string): string {
+  return text.replace(/(^|[.!?]\s+)([a-z])/g, (_, lead: string, letter: string) => {
+    return `${lead}${letter.toUpperCase()}`;
+  });
 }
 
 const styles = StyleSheet.create({
@@ -73,25 +66,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
   },
-  mascot: {
-    width: '92%',
-    aspectRatio: MASCOT_ASPECT_RATIO,
-    maxHeight: spacing.xxxl * 4,
-    marginTop: -spacing.sm,
+  hero: {
+    marginBottom: spacing.xs,
   },
   progressBlock: {
-    width: '46%',
-    minWidth: spacing.xxxl + spacing.xxl,
+    width: '62%',
     gap: spacing.xs,
     alignItems: 'stretch',
-  },
-  pill: {
-    alignItems: 'center',
-    gap: spacing.xxs,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.pill,
-    backgroundColor: colors.tint.gold,
-    maxWidth: '92%',
   },
 });

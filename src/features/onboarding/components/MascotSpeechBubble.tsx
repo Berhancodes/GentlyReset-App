@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { type AnimatedStyle, useReducedMotion } from 'react-native-reanimated';
+import Animated, {
+  type AnimatedStyle,
+  LinearTransition,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { AppText } from '@/components/ui';
 import { colors, motion, radius, shadows, spacing, type TextVariant } from '@/design-system';
@@ -8,7 +17,9 @@ import {
   type TypewriterLine,
   useStagedTypewriter,
 } from '@/features/onboarding/hooks/useStagedTypewriter';
-import { hapticTypewriterTick } from '@/utils/haptics';
+import { hapticSuccess, hapticTypewriterExcitement, hapticTypewriterTick } from '@/utils/haptics';
+
+type BubbleHaptic = 'tick' | 'excitement' | false;
 
 type BubbleLine = TypewriterLine & {
   variant: TextVariant;
@@ -21,13 +32,21 @@ type MascotSpeechBubbleProps = {
   showingReply: boolean;
   askStyle: AnimatedStyle<{ opacity: number }>;
   replyStyle: AnimatedStyle<{ opacity: number }>;
+  tailOffset: number;
   onAskComplete?: () => void;
   onReplyComplete: () => void;
 };
 
-const bubblePaddingHorizontal = spacing.md;
-const bubblePaddingVertical = spacing.sm;
+/** Same shape as the Home bubble: roomy padding, round corners, soft rounded tail. */
+const bubblePaddingHorizontal = 20;
+const bubblePaddingVertical = spacing.md;
 const bubbleFill = colors.surface.raised;
+const TAIL_WIDTH = 16;
+const TAIL_HEIGHT = 11;
+const TAIL_SQUARE = 14;
+/** When the mascot switches from asking to replying, the bubble dips then springs back. */
+const SWAP_DIP = 0.95;
+const SWAP_SPRING = { damping: 12, stiffness: 260 } as const;
 const typingStartDelayMs = motion.delay.bubbleReveal + 80;
 
 export function MascotSpeechBubble({
@@ -37,20 +56,35 @@ export function MascotSpeechBubble({
   showingReply,
   askStyle,
   replyStyle,
+  tailOffset,
   onAskComplete,
   onReplyComplete,
 }: MascotSpeechBubbleProps) {
   const reduceMotion = useReducedMotion();
   const [canType, setCanType] = useState(reduceMotion === true);
+  const swapPop = useSharedValue(1);
+  const wasShowingReply = useRef(showingReply);
+
+  useEffect(() => {
+    if (showingReply && !wasShowingReply.current && !reduceMotion) {
+      swapPop.value = withSequence(
+        withTiming(SWAP_DIP, { duration: motion.duration.homeBubbleSwapOut }),
+        withSpring(1, SWAP_SPRING),
+      );
+    }
+    wasShowingReply.current = showingReply;
+  }, [reduceMotion, showingReply, swapPop]);
+
+  const swapStyle = useAnimatedStyle(() => ({ transform: [{ scale: swapPop.value }] }));
   const askLines = useMemo<readonly BubbleLine[]>(
     () => [
       { id: 'greeting', text: askGreeting, variant: 'mascotSpeechGreeting' },
-      { id: 'question', text: askQuestion, variant: 'body' },
+      { id: 'question', text: askQuestion, variant: 'mascotSpeechGreeting' },
     ],
     [askGreeting, askQuestion],
   );
   const replyLines = useMemo<readonly BubbleLine[]>(
-    () => [{ id: 'reply', text: reply, variant: 'body' }],
+    () => [{ id: 'reply', text: reply, variant: 'mascotSpeechGreeting' }],
     [reply],
   );
 
@@ -67,49 +101,62 @@ export function MascotSpeechBubble({
     };
   }, [reduceMotion]);
 
+  // The bubble is sized by whatever line is showing right now, so it hugs the
+  // question first and then the reply.
+  const currentLines = showingReply && reply.length > 0 ? replyLines : askLines;
+
   return (
-    <View
+    <Animated.View
       accessible
       accessibilityRole="text"
       accessibilityLiveRegion="polite"
       accessibilityLabel={showingReply ? reply : `${askGreeting}. ${askQuestion}`}
-      style={styles.root}
+      style={[styles.root, swapStyle]}
     >
-      <View accessibilityElementsHidden importantForAccessibility="no" style={styles.tail} />
-      <View style={styles.card}>
-        <Animated.View style={[styles.copyLayer, askStyle]}>
-          <View accessibilityElementsHidden importantForAccessibility="no" style={styles.reserve}>
-            {askLines.map((line) => (
-              <AppText
-                key={`reserve-${line.id}`}
-                variant={line.variant}
-                color="primary"
-                align="left"
-              >
-                {line.text}
-              </AppText>
-            ))}
-          </View>
-          <View pointerEvents="none" style={styles.typedOverlay}>
-            {canType ? (
-              <TypedBubbleLines
-                lines={askLines}
-                haptic={!showingReply}
-                onComplete={onAskComplete}
-              />
-            ) : null}
-          </View>
-        </Animated.View>
-        <Animated.View
-          pointerEvents={showingReply ? 'auto' : 'none'}
-          style={[styles.copyLayer, styles.replyLayer, replyStyle]}
-        >
-          {canType && showingReply && reply.length > 0 ? (
-            <TypedBubbleLines key={reply} lines={replyLines} haptic onComplete={onReplyComplete} />
+      <View
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+        style={[styles.tailClip, { left: tailOffset - TAIL_WIDTH / 2 }]}
+      >
+        <View style={styles.tail} />
+      </View>
+      <Animated.View
+        style={styles.card}
+        layout={reduceMotion ? undefined : LinearTransition.springify().damping(18).stiffness(220)}
+      >
+        <View accessibilityElementsHidden importantForAccessibility="no" style={styles.reserve}>
+          {currentLines.map((line) => (
+            <AppText
+              key={`reserve-${line.id}`}
+              variant={line.variant}
+              color="primary"
+              align="center"
+            >
+              {line.text}
+            </AppText>
+          ))}
+        </View>
+        <Animated.View pointerEvents="none" style={[styles.copyLayer, askStyle]}>
+          {canType ? (
+            <TypedBubbleLines
+              lines={askLines}
+              haptic={showingReply ? false : 'tick'}
+              onComplete={onAskComplete}
+            />
           ) : null}
         </Animated.View>
-      </View>
-    </View>
+        <Animated.View pointerEvents="none" style={[styles.copyLayer, replyStyle]}>
+          {canType && showingReply && reply.length > 0 ? (
+            <TypedBubbleLines
+              key={reply}
+              lines={replyLines}
+              haptic="excitement"
+              onComplete={onReplyComplete}
+            />
+          ) : null}
+        </Animated.View>
+      </Animated.View>
+    </Animated.View>
   );
 }
 
@@ -119,7 +166,7 @@ function TypedBubbleLines({
   onComplete,
 }: {
   lines: readonly BubbleLine[];
-  haptic: boolean;
+  haptic: BubbleHaptic;
   onComplete?: () => void;
 }) {
   const { isComplete, visibleText } = useStagedTypewriter(lines);
@@ -141,6 +188,10 @@ function TypedBubbleLines({
     const added = spoken.slice(previousSpoken.current.length);
     previousSpoken.current = spoken;
     if ([...added].some((character) => character.trim() !== '')) {
+      if (haptic === 'excitement') {
+        void hapticTypewriterExcitement();
+        return;
+      }
       void hapticTypewriterTick();
     }
   }, [haptic, spoken]);
@@ -148,14 +199,17 @@ function TypedBubbleLines({
   useEffect(() => {
     if (isComplete && !completedRef.current) {
       completedRef.current = true;
+      if (haptic === 'excitement') {
+        void hapticSuccess();
+      }
       onComplete?.();
     }
-  }, [isComplete, onComplete]);
+  }, [haptic, isComplete, onComplete]);
 
   return (
-    <View accessibilityElementsHidden importantForAccessibility="no">
+    <View accessibilityElementsHidden importantForAccessibility="no" style={styles.typedLines}>
       {lines.map((line, index) => (
-        <AppText key={line.id} variant={line.variant} color="primary" align="left">
+        <AppText key={line.id} variant={line.variant} color="primary" align="center">
           {visibleText(index)}
         </AppText>
       ))}
@@ -164,50 +218,53 @@ function TypedBubbleLines({
 }
 
 const styles = StyleSheet.create({
+  /** Full anchor width so the tail can point at the head; the card itself hugs its text. */
   root: {
     width: '100%',
+    alignItems: 'center',
     overflow: 'visible',
   },
   card: {
     zIndex: 1,
-    minWidth: 0,
-    borderRadius: radius.xl,
+    maxWidth: '100%',
+    borderRadius: radius.homeBubble,
     backgroundColor: bubbleFill,
     paddingHorizontal: bubblePaddingHorizontal,
     paddingVertical: bubblePaddingVertical,
-    ...shadows.whisper,
+    ...shadows.homeBubble,
   },
-  copyLayer: {
-    gap: spacing.none,
-    minWidth: 0,
-    width: '100%',
-  },
+  /** Invisible copy of the current line; it alone decides the card's size. */
   reserve: {
     opacity: 0,
+    alignItems: 'center',
   },
-  typedOverlay: {
-    ...StyleSheet.absoluteFill,
-  },
-  replyLayer: {
+  /** Typed text sits over the reserve, inside the card's padding. */
+  copyLayer: {
     ...StyleSheet.absoluteFill,
     paddingHorizontal: bubblePaddingHorizontal,
     paddingVertical: bubblePaddingVertical,
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  tail: {
+  typedLines: {
+    alignItems: 'center',
+  },
+  /** Rounded tail like the Home bubble: the bottom half of a soft rotated square. */
+  tailClip: {
     position: 'absolute',
-    zIndex: 0,
-    left: 8,
-    bottom: -10,
-    width: 0,
-    height: 0,
-    borderStyle: 'solid',
-    borderLeftWidth: 4,
-    borderRightWidth: 18,
-    borderTopWidth: 18,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderTopColor: colors.surface.raised,
-    transform: [{ rotate: '10deg' }],
+    zIndex: 2,
+    bottom: -(TAIL_HEIGHT - 2),
+    width: TAIL_WIDTH,
+    height: TAIL_HEIGHT,
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  tail: {
+    width: TAIL_SQUARE,
+    height: TAIL_SQUARE,
+    marginTop: -(TAIL_SQUARE / 2) + 1,
+    borderRadius: 2,
+    backgroundColor: bubbleFill,
+    transform: [{ rotate: '45deg' }],
   },
 });

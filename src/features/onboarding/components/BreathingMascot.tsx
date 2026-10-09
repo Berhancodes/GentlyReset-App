@@ -13,7 +13,7 @@ const ART_ASPECT = ART_WIDTH / ART_HEIGHT;
 const MASCOT_SIZE_SCALE = 1.2;
 const MASCOT_MAX_WIDTH = Math.round(200 * MASCOT_SIZE_SCALE);
 const MASCOT_HEIGHT_FRACTION = 0.24 * MASCOT_SIZE_SCALE;
-const MASCOT_LOWER_OFFSET_FRACTION = 0.1;
+const MASCOT_LOWER_OFFSET_FRACTION = 0;
 
 /**
  * Reminder-screen mascot. Plays the supplied breath loop unless Reduce Motion is on.

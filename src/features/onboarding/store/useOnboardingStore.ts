@@ -23,6 +23,8 @@ type OnboardingState = {
   currentStepIndex: number;
   answers: Record<string, OnboardingAnswer>;
   hasCompletedOnboarding: boolean;
+  /** Temporary Home access until auth / billing is wired. */
+  hasLocalAppAccess: boolean;
 };
 
 type OnboardingActions = {
@@ -33,6 +35,7 @@ type OnboardingActions = {
   goToStep: (index: number) => void;
   canContinue: (step: OnboardingStep) => boolean;
   completeOnboarding: () => void;
+  grantLocalAppAccess: () => void;
   resetOnboarding: () => void;
 };
 
@@ -40,6 +43,7 @@ const initialState: OnboardingState = {
   currentStepIndex: 0,
   answers: {},
   hasCompletedOnboarding: false,
+  hasLocalAppAccess: false,
 };
 
 export const useOnboardingStore = create<OnboardingState & OnboardingActions>()(
@@ -86,6 +90,7 @@ export const useOnboardingStore = create<OnboardingState & OnboardingActions>()(
       goToStep: (index) => set({ currentStepIndex: clampStepIndex(index) }),
       canContinue: (step) => canProceed(step, get().answers[step.id]),
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),
+      grantLocalAppAccess: () => set({ hasLocalAppAccess: true }),
       resetOnboarding: () => {
         useResetStore.getState().clearReset();
         useJourneyVisualStore.getState().clearJourneyVisual();
@@ -103,6 +108,7 @@ export const useOnboardingStore = create<OnboardingState & OnboardingActions>()(
         currentStepId: ONBOARDING_STEPS[state.currentStepIndex]?.id,
         answers: state.answers,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
+        hasLocalAppAccess: state.hasLocalAppAccess,
       }),
     },
   ),

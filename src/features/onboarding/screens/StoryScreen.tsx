@@ -128,6 +128,8 @@ export function StoryScreen({ step }: StoryScreenProps) {
   const hideStillIllustration =
     showBreathingScene || showNoticingScene || showNewLifeScene || showCompanionScene;
   const companionOpacity = useSharedValue(1);
+  const breathingOpacity = useSharedValue(reduceMotion ? 1 : 0);
+  const breathingStarted = useRef(false);
 
   const handleCompanionFinished = useCallback(() => {
     if (companionFinished.current) {
@@ -143,6 +145,20 @@ export function StoryScreen({ step }: StoryScreenProps) {
   const handleReadyFinished = useCallback(() => {
     setReadyCopyDone(true);
   }, []);
+  const handleBreathingCopyFinished = () => {
+    if (breathingStarted.current) {
+      return;
+    }
+    breathingStarted.current = true;
+    if (reduceMotion) {
+      breathingOpacity.value = 1;
+      return;
+    }
+    breathingOpacity.value = withTiming(1, {
+      duration: motion.duration.mascotFade,
+      easing: Easing.out(Easing.cubic),
+    });
+  };
   useEffect(() => {
     if (copyPhase !== 'erasing') {
       return;
@@ -164,6 +180,9 @@ export function StoryScreen({ step }: StoryScreenProps) {
   const companionFadeStyle = useAnimatedStyle(() => ({
     opacity: companionOpacity.value,
   }));
+  const breathingFadeStyle = useAnimatedStyle(() => ({
+    opacity: breathingOpacity.value,
+  }));
 
   return (
     <OnboardingScreenLayout
@@ -174,6 +193,8 @@ export function StoryScreen({ step }: StoryScreenProps) {
       illustrationSize={step.illustrationSize ?? 'large'}
       illustrationPlacement="end"
       skipStorySpacer={showCompanionScene}
+      compact
+      scrollEnabled={false}
       hideProgress
       onBack={canGoBack ? goBack : undefined}
       footer={
@@ -223,9 +244,21 @@ export function StoryScreen({ step }: StoryScreenProps) {
           ) : null}
         </View>
       ) : (
-        <StoryCopy lines={lines} />
+        <StoryCopy
+          lines={lines}
+          onFinished={showBreathingScene ? handleBreathingCopyFinished : undefined}
+        />
       )}
-      {showBreathingScene ? <BreathingMascot /> : null}
+      {showBreathingScene ? (
+        <Animated.View
+          pointerEvents="none"
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+          style={breathingFadeStyle}
+        >
+          <BreathingMascot />
+        </Animated.View>
+      ) : null}
       {showNoticingScene ? <NoticingMascot /> : null}
       {showNewLifeScene ? <NewLifeMascot /> : null}
       {showCompanionScene ? (

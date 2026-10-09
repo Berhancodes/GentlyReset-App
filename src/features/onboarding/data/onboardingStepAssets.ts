@@ -11,7 +11,7 @@ import {
 import { ONBOARDING_STEPS } from '@/features/onboarding/data/onboardingSteps';
 import type { OnboardingStep } from '@/features/onboarding/types/onboarding';
 
-const WELCOME_ART = require('../../../../assets/images/onboarding/welcome-first-screen.png');
+const WELCOME_ART = require('../../../../assets/images/onboarding/welcome-sunset.png');
 const MASCOT_RUN = require('../../../../assets/images/onboarding/mascot-run-intro.gif');
 const MASCOT_RUN_FINAL = require('../../../../assets/images/onboarding/mascot-run-intro-final.png');
 const THINKING_ART = require('../../../../assets/images/onboarding/reason/reason-mascot-thinking.png');

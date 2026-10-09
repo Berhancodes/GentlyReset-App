@@ -38,7 +38,7 @@ export function MyResetCard({ facts, onOpenType }: MyResetCardProps) {
         onPress={onOpenType}
         style={({ pressed }) => [styles.header, pressed ? styles.pressed : null]}
       >
-        <AppText variant="optionTitle">my reset</AppText>
+        <AppText variant="navTitle">my reset</AppText>
         <Ionicons name="chevron-forward" size={18} color={colors.text.helper} />
       </Pressable>
       {facts.map((fact) => (

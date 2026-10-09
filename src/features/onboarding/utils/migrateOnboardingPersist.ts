@@ -59,6 +59,7 @@ export type OnboardingPersistedSlice = {
   currentStepId?: string;
   answers?: Record<string, unknown>;
   hasCompletedOnboarding?: boolean;
+  hasLocalAppAccess?: boolean;
 };
 
 function clampStepIndex(index: number): number {
@@ -113,5 +114,6 @@ export function migrateOnboardingPersist(
     currentStepId: currentStep?.id,
     answers: state.answers ?? {},
     hasCompletedOnboarding: completed,
+    hasLocalAppAccess: Boolean(state.hasLocalAppAccess),
   };
 }

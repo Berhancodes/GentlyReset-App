@@ -11,6 +11,8 @@ const colorMap = {
   inverse: colors.text.inverse,
   gold: colors.accent.gold,
   helper: colors.text.helper,
+  home: colors.text.home,
+  homeMuted: colors.text.homeMuted,
 } as const;
 
 export type AppTextColor = keyof typeof colorMap;
@@ -27,8 +29,12 @@ type AppTextProps = Omit<TextProps, 'style'> & {
 const HEADER_VARIANTS: ReadonlySet<TextVariant> = new Set([
   'display',
   'journeyDay',
+  'journeySheetTitle',
+  'profileName',
   'title',
+  'homeGreeting',
   'questionTitle',
+  'questionTitleCompact',
   'storyTitle',
   'journalHero',
   'navTitle',

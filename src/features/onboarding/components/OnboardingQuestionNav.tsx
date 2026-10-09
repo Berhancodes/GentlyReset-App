@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: spacing.xs,
+    paddingTop: spacing.none,
   },
   navSide: {
     width: 44,

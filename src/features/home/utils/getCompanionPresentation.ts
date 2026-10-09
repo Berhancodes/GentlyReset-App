@@ -7,8 +7,7 @@ import { getResetProfile } from '../../../domain/reset/resetProfile';
 import { getHomeGreeting } from './homeCopy';
 
 /**
- * Semantic clips for a future Rive state machine.
- * Home maps these 1:1 later; the reset engine never reads them.
+ * Semantic companion clips. Home maps these 1:1 later; the reset engine never reads them.
  */
 export type CompanionAnimationId =
   'idle' | 'wave' | 'encourage' | 'celebrate' | 'welcome_back' | 'milestone';

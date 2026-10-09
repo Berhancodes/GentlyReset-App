@@ -20,6 +20,12 @@ export type { JournalEntry, JournalMood } from '../../domain/journal/types';
 export type ResetSnapshot = {
   currentDay: number;
   completedDays: number[];
+  /**
+   * Local calendar date (YYYY-MM-DD) each plan day was completed, keyed by plan
+   * day. Recorded from completion onward; days completed before this field
+   * existed have no entry. Never back-filled with guessed dates.
+   */
+  completionDates?: Partial<Record<number, string>>;
   todayCompleted: boolean;
   todayStarted: boolean;
   todayTask: TodayTask;

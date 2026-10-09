@@ -42,6 +42,7 @@ export function applyCompleteToday(state: ResetSnapshot, now: Date): ResetSnapsh
     todayCompleted: true,
     todayStarted: true,
     completedDays: [...rolled.completedDays, rolled.currentDay],
+    completionDates: { ...rolled.completionDates, [rolled.currentDay]: today },
     lastCompletedOn: today,
     streak: Math.min(PLAN_DAY_COUNT, streak),
     missedYesterday: false,

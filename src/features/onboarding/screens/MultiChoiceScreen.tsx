@@ -27,7 +27,10 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
   const selectedIds = answer?.type === 'multiChoice' ? answer.optionIds : [];
   const layout = step.layout ?? 'stacked';
   const isReasonStep = step.id === 'reason';
+  const isThirtyDayStep = step.id === 'thirtyDayOutcome';
   const illustratedGrid = shouldUseIllustratedGrid(step);
+  const denseGrid =
+    illustratedGrid && (isReasonStep || isThirtyDayStep || step.options.length >= 8);
   const useGrid = illustratedGrid || layout === 'grid2' || layout === 'grid3';
   const columns = illustratedGrid || layout === 'grid2' ? 2 : 3;
 
@@ -42,8 +45,13 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
       return (
         <IllustratedChoiceCard
           key={option.id}
+          compact={denseGrid}
           label={option.label}
-          leading={icon ? <OptionIcon source={icon} size={isReasonStep ? 36 : 48} /> : undefined}
+          leading={
+            icon ? (
+              <OptionIcon source={icon} size={denseGrid ? 32 : isReasonStep ? 36 : 40} />
+            ) : undefined
+          }
           selected={selected}
           onPress={onPress}
         />
@@ -63,9 +71,11 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
   });
 
   const options = illustratedGrid ? (
-    <IllustratedChoiceGrid>{cards}</IllustratedChoiceGrid>
+    <IllustratedChoiceGrid compact={denseGrid}>{cards}</IllustratedChoiceGrid>
   ) : useGrid ? (
-    <OptionGrid columns={columns}>{cards}</OptionGrid>
+    <OptionGrid columns={columns} compact={denseGrid}>
+      {cards}
+    </OptionGrid>
   ) : (
     <View style={styles.list}>{cards}</View>
   );
@@ -73,7 +83,9 @@ export function MultiChoiceScreen({ step }: MultiChoiceScreenProps) {
   return (
     <OnboardingScreenLayout
       tone="question"
-      compact={isReasonStep || (illustratedGrid && step.options.length >= 8)}
+      compact
+      compactTitle={step.id === 'primaryObstacle' || isThirtyDayStep}
+      scrollEnabled={false}
       title={step.title}
       subtitle={getQuestionHelper(step)}
       hideProgress={step.hideProgress}
@@ -99,8 +111,9 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   reasonBlock: {
-    gap: spacing.sm,
-    flexGrow: 1,
+    flex: 1,
+    minHeight: 0,
+    gap: spacing.xs,
     justifyContent: 'space-between',
   },
 });

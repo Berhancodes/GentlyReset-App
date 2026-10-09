@@ -29,6 +29,18 @@ function createShadow(
 export const shadows = {
   none: {} satisfies ViewStyle,
   whisper: createShadow(2, 0.07, 8, 2),
+  homeBubble:
+    Platform.OS === 'web'
+      ? ({
+          boxShadow: '0 5px 12px rgba(0, 0, 0, 0.06)',
+        } satisfies ViewStyle)
+      : ({
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 5 },
+          shadowOpacity: 0.06,
+          shadowRadius: 12,
+          elevation: 2,
+        } satisfies ViewStyle),
   soft: createShadow(6, 0.08, 16, 3),
   medium: createShadow(8, 0.12, 20, 5),
   button: createShadow(5, 0.26, 12, 5),

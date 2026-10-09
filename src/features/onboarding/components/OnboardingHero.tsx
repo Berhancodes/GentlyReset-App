@@ -10,6 +10,7 @@ type OnboardingHeroProps = {
   eyebrow?: string;
   showTitle?: boolean;
   tone?: 'default' | 'question' | 'story';
+  compactTitle?: boolean;
 };
 
 /**
@@ -22,6 +23,7 @@ export function OnboardingHero({
   eyebrow,
   showTitle = true,
   tone = 'default',
+  compactTitle = false,
 }: OnboardingHeroProps) {
   const isQuestion = tone === 'question';
 
@@ -37,7 +39,11 @@ export function OnboardingHero({
         </AppText>
       ) : null}
       {showTitle ? (
-        <AppText variant={isQuestion ? 'questionTitle' : 'display'}>
+        <AppText
+          variant={
+            isQuestion ? (compactTitle ? 'questionTitleCompact' : 'questionTitle') : 'display'
+          }
+        >
           {capitalizeHeading(title)}
         </AppText>
       ) : null}

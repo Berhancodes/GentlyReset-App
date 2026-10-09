@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect, useRouter } from 'expo-router';
 
@@ -8,11 +8,11 @@ import { colors, spacing } from '@/design-system';
 import { useAuth } from '@/features/auth/session/useAuth';
 import { fetchOwnSocialProfile } from '@/features/friends/api/friendsApi';
 import { formatUsernameHandle } from '@/features/friends/username';
-import { AboutResetTypeCard } from '@/features/profile/components/AboutResetTypeCard';
 import { MyResetCard } from '@/features/profile/components/MyResetCard';
 import { ProfileHero } from '@/features/profile/components/ProfileHero';
 import { ProfileLinkRows } from '@/features/profile/components/ProfileLinkRows';
-import { WorkingTowardCard } from '@/features/profile/components/WorkingTowardCard';
+import { ProgressLinkCard } from '@/features/profile/components/ProgressLinkCard';
+import { YourResetCard } from '@/features/profile/components/YourResetCard';
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { getOnboardingOptionLabel } from '@/features/onboarding/utils/getOnboardingOptionLabel';
@@ -40,6 +40,7 @@ export function ProfileScreen() {
   const [signingOut, setSigningOut] = useState(false);
   const currentDay = useResetStore((state) => state.currentDay);
   const completedDays = useResetStore((state) => state.completedDays);
+  const resetOnboarding = useOnboardingStore((state) => state.resetOnboarding);
   const resetTypeId = useResetStore((state) => state.resetTypeId);
   const personalization = useResetStore((state) => state.personalization);
   const answers = useOnboardingStore((state) => state.answers);
@@ -56,7 +57,6 @@ export function ProfileScreen() {
   const goalLabels = personalization.desiredFeelings
     .map((id) => getOnboardingOptionLabel('desiredFeelings', id))
     .filter((label): label is string => Boolean(label));
-  const identityQuote = formatIdentityQuote(identityLabel);
   const resetApproach =
     profile.resetApproach.trim().length > 0 ? profile.resetApproach : profile.whatUsuallyHelps;
 
@@ -85,13 +85,6 @@ export function ProfileScreen() {
     }, [userId]),
   );
 
-  const openSettingsNotice = () => {
-    setNotice({
-      title: 'settings',
-      body: 'this part of Gently Reset is coming later.',
-    });
-  };
-
   const openHelpNotice = () => {
     setNotice({
       title: 'help & support',
@@ -99,8 +92,10 @@ export function ProfileScreen() {
     });
   };
 
-  const openSignIn = () => {
-    router.push('/(auth)/sign-in');
+  const returnToFirstOnboarding = () => {
+    resetOnboarding();
+    router.replace('/(onboarding)/flow');
+    setSigningOut(false);
   };
 
   const handleSignOut = () => {
@@ -108,6 +103,10 @@ export function ProfileScreen() {
       return;
     }
     setSigningOut(true);
+    if (!isAuthenticated) {
+      returnToFirstOnboarding();
+      return;
+    }
     void signOut()
       .then((result) => {
         if (!result.ok) {
@@ -115,28 +114,19 @@ export function ProfileScreen() {
             title: 'couldn’t sign out',
             body: result.message,
           });
+          setSigningOut(false);
+          return;
         }
+        returnToFirstOnboarding();
       })
-      .finally(() => {
-        setSigningOut(false);
+      .catch(() => {
+        returnToFirstOnboarding();
       });
   };
 
   return (
     <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-      <MainTabHeader
-        title="you"
-        rightAction={
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="settings"
-            onPress={openSettingsNotice}
-            style={styles.headerGear}
-          >
-            <Ionicons name="settings-outline" size={22} color={colors.text.secondary} />
-          </Pressable>
-        }
-      />
+      <MainTabHeader title="you" />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
@@ -145,10 +135,10 @@ export function ProfileScreen() {
         <ProfileHero
           name={profile.name}
           shortSummary={profile.shortSummary}
-          resetApproach={resetApproach}
           currentDay={getCurrentPlanDay({ currentDay })}
           progress={getResetProgress({ completedDays })}
         />
+        <YourResetCard approach={resetApproach} onPress={openTypeNotice} />
         <MyResetCard
           onOpenType={openTypeNotice}
           facts={[
@@ -184,17 +174,7 @@ export function ProfileScreen() {
               : []),
           ]}
         />
-        <WorkingTowardCard
-          goalLabels={goalLabels}
-          identityQuote={identityQuote}
-          onEdit={openGoalsNotice}
-        />
-        <AboutResetTypeCard
-          strength={profile.strength}
-          pattern={profile.pattern || profile.biggestPattern}
-          approach={profile.resetApproach}
-          onPress={openTypeNotice}
-        />
+        <ProgressLinkCard onPress={() => router.push('/journey-stats')} />
         <ProfileLinkRows
           links={[
             {
@@ -203,26 +183,15 @@ export function ProfileScreen() {
               onPress: () => router.push('/choose-username'),
             },
             {
-              icon: <Ionicons name="settings-outline" size={22} color={colors.text.primary} />,
-              title: 'settings',
-              onPress: openSettingsNotice,
-            },
-            {
               icon: <Ionicons name="help-circle-outline" size={22} color={colors.text.primary} />,
               title: 'help & support',
               onPress: openHelpNotice,
             },
-            isAuthenticated
-              ? {
-                  icon: <Ionicons name="log-out-outline" size={22} color={colors.text.primary} />,
-                  title: signingOut ? 'signing out…' : 'sign out',
-                  onPress: handleSignOut,
-                }
-              : {
-                  icon: <Ionicons name="log-in-outline" size={22} color={colors.text.primary} />,
-                  title: 'sign in',
-                  onPress: openSignIn,
-                },
+            {
+              icon: <Ionicons name="log-out-outline" size={22} color={colors.text.primary} />,
+              title: signingOut ? 'signing out…' : 'sign out',
+              onPress: handleSignOut,
+            },
           ]}
         />
       </ScrollView>
@@ -234,16 +203,6 @@ export function ProfileScreen() {
       />
     </Screen>
   );
-}
-
-function formatIdentityQuote(label: string | undefined): string | undefined {
-  if (!label) {
-    return undefined;
-  }
-  if (label.startsWith('someone')) {
-    return `I want to become ${label}.`;
-  }
-  return label;
 }
 
 const styles = StyleSheet.create({
@@ -258,11 +217,5 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: spacing.xl,
     gap: spacing.md,
-  },
-  headerGear: {
-    width: spacing.hitTarget,
-    height: spacing.hitTarget,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

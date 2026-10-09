@@ -14,10 +14,11 @@ const GIF_ASPECT = GIF_WIDTH / GIF_HEIGHT;
 const CONTENT_TOP = 343;
 const CONTENT_BOTTOM = 1257;
 const CONTENT_HEIGHT = CONTENT_BOTTOM - CONTENT_TOP;
-const MASCOT_MAX_WIDTH = 280;
-const MASCOT_HEIGHT_FRACTION = 0.38;
+const MASCOT_MAX_WIDTH = 340;
+const MASCOT_HEIGHT_FRACTION = 0.32;
+const MASCOT_WIDTH_SCALE = 1.4;
 /** How much of the hang loop stays in view under the last choice card. */
-const PEEK_FRACTION = 0.5;
+const PEEK_FRACTION = 0.86;
 
 /**
  * "What's hardest" mascot. Plays the hang loop unless Reduce Motion is on.
@@ -28,13 +29,17 @@ export const ClimbingMascot = memo(function ClimbingMascot() {
   const availableWidth = Math.round(windowWidth - spacing.lg * 2);
   const maxVisibleHeight = Math.round(windowHeight * MASCOT_HEIGHT_FRACTION);
   const widthFromVisible = Math.round(maxVisibleHeight * (GIF_WIDTH / CONTENT_HEIGHT));
+  const naturalWidth = Math.max(spacing.xxxl, Math.min(availableWidth, widthFromVisible));
   const artWidth = Math.max(
-    spacing.xxxl,
-    Math.min(availableWidth, widthFromVisible, MASCOT_MAX_WIDTH),
+    naturalWidth,
+    Math.min(availableWidth, Math.round(naturalWidth * MASCOT_WIDTH_SCALE), MASCOT_MAX_WIDTH),
   );
   const fullHeight = Math.round(artWidth / GIF_ASPECT);
   const cropTop = Math.round(fullHeight * (CONTENT_TOP / GIF_HEIGHT));
-  const visibleHeight = Math.round(fullHeight * (CONTENT_HEIGHT / GIF_HEIGHT) * PEEK_FRACTION);
+  const naturalFullHeight = Math.round(naturalWidth / GIF_ASPECT);
+  const visibleHeight = Math.round(
+    naturalFullHeight * (CONTENT_HEIGHT / GIF_HEIGHT) * PEEK_FRACTION,
+  );
   const imageSize = useMemo(
     () => ({ width: artWidth, height: fullHeight, marginTop: -cropTop }),
     [artWidth, cropTop, fullHeight],
@@ -69,6 +74,7 @@ const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
     marginTop: spacing.xs,
+    flexShrink: 0,
     pointerEvents: 'none',
   },
   frame: {

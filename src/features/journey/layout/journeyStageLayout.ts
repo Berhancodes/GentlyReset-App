@@ -69,6 +69,137 @@ export const JOURNEY_SUN_ART = {
   height: 1254,
 } as const;
 
+/** Distant autumn ridge. Intrinsic size of `autumn-mountains.png`. */
+export const JOURNEY_MOUNTAIN_ART = {
+  width: 1024,
+  height: 341,
+} as const;
+
+/**
+ * Environment-relative mountain placement.
+ * Width overflow crops the sides so the center-left peak stays in frame
+ * on every iPhone. Height always follows the art aspect. Lifted from the
+ * navbar so peaks sit in the lower-middle, behind the future mascot.
+ */
+export const JOURNEY_MOUNTAIN_LAYOUT = {
+  widthScale: 1.14,
+  /** Lift from the environment bottom, as a fraction of environment height. */
+  bottom: 0.5,
+  /** Keep peaks out of the heading / cloud band. */
+  minTop: 0.16,
+} as const;
+
+export type JourneyMountainRect = {
+  left: number;
+  bottom: number;
+  width: number;
+  height: number;
+};
+
+function getLiftedBottom(
+  environmentHeight: number,
+  assetHeight: number,
+  bottomFraction: number,
+  minTopFraction: number,
+): number {
+  const safeHeight = Math.max(environmentHeight, 1);
+  const desired = safeHeight * bottomFraction;
+  const minTop = safeHeight * minTopFraction;
+  return Math.min(desired, safeHeight - assetHeight - minTop);
+}
+
+export function getJourneyMountainRect(
+  environmentWidth: number,
+  environmentHeight: number,
+): JourneyMountainRect {
+  const safeWidth = Math.max(environmentWidth, 1);
+  const width = safeWidth * JOURNEY_MOUNTAIN_LAYOUT.widthScale;
+  const height = width * (JOURNEY_MOUNTAIN_ART.height / JOURNEY_MOUNTAIN_ART.width);
+
+  return {
+    left: (safeWidth - width) / 2,
+    bottom: getLiftedBottom(
+      environmentHeight,
+      height,
+      JOURNEY_MOUNTAIN_LAYOUT.bottom,
+      JOURNEY_MOUNTAIN_LAYOUT.minTop,
+    ),
+    width,
+    height,
+  };
+}
+
+/** Left autumn tree. Intrinsic size of `autumn-tree-left.png`. */
+export const JOURNEY_TREE_LEFT_ART = {
+  width: 682,
+  height: 1024,
+  /** Visible canopy / fence right edge. Empty PNG on the right is ignored. */
+  contentRight: 0.58,
+  /** Trunk in PNG space. Kept near or past the left clip. */
+  trunkX: 0.17,
+} as const;
+
+/**
+ * Environment-relative left tree. Sized from width, cropped from the left,
+ * and lifted so foliage enters from the middle-left without covering the
+ * heading or cloud band.
+ */
+export const JOURNEY_TREE_LEFT_LAYOUT = {
+  widthScale: 0.9,
+  /** How far the visible trunk sits past the left edge, at the 390 composition. */
+  trunkPastLeft: -0.02,
+  /** Extra left crop on a 320-wide phone, as a fraction of rendered width. */
+  narrowCropExtra: 0.08,
+  /** Less left crop on a 430-wide phone, as a fraction of rendered width. */
+  wideCropRelief: 0.05,
+  /** Lift from the environment bottom, as a fraction of environment height. */
+  bottom: 0.22,
+  /** Leave a thin band under the heading; extra height crops at the bottom. */
+  minTop: 0.04,
+} as const;
+
+export type JourneyTreeLeftRect = {
+  left: number;
+  bottom: number;
+  width: number;
+  height: number;
+};
+
+/** Right autumn foliage. Intrinsic size of `autumn-right-foreground.png`. */
+export const JOURNEY_TREE_RIGHT_ART = {
+  width: 1024,
+  height: 935,
+  /** Visible bushes / path left edge. Empty PNG on the left is ignored. */
+  contentLeft: 0.42,
+  /** Large tree in PNG space. Kept near or past the right clip. */
+  treeX: 0.9,
+} as const;
+
+/**
+ * Environment-relative right foliage. Smaller and lower than the left tree,
+ * cropped from the right, and lifted into the lower-middle.
+ */
+export const JOURNEY_TREE_RIGHT_LAYOUT = {
+  widthScale: 0.52,
+  /** How far the visible tree sits past the right edge, at the 390 composition. */
+  treePastRight: 0.05,
+  /** Extra right crop on a 320-wide phone, as a fraction of rendered width. */
+  narrowCropExtra: 0.07,
+  /** Less right crop on a 430-wide phone, as a fraction of rendered width. */
+  wideCropRelief: 0.04,
+  /** Lift from the environment bottom, as a fraction of environment height. */
+  bottom: 0.2,
+  /** Keep the right side lower than the left tree. */
+  minTop: 0.38,
+} as const;
+
+export type JourneyTreeRightRect = {
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+};
+
 /** Sprite sizes at a 390-wide stage, then scaled and clamped. */
 export const JOURNEY_STAGE_BASE = {
   mascotHeight: 210,
@@ -108,6 +239,7 @@ export type JourneyStageLayout = {
   width: number;
   height: number;
   pathHeight: number;
+  groundY: number;
   lineY: number;
   lineLeft: number;
   lineWidth: number;
@@ -129,6 +261,187 @@ export type JourneyStageLayout = {
 
 export function clampLayout(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+export function getJourneyTreeLeftRect(
+  environmentWidth: number,
+  environmentHeight: number,
+): JourneyTreeLeftRect {
+  const safeWidth = Math.max(environmentWidth, 1);
+  const width = safeWidth * JOURNEY_TREE_LEFT_LAYOUT.widthScale;
+  const height = width * (JOURNEY_TREE_LEFT_ART.height / JOURNEY_TREE_LEFT_ART.width);
+  const trunkX = width * JOURNEY_TREE_LEFT_ART.trunkX;
+  const left = -safeWidth * JOURNEY_TREE_LEFT_LAYOUT.trunkPastLeft - trunkX;
+  const narrowT = clampLayout((390 - safeWidth) / 70, 0, 1);
+  const wideT = clampLayout((safeWidth - 390) / 40, 0, 1);
+  const cropAdjust =
+    width * JOURNEY_TREE_LEFT_LAYOUT.narrowCropExtra * narrowT -
+    width * JOURNEY_TREE_LEFT_LAYOUT.wideCropRelief * wideT;
+
+  return {
+    left: left - cropAdjust,
+    bottom: getLiftedBottom(
+      environmentHeight,
+      height,
+      JOURNEY_TREE_LEFT_LAYOUT.bottom,
+      JOURNEY_TREE_LEFT_LAYOUT.minTop,
+    ),
+    width,
+    height,
+  };
+}
+
+export function getJourneyTreeRightRect(
+  environmentWidth: number,
+  environmentHeight: number,
+): JourneyTreeRightRect {
+  const safeWidth = Math.max(environmentWidth, 1);
+  const width = safeWidth * JOURNEY_TREE_RIGHT_LAYOUT.widthScale;
+  const height = width * (JOURNEY_TREE_RIGHT_ART.height / JOURNEY_TREE_RIGHT_ART.width);
+  const crop =
+    safeWidth * JOURNEY_TREE_RIGHT_LAYOUT.treePastRight +
+    width * (1 - JOURNEY_TREE_RIGHT_ART.treeX);
+  const narrowT = clampLayout((390 - safeWidth) / 70, 0, 1);
+  const wideT = clampLayout((safeWidth - 390) / 40, 0, 1);
+  const cropAdjust =
+    width * JOURNEY_TREE_RIGHT_LAYOUT.narrowCropExtra * narrowT -
+    width * JOURNEY_TREE_RIGHT_LAYOUT.wideCropRelief * wideT;
+
+  return {
+    right: -(crop + cropAdjust),
+    bottom: getLiftedBottom(
+      environmentHeight,
+      height,
+      JOURNEY_TREE_RIGHT_LAYOUT.bottom,
+      JOURNEY_TREE_RIGHT_LAYOUT.minTop,
+    ),
+    width,
+    height,
+  };
+}
+
+/** Full-screen season painting. All four `*-background.png` files share this size. */
+export const JOURNEY_SEASON_BACKGROUND_ART = {
+  width: 852,
+  height: 1846,
+} as const;
+
+/**
+ * Looping mascot video `assets/videos/journey/mascot-idle.mov` (768 x 1344,
+ * transparent). Measured on the first frame; feet stay planted for the loop.
+ */
+export const JOURNEY_SEASON_MASCOT_ART = {
+  width: 768,
+  height: 1344,
+  /** Body center between the feet. */
+  bodyCenterX: 0.488,
+  /** Top of the hat. */
+  contentTop: 0.25,
+  /** Lowest toe pixels. */
+  feetY: 0.762,
+  /** Widest extent (hat brim and pack), as a fraction of the art width. */
+  brimWidth: 0.84,
+} as const;
+
+/**
+ * Day-complete jump `assets/videos/journey/mascot-day-done.mov` (720 x 1280,
+ * transparent). First and last frames match the idle pose, so it swaps in place.
+ */
+export const JOURNEY_DAY_DONE_MASCOT_ART = {
+  width: 720,
+  height: 1280,
+  bodyCenterX: 0.4875,
+  feetY: 0.749,
+  brimWidth: 0.833,
+} as const;
+
+/**
+ * Mascot placement in BACKGROUND space so the character stays on the same
+ * spot of the painted path on every screen size.
+ */
+export const JOURNEY_SEASON_MASCOT_LAYOUT = {
+  centerX: 0.5,
+  /** Painted toes on the path, as a fraction of background height. */
+  feetY: 0.714,
+  /** Hat brim width, as a fraction of background width. */
+  brimWidth: 0.383,
+  /**
+   * `mascot-ground-shadow.png` (1000 x 200) is drawn in brim units: its width
+   * is one brim and its vertical center sits on the toes. One soft shadow
+   * under the whole body, darker in the middle.
+   */
+  shadowWidth: 1.3,
+  shadowHeight: 0.2,
+} as const;
+
+export type JourneySeasonSceneLayout = {
+  background: JourneyRect;
+  mascot: JourneyRect;
+  /** Same feet and size as `mascot`, framed for the day-complete video. */
+  celebrationMascot: JourneyRect;
+  shadow: JourneyRect;
+};
+
+/**
+ * Covers the screen with the painting, anchored to the bottom so the path and
+ * mascot never crop. Wider screens (SE, iPad) trim sky from the top instead.
+ */
+export function getJourneySeasonSceneLayout(
+  screenWidth: number,
+  screenHeight: number,
+): JourneySeasonSceneLayout {
+  const safeWidth = Math.max(screenWidth, 1);
+  const safeHeight = Math.max(screenHeight, 1);
+  const scale = Math.max(
+    safeWidth / JOURNEY_SEASON_BACKGROUND_ART.width,
+    safeHeight / JOURNEY_SEASON_BACKGROUND_ART.height,
+  );
+  const backgroundWidth = JOURNEY_SEASON_BACKGROUND_ART.width * scale;
+  const backgroundHeight = JOURNEY_SEASON_BACKGROUND_ART.height * scale;
+  const background: JourneyRect = {
+    left: (safeWidth - backgroundWidth) / 2,
+    top: safeHeight - backgroundHeight,
+    width: backgroundWidth,
+    height: backgroundHeight,
+  };
+
+  const brimWidth = backgroundWidth * JOURNEY_SEASON_MASCOT_LAYOUT.brimWidth;
+  const mascotWidth = brimWidth / JOURNEY_SEASON_MASCOT_ART.brimWidth;
+  const mascotHeight =
+    mascotWidth * (JOURNEY_SEASON_MASCOT_ART.height / JOURNEY_SEASON_MASCOT_ART.width);
+  const centerX = background.left + backgroundWidth * JOURNEY_SEASON_MASCOT_LAYOUT.centerX;
+  const feetY = background.top + backgroundHeight * JOURNEY_SEASON_MASCOT_LAYOUT.feetY;
+  const shadowWidth = brimWidth * JOURNEY_SEASON_MASCOT_LAYOUT.shadowWidth;
+  const shadowHeight = brimWidth * JOURNEY_SEASON_MASCOT_LAYOUT.shadowHeight;
+
+  return {
+    background,
+    mascot: {
+      left: centerX - mascotWidth * JOURNEY_SEASON_MASCOT_ART.bodyCenterX,
+      top: feetY - mascotHeight * JOURNEY_SEASON_MASCOT_ART.feetY,
+      width: mascotWidth,
+      height: mascotHeight,
+    },
+    celebrationMascot: placeArtOnFeet(JOURNEY_DAY_DONE_MASCOT_ART, brimWidth, centerX, feetY),
+    shadow: centerBox(centerX, feetY - shadowHeight / 2, shadowWidth, shadowHeight),
+  };
+}
+
+/** Sizes art so its widest extent matches `brimWidth`, standing on `feetY` at `centerX`. */
+function placeArtOnFeet(
+  art: { width: number; height: number; bodyCenterX: number; feetY: number; brimWidth: number },
+  brimWidth: number,
+  centerX: number,
+  feetY: number,
+): JourneyRect {
+  const width = brimWidth / art.brimWidth;
+  const height = width * (art.height / art.width);
+  return {
+    left: centerX - width * art.bodyCenterX,
+    top: feetY - height * art.feetY,
+    width,
+    height,
+  };
 }
 
 /** Resting timeline shows only the real current day. */
@@ -318,6 +631,7 @@ export function getJourneyStageLayout(width: number, height: number): JourneySta
     width: safeWidth,
     height: safeHeight,
     pathHeight,
+    groundY,
     lineY,
     lineLeft,
     lineWidth,

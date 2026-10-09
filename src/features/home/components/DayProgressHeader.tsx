@@ -4,12 +4,16 @@ import { AppText, ProgressBar } from '@/components/ui';
 import { PLAN_DAY_COUNT } from '@/features/reset/data/thirtyDayPlan';
 import { colors, spacing } from '@/design-system';
 
+const HERO_TRACK_WIDTH = 118;
+/** Home hero bar thickness. */
+const HERO_TRACK_THICKNESS = 6;
+
 type DayProgressHeaderProps = {
   currentDay: number;
   completedCount: number;
   progress: number;
   showCount?: boolean;
-  layout?: 'stacked' | 'inline';
+  layout?: 'stacked' | 'inline' | 'hero';
   thickness?: number;
   fillColor?: string;
   trackColor?: string;
@@ -29,9 +33,33 @@ export function DayProgressHeader({
 }: DayProgressHeaderProps) {
   const safeCompleted = Math.min(PLAN_DAY_COUNT, Math.max(0, completedCount));
   const inline = layout === 'inline';
-  const trackThickness = thickness ?? (inline ? spacing.xxs : undefined);
+  const hero = layout === 'hero';
+  const trackThickness =
+    thickness ?? (hero ? HERO_TRACK_THICKNESS : inline ? spacing.xxs : undefined);
   const markerSize = (trackThickness ?? 7) + spacing.xxs;
-  const resolvedTrack = trackColor ?? (inline ? colors.progress.trackStrong : undefined);
+  const resolvedTrack =
+    trackColor ??
+    (hero ? colors.progress.trackOnboarding : inline ? colors.progress.trackStrong : undefined);
+  const resolvedFill = fillColor ?? (hero ? colors.progress.fillGold : undefined);
+
+  if (hero) {
+    return (
+      <View style={styles.heroRoot}>
+        <AppText variant="homeDay" color="home">
+          {`☀️ Day ${currentDay}`}
+        </AppText>
+        <View style={styles.heroTrack}>
+          <ProgressBar
+            progress={progress}
+            accessibilityLabel={`Day ${currentDay}`}
+            thickness={trackThickness}
+            fillColor={resolvedFill}
+            trackColor={resolvedTrack}
+          />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={inline ? styles.inlineRoot : styles.root}>
@@ -64,7 +92,7 @@ export function DayProgressHeader({
                 height: markerSize,
                 borderRadius: markerSize / 2,
                 marginTop: -markerSize / 2,
-                backgroundColor: fillColor ?? colors.accent.gold,
+                backgroundColor: resolvedFill ?? colors.accent.gold,
               },
             ]}
           />
@@ -102,5 +130,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     top: '50%',
+  },
+  heroRoot: {
+    alignItems: 'flex-start',
+    gap: spacing.xxs,
+  },
+  heroTrack: {
+    width: HERO_TRACK_WIDTH,
   },
 });

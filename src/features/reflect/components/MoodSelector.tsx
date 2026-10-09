@@ -9,9 +9,11 @@ type MoodFaceProps = {
   mood: JournalMood;
   selected: boolean;
   size?: number;
+  /** Fill and face color; defaults to the neutral cream face. */
+  tint?: { well: string; ink: string };
 };
 
-export function MoodFace({ mood, selected, size = spacing.hitTarget }: MoodFaceProps) {
+export function MoodFace({ mood, selected, size = spacing.hitTarget, tint }: MoodFaceProps) {
   const isFrown = mood <= 2;
   const isNeutral = mood === 3;
   const scale = size / spacing.hitTarget;
@@ -23,6 +25,7 @@ export function MoodFace({ mood, selected, size = spacing.hitTarget }: MoodFaceP
       style={[
         styles.face,
         selected ? styles.faceSelected : styles.faceIdle,
+        tint ? { backgroundColor: tint.well, borderColor: selected ? undefined : tint.well } : null,
         {
           width: size,
           height: size,
@@ -31,8 +34,20 @@ export function MoodFace({ mood, selected, size = spacing.hitTarget }: MoodFaceP
       ]}
     >
       <View style={[styles.eyeRow, { gap: Math.max(5, Math.round(8 * scale)) }]}>
-        <View style={[styles.eye, { width: eye, height: eye }]} />
-        <View style={[styles.eye, { width: eye, height: eye }]} />
+        <View
+          style={[
+            styles.eye,
+            { width: eye, height: eye },
+            tint ? { backgroundColor: tint.ink } : null,
+          ]}
+        />
+        <View
+          style={[
+            styles.eye,
+            { width: eye, height: eye },
+            tint ? { backgroundColor: tint.ink } : null,
+          ]}
+        />
       </View>
       {isNeutral ? (
         <View
@@ -43,6 +58,7 @@ export function MoodFace({ mood, selected, size = spacing.hitTarget }: MoodFaceP
               height: Math.max(2, Math.round(2 * scale)),
               marginTop: Math.max(2, Math.round(4 * scale)),
             },
+            tint ? { backgroundColor: tint.ink } : null,
           ]}
         />
       ) : (
@@ -54,6 +70,7 @@ export function MoodFace({ mood, selected, size = spacing.hitTarget }: MoodFaceP
               height: Math.max(6, Math.round(8 * scale)),
               transform: [{ rotate: isFrown ? '180deg' : '0deg' }],
             },
+            tint ? { borderColor: tint.ink } : null,
           ]}
         />
       )}

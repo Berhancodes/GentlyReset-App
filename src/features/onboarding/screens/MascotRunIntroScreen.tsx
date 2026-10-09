@@ -20,9 +20,10 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { MOTION_EASING_STANDARD, colors, motion } from '@/design-system';
+import { MOTION_EASING_STANDARD, colors, motion, spacing } from '@/design-system';
 import { MascotNameField } from '@/features/onboarding/components/MascotNameField';
 import { MascotSpeechBubble } from '@/features/onboarding/components/MascotSpeechBubble';
+import { OnboardingQuestionNav } from '@/features/onboarding/components/OnboardingQuestionNav';
 import { getTypewriterDuration } from '@/features/onboarding/hooks/useStagedTypewriter';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
@@ -31,13 +32,13 @@ import {
   getMascotIntroKeyboardLift,
   getMascotIntroLayout,
 } from '@/features/onboarding/utils/mascotIntroLayout';
-import { hapticImpact } from '@/utils/haptics';
+import { hapticImpact, hapticSuccess } from '@/utils/haptics';
 
 const MASCOT_RUN = require('../../../../assets/images/onboarding/mascot-run-intro.gif');
 const MASCOT_RUN_FINAL = require('../../../../assets/images/onboarding/mascot-run-intro-final.png');
 
 const LAST_FRAME_MS = 100;
-const ASK_GREETING = 'Hey 👋';
+const ASK_GREETING = 'Hey';
 const ASK_QUESTION = 'what should I call you?';
 const BUBBLE_TYPING_DELAY_MS = motion.delay.bubbleReveal + 80;
 const ASK_TYPEWRITER_MS = getTypewriterDuration([
@@ -66,7 +67,7 @@ function storedIntroName(answer: OnboardingAnswer | undefined): string {
 }
 
 export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
-  const { goToNext } = useOnboardingNavigation();
+  const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
   const goToNextRef = useRef(goToNext);
   const submittedRef = useRef(false);
   const insets = useSafeAreaInsets();
@@ -152,7 +153,7 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
 
   const trimmedName = name.trim();
   const canContinue = trimmedName.length > 0;
-  const reply = committedName.length > 0 ? `nice to meet you, ${committedName} :)` : '';
+  const reply = committedName.length > 0 ? `Nice to meet you, ${committedName}` : '';
 
   const handleContinue = useCallback(() => {
     if (submittedRef.current || trimmedName.length === 0) {
@@ -160,7 +161,7 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
     }
 
     submittedRef.current = true;
-    void hapticImpact();
+    void hapticSuccess();
     Keyboard.dismiss();
     setAnswer(step.id, { type: 'mascotIntro', name: trimmedName });
     setCommittedName(trimmedName);
@@ -311,6 +312,14 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
   return (
     <View style={styles.root}>
       <StatusBar style="dark" />
+      {canGoBack ? (
+        <View
+          pointerEvents="box-none"
+          style={[styles.nav, { paddingTop: insets.top, paddingHorizontal: spacing.lg }]}
+        >
+          <OnboardingQuestionNav onBack={goBack} hideProgress />
+        </View>
+      ) : null}
       <Animated.View pointerEvents="box-none" style={[styles.composition, compositionStyle]}>
         <Animated.View pointerEvents="none" style={[styles.mascotStage, mascotStyle]}>
           <Image
@@ -344,6 +353,7 @@ export function MascotRunIntroScreen({ step }: MascotRunIntroScreenProps) {
               showingReply={phase === 'responding'}
               askStyle={askStyle}
               replyStyle={replyStyle}
+              tailOffset={layout.bubbleTailOffset}
               onReplyComplete={handleReplyComplete}
             />
           </Animated.View>
@@ -387,6 +397,13 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: 'hidden',
     backgroundColor: colors.background.primary,
+  },
+  nav: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 2,
   },
   composition: {
     flex: 1,

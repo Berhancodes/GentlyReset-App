@@ -34,10 +34,17 @@ export function mapCycleWriteToSnapshot(
   const personalization = readPersonalization(cycle.personalization);
   const currentDay = clampPlanDay(cycle.currentDay);
   const completedDays = uniquePlanDays(completions.map((row) => row.localDay));
+  const completionDates: Partial<Record<number, string>> = {};
+  for (const row of completions) {
+    if (isValidCalendarDate(row.completedOn)) {
+      completionDates[clampPlanDay(row.localDay)] = row.completedOn;
+    }
+  }
 
   return {
     currentDay,
     completedDays,
+    completionDates,
     todayCompleted: cycle.todayCompleted,
     todayStarted: cycle.todayStarted,
     todayTask: getTaskForDay(currentDay, personalization, cycle.resetTypeId),

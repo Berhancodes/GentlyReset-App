@@ -1,18 +1,17 @@
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import {
-  AppText,
-  getTabBarScenePadding,
-  MainTabHeader,
-  PrimaryButton,
-  Screen,
-} from '@/components/ui';
-import { spacing } from '@/design-system';
+import { AppText, getTabBarScenePadding, Screen, TAB_BAR_CONTENT_INSET } from '@/components/ui';
+import { colors, spacing } from '@/design-system';
 import { DayProgressHeader } from '@/features/home/components/DayProgressHeader';
-import { HomeScene } from '@/features/home/components/HomeScene';
+import { HomeMascot } from '@/features/home/components/HomeMascot';
+import { HomeSky } from '@/features/home/components/HomeSky';
+import { getHomeMascotDayState } from '@/features/home/utils/getHomeMascotReaction';
+import { HOME_STREAK_REMINDER } from '@/features/home/utils/homeCopy';
 import { getCompanionPresentation } from '@/features/home/utils/getCompanionPresentation';
+import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { getMascotIntroName } from '@/features/onboarding/utils/answerReaders';
+import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import {
@@ -22,21 +21,39 @@ import {
 } from '@/features/reset/utils/resetSelectors';
 
 const HOME_COLUMN_MAX_WIDTH = 430;
-const COMPACT_HEIGHT = 740;
+/** The greeting starts this far below the safe area, a little below the top of the sun. */
+const HERO_TOP_GAP = spacing.xxl;
+
+function homeGreetingLines(greeting: string): readonly string[] {
+  const commaIndex = greeting.lastIndexOf(', ');
+  if (commaIndex < 0) {
+    return [capitalizeHeading(greeting)];
+  }
+
+  return [
+    capitalizeHeading(`${greeting.slice(0, commaIndex)},`),
+    capitalizeHeading(greeting.slice(commaIndex + 2)),
+  ];
+}
 
 export function HomeScreen() {
   useSyncResetDay();
-  const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { height } = useWindowDimensions();
-  const compact = height < COMPACT_HEIGHT;
   const resetStartedOn = useResetStore((state) => state.resetStartedOn);
   const currentDay = useResetStore((state) => state.currentDay);
   const completedDays = useResetStore((state) => state.completedDays);
   const todayCompleted = useResetStore((state) => state.todayCompleted);
   const todayStarted = useResetStore((state) => state.todayStarted);
   const missedYesterday = useResetStore((state) => state.missedYesterday);
+  const streak = useResetStore((state) => state.streak);
   const resetTypeId = useResetStore((state) => state.resetTypeId);
+  const onboardingAnswers = useOnboardingStore((state) => state.answers);
+  const firstName = getMascotIntroName(onboardingAnswers);
+  const bubbleContext = {
+    firstName,
+    dayState: getHomeMascotDayState({ todayStarted, todayCompleted, missedYesterday }),
+    streak,
+  };
 
   if (!resetStartedOn) {
     return (
@@ -44,10 +61,21 @@ export function HomeScreen() {
         includeTopSafeArea={false}
         includeBottomSafeArea={false}
         padded={false}
-        backgroundColor="transparent"
+        backgroundColor={colors.background.home}
       >
-        <HomeScene completed={false} />
-        <MainTabHeader title="home" transparent fade />
+        <HomeSky top={insets.top + spacing.xs} />
+        <View style={[styles.hero, { paddingTop: insets.top + HERO_TOP_GAP }]}>
+          <View style={styles.greetingLines}>
+            {homeGreetingLines(firstName ? `welcome, ${firstName}` : 'welcome').map((line) => (
+              <AppText key={line} variant="homeGreeting" color="home">
+                {line}
+              </AppText>
+            ))}
+          </View>
+        </View>
+        <View style={[styles.stage, { paddingBottom: getTabBarScenePadding(insets.bottom) }]}>
+          <HomeMascot bubbleContext={bubbleContext} />
+        </View>
       </Screen>
     );
   }
@@ -63,6 +91,7 @@ export function HomeScreen() {
     todayCompleted,
     missedYesterday,
     resetTypeId,
+    firstName,
   });
 
   return (
@@ -70,72 +99,51 @@ export function HomeScreen() {
       includeTopSafeArea={false}
       includeBottomSafeArea={false}
       padded={false}
-      backgroundColor="transparent"
+      backgroundColor={colors.background.home}
     >
-      <HomeScene completed={todayCompleted} />
-      <MainTabHeader title="home" transparent fade />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[
-          styles.content,
-          compact ? styles.contentCompact : null,
-          { paddingBottom: getTabBarScenePadding(insets.bottom) },
-        ]}
-        showsVerticalScrollIndicator={false}
-        bounces={false}
-        overScrollMode="never"
-      >
-        <View style={styles.greeting}>
-          <AppText variant="display">{companion.greeting}</AppText>
-          <AppText variant="body" color="primary">
-            {companion.supportingMessage}
-          </AppText>
+      <HomeSky top={insets.top + spacing.xs} />
+      <View style={[styles.hero, { paddingTop: insets.top + HERO_TOP_GAP }]}>
+        <View style={styles.greetingLines}>
+          {homeGreetingLines(companion.greeting).map((line) => (
+            <AppText key={line} variant="homeGreeting" color="home">
+              {line}
+            </AppText>
+          ))}
         </View>
         <DayProgressHeader
           currentDay={planDay}
           completedCount={completedCount}
           progress={progress}
           showCount={false}
-          layout="inline"
+          layout="hero"
         />
-        {companion.primaryCtaDestination === 'journey' ? (
-          <PrimaryButton
-            label={companion.primaryCtaLabel}
-            accessibilityHint="Opens Journey for today's reset"
-            onPress={() => {
-              router.navigate('/(app)/(tabs)/journey');
-            }}
-          />
-        ) : null}
-        <View style={styles.landscape} />
-      </ScrollView>
+        <AppText variant="homeStatus" color="homeMuted">
+          {HOME_STREAK_REMINDER}
+        </AppText>
+      </View>
+      <View style={[styles.stage, { paddingBottom: getTabBarScenePadding(insets.bottom) }]}>
+        <HomeMascot bubbleContext={bubbleContext} />
+      </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-  },
-  content: {
-    flexGrow: 1,
+  hero: {
     width: '100%',
     maxWidth: HOME_COLUMN_MAX_WIDTH,
     alignSelf: 'center',
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    gap: spacing.sm,
-  },
-  contentCompact: {
-    paddingTop: spacing.xxs,
+    paddingHorizontal: TAB_BAR_CONTENT_INSET,
+    alignItems: 'flex-start',
     gap: spacing.xs,
   },
-  greeting: {
-    flexShrink: 0,
-    gap: spacing.xxs,
+  greetingLines: {
+    alignItems: 'flex-start',
   },
-  landscape: {
+  stage: {
     flex: 1,
-    minHeight: spacing.xl,
+    minHeight: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

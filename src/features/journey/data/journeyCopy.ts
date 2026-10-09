@@ -16,6 +16,13 @@ const QUOTES: Record<JourneyChapterId, string> = {
   finish: 'A gentle close still counts.',
 };
 
+/** The same three-step checklist on every day's pop-up. */
+export const JOURNEY_DAY_STEPS = [
+  { title: "Read today's reset", hint: "Understand today's small step." },
+  { title: 'Do it', hint: 'Make one small change today.' },
+  { title: 'Check in', hint: 'Notice how it felt.' },
+] as const;
+
 export function getJourneySignLine(chapterId: JourneyChapterId): string {
   return SIGN_LINES[chapterId];
 }

@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { AppText } from '@/components/ui/Text';
-import { colors, radius, shadows, spacing } from '@/design-system';
+import { colors, lineHeights, radius, shadows, spacing } from '@/design-system';
 import {
   useSelectionFeedback,
   type SelectionHaptic,
@@ -23,12 +23,19 @@ export type ChoiceCardProps = {
    * Defaults stay unchanged for every other screen.
    */
   compact?: boolean;
+  /** Extra-tight row cards so a peeking mascot can show more of its loop. */
+  tight?: boolean;
   haptic?: SelectionHaptic;
   onPress: () => void;
 };
 
 const BADGE_SIZE = 20;
 const BORDER_WIDTH = 2;
+const TIGHT_ROW_MIN_HEIGHT =
+  spacing.xs * 2 +
+  lineHeights.onboardingChoiceTitle +
+  spacing.xxs +
+  lineHeights.onboardingChoice * 2;
 
 export function AnimatedChoiceCard({
   label,
@@ -38,6 +45,7 @@ export function AnimatedChoiceCard({
   variant = 'row',
   leading,
   compact = false,
+  tight = false,
   haptic = 'selection',
   onPress,
 }: ChoiceCardProps) {
@@ -72,7 +80,11 @@ export function AnimatedChoiceCard({
               : styles.illustrated
             : isTile
               ? styles.tile
-              : styles.row,
+              : tight
+                ? styles.rowTight
+                : compact
+                  ? styles.rowCompact
+                  : styles.row,
           isIllustrated ? shadows.whisper : !isTile ? shadows.soft : null,
           disabled && styles.disabled,
           cardMotionStyle,
@@ -93,7 +105,7 @@ export function AnimatedChoiceCard({
             color={disabled ? 'muted' : 'primary'}
             align={isTile || isIllustrated ? 'center' : 'left'}
             fillWidth={isTile || isIllustrated}
-            numberOfLines={isIllustrated ? 3 : undefined}
+            numberOfLines={isIllustrated ? 3 : tight ? 1 : undefined}
             ellipsizeMode="tail"
           >
             {label}
@@ -103,6 +115,8 @@ export function AnimatedChoiceCard({
               variant="onboardingChoiceSubtitle"
               color="secondary"
               align={isTile ? 'center' : 'left'}
+              numberOfLines={tight ? 2 : undefined}
+              ellipsizeMode="tail"
             >
               {description}
             </AppText>
@@ -143,6 +157,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+  },
+  rowCompact: {
+    minHeight: 62,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  rowTight: {
+    height: TIGHT_ROW_MIN_HEIGHT,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxs,
   },
   tile: {
     minHeight: 129,

@@ -25,4 +25,5 @@ export function getHomeSupportLine(obstacle?: string): string {
 }
 
 export const HOME_IDLE_SUBTITLE = 'small steps still move you forward.';
+export const HOME_STREAK_REMINDER = "Miss a day? Just continue.\nThat's the whole point.";
 export const HOME_COMPLETION_MESSAGE = "that's a real day. I'm proud of you.";

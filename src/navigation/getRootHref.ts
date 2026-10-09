@@ -9,13 +9,14 @@ import { getAccessDestination } from '@/features/subscription/access/getAccessDe
 export type RootNavigationState = {
   hasCompletedOnboarding: boolean;
   isPro: boolean;
+  hasLocalAppAccess?: boolean;
 };
 
 export function getRootHref(state: RootNavigationState): Href {
   const destination = getAccessDestination({
     hasCompletedOnboarding: state.hasCompletedOnboarding,
     subscriptionInitializing: false,
-    isPro: state.isPro,
+    isPro: state.isPro || Boolean(state.hasLocalAppAccess),
   });
 
   switch (destination) {

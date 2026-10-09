@@ -33,6 +33,8 @@ function RootLayoutReady() {
   const { initializing: authInitializing } = useAuth();
   const { initializing: subscriptionInitializing, isPro } = useSubscription();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
+  const hasLocalAppAccess = useOnboardingStore((state) => state.hasLocalAppAccess);
+  const canEnterApp = isPro || hasLocalAppAccess;
   const ready = storesHydrated && !authInitializing && !subscriptionInitializing;
 
   useEffect(() => {
@@ -67,10 +69,10 @@ function RootLayoutReady() {
           <Stack.Protected guard={!hasCompletedOnboarding}>
             <Stack.Screen name="(onboarding)" />
           </Stack.Protected>
-          <Stack.Protected guard={hasCompletedOnboarding && !isPro}>
+          <Stack.Protected guard={hasCompletedOnboarding && !canEnterApp}>
             <Stack.Screen name="(paywall)" />
           </Stack.Protected>
-          <Stack.Protected guard={hasCompletedOnboarding && isPro}>
+          <Stack.Protected guard={hasCompletedOnboarding && canEnterApp}>
             <Stack.Screen name="(app)" />
           </Stack.Protected>
         </Stack>

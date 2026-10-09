@@ -26,13 +26,14 @@ export const MASCOT_INTRO_LAYOUT = {
   settleScale: 0.5,
   clusterCenterRatio: 0.5,
   clusterNudgeY: -10,
-  bubbleMaxWidth: 220,
+  /** Wide enough that "what should I call you?" and the reply each stay on one line. */
+  bubbleMaxWidth: 310,
   bubbleMinWidth: 136,
-  /** Cream gap from the hat brim to the bubble body. */
-  bubbleHeadGap: 24,
-  /** How far the bubble sits above the hat top. */
-  bubbleLift: 60,
-  estimatedBubbleHeight: 108,
+  /** Cream gap from the hat brim to the tail tip. */
+  bubbleHeadGap: 10,
+  bubbleTailHeight: 12,
+  /** Two one-line rows (24pt) plus the bubble's top and bottom padding (16pt each). */
+  estimatedBubbleHeight: 80,
   characterToForm: 40,
   fieldHeight: 60,
   submitSize: 36,
@@ -46,6 +47,7 @@ export type MascotIntroLayout = {
   bubbleMaxWidth: number;
   bubbleLeft: number;
   bubbleTop: number;
+  bubbleTailOffset: number;
   formWidth: number;
   formLeft: number;
   formTop: number;
@@ -118,32 +120,40 @@ export function getMascotIntroLayout(
   }
   settleY += MASCOT_INTRO_LAYOUT.clusterNudgeY;
 
-  const hat = applySettle(imageX(MASCOT_BOUNDS.hatRight), imageY(MASCOT_BOUNDS.hatTop), settleY);
+  const minBubbleTop = insets.top + spacing.hitTarget + spacing.xs;
+  const bubbleStack =
+    MASCOT_INTRO_LAYOUT.estimatedBubbleHeight +
+    MASCOT_INTRO_LAYOUT.bubbleTailHeight +
+    MASCOT_INTRO_LAYOUT.bubbleHeadGap;
+  const unshiftedHatTop = applySettle(
+    imageX(MASCOT_BOUNDS.centerX),
+    imageY(MASCOT_BOUNDS.hatTop),
+    settleY,
+  );
+  const bubbleOverlap = minBubbleTop + bubbleStack - unshiftedHatTop.y;
+  if (bubbleOverlap > 0) {
+    settleY += bubbleOverlap;
+  }
+
+  const hat = applySettle(imageX(MASCOT_BOUNDS.centerX), imageY(MASCOT_BOUNDS.hatTop), settleY);
   const feet = applySettle(imageX(MASCOT_BOUNDS.centerX), imageY(MASCOT_BOUNDS.bottom), settleY);
 
   const margin = spacing.md;
-  const gap = MASCOT_INTRO_LAYOUT.bubbleHeadGap;
   const widthLimit = viewWidth - margin * 2;
-  const widthBesideMascot = viewWidth - margin - hat.x - gap;
   const bubbleMaxWidth = clamp(
-    Math.round(
-      Math.min(
-        MASCOT_INTRO_LAYOUT.bubbleMaxWidth,
-        widthLimit,
-        Math.max(widthBesideMascot, MASCOT_INTRO_LAYOUT.bubbleMinWidth),
-      ),
-    ),
+    Math.round(Math.min(MASCOT_INTRO_LAYOUT.bubbleMaxWidth, widthLimit)),
     MASCOT_INTRO_LAYOUT.bubbleMinWidth,
     widthLimit,
   );
-  const desiredBubbleLeft = hat.x + gap;
+  const desiredBubbleLeft = hat.x - bubbleMaxWidth / 2;
   const bubbleLeft = clamp(desiredBubbleLeft, margin, viewWidth - bubbleMaxWidth - margin);
-  const desiredBubbleTop = hat.y - MASCOT_INTRO_LAYOUT.bubbleLift;
+  const desiredBubbleTop = hat.y - bubbleStack;
   const bubbleTop = clamp(
     desiredBubbleTop,
-    insets.top + spacing.sm,
+    minBubbleTop,
     viewHeight - MASCOT_INTRO_LAYOUT.estimatedBubbleHeight - spacing.lg,
   );
+  const bubbleTailOffset = clamp(hat.x - bubbleLeft, spacing.md, bubbleMaxWidth - spacing.md);
 
   return {
     settleScale,
@@ -152,6 +162,7 @@ export function getMascotIntroLayout(
     bubbleMaxWidth,
     bubbleLeft,
     bubbleTop,
+    bubbleTailOffset,
     formWidth,
     formLeft,
     formTop: Math.min(feet.y + MASCOT_INTRO_LAYOUT.characterToForm, maxFormTop),

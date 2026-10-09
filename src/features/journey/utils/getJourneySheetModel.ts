@@ -1,5 +1,6 @@
 import { completeResetDay } from '../../../application/reset/completeResetDay';
 import { startResetDay } from '../../../application/reset/startResetDay';
+import { PLAN_DAY_COUNT } from '../../reset/data/thirtyDayPlan';
 import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
 import { formatMinutesLabel, getTaskForDay } from '../../reset/utils/getTaskForDay';
 import {
@@ -29,6 +30,8 @@ export type JourneySheetModel = {
   cta: JourneySheetCta;
   ctaLabel: string | null;
   weekLabel: string | null;
+  /** Eyebrow above the title, e.g. "week 1 · day 1 of 30". */
+  progressLabel: string;
   weekDots: readonly JourneySheetDot[];
 };
 
@@ -65,6 +68,8 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
         }))
       : [];
   const weekLabel = chapter ? getJourneyWeekLabel(chapter) : null;
+  const dayOfPlan = `day ${input.day} of ${PLAN_DAY_COUNT}`;
+  const progressLabel = chapter ? `${chapter.subtitle} · ${dayOfPlan}` : dayOfPlan;
 
   if (state.kind === 'future') {
     return {
@@ -80,6 +85,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
       cta: 'none',
       ctaLabel: null,
       weekLabel,
+      progressLabel,
       weekDots,
     };
   }
@@ -98,6 +104,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
       cta: 'none',
       ctaLabel: null,
       weekLabel,
+      progressLabel,
       weekDots,
     };
   }
@@ -114,8 +121,9 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
     footnote: null,
     completeLabel: null,
     cta: started ? 'complete' : 'start',
-    ctaLabel: started ? "complete today's reset →" : "start today's reset →",
+    ctaLabel: started ? "Complete today's reset" : "Start today's reset",
     weekLabel,
+    progressLabel,
     weekDots,
   };
 }

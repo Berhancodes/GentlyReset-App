@@ -39,6 +39,8 @@ type TabRouteName = keyof typeof TABS;
 
 export const TAB_BAR_HEIGHT = 80;
 export const TAB_BAR_SIDE_INSET = spacing.md;
+export const TAB_BAR_INNER_INSET = spacing.sm;
+export const TAB_BAR_CONTENT_INSET = TAB_BAR_SIDE_INSET + TAB_BAR_INNER_INSET;
 export const TAB_BAR_BOTTOM_GAP = spacing.sm;
 
 export function getTabBarScenePadding(bottomInset: number) {
@@ -117,7 +119,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: radius.tabBar,
     backgroundColor: colors.surface.raised,
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: TAB_BAR_INNER_INSET,
     paddingVertical: spacing.xxs,
     ...shadows.whisper,
   },
