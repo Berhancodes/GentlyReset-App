@@ -1,11 +1,12 @@
 import { StyleSheet, View } from 'react-native';
 
-import { AppText, PrimaryButton } from '@/components/ui';
+import { AppText } from '@/components/ui';
 import { colors, radius, shadows, spacing } from '@/design-system';
-import { IllustrationPlaceholder } from '@/features/onboarding/components/IllustrationPlaceholder';
-import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { OnboardingTextButton } from '@/features/onboarding/components/OnboardingTextButton';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
+import { useStageScene } from '@/features/onboarding/stage/stageHooks';
+import { StageButton } from '@/features/onboarding/stage/StageButton';
+import { StageLayout } from '@/features/onboarding/stage/StageLayout';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { SharePreviewStep } from '@/features/onboarding/types/onboarding';
 import { shareReset } from '@/features/onboarding/utils/shareReset';
@@ -15,58 +16,55 @@ type SharePreviewScreenProps = {
   step: SharePreviewStep;
 };
 
+/** The reset card people can share, with the mascot cheering behind it. */
 export function SharePreviewScreen({ step }: SharePreviewScreenProps) {
-  const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
+  const { goToNext } = useOnboardingNavigation();
   const answers = useOnboardingStore((state) => state.answers);
   const profile = getResetProfileForAnswers(answers);
 
+  useStageScene(step.mascot?.pose ?? 'cheer', step.mascot?.line);
+
   return (
-    <OnboardingScreenLayout
-      tone="story"
+    <StageLayout
       title={step.title}
-      hideProgress
-      onBack={canGoBack ? goBack : undefined}
       footer={
-        <View style={styles.footer}>
-          <PrimaryButton
+        <>
+          <StageButton
             label={step.shareCtaLabel}
-            haptic="none"
             onPress={() => {
-              shareReset(profile);
+              void shareReset(profile);
             }}
           />
           <OnboardingTextButton label={step.continueCtaLabel} onPress={goToNext} />
-        </View>
+        </>
       }
     >
-      <View style={styles.card}>
-        <IllustrationPlaceholder illustrationKey={profile.illustrationKey} size="default" />
-        <AppText variant="label" color="muted" align="center">
-          THE {profile.name.replace(/^The /u, '').toUpperCase()}
+      <View
+        style={styles.card}
+        accessible
+        accessibilityLabel={`${profile.name}. ${profile.shareQuote}`}
+      >
+        <AppText variant="storyEyebrow" color="helper" align="center">
+          {profile.name}
         </AppText>
-        <AppText variant="title" align="center">
+        <AppText variant="optionTitle" align="center">
           {profile.shareQuote}
         </AppText>
-        <AppText variant="label" color="muted" align="center">
+        <AppText variant="label" color="helper" align="center">
           Gently Reset
         </AppText>
       </View>
-    </OnboardingScreenLayout>
+    </StageLayout>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface.choice,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-    padding: spacing.lg,
-    gap: spacing.md,
-    alignItems: 'center',
-    ...shadows.soft,
-  },
-  footer: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: radius.xl,
+    backgroundColor: colors.surface.selected,
     gap: spacing.xs,
+    ...shadows.soft,
   },
 });

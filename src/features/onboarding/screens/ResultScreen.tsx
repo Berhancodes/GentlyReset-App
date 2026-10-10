@@ -76,7 +76,7 @@ export function ResultScreen({ step }: ResultScreenProps) {
       footer={
         <RevealBlock delayMs={motion.delay.revealFooter}>
           <View style={styles.footer}>
-            <PrimaryButton label={step.ctaLabel} haptic="success" onPress={goToNext} />
+            <PrimaryButton label={step.ctaLabel} tone="cocoa" haptic="success" onPress={goToNext} />
             {step.secondaryCtaLabel ? (
               <OnboardingTextButton label={step.secondaryCtaLabel} onPress={goToNext} />
             ) : null}

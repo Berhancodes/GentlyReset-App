@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { AppText, PrimaryButton } from '@/components/ui';
-import { spacing } from '@/design-system';
+import { colors, spacing, textVariants } from '@/design-system';
 import { AuthTextField } from '@/features/auth/components/AuthTextField';
 import { useAuth } from '@/features/auth/session/useAuth';
+import { openLegalDocument } from '@/features/legal/utils/openLegalDocument';
 import type { SignUpErrors, SignUpValues } from '@/features/auth/types';
 import { canSubmitSignIn, validateSignIn } from '@/features/auth/utils/validateSignIn';
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
@@ -132,6 +133,25 @@ export function SignUpScreen() {
       avoidKeyboard
       footer={
         <View style={styles.footer}>
+          <Text style={styles.agree} maxFontSizeMultiplier={1.3}>
+            {'By creating an account, you agree to the '}
+            <Text
+              accessibilityRole="link"
+              style={styles.agreeLink}
+              onPress={() => openLegalDocument('terms')}
+            >
+              Terms of Service
+            </Text>
+            {' and '}
+            <Text
+              accessibilityRole="link"
+              style={styles.agreeLink}
+              onPress={() => openLegalDocument('privacy')}
+            >
+              Privacy Policy
+            </Text>
+            .
+          </Text>
           <PrimaryButton
             label={submitting ? 'creating account…' : 'create account →'}
             disabled={!canSubmitSignIn(values) || submitting}
@@ -195,6 +215,15 @@ const styles = StyleSheet.create({
   },
   footer: {
     gap: spacing.xs,
+  },
+  agree: {
+    ...textVariants.caption,
+    color: colors.text.helper,
+    textAlign: 'center',
+  },
+  agreeLink: {
+    color: colors.text.primary,
+    textDecorationLine: 'underline',
   },
   switchRow: {
     minHeight: spacing.hitTarget,

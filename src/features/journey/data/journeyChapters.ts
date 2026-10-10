@@ -57,7 +57,7 @@ export const JOURNEY_CHAPTERS: readonly JourneyChapterDefinition[] = [
     id: 'finish',
     startDay: 29,
     endDay: 30,
-    title: 'the finish',
+    title: 'keep growing',
     subtitle: 'a new beginning',
     artWidth: 798,
     artHeight: 1971,

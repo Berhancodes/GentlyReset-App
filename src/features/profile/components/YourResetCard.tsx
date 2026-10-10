@@ -1,7 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { AppText } from '@/components/ui';
+import { AppText, MascotIcon } from '@/components/ui';
 import { colors, radius, spacing } from '@/design-system';
 
 type YourResetCardProps = {
@@ -18,14 +17,14 @@ export function YourResetCard({ approach, onPress }: YourResetCardProps) {
       onPress={onPress}
       style={({ pressed }) => [styles.card, pressed ? styles.pressed : null]}
     >
-      <Ionicons name="leaf-outline" size={24} color={colors.profile.yourResetIcon} />
+      <MascotIcon name="sprout" size={28} />
       <View style={styles.copy}>
         <View style={styles.eyebrow}>
           <AppText variant="label">YOUR RESET</AppText>
         </View>
         <AppText variant="caption">{approach}</AppText>
       </View>
-      <Ionicons name="chevron-forward" size={18} color={colors.text.helper} />
+      <MascotIcon name="chevron" size={18} color={colors.text.helper} />
     </Pressable>
   );
 }

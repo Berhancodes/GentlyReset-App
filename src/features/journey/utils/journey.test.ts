@@ -46,11 +46,15 @@ import { getJourneyDayState } from './getJourneyDayState';
 import { getJourneySeason } from './getJourneySeason';
 import { shortenSheetDescription } from './shortenSheetDescription';
 import {
+  getJourneyCalendarMonth,
   getJourneyCheckInDates,
   getJourneyHeatmap,
+  getJourneyLongestStreak,
   getJourneyMilestoneTrack,
+  getJourneySeasonWeeks,
   getJourneyShowUpMessage,
   getJourneyStats,
+  getJourneyStreakLine,
 } from './getJourneyStats';
 import { getJourneyProgression } from './getJourneyProgression';
 import {
@@ -236,7 +240,7 @@ check(
   afterCompletedOpen.completedDays.join(',') === completedState.completedDays.join(',') &&
     afterCompletedClose.todayCompleted === false &&
     completedModel.cta === 'none' &&
-    completedModel.completeLabel === '✓ complete',
+    completedModel.completeLabel === '✓ done',
 );
 
 const idle = snapshot({ currentDay: 1 });
@@ -263,7 +267,7 @@ const startedModel = getJourneySheetModel({
 });
 check(
   '13. started current CTA is Complete',
-  startedModel.cta === 'complete' && startedModel.ctaLabel === "Complete today's reset",
+  startedModel.cta === 'complete' && startedModel.ctaLabel === 'Check in for today',
 );
 
 const completedCurrentModel = getJourneySheetModel({
@@ -278,7 +282,7 @@ const completedCurrentModel = getJourneySheetModel({
 check(
   '14. completed current shows completed and has no start button',
   completedCurrentModel.kind === 'current' &&
-    completedCurrentModel.completeLabel === '✓ reset complete' &&
+    completedCurrentModel.completeLabel === '✓ checked in' &&
     completedCurrentModel.cta === 'none' &&
     completedCurrentModel.ctaLabel === null,
 );
@@ -752,7 +756,7 @@ const afterCompleteModel = getJourneySheetModel({
 });
 check(
   'COMPLETED current day has no primary CTA',
-  afterCompleteModel.completeLabel === '✓ reset complete' &&
+  afterCompleteModel.completeLabel === '✓ checked in' &&
     afterCompleteModel.footnote === 'you showed up.' &&
     afterCompleteModel.cta === 'none',
 );
@@ -941,6 +945,54 @@ check(
   getJourneyShowUpMessage(1).title === "You've shown up once." &&
     getJourneyShowUpMessage(2).title === "You've shown up twice." &&
     getJourneyShowUpMessage(5).title === "You've shown up 5 times.",
+);
+
+const calendarDates = getJourneyCheckInDates(statsInput);
+const october = getJourneyCalendarMonth(calendarDates, '2026-10-06', '2026-09-29', 0);
+const octoberDays = october.cells.flatMap((cell) => (cell.kind === 'day' ? [cell] : []));
+const stateOf = (date: number) => octoberDays.find((cell) => cell.date === date)?.state;
+check(
+  'calendar: October 2026 starts on Thursday, weeks are whole, days are labelled by state',
+  october.title === 'October' &&
+    october.cells.slice(0, 3).every((cell) => cell.kind === 'blank') &&
+    october.cells[3]?.kind === 'day' &&
+    october.cells.length % 7 === 0 &&
+    octoberDays.length === 31 &&
+    stateOf(3) === 'checkedIn' &&
+    stateOf(2) === 'missed' &&
+    stateOf(6) === 'today' &&
+    stateOf(7) === 'upcoming',
+);
+const september = getJourneyCalendarMonth(calendarDates, '2026-10-06', '2026-09-29', -1);
+check(
+  'calendar: pages back to the start month only, and never past this month',
+  october.canGoBack &&
+    !october.canGoForward &&
+    !september.canGoBack &&
+    september.canGoForward &&
+    september.cells.some(
+      (cell) => cell.kind === 'day' && cell.date === 28 && cell.state === 'beforeStart',
+    ),
+);
+check(
+  'longest streak counts back-to-back calendar days',
+  getJourneyLongestStreak(
+    new Set(['2026-10-01', '2026-10-02', '2026-10-04', '2026-10-05', '2026-10-06']),
+  ) === 3 && getJourneyLongestStreak(new Set()) === 0,
+);
+const seasonWeeks = getJourneySeasonWeeks([1, 2, 3, 4, 5, 6, 7, 9, 10, 11], 12);
+check(
+  'season weeks: check-ins per week, the last week is two days, the current week is marked',
+  seasonWeeks.map((week) => week.checkIns).join(',') === '7,3,0,0,0' &&
+    seasonWeeks[4]?.days === 2 &&
+    seasonWeeks[4]?.label === 'Last' &&
+    seasonWeeks.findIndex((week) => week.current) === 1,
+);
+check(
+  'streak line nudges toward the longest streak, or celebrates a new best',
+  getJourneyStreakLine(3, 7) === 'Your longest streak is 7 days. Want to beat it?' &&
+    getJourneyStreakLine(7, 7) === '7 days in a row is your best yet.' &&
+    getJourneyStreakLine(0, 0) === 'Your first check-in starts the calendar.',
 );
 
 check(

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Image, StyleSheet, View, type ImageSourcePropType } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { MascotIcon, type MascotIllustrationName } from '@/components/ui';
 import { colors, radius } from '@/design-system';
 import type { WorldStatGlyph } from '@/features/world/data/worldStats';
 
@@ -14,10 +14,10 @@ const WORLD_STAT_PEOPLE_CIRCLE_SIZE = 40;
 const WORLD_STAT_PEOPLE_GLYPH_SIZE = 22;
 const WORLD_STAT_OUTLINE_SIZE = 28;
 
-const WORLD_STAT_OUTLINE_NAME = {
-  globe: 'globe-outline',
-  heart: 'heart-outline',
-} as const satisfies Record<Exclude<WorldStatGlyph, 'people'>, 'globe-outline' | 'heart-outline'>;
+const WORLD_STAT_ICON_NAME = {
+  globe: 'globe',
+  heart: 'heart',
+} as const satisfies Record<Exclude<WorldStatGlyph, 'people'>, MascotIllustrationName>;
 
 /** Action-row circles match the 44pt hit target, with modest glyphs inside. */
 const WORLD_ACTION_CIRCLE_SIZE = 44;
@@ -94,24 +94,15 @@ export function WorldStatIcon({ glyph }: { glyph: WorldStatGlyph }) {
   if (glyph === 'people') {
     return (
       <CircleIcon size={WORLD_STAT_PEOPLE_CIRCLE_SIZE} backgroundColor={colors.world.statCircle}>
-        <Ionicons
-          name="people"
-          size={WORLD_STAT_PEOPLE_GLYPH_SIZE}
-          color={colors.world.glyph}
-          accessibilityElementsHidden
-          importantForAccessibility="no"
-        />
+        <MascotIcon name="people" size={WORLD_STAT_PEOPLE_GLYPH_SIZE} />
       </CircleIcon>
     );
   }
 
   return (
-    <Ionicons
-      name={WORLD_STAT_OUTLINE_NAME[glyph]}
+    <MascotIcon
+      name={WORLD_STAT_ICON_NAME[glyph]}
       size={WORLD_STAT_OUTLINE_SIZE}
-      color={colors.world.glyph}
-      accessibilityElementsHidden
-      importantForAccessibility="no"
       style={styles.statGlyph}
     />
   );
@@ -133,11 +124,7 @@ export function WorldActionIcon({ glyph }: { glyph: WorldActionGlyph }) {
   if (glyph === 'heart') {
     return (
       <CircleIcon size={WORLD_ACTION_CIRCLE_SIZE} backgroundColor={colors.world.actionHeart}>
-        <Ionicons
-          name="heart"
-          size={WORLD_ACTION_GLYPH_SIZE}
-          color={colors.world.actionHeartGlyph}
-        />
+        <MascotIcon name="heart" size={WORLD_ACTION_GLYPH_SIZE} />
       </CircleIcon>
     );
   }

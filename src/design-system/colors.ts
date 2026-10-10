@@ -48,6 +48,10 @@ const palette = {
   brownDeep: '#3A2112',
   brownSecondary: '#8B5A32',
   brownDisabled: '#C4A88F',
+  milkCocoa: '#6B4630',
+  milkCocoaPressed: '#5A3A27',
+  cocoaGold: '#8C631D',
+  cocoaTan: '#D9C3AE',
   gold: '#E6B84A',
   goldBar: '#E9B34F',
   goldAmber: '#E9A82F',
@@ -71,6 +75,14 @@ const palette = {
   white: '#FFFFFF',
   night: '#152347',
   sky: '#C4D6E4',
+  skyIcon: '#CFE0EA',
+  stageSky: '#FAF0E5',
+  stageChip: '#FFFAF4',
+  stageTrack: '#E9DCC8',
+  stageDot: '#CDB89C',
+  stageDisabled: '#B9AC9F',
+  stageSprout: '#7E8F55',
+  sageLight: '#B9C48C',
 } as const;
 
 /**
@@ -159,6 +171,8 @@ export const colors = {
     mascotGlowCore: 'rgba(230, 184, 74, 0.38)',
     snowflake: 'rgba(255, 255, 255, 0.92)',
     sheetScrim: 'rgba(74, 44, 24, 0.22)',
+    /** Behind cream text on the welcome sky. */
+    skyText: 'rgba(40, 60, 110, 0.3)',
   },
   /** Journey day sheet. */
   journeySheet: {
@@ -176,7 +190,6 @@ export const colors = {
     dotTodayHalo: palette.goldPale,
     dotDone: palette.gold,
     dotFutureBorder: palette.sand,
-    leaf: palette.clay,
   },
   /** Journey step checklist and its confetti. */
   journeySteps: {
@@ -200,7 +213,6 @@ export const colors = {
     focusRing: palette.moodRing,
     chip: palette.creamChip,
     divider: palette.creamDivider,
-    savedCheck: palette.leafGreen,
     blush: 'rgba(240, 140, 130, 0.45)',
     tear: '#8CC4E8',
     bubble: palette.creamJournalBubble,
@@ -216,9 +228,7 @@ export const colors = {
   /** "you" tab. */
   profile: {
     yourResetCard: palette.creamRememberWarm,
-    yourResetIcon: palette.goldDeep,
     progressIconWell: palette.goldIconWell,
-    progressIcon: palette.goldDeep,
   },
   /** Journey stats screen and check-in grid. */
   journeyStats: {
@@ -243,9 +253,69 @@ export const colors = {
     actionPlus: palette.brown,
     actionPlusGlyph: palette.cream,
     actionHeart: palette.peachGlow,
-    actionHeartGlyph: palette.clay,
     actionGroup: palette.goldSun,
-    glyph: palette.brown,
+  },
+  /** Onboarding clean stage: cream floor, soft pills, and the mascot's props. */
+  stage: {
+    sky: palette.stageSky,
+    floor: palette.cream,
+    chip: palette.stageChip,
+    chipBorder: 'rgba(58, 33, 18, 0.07)',
+    /** Progress dots still ahead. */
+    dot: 'rgba(58, 33, 18, 0.15)',
+    /** Secondary copy on the stage: chapter label and helper line. */
+    copySoft: palette.brownHomeMuted,
+    chipBorderSelected: 'rgba(58, 33, 18, 0.55)',
+    chipSelected: palette.goldPale,
+    chipShadow: 'rgba(150, 110, 80, 1)',
+    mascotShadow: 'rgba(58, 33, 18, 0.12)',
+    bubble: palette.creamSoft,
+    bubbleBorder: palette.brownDeep,
+    track: palette.stageTrack,
+    trackFill: palette.brownDeep,
+    trackDot: palette.stageDot,
+    trackDotPassed: palette.cream,
+    knob: palette.creamSoft,
+    ctaDisabled: palette.stageDisabled,
+    /** Every onboarding button: one shade lighter than the app's brown, so it doesn't outweigh the screen. */
+    cta: palette.milkCocoa,
+    ctaPressed: palette.milkCocoaPressed,
+    ctaGlow: palette.milkCocoa,
+    /** Sign-in link beside the onboarding button; dark enough to read at small sizes. */
+    ctaLink: palette.cocoaGold,
+    /** Bars for past weeks on the stats chart; the current week is gold. */
+    barMuted: palette.cocoaTan,
+    /** Friend avatars take turns through these warm fills, with matching letters. */
+    avatarFills: [palette.milkCocoa, palette.peach, palette.goldPale, palette.cocoaTan],
+    avatarLetters: [palette.creamSoft, palette.brownDeep, palette.brownDeep, palette.brownDeep],
+    /** Postcard stamp and its dashed inner border. */
+    stamp: palette.goldPale,
+    postcardRule: 'rgba(58, 33, 18, 0.14)',
+    sprout: palette.sage,
+    sproutLight: palette.sageLight,
+    sproutStem: palette.stageSprout,
+    stones: [
+      palette.peach,
+      palette.gold,
+      palette.brownDisabled,
+      palette.goldCellPast,
+      palette.peachGlow,
+      palette.sageLight,
+    ],
+    stoneShine: 'rgba(255, 255, 255, 0.45)',
+  },
+  /** Mascot-style icons: one brown outline, flat warm fills. */
+  icon: {
+    ink: palette.brownDeep,
+    gold: palette.gold,
+    goldLight: palette.goldCellPast,
+    peach: palette.peach,
+    sage: palette.sage,
+    sageLight: palette.sageLight,
+    cream: palette.creamCard,
+    creamWarm: palette.creamBubble,
+    highlight: palette.creamSoft,
+    sky: palette.skyIcon,
   },
 } as const;
 

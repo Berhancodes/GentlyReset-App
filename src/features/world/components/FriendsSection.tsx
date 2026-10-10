@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { AppText } from '@/components/ui';
-import { colors, radius, shadows, spacing } from '@/design-system';
+import { colors, fontFamilies, fontSizes, fontWeights, radius, spacing } from '@/design-system';
 import {
   acceptFriendRequest,
   cancelFriendRequest,
@@ -14,11 +13,11 @@ import {
 import { EncouragementPicker } from '@/features/friends/components/EncouragementPicker';
 import { FriendIdentityRow } from '@/features/friends/components/FriendIdentityRow';
 import { FriendProgressCard } from '@/features/friends/components/FriendProgressCard';
-import { ReceivedEncouragementList } from '@/features/friends/components/ReceivedEncouragementList';
 import type { EncouragementKind } from '@/features/friends/encouragements';
 import type { PublicFriendIdentity, ReceivedEncouragement } from '@/features/friends/types';
 import type { WorldFriendsPresentation } from '@/features/friends/worldState';
 import { WorldActionCard } from '@/features/world/components/WorldActionCard';
+import { WorldPostcards } from '@/features/world/components/WorldPostcards';
 import { buildInviteShareMessage, inviteFriend } from '@/features/world/utils/inviteFriend';
 
 export type WorldNotice = {
@@ -34,6 +33,8 @@ type FriendsSectionProps = {
   onInviteFriend: () => void;
   onRefresh: () => void;
   onNotice: (notice: WorldNotice) => void;
+  /** The hero already offers username, find and invite, so skip the action cards. */
+  hideActionCards?: boolean;
 };
 
 export async function shareWorldInvite(deepLink?: string): Promise<WorldNotice | null> {
@@ -62,6 +63,7 @@ export function FriendsSection({
   onInviteFriend,
   onRefresh,
   onNotice,
+  hideActionCards = false,
 }: FriendsSectionProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [encourageFriend, setEncourageFriend] = useState<PublicFriendIdentity | null>(null);
@@ -122,7 +124,7 @@ export function FriendsSection({
 
   return (
     <View style={styles.root}>
-      {presentation.showChooseUsername ? (
+      {!hideActionCards && presentation.showChooseUsername ? (
         <WorldActionCard
           glyph="plus"
           title="choose username"
@@ -130,7 +132,7 @@ export function FriendsSection({
           onPress={onChooseUsername}
         />
       ) : null}
-      {presentation.showFindFriend ? (
+      {!hideActionCards && presentation.showFindFriend ? (
         <WorldActionCard
           glyph="group"
           title="find a friend"
@@ -138,7 +140,7 @@ export function FriendsSection({
           onPress={onFindFriend}
         />
       ) : null}
-      {presentation.showInviteFriend ? (
+      {!hideActionCards && presentation.showInviteFriend ? (
         <WorldActionCard
           glyph="plus"
           title="invite a friend"
@@ -147,7 +149,7 @@ export function FriendsSection({
         />
       ) : null}
 
-      <ReceivedEncouragementList
+      <WorldPostcards
         items={presentation.receivedEncouragements}
         nowMs={nowMs}
         onOpen={openReceived}
@@ -155,7 +157,7 @@ export function FriendsSection({
 
       {presentation.incoming.length > 0 ? (
         <View style={styles.block}>
-          <AppText variant="optionTitle">requests</AppText>
+          <SectionTitle>Friend requests</SectionTitle>
           <View style={styles.card}>
             {presentation.incoming.map((item, index) => (
               <View key={item.friendshipId}>
@@ -183,7 +185,7 @@ export function FriendsSection({
 
       {presentation.friends.length > 0 ? (
         <View style={styles.block}>
-          <AppText variant="optionTitle">friends</AppText>
+          <SectionTitle>Friends</SectionTitle>
           <View style={styles.card}>
             {presentation.friends.map((item, index) => (
               <View key={item.friendshipId}>
@@ -192,6 +194,7 @@ export function FriendsSection({
                   friend={item}
                   progress={presentation.progressByUserId[item.userId]}
                   busy={busyId === item.friendshipId || busyId === item.userId}
+                  tone={index}
                   onEncourage={() => setEncourageFriend(item)}
                   onRemove={() => {
                     run(item.friendshipId, () => removeFriend(item.friendshipId), 'friends');
@@ -205,7 +208,7 @@ export function FriendsSection({
 
       {presentation.outgoing.length > 0 ? (
         <View style={styles.block}>
-          <AppText variant="optionTitle">waiting</AppText>
+          <SectionTitle>Waiting to hear back</SectionTitle>
           <View style={styles.card}>
             {presentation.outgoing.map((item, index) => (
               <View key={item.friendshipId}>
@@ -235,7 +238,22 @@ export function FriendsSection({
   );
 }
 
+function SectionTitle({ children }: { children: string }) {
+  return (
+    <Text style={styles.sectionTitle} accessibilityRole="header" maxFontSizeMultiplier={1.3}>
+      {children}
+    </Text>
+  );
+}
+
 const styles = StyleSheet.create({
+  sectionTitle: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.heavy,
+    color: colors.text.primary,
+    paddingHorizontal: spacing.xxs,
+  },
   root: {
     gap: spacing.md,
   },
@@ -243,14 +261,18 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   card: {
-    borderRadius: radius.xxl,
-    backgroundColor: colors.surface.raised,
-    overflow: 'hidden',
-    ...shadows.soft,
+    borderRadius: radius.card,
+    backgroundColor: colors.stage.chip,
+    paddingVertical: spacing.xxs,
+    shadowColor: colors.stage.chipShadow,
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
   },
   divider: {
     height: StyleSheet.hairlineWidth,
     marginLeft: spacing.md + spacing.hitTarget + spacing.sm,
-    backgroundColor: colors.border.subtle,
+    backgroundColor: colors.stage.chipBorder,
   },
 });

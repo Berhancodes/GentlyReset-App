@@ -1,24 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import { StyleSheet, Text } from 'react-native';
 
-import { AppText, PrimaryButton } from '@/components/ui';
-import { motion, spacing } from '@/design-system';
-import { BreathingMascot } from '@/features/onboarding/components/BreathingMascot';
-import { CompanionMascot } from '@/features/onboarding/components/CompanionMascot';
-import { NewLifeMascot } from '@/features/onboarding/components/NewLifeMascot';
-import { NoticingMascot } from '@/features/onboarding/components/NoticingMascot';
-import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
-import { PlanPreviewList } from '@/features/onboarding/components/PlanPreviewList';
-import { StoryCopy, type StoryCopyLine } from '@/features/onboarding/components/StoryCopy';
-import { PLAN_READY_COPY, PLAN_READY_PREVIEW } from '@/features/onboarding/data/onboardingSteps';
+import { colors, spacing, textVariants } from '@/design-system';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
+import { useStageScene } from '@/features/onboarding/stage/stageHooks';
+import { StageButton } from '@/features/onboarding/stage/StageButton';
+import { StageLayout } from '@/features/onboarding/stage/StageLayout';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { StoryStep } from '@/features/onboarding/types/onboarding';
 import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
@@ -31,18 +17,12 @@ type StoryScreenProps = {
   step: StoryStep;
 };
 
-type CompanionCopyPhase = 'writing' | 'erasing' | 'ready';
-
+/** A pause between chapters: the mascot says something, then the person continues. */
 export function StoryScreen({ step }: StoryScreenProps) {
-  const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
+  const { goToNext } = useOnboardingNavigation();
   const answers = useOnboardingStore((state) => state.answers);
-  const reduceMotion = useReducedMotion();
-  const [copyPhase, setCopyPhase] = useState<CompanionCopyPhase>('writing');
-  const [readyCopyDone, setReadyCopyDone] = useState(false);
-  const [companionCopyHeight, setCompanionCopyHeight] = useState(0);
-  const [readyCopyHeight, setReadyCopyHeight] = useState(0);
-  const companionFinished = useRef(false);
-  const copySlotHeight = Math.max(companionCopyHeight, readyCopyHeight);
+
+  useStageScene(step.mascot?.pose ?? 'react-warm', step.mascot?.line);
 
   const subtitle =
     step.dynamicCopy === 'outOfBalance'
@@ -51,253 +31,28 @@ export function StoryScreen({ step }: StoryScreenProps) {
         ? deriveConsistencyInsight(answers)
         : step.subtitle;
 
-  const lines = useMemo(() => {
-    const nextLines: StoryCopyLine[] = [];
-
-    if (step.eyebrow) {
-      nextLines.push({
-        id: 'eyebrow',
-        text: step.eyebrow,
-        variant: 'storyEyebrow',
-        color: 'helper',
-      });
-    }
-
-    nextLines.push({
-      id: 'title',
-      text: capitalizeHeading(step.title),
-      variant: 'storyTitle',
-      color: 'primary',
-    });
-
-    if (subtitle) {
-      nextLines.push({
-        id: 'subtitle',
-        text: subtitle,
-        variant: 'storySupporting',
-        color: 'primary',
-      });
-    }
-
-    if (step.body) {
-      nextLines.push({
-        id: 'body',
-        text: step.body,
-        variant: 'storySupporting',
-        color: 'helper',
-      });
-    }
-
-    return nextLines;
-  }, [step.body, step.eyebrow, step.title, subtitle]);
-
-  const readyLines = useMemo<StoryCopyLine[]>(
-    () => [
-      {
-        id: 'ready-eyebrow',
-        text: PLAN_READY_COPY.eyebrow,
-        variant: 'onboardingHelper',
-        color: 'helper',
-      },
-      {
-        id: 'ready-title',
-        text: PLAN_READY_COPY.title,
-        variant: 'storyTitle',
-        color: 'primary',
-      },
-      {
-        id: 'ready-supporting',
-        text: PLAN_READY_COPY.supporting,
-        variant: 'storyTitle',
-        color: 'primary',
-      },
-      {
-        id: 'ready-subtitle',
-        text: PLAN_READY_COPY.subtitle,
-        variant: 'storySupporting',
-        color: 'helper',
-      },
-    ],
-    [],
-  );
-
-  const showBreathingScene = step.scene === 'breathing';
-  const showNoticingScene = step.scene === 'noticing';
-  const showNewLifeScene = step.scene === 'newLife';
-  const showCompanionScene = step.scene === 'companion';
-  const hideStillIllustration =
-    showBreathingScene || showNoticingScene || showNewLifeScene || showCompanionScene;
-  const companionOpacity = useSharedValue(1);
-  const breathingOpacity = useSharedValue(reduceMotion ? 1 : 0);
-  const breathingStarted = useRef(false);
-
-  const handleCompanionFinished = useCallback(() => {
-    if (companionFinished.current) {
-      return;
-    }
-    companionFinished.current = true;
-    if (reduceMotion) {
-      setCopyPhase('ready');
-      return;
-    }
-    setCopyPhase('erasing');
-  }, [reduceMotion]);
-  const handleReadyFinished = useCallback(() => {
-    setReadyCopyDone(true);
-  }, []);
-  const handleBreathingCopyFinished = () => {
-    if (breathingStarted.current) {
-      return;
-    }
-    breathingStarted.current = true;
-    if (reduceMotion) {
-      breathingOpacity.value = 1;
-      return;
-    }
-    breathingOpacity.value = withTiming(1, {
-      duration: motion.duration.mascotFade,
-      easing: Easing.out(Easing.cubic),
-    });
-  };
-  useEffect(() => {
-    if (copyPhase !== 'erasing') {
-      return;
-    }
-
-    companionOpacity.value = withTiming(0, {
-      duration: motion.typewriter.eraseMs,
-      easing: Easing.out(Easing.cubic),
-    });
-    const timeoutId = setTimeout(() => {
-      setCopyPhase('ready');
-    }, motion.typewriter.eraseMs);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [companionOpacity, copyPhase]);
-
-  const companionFadeStyle = useAnimatedStyle(() => ({
-    opacity: companionOpacity.value,
-  }));
-  const breathingFadeStyle = useAnimatedStyle(() => ({
-    opacity: breathingOpacity.value,
-  }));
-
   return (
-    <OnboardingScreenLayout
-      tone="story"
+    <StageLayout
       title={step.title}
-      showTitle={false}
-      illustrationKey={hideStillIllustration ? undefined : step.illustrationKey}
-      illustrationSize={step.illustrationSize ?? 'large'}
-      illustrationPlacement="end"
-      skipStorySpacer={showCompanionScene}
-      compact
-      scrollEnabled={false}
-      hideProgress
-      onBack={canGoBack ? goBack : undefined}
-      footer={
-        step.ctaLabel ? <PrimaryButton label={step.ctaLabel} onPress={goToNext} /> : undefined
-      }
+      eyebrow={step.eyebrow}
+      chapter={step.chapter}
+      subtitle={subtitle}
+      footer={step.ctaLabel ? <StageButton label={step.ctaLabel} onPress={goToNext} /> : null}
     >
-      {showCompanionScene ? (
-        <View style={[styles.copySlot, copySlotHeight > 0 ? { height: copySlotHeight } : null]}>
-          <View
-            accessibilityElementsHidden
-            importantForAccessibility="no"
-            onLayout={(event) => {
-              setCompanionCopyHeight(event.nativeEvent.layout.height);
-            }}
-            style={styles.copySizer}
-          >
-            {lines.map((line) => (
-              <AppText key={line.id} variant={line.variant} color={line.color}>
-                {line.text}
-              </AppText>
-            ))}
-          </View>
-          <View
-            accessibilityElementsHidden
-            importantForAccessibility="no"
-            onLayout={(event) => {
-              setReadyCopyHeight(event.nativeEvent.layout.height);
-            }}
-            style={[styles.copySizer, styles.copyLayer]}
-          >
-            {readyLines.map((line) => (
-              <AppText key={line.id} variant={line.variant} color={line.color}>
-                {line.text}
-              </AppText>
-            ))}
-          </View>
-          <Animated.View
-            pointerEvents={copyPhase === 'ready' ? 'none' : 'auto'}
-            style={[styles.copyLayer, companionFadeStyle]}
-          >
-            <StoryCopy lines={lines} onFinished={handleCompanionFinished} />
-          </Animated.View>
-          {copyPhase === 'ready' ? (
-            <View style={styles.copyLayer}>
-              <StoryCopy lines={readyLines} onFinished={handleReadyFinished} />
-            </View>
-          ) : null}
-        </View>
-      ) : (
-        <StoryCopy
-          lines={lines}
-          onFinished={showBreathingScene ? handleBreathingCopyFinished : undefined}
-        />
-      )}
-      {showBreathingScene ? (
-        <Animated.View
-          pointerEvents="none"
-          accessibilityElementsHidden
-          importantForAccessibility="no"
-          style={breathingFadeStyle}
-        >
-          <BreathingMascot />
-        </Animated.View>
+      {step.body ? (
+        <Text style={styles.body} maxFontSizeMultiplier={1.3}>
+          {capitalizeHeading(step.body)}
+        </Text>
       ) : null}
-      {showNoticingScene ? <NoticingMascot /> : null}
-      {showNewLifeScene ? <NewLifeMascot /> : null}
-      {showCompanionScene ? (
-        <View style={styles.companionStage}>
-          <View style={styles.mascotSlot}>
-            <CompanionMascot />
-          </View>
-          <PlanPreviewList items={PLAN_READY_PREVIEW} revealed={readyCopyDone} />
-        </View>
-      ) : null}
-    </OnboardingScreenLayout>
+    </StageLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  copySlot: {
-    position: 'relative',
-    width: '100%',
-  },
-  copySizer: {
-    gap: spacing.md,
-    opacity: 0,
-  },
-  copyLayer: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    left: 0,
-  },
-  companionStage: {
-    flexGrow: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    gap: spacing.lg,
-    width: '100%',
-    paddingTop: spacing.sm,
-  },
-  mascotSlot: {
-    alignItems: 'center',
-    width: '100%',
+  body: {
+    ...textVariants.stageSubtitle,
+    color: colors.stage.copySoft,
+    textAlign: 'center',
+    paddingHorizontal: spacing.md,
   },
 });

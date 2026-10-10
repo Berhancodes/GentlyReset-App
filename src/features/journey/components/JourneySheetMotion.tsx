@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View, type AccessibilityState } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -12,6 +11,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { MascotIcon } from '@/components/ui';
 import { colors, radius, spacing } from '@/design-system';
 
 /** Gap between sections gliding in, and the first section's wait for the sheet. */
@@ -132,9 +132,7 @@ export function PopCheckBox({ checked, size }: { checked: boolean; size: number 
     <Animated.View
       style={[styles.box, { width: size, height: size }, checked ? styles.boxChecked : null, style]}
     >
-      {checked ? (
-        <Ionicons name="checkmark" size={size * 0.56} color={colors.text.inverse} />
-      ) : null}
+      {checked ? <MascotIcon name="check" size={size * 0.56} color={colors.text.inverse} /> : null}
     </Animated.View>
   );
 }

@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PrimaryButton } from '@/components/ui';
 import {
@@ -17,14 +16,15 @@ import {
   spacing,
   textVariants,
 } from '@/design-system';
-import { PAYWALL_SKY_ART } from '@/features/onboarding/data/onboardingAssets';
+import { openLegalDocument } from '@/features/legal/utils/openLegalDocument';
+import { STAGE_POSE_ART, STAGE_POSE_SCALE } from '@/features/onboarding/stage/stagePoses';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { getResetProfileForAnswers } from '@/features/reset/data/resetProfiles';
 import { getPaywallUnlockLabel } from '@/features/subscription/access/getPaywallPrimaryAction';
 import {
   peekPaywallUnlock,
   rememberPaywallPackage,
 } from '@/features/subscription/access/pendingPaywallUnlock';
-import { PaywallRestMascot } from '@/features/subscription/components/PaywallRestMascot';
 import { ANNUAL_PACKAGE_ID } from '@/features/subscription/constants';
 import { PAYWALL_BENEFITS, PAYWALL_SUBTITLE } from '@/features/subscription/data/paywallCopy';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
@@ -33,40 +33,25 @@ import {
   type PaywallPlan,
 } from '@/features/subscription/utils/buildPaywallPlans';
 
-const COMPACT_HEIGHT = 720;
-const ROOMY_HEIGHT = 900;
-const CTA_WIDTH_RATIO = 0.76;
-const CTA_MAX_WIDTH = 327;
+const HERO_ART = STAGE_POSE_ART['react-hopeful'];
+/** The paywall mascot is a little smaller than on the onboarding stage. */
+const HERO_SCALE = STAGE_POSE_SCALE * 0.78;
 
-function layoutForHeight(windowHeight: number) {
-  const compact = windowHeight < COMPACT_HEIGHT;
-  const roomy = windowHeight >= ROOMY_HEIGHT;
-  return {
-    compact,
-    headerTop: compact ? spacing.sm : roomy ? spacing.xl : spacing.lg,
-    headerGap: compact ? spacing.xxs : spacing.xs,
-    sectionGap: compact ? spacing.xs : spacing.sm,
-    planSectionGap: compact ? spacing.sm : spacing.md,
-    benefitGap: compact ? spacing.xs : roomy ? spacing.sm : spacing.xs,
-    planGap: compact ? spacing.xs : spacing.sm,
-    planPaddingVertical: compact ? spacing.xs : roomy ? spacing.sm : spacing.xs,
-    footerLinkMinHeight: spacing.xl,
-    bottomPad: compact ? spacing.xs : spacing.sm,
-  };
-}
-
+/** Clean stage paywall: the mascot, what Pro includes, the plans, one button. */
 export function HardPaywallScreen() {
-  const insets = useSafeAreaInsets();
-  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
-  const layout = layoutForHeight(windowHeight);
   const router = useRouter();
   const grantLocalAppAccess = useOnboardingStore((state) => state.grantLocalAppAccess);
+  const answers = useOnboardingStore((state) => state.answers);
   const { packages, unexpectedTrial } = useSubscription();
   const plans = useMemo(() => buildPaywallPlans(packages), [packages]);
   const [selectedId, setSelectedId] = useState<string | null>(
     () => peekPaywallUnlock()?.packageIdentifier ?? ANNUAL_PACKAGE_ID,
   );
   const [busy, setBusy] = useState<'purchase' | null>(null);
+  const profile = getResetProfileForAnswers(answers);
+  const introAnswer = answers.mascotRunIntro;
+  const typedName = introAnswer?.type === 'mascotIntro' ? introAnswer.name.trim() : '';
+  const firstName = typedName ? typedName.charAt(0).toUpperCase() + typedName.slice(1) : '';
 
   const selected = plans.find((plan) => plan.identifier === selectedId) ?? plans[0];
 
@@ -90,127 +75,117 @@ export function HardPaywallScreen() {
   return (
     <View style={styles.root} testID="hard-paywall">
       <StatusBar style="dark" />
-      <Image
-        source={PAYWALL_SKY_ART}
-        resizeMode="cover"
-        accessibilityIgnoresInvertColors
-        importantForAccessibility="no"
-        style={styles.sky}
-      />
-      <PaywallRestMascot />
-      <SafeAreaView edges={['top', 'right', 'left']} style={styles.safe}>
-        <View style={[styles.header, { marginTop: layout.headerTop, gap: layout.headerGap }]}>
-          <View style={styles.sprout} accessibilityElementsHidden>
-            <Ionicons name="leaf" size={18} color={colors.accent.gold} />
-            <Ionicons name="leaf" size={18} color={colors.accent.gold} style={styles.sproutLeaf} />
-          </View>
-          <View style={styles.titleRow} accessibilityRole="header">
-            <Text
-              allowFontScaling
-              maxFontSizeMultiplier={1.25}
-              style={[styles.title, layout.compact ? styles.titleCompact : null]}
-            >
-              Gently Reset{' '}
-            </Text>
-            <Text
-              allowFontScaling
-              maxFontSizeMultiplier={1.25}
-              style={[styles.titlePro, layout.compact ? styles.titleCompact : null]}
-            >
-              Pro
-            </Text>
-            <Text style={styles.titleSpark}>✦</Text>
-          </View>
-          <Text
-            allowFontScaling
-            maxFontSizeMultiplier={1.3}
-            style={[styles.subtitle, layout.compact ? styles.subtitleCompact : null]}
+      <SafeAreaView edges={['top', 'right', 'left', 'bottom']} style={styles.safe}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <View
+            style={styles.hero}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
           >
-            {PAYWALL_SUBTITLE}
-          </Text>
-        </View>
+            <Image
+              source={HERO_ART.source}
+              resizeMode="contain"
+              style={{ width: HERO_ART.width * HERO_SCALE, height: HERO_ART.height * HERO_SCALE }}
+            />
+          </View>
 
-        <View style={[styles.benefits, { marginTop: layout.sectionGap, gap: layout.benefitGap }]}>
-          {PAYWALL_BENEFITS.map((benefit) => (
-            <View key={benefit.title} style={styles.benefitRow}>
-              <View style={styles.check}>
-                <Text style={styles.checkMark}>✓</Text>
-              </View>
-              <View style={styles.benefitCopy}>
-                <Text
-                  allowFontScaling
-                  maxFontSizeMultiplier={1.3}
-                  style={[styles.benefitTitle, layout.compact ? styles.benefitTitleCompact : null]}
-                >
-                  {benefit.title}
-                </Text>
-                <Text
-                  allowFontScaling
-                  maxFontSizeMultiplier={1.3}
-                  style={[
-                    styles.benefitDetail,
-                    layout.compact ? styles.benefitDetailCompact : null,
-                  ]}
-                >
-                  {benefit.detail}
-                </Text>
-              </View>
+          <View style={styles.header} accessibilityRole="header">
+            <Text allowFontScaling maxFontSizeMultiplier={1.25} style={styles.title}>
+              Gently Reset <Text style={styles.titlePro}>Pro</Text>
+            </Text>
+            <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.subtitle}>
+              {PAYWALL_SUBTITLE.replace('\n', ' ')}
+            </Text>
+            <View style={styles.tag}>
+              <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.tagText}>
+                {`Built for ${profile.name}${firstName ? ` · ${firstName}` : ''}`}
+              </Text>
             </View>
-          ))}
-        </View>
+          </View>
 
-        {unexpectedTrial ? (
-          <Text
-            style={[styles.status, { marginTop: layout.sectionGap }]}
-            accessibilityLiveRegion="polite"
-          >
-            a trial offer appeared in the store. Gently Reset does not sell trials.
-          </Text>
-        ) : (
-          <View style={[styles.plans, { marginTop: layout.planSectionGap, gap: layout.planGap }]}>
-            {plans.map((plan) => (
-              <PlanCard
-                key={plan.identifier}
-                plan={plan}
-                selected={selected?.identifier === plan.identifier}
-                paddingVertical={layout.planPaddingVertical}
-                onPress={() => choosePackage(plan.identifier)}
-              />
+          <View style={styles.benefits}>
+            {PAYWALL_BENEFITS.map((benefit) => (
+              <View key={benefit.title} style={styles.benefitRow}>
+                <View style={styles.check} accessibilityElementsHidden>
+                  <View style={styles.checkMark} />
+                </View>
+                <View style={styles.benefitCopy}>
+                  <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.benefitTitle}>
+                    {benefit.title}
+                  </Text>
+                  <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.benefitDetail}>
+                    {benefit.detail}
+                  </Text>
+                </View>
+              </View>
             ))}
           </View>
-        )}
 
-        <View style={styles.sceneSpacer} />
+          {unexpectedTrial ? (
+            <Text style={styles.status} accessibilityLiveRegion="polite">
+              a trial offer appeared in the store. Gently Reset does not sell trials.
+            </Text>
+          ) : (
+            <View style={styles.plans} accessibilityRole="radiogroup">
+              {plans.map((plan) => (
+                <PlanCard
+                  key={plan.identifier}
+                  plan={plan}
+                  selected={selected?.identifier === plan.identifier}
+                  onPress={() => choosePackage(plan.identifier)}
+                />
+              ))}
+            </View>
+          )}
 
-        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, layout.bottomPad) }]}>
-          <View
-            style={[styles.cta, { width: windowWidth * CTA_WIDTH_RATIO, maxWidth: CTA_MAX_WIDTH }]}
-          >
+          <View style={styles.footer}>
             <PrimaryButton
               label={getPaywallUnlockLabel(busy === 'purchase')}
-              tone="gold"
-              size="compact"
-              showArrow
+              tone="cocoa"
               disabled={!canUnlock}
               onPress={beginUnlock}
             />
+            {selected ? (
+              <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.fine}>
+                {`Auto-renews at ${selected.priceString}/${selected.billingPeriod} until cancelled. Cancel anytime in Settings.`}
+              </Text>
+            ) : null}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Sign in"
+              onPress={() => router.push('/(auth)/sign-in')}
+              hitSlop={spacing.sm}
+              style={({ pressed }) => [styles.signIn, pressed && styles.pressed]}
+            >
+              <Text style={styles.signInLabel}>
+                Already have an account? <Text style={styles.signInEmphasis}>Sign In</Text>
+              </Text>
+            </Pressable>
+            <View style={styles.legal}>
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel="Terms of Service"
+                onPress={() => openLegalDocument('terms')}
+                hitSlop={spacing.xs}
+                style={styles.legalLink}
+              >
+                <Text style={styles.legalLabel}>Terms of Service</Text>
+              </Pressable>
+              <Text style={styles.legalDot} accessibilityElementsHidden>
+                ·
+              </Text>
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel="Privacy Policy"
+                onPress={() => openLegalDocument('privacy')}
+                hitSlop={spacing.xs}
+                style={styles.legalLink}
+              >
+                <Text style={styles.legalLabel}>Privacy Policy</Text>
+              </Pressable>
+            </View>
           </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Sign in"
-            onPress={() => router.push('/(auth)/sign-in')}
-            hitSlop={spacing.sm}
-            style={({ pressed }) => [
-              styles.signIn,
-              { minHeight: layout.footerLinkMinHeight },
-              pressed && styles.pressed,
-            ]}
-          >
-            <Text style={styles.signInLabel}>
-              Already have an account? <Text style={styles.signInEmphasis}>Sign In</Text>
-            </Text>
-          </Pressable>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -219,21 +194,23 @@ export function HardPaywallScreen() {
 function PlanCard({
   plan,
   selected,
-  paddingVertical,
   onPress,
 }: {
   plan: PaywallPlan;
   selected: boolean;
-  paddingVertical: number;
   onPress: () => void;
 }) {
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole="radio"
       accessibilityState={{ selected }}
       accessibilityLabel={`${plan.title}, ${plan.priceString} per ${plan.billingPeriod}`}
       onPress={onPress}
-      style={[styles.plan, selected ? styles.planSelected : null, { paddingVertical }]}
+      style={({ pressed }) => [
+        styles.plan,
+        selected ? styles.planSelected : null,
+        pressed ? styles.pressed : null,
+      ]}
     >
       {plan.bestValue ? (
         <View style={styles.badge}>
@@ -245,18 +222,12 @@ function PlanCard({
       </View>
       <View style={styles.planCopy}>
         <Text style={styles.planTitle}>{plan.title}</Text>
-        <Text style={styles.planMonthly}>{plan.monthlyEquivalent}/month</Text>
+        <Text style={styles.planDetail}>{plan.monthlyEquivalent}/month</Text>
       </View>
       <View style={styles.planPrices}>
-        <Text style={styles.planPrice}>
-          {plan.priceString} <Text style={styles.planPeriod}>/{plan.billingPeriod}</Text>
-        </Text>
-        {plan.compareAtPriceString ? (
-          <View style={styles.planSaveRow}>
-            <Text style={styles.planCompare}>{plan.compareAtPriceString}</Text>
-            {plan.savingsLabel ? <Text style={styles.planSave}>{plan.savingsLabel}</Text> : null}
-          </View>
-        ) : null}
+        <Text style={styles.planPrice}>{plan.priceString}</Text>
+        <Text style={styles.planDetail}>per {plan.billingPeriod}</Text>
+        {plan.savingsLabel ? <Text style={styles.planSave}>{plan.savingsLabel}</Text> : null}
       </View>
     </Pressable>
   );
@@ -265,83 +236,57 @@ function PlanCard({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.background.primary,
-    overflow: 'hidden',
-  },
-  sky: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: 280,
-    resizeMode: 'cover',
+    backgroundColor: colors.stage.sky,
   },
   safe: {
     flex: 1,
+  },
+  content: {
+    flexGrow: 1,
     paddingHorizontal: spacing.lg,
-    overflow: 'visible',
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
+    gap: spacing.md,
+  },
+  hero: {
+    alignItems: 'center',
   },
   header: {
-    flexGrow: 0,
-    flexShrink: 0,
     alignItems: 'center',
-  },
-  sprout: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  sproutLeaf: {
-    marginLeft: -spacing.xxs,
-    transform: [{ scaleX: -1 }, { rotate: '-18deg' }],
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
+    gap: spacing.xs,
   },
   title: {
     fontFamily: fontFamilies.rounded,
-    fontSize: fontSizes.display,
-    lineHeight: lineHeights.display,
+    fontSize: fontSizes.xl,
+    lineHeight: lineHeights.xl,
     fontWeight: fontWeights.bold,
     color: colors.text.primary,
     textAlign: 'center',
-    letterSpacing: -0.6,
   },
   titlePro: {
-    fontFamily: fontFamilies.rounded,
-    fontSize: fontSizes.display,
-    lineHeight: lineHeights.display,
-    fontWeight: fontWeights.bold,
     color: colors.accent.gold,
-    letterSpacing: -0.6,
-  },
-  titleCompact: {
-    fontSize: fontSizes.xl,
-    lineHeight: lineHeights.xl,
-  },
-  titleSpark: {
-    fontFamily: fontFamilies.rounded,
-    fontSize: fontSizes.sm,
-    lineHeight: lineHeights.sm,
-    color: colors.accent.gold,
-    marginLeft: spacing.xxs,
-    marginTop: spacing.xxs,
   },
   subtitle: {
     ...textVariants.subtitle,
     color: colors.text.secondary,
     textAlign: 'center',
   },
-  subtitleCompact: {
-    lineHeight: lineHeights.sm,
+  tag: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xxs,
+    borderRadius: radius.pill,
+    backgroundColor: colors.stage.chipSelected,
+  },
+  tagText: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.xs,
+    lineHeight: lineHeights.xs,
+    fontWeight: fontWeights.bold,
+    color: colors.text.primary,
   },
   benefits: {
-    flexGrow: 0,
-    flexShrink: 0,
-    alignSelf: 'center',
-    alignItems: 'flex-start',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.xxs,
   },
   benefitRow: {
     flexDirection: 'row',
@@ -349,67 +294,63 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   check: {
-    width: 28,
-    height: 28,
+    width: spacing.lg,
+    height: spacing.lg,
     marginTop: 1,
     borderRadius: radius.pill,
-    backgroundColor: colors.tint.gold,
+    backgroundColor: colors.stage.chipSelected,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkMark: {
-    fontFamily: fontFamilies.rounded,
-    fontSize: fontSizes.xs,
-    lineHeight: fontSizes.xs + 1,
-    fontWeight: fontWeights.bold,
-    color: colors.text.primary,
+    width: 9,
+    height: 5,
+    marginTop: -2,
+    borderLeftWidth: 2.5,
+    borderBottomWidth: 2.5,
+    borderColor: colors.text.primary,
+    transform: [{ rotate: '-45deg' }],
   },
   benefitCopy: {
+    flex: 1,
     gap: 1,
   },
   benefitTitle: {
     ...textVariants.optionTitle,
     color: colors.text.primary,
   },
-  benefitTitleCompact: {
-    lineHeight: lineHeights.sm,
-  },
   benefitDetail: {
     ...textVariants.caption,
     color: colors.text.secondary,
   },
-  benefitDetailCompact: {
-    lineHeight: lineHeights.xs,
-  },
   plans: {
-    flexGrow: 0,
-    flexShrink: 0,
-    width: '100%',
-    paddingTop: spacing.sm,
+    gap: spacing.sm,
+    paddingTop: spacing.xs,
   },
   plan: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    borderRadius: radius.xxl,
-    borderWidth: 2,
-    borderColor: colors.border.default,
-    backgroundColor: colors.surface.raised,
     paddingHorizontal: spacing.md,
-    ...shadows.whisper,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.xl,
+    borderWidth: 2,
+    borderColor: colors.stage.chipBorder,
+    backgroundColor: colors.stage.chip,
+    ...shadows.soft,
   },
   planSelected: {
-    borderColor: colors.border.gold,
+    borderColor: colors.border.selected,
     backgroundColor: colors.surface.choiceSelected,
   },
   badge: {
     position: 'absolute',
-    top: -11,
+    top: -10,
     right: spacing.lg,
-    backgroundColor: colors.accent.gold,
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.xs,
     paddingVertical: 2,
+    borderRadius: radius.pill,
+    backgroundColor: colors.accent.gold,
   },
   badgeLabel: {
     fontFamily: fontFamilies.rounded,
@@ -429,13 +370,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   radioSelected: {
-    borderColor: colors.accent.gold,
+    borderColor: colors.border.selected,
   },
   radioDot: {
-    width: 12,
-    height: 12,
+    width: 11,
+    height: 11,
     borderRadius: radius.pill,
-    backgroundColor: colors.accent.gold,
+    backgroundColor: colors.text.primary,
   },
   planCopy: {
     flex: 1,
@@ -445,7 +386,7 @@ const styles = StyleSheet.create({
     ...textVariants.optionTitle,
     color: colors.text.primary,
   },
-  planMonthly: {
+  planDetail: {
     ...textVariants.caption,
     color: colors.text.secondary,
   },
@@ -457,44 +398,28 @@ const styles = StyleSheet.create({
     ...textVariants.optionTitle,
     color: colors.text.primary,
   },
-  planPeriod: {
-    ...textVariants.caption,
-    color: colors.text.secondary,
-  },
-  planSaveRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  planCompare: {
-    ...textVariants.caption,
-    color: colors.text.muted,
-    textDecorationLine: 'line-through',
-  },
   planSave: {
     ...textVariants.caption,
     color: colors.accent.gold,
     fontWeight: fontWeights.semibold,
   },
-  sceneSpacer: {
-    flex: 1,
-    minHeight: 0,
-  },
   footer: {
-    flexGrow: 0,
-    flexShrink: 0,
-    zIndex: 1,
+    marginTop: 'auto',
+    gap: spacing.xs,
+    paddingTop: spacing.sm,
   },
-  cta: {
-    alignSelf: 'center',
+  fine: {
+    ...textVariants.caption,
+    color: colors.text.helper,
+    textAlign: 'center',
   },
   status: {
     ...textVariants.caption,
     color: colors.text.secondary,
     textAlign: 'center',
-    marginBottom: spacing.xs,
   },
   signIn: {
+    minHeight: spacing.hitTarget,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -514,5 +439,26 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.7,
+  },
+  legal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+  },
+  legalLink: {
+    minHeight: spacing.hitTarget - spacing.sm,
+    justifyContent: 'center',
+  },
+  legalLabel: {
+    fontFamily: fontFamilies.sans,
+    fontSize: fontSizes.xs,
+    lineHeight: lineHeights.xs,
+    color: colors.text.helper,
+    textDecorationLine: 'underline',
+  },
+  legalDot: {
+    fontSize: fontSizes.xs,
+    color: colors.text.helper,
   },
 });

@@ -14,6 +14,28 @@ export const motion = {
     press: 240,
     pressDown: 100,
     question: 280,
+    /** Onboarding stage: copy slides out, then the next question slides in. */
+    stageLeave: 260,
+    stageEnter: 400,
+    /** A chosen answer floating to the mascot. */
+    stageFlight: 520,
+    stageFlightStagger: 70,
+    /** Reaction shown before a single choice moves on. */
+    stageAutoAdvance: 800,
+    stagePoseFade: 320,
+    stageCatch: 500,
+    stageBreath: 1700,
+    stageNoteTuck: 1500,
+    stagePlantCheer: 1400,
+    /** Opening screen: he walks in, worries drop into his sack, then he sets it down. */
+    welcomeWalk: 1300,
+    welcomeWorryEvery: 1300,
+    welcomeWorryHold: 950,
+    welcomeWorryFall: 650,
+    welcomeFrameFade: 260,
+    welcomeSettle: 900,
+    welcomeReveal: 600,
+    welcomeSquash: 450,
     progress: 280,
     screen: 280,
     loadingMark: 240,
@@ -73,6 +95,10 @@ export const motion = {
     journeyArrivalRingTo: 1.42,
   },
   offset: {
+    stageSlide: 36,
+    stageFlightArc: 40,
+    /** Opening screen: worries alternate this far either side of centre. */
+    welcomeWorrySway: 18,
     press: 8,
     pressDown: 1,
     question: 8,

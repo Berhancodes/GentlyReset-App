@@ -1,18 +1,23 @@
 import { useCallback, useState } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { MainTabHeader, Screen } from '@/components/ui';
-import { colors, spacing } from '@/design-system';
+import { getTabBarScenePadding, MascotIcon, Screen } from '@/components/ui';
+import { colors, fontWeights, radius, spacing, textVariants } from '@/design-system';
 import { JourneyDayCelebration } from '@/features/journey/components/JourneyDayCelebration';
-import { JourneyDaySheet } from '@/features/journey/components/JourneyDaySheet';
+import { JourneyGarden } from '@/features/journey/components/JourneyGarden';
+import { JourneyGardenSheet } from '@/features/journey/components/JourneyGardenSheet';
+import {
+  getJourneyChapterDays,
+  getJourneyChapterForDay,
+} from '@/features/journey/data/journeyChapters';
 import { JOURNEY_DAY_STEPS } from '@/features/journey/data/journeyCopy';
-import { JourneySeasonScene } from '@/features/journey/components/JourneySeasonScene';
-import { JourneyLinearStage } from '@/features/journey/components/JourneyLinearStage';
 import { useJourneyProgression } from '@/features/journey/hooks/useJourneyProgression';
+import { getJourneyDayState } from '@/features/journey/utils/getJourneyDayState';
+import { StageBackdrop } from '@/features/onboarding/stage/StageBackdrop';
 import { useJourneyVisualStore } from '@/features/journey/store/useJourneyVisualStore';
-import { getJourneySeason, type JourneySeason } from '@/features/journey/utils/getJourneySeason';
+import type { JourneySeason } from '@/features/journey/utils/getJourneySeason';
 import { getJourneyVisualTargetDay } from '@/features/journey/utils/getJourneyProgression';
 import { getJourneySheetModel } from '@/features/journey/utils/getJourneySheetModel';
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
@@ -31,7 +36,7 @@ function JourneyStatsButton() {
       onPress={() => router.push('/journey-stats')}
       style={styles.mapButton}
     >
-      <Ionicons name="map-outline" size={24} color={colors.text.primary} />
+      <MascotIcon name="map" size={24} />
     </Pressable>
   );
 }
@@ -41,8 +46,24 @@ const SHEET_CLOSE_MS = 300;
 /** Pause after the last step's tick so it registers before the pop-up leaves. */
 const LAST_TICK_PAUSE_MS = 700;
 
+/** Streak pill: only shown once there's a streak to show. */
+function JourneyStreakPill({ streak }: { streak: number }) {
+  if (streak <= 0) {
+    return <View style={styles.topSpacer} />;
+  }
+  return (
+    <View style={styles.streakPill} accessible accessibilityLabel={`${streak} day streak`}>
+      <MascotIcon name="star" size={14} />
+      <Text style={styles.streakText} maxFontSizeMultiplier={1.3}>
+        {`${streak} day streak`}
+      </Text>
+    </View>
+  );
+}
+
 export function JourneyScreen() {
   useSyncResetDay();
+  const insets = useSafeAreaInsets();
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   // 'pending' covers the pop-up sliding away; the heading holds the old day until 'none'.
   const [celebration, setCelebration] = useState<'none' | 'pending' | 'playing'>('none');
@@ -63,8 +84,6 @@ export function JourneyScreen() {
     }, []),
   );
 
-  const devSeason = useJourneyVisualStore((state) => state.devSeason);
-  const season = devSeason ?? getJourneySeason(new Date());
   const currentDay = useResetStore((state) => state.currentDay);
   const completedDays = useResetStore((state) => state.completedDays);
   const todayCompleted = useResetStore((state) => state.todayCompleted);
@@ -74,10 +93,12 @@ export function JourneyScreen() {
   const resetStartedOn = useResetStore((state) => state.resetStartedOn);
   const startToday = useResetStore((state) => state.startToday);
   const completeToday = useResetStore((state) => state.completeToday);
+  const streak = useResetStore((state) => state.streak);
 
   const rememberLine = getResetProfile(resetTypeId).homeSupportLine;
   const currentTask = getCurrentResetTask({ currentDay, personalization, resetTypeId });
-  const progression = useJourneyProgression({
+  // Still runs so Journey keeps acknowledging each new day as before.
+  useJourneyProgression({
     currentDay,
     completedDays,
     todayCompleted,
@@ -98,10 +119,6 @@ export function JourneyScreen() {
           rememberLine,
           resetTypeId,
         });
-
-  const onPressDay = useCallback((day: number) => {
-    setSelectedDay(day);
-  }, []);
 
   const closeSheet = useCallback(() => {
     setSelectedDay(null);
@@ -149,45 +166,70 @@ export function JourneyScreen() {
   // still changes at midnight); it waits until the celebration is over.
   const headingDay =
     celebration === 'none' ? getJourneyVisualTargetDay({ currentDay, todayCompleted }) : currentDay;
+  // The heading moves on to tomorrow once today is done; the garden mood follows the real day.
+  const mood = todayCompleted ? 'done' : todayStarted ? 'started' : 'ready';
+  const chapter = getJourneyChapterForDay(headingDay);
+  const weekDays = chapter
+    ? getJourneyChapterDays(chapter).map((day) => ({
+        day,
+        // Checked-in days turn sage straight away; the gold ring follows the heading day.
+        kind: completedDays.includes(day)
+          ? ('completed' as const)
+          : day === headingDay
+            ? ('current' as const)
+            : getJourneyDayState(day, currentDay, completedDays, todayCompleted).kind,
+      }))
+    : [];
+  const headingTask =
+    headingDay === currentDay
+      ? currentTask
+      : getCurrentResetTask({ currentDay: headingDay, personalization, resetTypeId });
 
   return (
     <Screen
       includeTopSafeArea={false}
       includeBottomSafeArea={false}
       padded={false}
-      backgroundColor={colors.background.journey}
+      backgroundColor={colors.stage.floor}
     >
-      <JourneySeasonScene
-        season={season}
-        active={journeyFocused}
-        mascotHidden={celebration === 'playing'}
-        onPressMascot={() => setSelectedDay(currentDay)}
-        onLongPressMascot={__DEV__ ? resetTodayForTesting : undefined}
-      />
-      <MainTabHeader
-        title="journey"
-        contentSpacing="roomy"
-        transparent
-        rightAction={<JourneyStatsButton />}
-      />
-      {resetStartedOn ? (
-        <>
-          <JourneyLinearStage
-            presentation={progression}
-            focused={journeyFocused}
-            onPressDay={onPressDay}
-            hidden={sheetModel !== null}
+      <StageBackdrop />
+      <View
+        style={[
+          styles.page,
+          {
+            paddingTop: insets.top + spacing.xs,
+            paddingBottom: getTabBarScenePadding(insets.bottom) + spacing.sm,
+          },
+        ]}
+      >
+        <View style={styles.topBar}>
+          <Pressable onLongPress={__DEV__ ? resetTodayForTesting : undefined} accessible={false}>
+            <JourneyStreakPill streak={streak} />
+          </Pressable>
+          <JourneyStatsButton />
+        </View>
+        {resetStartedOn ? (
+          <JourneyGarden
             day={headingDay}
+            eyebrow={`first season · ${chapter?.subtitle ?? 'week 1'}`}
+            taskTitle={headingTask.title}
+            mood={mood}
+            sproutCount={completedDays.length}
+            weekDays={weekDays}
+            // He hops into the pop-up while it's open, and steps aside for the celebration.
+            mascotHidden={celebration === 'playing' || sheetModel !== null}
+            onOpenDay={setSelectedDay}
           />
-          <JourneyDaySheet
-            visible={sheetModel !== null}
-            season={season}
-            model={sheetModel}
-            onClose={closeSheet}
-            onPrimary={onPrimary}
-            onStepChecked={onStepChecked}
-          />
-        </>
+        ) : null}
+      </View>
+      {resetStartedOn ? (
+        <JourneyGardenSheet
+          visible={sheetModel !== null}
+          model={sheetModel}
+          onClose={closeSheet}
+          onPrimary={onPrimary}
+          onStepChecked={onStepChecked}
+        />
       ) : null}
       <JourneyDayCelebration
         active={celebration === 'playing'}
@@ -258,6 +300,39 @@ if (__DEV__) {
 }
 
 const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+  },
+  topSpacer: {
+    width: spacing.hitTarget,
+  },
+  streakPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxs + 1,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xxs + 2,
+    borderRadius: radius.pill,
+    backgroundColor: colors.stage.chip,
+    shadowColor: colors.stage.chipShadow,
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  streakText: {
+    ...textVariants.stageEyebrow,
+    letterSpacing: 0.2,
+    textTransform: 'none',
+    fontWeight: fontWeights.heavy,
+    color: colors.text.primary,
+  },
   mapButton: {
     minWidth: spacing.hitTarget,
     minHeight: spacing.hitTarget,

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { VideoView } from 'expo-video';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
@@ -16,7 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText, getTabBarScenePadding } from '@/components/ui';
+import { AppText, getTabBarScenePadding, MascotIcon } from '@/components/ui';
 import { colors, radius, shadows, spacing } from '@/design-system';
 import { JourneyConfetti } from '@/features/journey/components/JourneyConfetti';
 import {
@@ -292,7 +291,7 @@ function SheetContent({ model, season, visible, onPrimary, onStepTicked }: Sheet
                 style={[styles.rememberPlant, SHEET_ART.rememberPlant]}
               />
             ) : null}
-            <Ionicons name="leaf-outline" size={22} color={colors.journeySheet.leaf} />
+            <MascotIcon name="leaf" size={22} />
             <View
               style={[
                 styles.rememberCopy,
@@ -335,7 +334,7 @@ function SheetContent({ model, season, visible, onPrimary, onStepTicked }: Sheet
             <AppText variant="button" color="inverse" align="center">
               {model.ctaLabel}
             </AppText>
-            <Ionicons name="arrow-forward" size={20} color={colors.text.inverse} />
+            <MascotIcon name="arrow" size={20} color={colors.text.inverse} />
           </TactileButton>
         </Reveal>
       ) : null}
@@ -376,11 +375,7 @@ function SeasonDecor({ season }: { season: JourneySeason }) {
         if (particles.kind === 'snow') {
           return (
             <View key={`${piece.right}-${piece.top}`} style={[styles.decorPiece, frame]}>
-              <Ionicons
-                name="snow-outline"
-                size={piece.size * 0.7}
-                color={colors.journeyShadow.cool}
-              />
+              <MascotIcon name="snow" size={piece.size * 0.7} color={colors.journeyShadow.cool} />
             </View>
           );
         }

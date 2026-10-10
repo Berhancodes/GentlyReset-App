@@ -1,6 +1,5 @@
 import { useEffect, useState, type RefObject } from 'react';
 import { Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import Animated, {
   interpolateColor,
   useAnimatedStyle,
@@ -9,7 +8,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { AppText } from '@/components/ui';
+import { AppText, MascotIcon } from '@/components/ui';
 import { colors, radius, shadows, spacing, textVariants } from '@/design-system';
 import { JOURNEY_SEASON_SCENES } from '@/features/journey/data/journeySeasonScenes';
 import type { JourneySeason } from '@/features/journey/utils/getJourneySeason';
@@ -117,7 +116,7 @@ export function JournalWritingCard({
         </AppText>
         {draftSaved && words > 0 ? (
           <View style={styles.saved} accessibilityLabel="Draft saved">
-            <Ionicons name="checkmark-circle" size={14} color={colors.journal.savedCheck} />
+            <MascotIcon name="checkCircle" size={14} />
             <AppText variant="label" color="helper">
               Draft saved
             </AppText>
@@ -146,11 +145,7 @@ function CornerDecor({ season }: { season: JourneySeason }) {
       style={styles.corner}
     >
       {particles.kind === 'snow' ? (
-        <Ionicons
-          name="snow-outline"
-          size={CORNER_DECOR_SIZE * 0.8}
-          color={colors.journeyShadow.cool}
-        />
+        <MascotIcon name="snow" size={CORNER_DECOR_SIZE * 0.8} color={colors.journeyShadow.cool} />
       ) : (
         <Image
           source={particles.source}

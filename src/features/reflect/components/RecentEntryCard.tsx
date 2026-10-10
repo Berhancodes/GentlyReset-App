@@ -1,7 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { AppText } from '@/components/ui';
+import { AppText, MascotIcon } from '@/components/ui';
 import { colors, radius, shadows, spacing } from '@/design-system';
 import {
   formatRecentEntryDate,
@@ -38,12 +37,7 @@ export function RecentEntryCard({ entry, onPress }: RecentEntryCardProps) {
           {preview}
         </AppText>
       </View>
-      <Ionicons
-        name="chevron-forward"
-        size={20}
-        color={colors.text.helper}
-        accessibilityElementsHidden
-      />
+      <MascotIcon name="chevron" size={20} color={colors.text.helper} />
     </Pressable>
   );
 }

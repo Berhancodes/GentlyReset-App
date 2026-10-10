@@ -55,7 +55,7 @@ export const DRIFTING_COMPASS_PLAYLIST = [
   slot(
     8,
     'choose-direction',
-    'Choose one 30-day direction',
+    'Choose one direction for this season',
     'Pick one north for the rest of this reset. Let the other destinations wait.',
     'What did you choose — and what did you not choose?',
     'drifting-compass-d8',

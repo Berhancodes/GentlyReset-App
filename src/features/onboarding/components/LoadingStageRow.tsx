@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { StyleSheet } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import Animated, {
   Easing,
   interpolate,
@@ -14,6 +13,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { MascotIcon } from '@/components/ui';
 import { colors, motion, radius, spacing, textVariants } from '@/design-system';
 import { hapticSelection } from '@/utils/haptics';
 
@@ -129,7 +129,7 @@ export function LoadingStageRow({ label, done, active }: LoadingStageRowProps) {
     <Animated.View style={styles.row}>
       <Animated.View style={[styles.mark, markStyle]}>
         <Animated.View style={[styles.checkWrap, checkStyle]}>
-          <Ionicons name="checkmark" size={16} color={colors.action.primaryText} />
+          <MascotIcon name="check" size={16} color={colors.action.primaryText} />
         </Animated.View>
       </Animated.View>
       <Animated.Text

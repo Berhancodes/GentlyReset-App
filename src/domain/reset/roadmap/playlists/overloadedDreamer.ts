@@ -19,7 +19,7 @@ export const OVERLOADED_DREAMER_PLAYLIST = [
   slot(
     3,
     'pick-one',
-    'Pick one for 30 days',
+    'Pick one to focus on this season',
     'Circle one small thing to keep. The rest can wait until after this reset.',
     'What did you choose — and what did you let wait?',
     'overloaded-dreamer-d3',
@@ -206,7 +206,7 @@ export const OVERLOADED_DREAMER_PLAYLIST = [
   slot(
     29,
     'honor-days',
-    'Honor the 30 days you asked for',
+    'Honor the season you asked for',
     'Look at what staying with one thing made possible.',
     'What did one thing give you that ten things did not?',
   ),

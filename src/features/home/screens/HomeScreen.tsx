@@ -5,7 +5,12 @@ import { AppText, getTabBarScenePadding, Screen, TAB_BAR_CONTENT_INSET } from '@
 import { colors, spacing } from '@/design-system';
 import { DayProgressHeader } from '@/features/home/components/DayProgressHeader';
 import { HomeMascot } from '@/features/home/components/HomeMascot';
+import { HomeDriftingClouds } from '@/features/home/components/HomeDriftingClouds';
+import { HomeSeasonDrift } from '@/features/home/components/HomeSeasonDrift';
 import { HomeSky } from '@/features/home/components/HomeSky';
+import { HomeWarmWash } from '@/features/home/components/HomeWarmWash';
+import { useJourneyVisualStore } from '@/features/journey/store/useJourneyVisualStore';
+import { getJourneySeason } from '@/features/journey/utils/getJourneySeason';
 import { getHomeMascotDayState } from '@/features/home/utils/getHomeMascotReaction';
 import { HOME_STREAK_REMINDER } from '@/features/home/utils/homeCopy';
 import { getCompanionPresentation } from '@/features/home/utils/getCompanionPresentation';
@@ -47,6 +52,8 @@ export function HomeScreen() {
   const missedYesterday = useResetStore((state) => state.missedYesterday);
   const streak = useResetStore((state) => state.streak);
   const resetTypeId = useResetStore((state) => state.resetTypeId);
+  const devSeason = useJourneyVisualStore((state) => state.devSeason);
+  const season = devSeason ?? getJourneySeason(new Date());
   const onboardingAnswers = useOnboardingStore((state) => state.answers);
   const firstName = getMascotIntroName(onboardingAnswers);
   const bubbleContext = {
@@ -63,6 +70,8 @@ export function HomeScreen() {
         padded={false}
         backgroundColor={colors.background.home}
       >
+        <HomeDriftingClouds />
+        <HomeSeasonDrift season={season} />
         <HomeSky top={insets.top + spacing.xs} />
         <View style={[styles.hero, { paddingTop: insets.top + HERO_TOP_GAP }]}>
           <View style={styles.greetingLines}>
@@ -101,7 +110,10 @@ export function HomeScreen() {
       padded={false}
       backgroundColor={colors.background.home}
     >
-      <HomeSky top={insets.top + spacing.xs} />
+      <HomeWarmWash warm={todayCompleted} />
+      <HomeDriftingClouds />
+      <HomeSeasonDrift season={season} />
+      <HomeSky top={insets.top + spacing.xs} glowing={todayCompleted} />
       <View style={[styles.hero, { paddingTop: insets.top + HERO_TOP_GAP }]}>
         <View style={styles.greetingLines}>
           {homeGreetingLines(companion.greeting).map((line) => (

@@ -87,7 +87,7 @@ export function friendProgressCopy(
 } {
   const day = Math.min(progress.cycleLength, Math.max(1, progress.currentDay));
   return {
-    dayLabel: `day ${day} of ${progress.cycleLength}`,
+    dayLabel: `day ${day}`,
     presenceLabel: progress.completedToday ? 'showed up today' : 'taking today gently',
     streakLabel: progress.streak > 0 ? `${progress.streak} day streak` : null,
   };

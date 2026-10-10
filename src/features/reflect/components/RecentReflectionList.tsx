@@ -1,7 +1,6 @@
 import { StyleSheet, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { AppText } from '@/components/ui';
+import { AppText, MascotIcon } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
 import { MoodFace } from '@/features/reflect/components/MoodSelector';
 import { formatReflectionListDate, MOOD_LABELS } from '@/features/reflect/utils/journalHistory';
@@ -39,12 +38,7 @@ export function RecentReflectionList({ entries }: RecentReflectionListProps) {
               {item.text}
             </AppText>
           </View>
-          <Ionicons
-            name="chevron-forward"
-            size={16}
-            color={colors.text.helper}
-            accessibilityElementsHidden
-          />
+          <MascotIcon name="chevron" size={16} color={colors.text.helper} />
         </View>
       ))}
     </View>

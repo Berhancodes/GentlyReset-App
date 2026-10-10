@@ -1,7 +1,6 @@
 import { Platform, Share } from 'react-native';
 
-export const INVITE_MESSAGE =
-  "I'm doing a 30-day Gently Reset — one small reset a day. Come reset with me.";
+export const INVITE_MESSAGE = "I'm doing Gently Reset — one small reset a day. Come reset with me.";
 
 export type InviteResult = 'shared' | 'copied';
 

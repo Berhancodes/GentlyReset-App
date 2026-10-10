@@ -1,11 +1,8 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { AppText } from '@/components/ui';
-import { colors, spacing } from '@/design-system';
-
-import { ProfileCard } from './ProfileCard';
+import { MascotIcon } from '@/components/ui';
+import { colors, fontFamilies, fontSizes, fontWeights, radius, spacing } from '@/design-system';
 
 type ProfileLink = {
   icon: ReactNode;
@@ -19,7 +16,7 @@ type ProfileLinkRowsProps = {
 
 export function ProfileLinkRows({ links }: ProfileLinkRowsProps) {
   return (
-    <ProfileCard style={styles.card}>
+    <View style={styles.card}>
       {links.map((link, index) => (
         <View key={link.title}>
           {index > 0 ? <View style={styles.divider} /> : null}
@@ -31,20 +28,35 @@ export function ProfileLinkRows({ links }: ProfileLinkRowsProps) {
           >
             <View style={styles.icon}>{link.icon}</View>
             <View style={styles.copy}>
-              <AppText variant="optionTitle">{link.title}</AppText>
+              <Text style={styles.title} maxFontSizeMultiplier={1.3}>
+                {link.title}
+              </Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={colors.text.helper} />
+            <MascotIcon name="chevron" size={18} color={colors.stage.copySoft} />
           </Pressable>
         </View>
       ))}
-    </ProfileCard>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    paddingVertical: spacing.xs,
-    gap: 0,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xxs,
+    borderRadius: radius.card,
+    backgroundColor: colors.stage.chip,
+    shadowColor: colors.stage.chipShadow,
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
+  },
+  title: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.heavy,
+    color: colors.text.primary,
   },
   row: {
     minHeight: spacing.hitTarget,
@@ -64,7 +76,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border.subtle,
+    backgroundColor: colors.stage.chipBorder,
   },
   pressed: {
     opacity: 0.88,

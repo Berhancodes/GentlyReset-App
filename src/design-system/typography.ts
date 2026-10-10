@@ -30,6 +30,9 @@ export const fontSizes = {
   nav: 22,
   xl: 28,
   questionCompact: 28,
+  stageTitle: 25,
+  stageEyebrow: 11,
+  stageChip: 14,
   question: 36,
   questionHelper: 18,
   onboardingChoice: 17,
@@ -60,6 +63,9 @@ export const lineHeights = {
   nav: 28,
   xl: 34,
   questionCompact: 34,
+  stageTitle: 30,
+  stageEyebrow: 13,
+  stageChip: 19,
   question: 43,
   questionHelper: 26,
   onboardingChoice: 23,
@@ -220,6 +226,30 @@ export const textVariants = {
     lineHeight: lineHeights.question,
     fontWeight: fontWeights.bold,
     letterSpacing: -0.45,
+  },
+  /** Onboarding clean stage: centred question. */
+  stageTitle: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.stageTitle,
+    lineHeight: lineHeights.stageTitle,
+    fontWeight: fontWeights.heavy,
+    letterSpacing: -0.3,
+  },
+  /** Onboarding clean stage: the line under the question. */
+  stageSubtitle: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.sm,
+    lineHeight: lineHeights.sm,
+    fontWeight: fontWeights.bold,
+  },
+  /** Onboarding clean stage: chapter label above the question. */
+  stageEyebrow: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.stageEyebrow,
+    lineHeight: lineHeights.stageEyebrow,
+    fontWeight: fontWeights.heavy,
+    letterSpacing: 1.3,
+    textTransform: 'uppercase',
   },
   questionTitleCompact: {
     fontFamily: fontFamilies.rounded,

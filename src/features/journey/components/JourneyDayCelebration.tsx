@@ -129,7 +129,7 @@ export function JourneyDayCelebration({ active, onDone }: JourneyDayCelebrationP
       pointerEvents={active ? 'auto' : 'none'}
       accessibilityElementsHidden={!active}
       importantForAccessibility={active ? 'yes' : 'no-hide-descendants'}
-      accessibilityLabel={active ? 'Day complete' : undefined}
+      accessibilityLabel={active ? 'Checked in for today' : undefined}
       style={styles.root}
       onLayout={(event) => {
         const { width, height } = event.nativeEvent.layout;

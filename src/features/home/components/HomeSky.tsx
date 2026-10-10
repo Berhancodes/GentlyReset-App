@@ -10,6 +10,9 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
+
+import { colors } from '@/design-system';
 
 /**
  * Sun and clouds for the top right of Home, separated from one illustration
@@ -62,14 +65,23 @@ const ENTRANCE = {
   smallCloud: { fromX: 260, fromY: 0, delay: 230 },
 } as const;
 const ENTRANCE_MS = 750;
+/**
+ * The glow behind the sun once today is checked in, as a multiple of the sun's
+ * width. It must stay inside the sky group, which clips (the sun sits 84 canvas px
+ * from the right edge), and it fades to nothing at its rim so no edge shows.
+ */
+const GLOW_SCALE = 1.15;
+const GLOW_FADE_MS = 1200;
 
 type HomeSkyProps = {
   /** Distance from the top of the screen (below the status bar). */
   top: number;
+  /** Today is checked in: a warm glow comes up behind the sun. */
+  glowing?: boolean;
 };
 
 /** Decorative sun and clouds pinned to the top-right corner of Home. */
-export function HomeSky({ top }: HomeSkyProps) {
+export function HomeSky({ top, glowing = false }: HomeSkyProps) {
   const reduceMotion = useReducedMotion();
   const { width: screenWidth } = useWindowDimensions();
   const scale = Math.min(
@@ -80,6 +92,11 @@ export function HomeSky({ top }: HomeSkyProps) {
   const sunIn = useSharedValue(reduceMotion ? 1 : 0);
   const bigCloudIn = useSharedValue(reduceMotion ? 1 : 0);
   const smallCloudIn = useSharedValue(reduceMotion ? 1 : 0);
+  const glow = useSharedValue(glowing ? 1 : 0);
+
+  useEffect(() => {
+    glow.value = withTiming(glowing ? 1 : 0, { duration: reduceMotion ? 0 : GLOW_FADE_MS });
+  }, [glow, glowing, reduceMotion]);
 
   // Replay the slide-in whenever Home comes into view.
   const [focusCount, setFocusCount] = useState(0);
@@ -139,6 +156,10 @@ export function HomeSky({ top }: HomeSkyProps) {
       },
     ],
   }));
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity:
+      glow.value * Math.min(1, sunIn.value * 2) * (0.85 + Math.sin(drift.value * Math.PI) * 0.15),
+  }));
   const sunStyle = useAnimatedStyle(() => ({
     opacity: Math.min(1, sunIn.value * 2),
     transform: [
@@ -162,6 +183,17 @@ export function HomeSky({ top }: HomeSkyProps) {
         },
       ]}
     >
+      <Animated.View style={[styles.piece, glowFrame(scale), glowStyle]}>
+        <Svg width="100%" height="100%" viewBox="0 0 100 100">
+          <Defs>
+            <RadialGradient id="sunGlow" cx="50" cy="50" r="50" gradientUnits="userSpaceOnUse">
+              <Stop offset="0" stopColor={colors.accent.gold} stopOpacity={0.55} />
+              <Stop offset="1" stopColor={colors.accent.gold} stopOpacity={0} />
+            </RadialGradient>
+          </Defs>
+          <Circle cx="50" cy="50" r="50" fill="url(#sunGlow)" />
+        </Svg>
+      </Animated.View>
       <Animated.Image
         source={SKY_PIECES.sun.source}
         style={[styles.piece, pieceFrame(SKY_PIECES.sun, scale), sunStyle]}
@@ -176,6 +208,18 @@ export function HomeSky({ top }: HomeSkyProps) {
       />
     </View>
   );
+}
+
+/** A soft halo centred on the sun, bigger than it. */
+function glowFrame(scale: number) {
+  const sun = SKY_PIECES.sun;
+  const size = sun.width * GLOW_SCALE;
+  return {
+    left: (sun.left + sun.width / 2 - size / 2) * scale,
+    top: (sun.top + sun.height / 2 - size / 2) * scale,
+    width: size * scale,
+    height: size * scale,
+  };
 }
 
 /** A piece's place in the scaled group. */

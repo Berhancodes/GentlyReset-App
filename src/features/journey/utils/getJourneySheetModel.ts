@@ -1,6 +1,5 @@
 import { completeResetDay } from '../../../application/reset/completeResetDay';
 import { startResetDay } from '../../../application/reset/startResetDay';
-import { PLAN_DAY_COUNT } from '../../reset/data/thirtyDayPlan';
 import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
 import { formatMinutesLabel, getTaskForDay } from '../../reset/utils/getTaskForDay';
 import {
@@ -30,7 +29,7 @@ export type JourneySheetModel = {
   cta: JourneySheetCta;
   ctaLabel: string | null;
   weekLabel: string | null;
-  /** Eyebrow above the title, e.g. "week 1 · day 1 of 30". */
+  /** Eyebrow above the title, e.g. "week 1 · day 1". */
   progressLabel: string;
   weekDots: readonly JourneySheetDot[];
 };
@@ -68,7 +67,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
         }))
       : [];
   const weekLabel = chapter ? getJourneyWeekLabel(chapter) : null;
-  const dayOfPlan = `day ${input.day} of ${PLAN_DAY_COUNT}`;
+  const dayOfPlan = `day ${input.day}`;
   const progressLabel = chapter ? `${chapter.subtitle} · ${dayOfPlan}` : dayOfPlan;
 
   if (state.kind === 'future') {
@@ -100,7 +99,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
       description: task.description,
       rememberLine: null,
       footnote: 'you showed up.',
-      completeLabel: state.kind === 'current' ? '✓ reset complete' : '✓ complete',
+      completeLabel: state.kind === 'current' ? '✓ checked in' : '✓ done',
       cta: 'none',
       ctaLabel: null,
       weekLabel,
@@ -121,7 +120,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
     footnote: null,
     completeLabel: null,
     cta: started ? 'complete' : 'start',
-    ctaLabel: started ? "Complete today's reset" : "Start today's reset",
+    ctaLabel: started ? 'Check in for today' : "Start today's reset",
     weekLabel,
     progressLabel,
     weekDots,

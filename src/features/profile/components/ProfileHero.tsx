@@ -37,11 +37,11 @@ export function ProfileHero({ name, shortSummary, currentDay, progress }: Profil
       </AppText>
       <View style={styles.progressBlock}>
         <AppText variant="label" color="helper" align="center">
-          {`DAY ${safeDay} OF ${PLAN_DAY_COUNT}`}
+          {`DAY ${safeDay} · FIRST SEASON`}
         </AppText>
         <ProgressBar
           progress={progress}
-          accessibilityLabel="30-day reset progress"
+          accessibilityLabel="First season progress"
           fillColor={colors.progress.fillGold}
           trackColor={colors.progress.trackStrong}
           thickness={spacing.xs}

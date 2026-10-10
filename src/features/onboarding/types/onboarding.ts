@@ -1,3 +1,5 @@
+import type { StagePose } from '../stage/stagePoseNames';
+
 export const ONBOARDING_CHAPTERS = [
   { id: 'where-you-are', label: 'where you are' },
   { id: 'whats-holding-you-back', label: "what's holding you back" },
@@ -50,13 +52,36 @@ export type ResetProfile = {
   illustrationKey: OnboardingIllustrationKey;
 };
 
-export type QuestionLayout = 'grid2' | 'grid3' | 'stacked' | 'stackedWithSubtitle' | 'feelingList';
+export type QuestionLayout =
+  | 'grid2'
+  | 'grid3'
+  | 'stacked'
+  | 'stackedWithSubtitle'
+  | 'feelingList'
+  /** Clean stage: soft pills under the mascot. */
+  | 'chips'
+  /** Clean stage: full-width answers with a description. */
+  | 'cards'
+  /** Clean stage: a snapping slider for ordered answers. */
+  | 'slider'
+  /** Clean stage: each pick drops a stone into the sack he carries. */
+  | 'sack'
+  /** Clean stage: each pick plants a sprout by his feet. */
+  | 'plant';
+
+/** What the mascot does: a pose, and optionally a short line in his speech bubble. */
+export type MascotReaction = {
+  pose: StagePose;
+  line?: string;
+};
 
 export type OnboardingOption = {
   id: string;
   label: string;
   description?: string;
   selectHaptic?: 'selection' | 'success';
+  /** How the mascot reacts when this answer is chosen. */
+  reaction?: MascotReaction;
 };
 
 export type ScalePoint = {
@@ -84,10 +109,21 @@ type BaseOnboardingStep = {
   illustrationSize?: OnboardingIllustrationSize;
   hideProgress?: boolean;
   required: boolean;
+  /** The mascot's pose and line when this step appears on the clean stage. */
+  mascot?: MascotReaction;
+};
+
+/** A worry that pops up over the mascot and drops into his sack on the opening screen. */
+export type WelcomeWorry = {
+  label: string;
+  /** What he says as it lands. */
+  line?: string;
 };
 
 export type WelcomeStep = BaseOnboardingStep & {
   type: 'welcome';
+  /** One per sinking frame: each lands in the sack and weighs him down a step further. */
+  worries: readonly WelcomeWorry[];
   ctaLabel: string;
   signInPrompt?: string;
   signInLabel?: string;
@@ -107,6 +143,8 @@ export type SingleChoiceStep = BaseOnboardingStep & {
   options: readonly OnboardingOption[];
   comfortable?: boolean;
   layout?: QuestionLayout;
+  /** Slider answer chosen before the person moves it. */
+  defaultOptionId?: string;
 };
 
 export type MultiChoiceStep = BaseOnboardingStep & {
@@ -115,6 +153,8 @@ export type MultiChoiceStep = BaseOnboardingStep & {
   minSelections?: number;
   maxSelections?: number;
   layout?: QuestionLayout;
+  /** Said instead of an answer's own line once more than two are chosen. */
+  crowdedLine?: string;
 };
 
 export type ScaleStep = BaseOnboardingStep & {
@@ -127,6 +167,8 @@ export type TextInputStep = BaseOnboardingStep & {
   placeholder?: string;
   maxLength?: number;
   multiline?: boolean;
+  /** What the mascot does with the answer before the next step. */
+  submitReaction?: MascotReaction;
 };
 
 export type StoryStep = BaseOnboardingStep & {

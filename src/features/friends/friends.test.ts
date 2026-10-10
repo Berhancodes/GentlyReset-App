@@ -304,7 +304,7 @@ check(
     incoming: [],
     outgoing: [],
     currentDay: 8,
-  }).statusBody === 'day 8 of 30',
+  }).statusBody === 'day 8',
 );
 
 const pendingOnly = sendFriendRequest(emptyFriendshipStore(), 'user-a', 'user-b').store;

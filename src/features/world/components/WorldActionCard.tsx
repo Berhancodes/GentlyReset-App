@@ -1,7 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { AppText } from '@/components/ui';
+import { AppText, MascotIcon } from '@/components/ui';
 import { colors, radius, shadows, spacing } from '@/design-system';
 import { WorldActionIcon, type WorldActionGlyph } from '@/features/world/components/WorldIcons';
 
@@ -27,13 +26,7 @@ export function WorldActionCard({ glyph, title, subtitle, onPress }: WorldAction
           {subtitle}
         </AppText>
       </View>
-      <Ionicons
-        name="chevron-forward"
-        size={18}
-        color={colors.text.helper}
-        accessibilityElementsHidden
-        style={styles.chevron}
-      />
+      <MascotIcon name="chevron" size={18} color={colors.text.helper} style={styles.chevron} />
     </Pressable>
   );
 }

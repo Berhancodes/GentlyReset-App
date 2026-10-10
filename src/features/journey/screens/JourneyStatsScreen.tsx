@@ -1,33 +1,51 @@
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { AppText, Screen } from '@/components/ui';
-import { colors, radius, shadows, spacing } from '@/design-system';
-import { JOURNEY_SPRITES } from '@/features/journey/data/journeyChapterImages';
+import { Screen } from '@/components/ui';
 import {
+  colors,
+  fontFamilies,
+  fontSizes,
+  fontWeights,
+  lineHeights,
+  radius,
+  spacing,
+  textVariants,
+} from '@/design-system';
+import {
+  getJourneyCalendarMonth,
   getJourneyCheckInDates,
-  getJourneyHeatmap,
-  getJourneyMilestoneTrack,
-  getJourneyShowUpMessage,
+  getJourneyLongestStreak,
+  getJourneySeasonWeeks,
   getJourneyStats,
-  type JourneyHeatmapWeek,
-  type JourneyMilestoneTrack,
+  getJourneyStreakLine,
+  type JourneyCalendarCell,
+  type JourneySeasonWeek,
 } from '@/features/journey/utils/getJourneyStats';
 import { BackChevron } from '@/features/onboarding/components/BackChevron';
+import { StageBackdrop } from '@/features/onboarding/stage/StageBackdrop';
+import { STAGE_POSE_ART } from '@/features/onboarding/stage/stagePoses';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { toLocalDateKey } from '@/features/reset/utils/calendar';
 
-const CELL_SIZE = 15;
-const CELL_GAP = 4;
-const WEEKDAY_LABEL_WIDTH = 28;
-/** Monday-first rows. */
-const WEEKDAY_LABELS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] as const;
-const NODE_SIZE = 20;
-const LINE_THICKNESS = 3;
-/** Sitting mascot cut from the stats mockup (267 x 221). */
-const SITTING_MASCOT = { width: 110, height: 91 } as const;
+/** Monday-first, matching the calendar rows. */
+const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as const;
+const WEEKDAY_NAMES = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+] as const;
+const BAR_MAX_HEIGHT = 80;
+const BAR_MIN_HEIGHT = 6;
+const MASCOT_HEIGHT = 76;
+const MASCOT_POSE = STAGE_POSE_ART['react-hopeful'];
 
+/** Your journey at a glance: a real calendar of check-ins, the season by week, and a nudge. */
 export function JourneyStatsScreen() {
   const router = useRouter();
   const completedDays = useResetStore((state) => state.completedDays);
@@ -35,7 +53,9 @@ export function JourneyStatsScreen() {
   const lastCompletedOn = useResetStore((state) => state.lastCompletedOn);
   const streak = useResetStore((state) => state.streak);
   const resetStartedOn = useResetStore((state) => state.resetStartedOn);
-  const [gridWidth, setGridWidth] = useState(0);
+  const currentDay = useResetStore((state) => state.currentDay);
+  const todayCompleted = useResetStore((state) => state.todayCompleted);
+  const [monthOffset, setMonthOffset] = useState(0);
 
   const input = {
     completedDays,
@@ -46,20 +66,18 @@ export function JourneyStatsScreen() {
     today: toLocalDateKey(new Date()),
   };
   const stats = getJourneyStats(input);
-  const weekCount = Math.max(
-    1,
-    Math.floor((gridWidth - WEEKDAY_LABEL_WIDTH + CELL_GAP) / (CELL_SIZE + CELL_GAP)),
-  );
-  const weeks =
-    gridWidth > 0 ? getJourneyHeatmap(getJourneyCheckInDates(input), input.today, weekCount) : [];
-  const message = getJourneyShowUpMessage(stats.checkIns);
+  const checkInDates = getJourneyCheckInDates(input);
+  const month = getJourneyCalendarMonth(checkInDates, input.today, resetStartedOn, monthOffset);
+  const weeks = getJourneySeasonWeeks(completedDays, currentDay);
+  const streakLine = getJourneyStreakLine(stats.streak, getJourneyLongestStreak(checkInDates));
 
   return (
-    <Screen>
-      <View style={styles.header}>
+    <Screen backgroundColor={colors.stage.floor}>
+      <StageBackdrop />
+      <View style={styles.nav}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="back"
+          accessibilityLabel="Back"
           onPress={() => {
             if (router.canGoBack()) {
               router.back();
@@ -67,59 +85,94 @@ export function JourneyStatsScreen() {
             }
             router.replace('/(app)/(tabs)/journey');
           }}
-          style={styles.back}
+          style={styles.navButton}
         >
-          <BackChevron />
+          <View style={styles.backCircle}>
+            <BackChevron />
+          </View>
         </Pressable>
-        <AppText variant="navTitle">your journey</AppText>
-        <View style={styles.back} />
+        <Text style={styles.eyebrow} accessibilityRole="header" maxFontSizeMultiplier={1.3}>
+          your journey
+        </Text>
+        <View style={styles.navButton} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.intro}>
+          <Text style={styles.title} maxFontSizeMultiplier={1.25}>
+            Showing up, gently
+          </Text>
+          <Text style={styles.subtitle} maxFontSizeMultiplier={1.3}>
+            The filled days are days you checked in.
+          </Text>
+        </View>
+
         <View style={styles.statsRow}>
-          <Stat value={`${stats.streak}`} label="Streak" />
-          <Stat value={`${stats.consistency}`} unit="%" label="Consistency" />
-          <Stat value={`${stats.checkIns}`} label="Check-ins" />
+          <Stat value={`${stats.streak}`} label="day streak" />
+          <Stat value={`${stats.checkIns}`} label="check-ins" />
+          <Stat value={`${stats.consistency}`} unit="%" label="of days" />
         </View>
 
-        <View
-          style={styles.card}
-          onLayout={(event) => {
-            const width = event.nativeEvent.layout.width - spacing.lg * 2;
-            if (width !== gridWidth) {
-              setGridWidth(width);
-            }
-          }}
-        >
-          <View style={styles.cardHeader}>
-            <AppText variant="navTitle">Your days of showing up</AppText>
-            <AppText variant="caption" color="secondary">
-              Each square is a day you showed up.
-            </AppText>
+        <View style={styles.card}>
+          <View style={styles.monthBar}>
+            <MonthButton
+              direction="back"
+              disabled={!month.canGoBack}
+              onPress={() => setMonthOffset((offset) => offset - 1)}
+            />
+            <Text style={styles.cardTitle} maxFontSizeMultiplier={1.3}>
+              {month.title}
+            </Text>
+            <MonthButton
+              direction="forward"
+              disabled={!month.canGoForward}
+              onPress={() => setMonthOffset((offset) => offset + 1)}
+            />
           </View>
-          <Heatmap weeks={weeks} />
-          <AppText variant="body" color="secondary">
-            {`${stats.checkIns} ${stats.checkIns === 1 ? 'day' : 'days'} shown up.`}
-          </AppText>
+          <View style={styles.grid} accessibilityElementsHidden>
+            {WEEKDAYS.map((letter, index) => (
+              <Text key={WEEKDAY_NAMES[index]} style={styles.weekday} maxFontSizeMultiplier={1.2}>
+                {letter}
+              </Text>
+            ))}
+          </View>
+          <View style={styles.grid}>
+            {month.cells.map((cell, index) => (
+              <CalendarSquare
+                key={cell.kind === 'day' ? cell.dateKey : `blank-${index}`}
+                cell={cell}
+                month={month.title}
+              />
+            ))}
+          </View>
         </View>
 
-        <View style={styles.progress}>
-          <AppText variant="title">Your Progress</AppText>
-          <MilestoneTrack track={getJourneyMilestoneTrack(stats.checkIns)} />
+        <View style={styles.card}>
+          <Text style={styles.cardTitle} maxFontSizeMultiplier={1.3}>
+            This season, week by week
+          </Text>
+          <SeasonBars weeks={weeks} />
+          <Text style={styles.cardNote} maxFontSizeMultiplier={1.3}>
+            {getCurrentWeekNote(weeks, currentDay, todayCompleted)}
+          </Text>
         </View>
 
         <View style={styles.cheer}>
           <Image
-            source={JOURNEY_SPRITES.statsMascotSitting}
+            source={MASCOT_POSE.source}
+            resizeMode="contain"
             accessibilityElementsHidden
             importantForAccessibility="no"
-            style={SITTING_MASCOT}
+            style={{
+              height: MASCOT_HEIGHT,
+              width: (MASCOT_POSE.width / MASCOT_POSE.height) * MASCOT_HEIGHT,
+            }}
           />
           <View style={styles.bubble}>
-            <AppText variant="optionTitle">{message.title}</AppText>
-            <AppText variant="body" color="secondary">
-              {message.body}
-            </AppText>
+            <View style={styles.bubbleTail} />
+            <Text style={styles.bubbleText} maxFontSizeMultiplier={1.3}>
+              {streakLine}
+            </Text>
           </View>
         </View>
       </ScrollView>
@@ -127,252 +180,324 @@ export function JourneyStatsScreen() {
   );
 }
 
-type StatProps = {
-  value: string;
-  unit?: string;
-  label: string;
-};
-
-function Stat({ value, unit, label }: StatProps) {
+function Stat({ value, unit, label }: { value: string; unit?: string; label: string }) {
   return (
-    <View style={styles.stat} accessible accessibilityLabel={`${label}: ${value}${unit ?? ''}`}>
-      <View style={styles.statValue}>
-        <AppText variant="journeyDay">{value}</AppText>
-        {unit ? <AppText variant="title">{unit}</AppText> : null}
-      </View>
-      <AppText variant="body" color="secondary">
+    <View style={styles.stat} accessible accessibilityLabel={`${value}${unit ?? ''} ${label}`}>
+      <Text style={styles.statValue} maxFontSizeMultiplier={1.2}>
+        {value}
+        {unit ? <Text style={styles.statUnit}>{unit}</Text> : null}
+      </Text>
+      <Text style={styles.statLabel} maxFontSizeMultiplier={1.3}>
         {label}
-      </AppText>
+      </Text>
     </View>
   );
 }
 
-function Heatmap({ weeks }: { weeks: readonly JourneyHeatmapWeek[] }) {
+type MonthButtonProps = {
+  direction: 'back' | 'forward';
+  disabled: boolean;
+  onPress: () => void;
+};
+
+function MonthButton({ direction, disabled, onPress }: MonthButtonProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={direction === 'back' ? 'Previous month' : 'Next month'}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      style={styles.navButton}
+    >
+      <View style={[styles.monthCircle, disabled ? styles.monthCircleDisabled : null]}>
+        <View style={direction === 'forward' ? styles.flipped : null}>
+          <BackChevron />
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+const STATE_WORDS = {
+  checkedIn: 'checked in',
+  today: 'today',
+  missed: 'no check-in',
+  upcoming: 'coming up',
+  beforeStart: 'before you started',
+} as const;
+
+function CalendarSquare({ cell, month }: { cell: JourneyCalendarCell; month: string }) {
+  if (cell.kind === 'blank') {
+    return <View style={styles.square} />;
+  }
   return (
     <View
-      accessibilityLabel={`Check-in history for the last ${weeks.length} weeks`}
-      style={styles.heatmap}
+      accessible
+      accessibilityLabel={`${month} ${cell.date}, ${STATE_WORDS[cell.state]}`}
+      style={styles.square}
     >
-      <View style={styles.monthRow}>
-        <View style={styles.weekdayColumn} />
-        {weeks.map((week, index) => (
-          <View key={`month-${index}`} style={styles.monthSlot}>
-            {week.monthLabel ? (
-              <View style={styles.month}>
-                <AppText variant="label" color="secondary" numberOfLines={1}>
-                  {week.monthLabel}
-                </AppText>
-              </View>
-            ) : null}
-          </View>
-        ))}
+      <View
+        style={[
+          styles.squareFill,
+          cell.state === 'checkedIn' ? styles.squareCheckedIn : null,
+          cell.state === 'today' ? styles.squareToday : null,
+        ]}
+      >
+        <Text
+          maxFontSizeMultiplier={1.2}
+          style={[
+            styles.squareDate,
+            cell.state === 'checkedIn' ? styles.squareDateCheckedIn : null,
+            cell.state === 'today' ? styles.squareDateToday : null,
+            cell.state === 'missed' || cell.state === 'beforeStart' ? styles.squareDateFaint : null,
+          ]}
+        >
+          {cell.date}
+        </Text>
       </View>
-      {WEEKDAY_LABELS.map((weekdayLabel, weekday) => (
-        <View key={weekdayLabel} style={styles.row}>
-          <View style={styles.weekdayColumn}>
-            <AppText variant="label" color="secondary">
-              {weekdayLabel}
-            </AppText>
-          </View>
-          {weeks.map((week, index) => {
-            const cell = week.cells[weekday];
-            if (!cell || cell.kind === 'future') {
-              return <View key={`cell-${index}`} style={styles.cellSlot} />;
-            }
-            return (
-              <View
-                key={cell.dateKey}
-                accessibilityLabel={`${cell.dateKey} ${cell.checkedIn ? 'showed up' : 'no check-in'}`}
-                style={[
-                  styles.cellSlot,
-                  styles.cell,
-                  cell.checkedIn ? styles.cellCheckedIn : null,
-                  cell.checkedIn && cell.isToday ? styles.cellToday : null,
-                  !cell.checkedIn && cell.isToday ? styles.cellTodayOpen : null,
-                ]}
-              />
-            );
-          })}
+    </View>
+  );
+}
+
+function SeasonBars({ weeks }: { weeks: readonly JourneySeasonWeek[] }) {
+  return (
+    <View style={styles.bars}>
+      {weeks.map((week) => (
+        <View
+          key={week.label}
+          style={styles.barColumn}
+          accessible
+          accessibilityLabel={`${week.label}: ${week.checkIns} of ${week.days} days`}
+        >
+          <View
+            style={[
+              styles.bar,
+              week.current ? styles.barCurrent : null,
+              { height: Math.max(BAR_MIN_HEIGHT, (week.checkIns / 7) * BAR_MAX_HEIGHT) },
+            ]}
+          />
+          <Text style={styles.barLabel} maxFontSizeMultiplier={1.2}>
+            {week.label}
+          </Text>
         </View>
       ))}
     </View>
   );
 }
 
-/**
- * Three equal columns, each with its node centered over its label. The line
- * between two nodes is the right half of one column plus the left half of the
- * next, so a segment's fill is split across those two halves.
- */
-function MilestoneTrack({ track }: { track: JourneyMilestoneTrack }) {
-  const last = track.milestones.length - 1;
-
-  return (
-    <View style={styles.track}>
-      {track.milestones.map((milestone, index) => {
-        const incoming = index > 0 ? (track.segmentFill[index - 1] ?? 0) : null;
-        const outgoing = index < last ? (track.segmentFill[index] ?? 0) : null;
-        return (
-          <View
-            key={`${milestone.days}-${index}`}
-            style={styles.trackColumn}
-            accessible
-            accessibilityLabel={`${milestone.days} ${milestone.days === 1 ? 'day' : 'days'}, ${milestone.label}${milestone.reached ? ', reached' : ''}`}
-          >
-            <View style={styles.nodeRow}>
-              <LineHalf fill={incoming === null ? null : Math.max(0, incoming * 2 - 1)} />
-              <View
-                style={[styles.node, milestone.reached ? styles.nodeReached : styles.nodeOpen]}
-              />
-              <LineHalf fill={outgoing === null ? null : Math.min(1, outgoing * 2)} />
-            </View>
-            <AppText variant="optionTitle" align="center">
-              {`${milestone.days} ${milestone.days === 1 ? 'day' : 'days'}`}
-            </AppText>
-            <AppText variant="label" color="secondary" align="center" numberOfLines={1}>
-              {milestone.label}
-            </AppText>
-          </View>
-        );
-      })}
-    </View>
-  );
-}
-
-/** One half of a connecting line; `null` leaves the space empty at the track ends. */
-function LineHalf({ fill }: { fill: number | null }) {
-  if (fill === null) {
-    return <View style={styles.lineHalf} />;
+/** "Week 2: 3 of the 4 days so far." for the week you're in. Today counts once it's done. */
+function getCurrentWeekNote(
+  weeks: readonly JourneySeasonWeek[],
+  currentDay: number,
+  todayCompleted: boolean,
+): string {
+  const index = weeks.findIndex((week) => week.current);
+  const week = weeks[index];
+  if (!week) {
+    return 'Your first season, one week at a time.';
   }
-  return (
-    <View style={[styles.lineHalf, styles.line]}>
-      <View style={[styles.lineFill, { width: `${fill * 100}%` }]} />
-    </View>
-  );
+  const daysSoFar = currentDay - index * 7 - (todayCompleted ? 0 : 1);
+  return daysSoFar <= 0
+    ? `${week.label} starts today.`
+    : `${week.label}: ${week.checkIns} of the ${daysSoFar} ${daysSoFar === 1 ? 'day' : 'days'} so far.`;
 }
+
+const cardShadow = {
+  shadowColor: colors.stage.chipShadow,
+  shadowOpacity: 0.1,
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 3 },
+  elevation: 2,
+} as const;
 
 const styles = StyleSheet.create({
-  header: {
+  nav: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: spacing.lg,
   },
-  back: {
+  navButton: {
     width: spacing.hitTarget,
     height: spacing.hitTarget,
+    alignItems: 'center',
     justifyContent: 'center',
   },
+  backCircle: {
+    width: spacing.xl + 2,
+    height: spacing.xl + 2,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.stage.chip,
+    ...cardShadow,
+  },
+  eyebrow: {
+    ...textVariants.stageEyebrow,
+    color: colors.stage.copySoft,
+  },
   content: {
-    gap: spacing.xl,
-    paddingTop: spacing.xxl,
+    gap: spacing.md,
+    paddingTop: spacing.xs,
     paddingBottom: spacing.xxl,
+  },
+  intro: {
+    alignItems: 'center',
+    gap: spacing.xxs,
+  },
+  title: {
+    ...textVariants.stageTitle,
+    color: colors.text.primary,
+    textAlign: 'center',
+  },
+  subtitle: {
+    ...textVariants.stageSubtitle,
+    color: colors.stage.copySoft,
+    textAlign: 'center',
   },
   statsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: spacing.xs,
   },
   stat: {
     flex: 1,
     alignItems: 'center',
-    gap: spacing.xxs,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.lg,
+    backgroundColor: colors.stage.chip,
+    ...cardShadow,
   },
   statValue: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.xl,
+    lineHeight: lineHeights.xl,
+    fontWeight: fontWeights.heavy,
+    color: colors.text.primary,
+    fontVariant: ['tabular-nums'],
+  },
+  statUnit: {
+    fontSize: fontSizes.md,
+  },
+  statLabel: {
+    ...textVariants.stageSubtitle,
+    fontSize: fontSizes.xs,
+    lineHeight: lineHeights.xs,
+    color: colors.stage.copySoft,
   },
   card: {
-    gap: spacing.md,
-    padding: spacing.lg,
-    borderRadius: radius.xl,
-    backgroundColor: colors.journeyStats.card,
-    ...shadows.soft,
+    gap: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radius.card,
+    backgroundColor: colors.stage.chip,
+    ...cardShadow,
   },
-  cardHeader: {
-    gap: spacing.xxs,
+  cardTitle: {
+    ...textVariants.stageSubtitle,
+    fontSize: fontSizes.md,
+    lineHeight: lineHeights.md,
+    fontWeight: fontWeights.heavy,
+    color: colors.text.primary,
   },
-  heatmap: {
-    gap: CELL_GAP,
+  cardNote: {
+    ...textVariants.stageSubtitle,
+    color: colors.stage.copySoft,
+    textAlign: 'center',
   },
-  monthRow: {
-    flexDirection: 'row',
-    gap: CELL_GAP,
-  },
-  monthSlot: {
-    width: CELL_SIZE,
-    overflow: 'visible',
-  },
-  /** Month names are wider than one column; let them spill to the right. */
-  month: {
-    width: CELL_SIZE * 3,
-  },
-  row: {
+  monthBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: CELL_GAP,
+    justifyContent: 'space-between',
+    marginHorizontal: -spacing.xs,
+    marginVertical: -spacing.xs,
   },
-  weekdayColumn: {
-    width: WEEKDAY_LABEL_WIDTH - CELL_GAP,
-  },
-  cellSlot: {
-    width: CELL_SIZE,
-    height: CELL_SIZE,
-  },
-  cell: {
-    borderRadius: radius.sm / 2,
-    backgroundColor: colors.journeyStats.cellEmpty,
-  },
-  cellCheckedIn: {
-    backgroundColor: colors.journeyStats.cellCheckedIn,
-  },
-  cellToday: {
-    backgroundColor: colors.journeyStats.cellToday,
-  },
-  cellTodayOpen: {
-    borderWidth: 1.5,
-    borderColor: colors.journeyStats.cellToday,
-  },
-  progress: {
-    gap: spacing.lg,
-  },
-  track: {
-    flexDirection: 'row',
-  },
-  trackColumn: {
-    flex: 1,
-    alignItems: 'center',
-    gap: spacing.xxs,
-  },
-  nodeRow: {
-    alignSelf: 'stretch',
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
-  lineHalf: {
-    flex: 1,
-    height: LINE_THICKNESS,
-  },
-  line: {
-    backgroundColor: colors.journeyStats.trackLine,
-    overflow: 'hidden',
-  },
-  lineFill: {
-    height: '100%',
-    backgroundColor: colors.journeyStats.trackFill,
-  },
-  node: {
-    width: NODE_SIZE,
-    height: NODE_SIZE,
+  monthCircle: {
+    width: spacing.xl - 2,
+    height: spacing.xl - 2,
     borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.stage.sky,
   },
-  nodeReached: {
-    backgroundColor: colors.journeyStats.nodeReached,
+  monthCircleDisabled: {
+    opacity: 0.35,
   },
-  nodeOpen: {
+  flipped: {
+    transform: [{ scaleX: -1 }],
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  weekday: {
+    width: `${100 / 7}%`,
+    textAlign: 'center',
+    ...textVariants.stageEyebrow,
+    letterSpacing: 0,
+    color: colors.stage.copySoft,
+  },
+  square: {
+    width: `${100 / 7}%`,
+    aspectRatio: 1,
+    padding: 2,
+  },
+  squareFill: {
+    flex: 1,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  squareCheckedIn: {
+    backgroundColor: colors.stage.cta,
+  },
+  squareToday: {
+    backgroundColor: colors.stage.chipSelected,
     borderWidth: 2,
-    borderColor: colors.journeyStats.nodeRing,
-    backgroundColor: colors.background.primary,
+    borderColor: colors.accent.gold,
+  },
+  squareDate: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.xs,
+    fontWeight: fontWeights.bold,
+    color: colors.stage.copySoft,
+  },
+  squareDateCheckedIn: {
+    color: colors.text.inverse,
+    fontWeight: fontWeights.heavy,
+  },
+  squareDateToday: {
+    color: colors.text.primary,
+    fontWeight: fontWeights.heavy,
+  },
+  squareDateFaint: {
+    color: colors.stage.ctaDisabled,
+  },
+  bars: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: spacing.sm,
+    height: BAR_MAX_HEIGHT + spacing.lg,
+  },
+  barColumn: {
+    flex: 1,
+    alignItems: 'stretch',
+    gap: spacing.xxs,
+  },
+  bar: {
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
+    borderBottomLeftRadius: spacing.xxs,
+    borderBottomRightRadius: spacing.xxs,
+    backgroundColor: colors.stage.barMuted,
+  },
+  barCurrent: {
+    backgroundColor: colors.accent.gold,
+  },
+  barLabel: {
+    ...textVariants.stageEyebrow,
+    letterSpacing: 0,
+    textTransform: 'none',
+    color: colors.stage.copySoft,
+    textAlign: 'center',
   },
   cheer: {
     flexDirection: 'row',
@@ -381,10 +506,31 @@ const styles = StyleSheet.create({
   },
   bubble: {
     flex: 1,
-    gap: spacing.xxs,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.xxl,
-    backgroundColor: colors.journeyStats.bubble,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: radius.lg,
+    borderWidth: 2,
+    borderColor: colors.stage.bubbleBorder,
+    backgroundColor: colors.stage.bubble,
+  },
+  bubbleTail: {
+    position: 'absolute',
+    left: -8,
+    top: '50%',
+    marginTop: -6,
+    width: 12,
+    height: 12,
+    backgroundColor: colors.stage.bubble,
+    borderLeftWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: colors.stage.bubbleBorder,
+    transform: [{ rotate: '45deg' }],
+  },
+  bubbleText: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.sm,
+    lineHeight: lineHeights.sm,
+    fontWeight: fontWeights.bold,
+    color: colors.text.primary,
   },
 });

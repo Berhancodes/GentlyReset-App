@@ -62,7 +62,7 @@ export const ONBOARDING_ILLUSTRATIONS: Record<
   quietStranger: { label: 'The Quiet Stranger', motif: 'path', aspectRatio: 1246 / 1263 },
   softScatter: { label: 'The Soft Scatter', motif: 'path', aspectRatio: 1 },
   companion: { label: 'Gently Reset companion', motif: 'companion', aspectRatio: SCENE_ASPECT },
-  journey: { label: 'Mascot starting a 30-day journey', motif: 'path', aspectRatio: SCENE_ASPECT },
+  journey: { label: 'Mascot setting out on his journey', motif: 'path', aspectRatio: SCENE_ASPECT },
 };
 
 export const ONBOARDING_ILLUSTRATION_SOURCES: Partial<

@@ -1,11 +1,14 @@
+import { Share } from 'react-native';
+
 import type { ResetProfile } from '@/features/onboarding/types/onboarding';
 
-/**
- * TODO: Implement native share/export of the Reset Card.
- * Intentionally a no-op until that work is scheduled — do not fake success.
- */
-export function shareReset(_profile: ResetProfile): void {
-  if (__DEV__) {
-    console.info('[Gently Reset] shareReset is not implemented yet.');
+/** Opens the system share sheet with the person's reset card text. */
+export async function shareReset(profile: ResetProfile): Promise<void> {
+  try {
+    await Share.share({
+      message: `${profile.name}\n\n${profile.shareQuote}\n\nGently Reset`,
+    });
+  } catch {
+    // Dismissing or an unavailable share sheet is not an error for the person.
   }
 }

@@ -19,7 +19,7 @@ export function JourneyDayNode({ state, size, onPress }: JourneyDayNodeProps) {
   const accessibilityLabel = current
     ? `Day ${state.day}. You are here.`
     : complete
-      ? `Day ${state.day} completed.`
+      ? `Day ${state.day}, checked in.`
       : `Day ${state.day}. Preview only.`;
 
   return (

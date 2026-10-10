@@ -1,18 +1,32 @@
 import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 
-import { MainTabHeader, NoticeDialog, Screen } from '@/components/ui';
-import { colors, spacing } from '@/design-system';
+import { getTabBarScenePadding, MascotIcon, NoticeDialog, Screen } from '@/components/ui';
+import {
+  colors,
+  fontFamilies,
+  fontSizes,
+  fontWeights,
+  radius,
+  spacing,
+  textVariants,
+} from '@/design-system';
 import { useAuth } from '@/features/auth/session/useAuth';
 import { fetchOwnSocialProfile } from '@/features/friends/api/friendsApi';
 import { formatUsernameHandle } from '@/features/friends/username';
-import { MyResetCard } from '@/features/profile/components/MyResetCard';
-import { ProfileHero } from '@/features/profile/components/ProfileHero';
+import { getJourneyStats } from '@/features/journey/utils/getJourneyStats';
+import { StageBackdrop } from '@/features/onboarding/stage/StageBackdrop';
+import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
+import { shareReset } from '@/features/onboarding/utils/shareReset';
+import {
+  ProfileAnswersCard,
+  ProfileProgressCard,
+} from '@/features/profile/components/ProfileSummaryCards';
+import { ResetTypeCard } from '@/features/profile/components/ResetTypeCard';
+import { openLegalDocument } from '@/features/legal/utils/openLegalDocument';
 import { ProfileLinkRows } from '@/features/profile/components/ProfileLinkRows';
-import { ProgressLinkCard } from '@/features/profile/components/ProgressLinkCard';
-import { YourResetCard } from '@/features/profile/components/YourResetCard';
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { getOnboardingOptionLabel } from '@/features/onboarding/utils/getOnboardingOptionLabel';
@@ -20,10 +34,10 @@ import { getMultiChoiceIds, getSingleChoiceId } from '@/features/onboarding/util
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { minutesFromCommitment } from '@/features/reset/utils/getTaskForDay';
-import { getCurrentPlanDay, getResetProgress } from '@/features/reset/utils/resetSelectors';
+import { toLocalDateKey } from '@/features/reset/utils/calendar';
+import { getCurrentPlanDay } from '@/features/reset/utils/resetSelectors';
 
 const PROFILE_COLUMN_MAX_WIDTH = 430;
-const EMPTY_VALUE = 'not set yet';
 
 type Notice = {
   title: string;
@@ -40,6 +54,11 @@ export function ProfileScreen() {
   const [signingOut, setSigningOut] = useState(false);
   const currentDay = useResetStore((state) => state.currentDay);
   const completedDays = useResetStore((state) => state.completedDays);
+  const completionDates = useResetStore((state) => state.completionDates);
+  const lastCompletedOn = useResetStore((state) => state.lastCompletedOn);
+  const streak = useResetStore((state) => state.streak);
+  const resetStartedOn = useResetStore((state) => state.resetStartedOn);
+  const insets = useSafeAreaInsets();
   const resetOnboarding = useOnboardingStore((state) => state.resetOnboarding);
   const resetTypeId = useResetStore((state) => state.resetTypeId);
   const personalization = useResetStore((state) => state.personalization);
@@ -54,25 +73,26 @@ export function ProfileScreen() {
   const focus =
     identityLabel ??
     (outcomeId ? getOnboardingOptionLabel('thirtyDayOutcome', outcomeId) : undefined);
-  const goalLabels = personalization.desiredFeelings
-    .map((id) => getOnboardingOptionLabel('desiredFeelings', id))
-    .filter((label): label is string => Boolean(label));
+  const stats = getJourneyStats({
+    completedDays,
+    completionDates,
+    lastCompletedOn,
+    streak,
+    resetStartedOn,
+    today: toLocalDateKey(new Date()),
+  });
+  const answerRows = [
+    { label: 'Working toward', value: focus ? capitalizeHeading(focus) : 'Not set yet' },
+    {
+      label: 'Each day',
+      value: personalization.dailyCommitment ? `${minutes} minutes` : 'Not set yet',
+    },
+    ...(personalization.resetReason
+      ? [{ label: 'Why', value: capitalizeHeading(personalization.resetReason) }]
+      : []),
+  ];
   const resetApproach =
     profile.resetApproach.trim().length > 0 ? profile.resetApproach : profile.whatUsuallyHelps;
-
-  const openTypeNotice = () => {
-    setNotice({
-      title: profile.name,
-      body: `${profile.summary}\n\n${profile.description}\n\n${profile.emphasized}`,
-    });
-  };
-
-  const openGoalsNotice = () => {
-    setNotice({
-      title: 'goals',
-      body: goalLabels.length > 0 ? goalLabels.join('\n') : 'no goals were saved from onboarding.',
-    });
-  };
 
   useFocusEffect(
     useCallback(() => {
@@ -87,7 +107,7 @@ export function ProfileScreen() {
 
   const openHelpNotice = () => {
     setNotice({
-      title: 'help & support',
+      title: 'Help & support',
       body: 'this part of Gently Reset is coming later.',
     });
   };
@@ -125,71 +145,77 @@ export function ProfileScreen() {
   };
 
   return (
-    <Screen includeTopSafeArea={false} includeBottomSafeArea={false} padded={false}>
-      <MainTabHeader title="you" />
+    <Screen
+      includeTopSafeArea={false}
+      includeBottomSafeArea={false}
+      padded={false}
+      backgroundColor={colors.stage.floor}
+    >
+      <StageBackdrop />
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: insets.top + spacing.sm,
+            paddingBottom: getTabBarScenePadding(insets.bottom) + spacing.lg,
+          },
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        <ProfileHero
+        <Text style={styles.eyebrow} accessibilityRole="header" maxFontSizeMultiplier={1.3}>
+          you
+        </Text>
+        <ResetTypeCard
           name={profile.name}
-          shortSummary={profile.shortSummary}
-          currentDay={getCurrentPlanDay({ currentDay })}
-          progress={getResetProgress({ completedDays })}
+          truth={profile.shortSummary}
+          strengths={profile.strengths}
+          challenges={profile.challenges}
+          approach={resetApproach}
+          helps={profile.whatUsuallyHelps}
         />
-        <YourResetCard approach={resetApproach} onPress={openTypeNotice} />
-        <MyResetCard
-          onOpenType={openTypeNotice}
-          facts={[
-            {
-              icon: 'person-outline',
-              tint: 'gold',
-              label: 'reset type',
-              value: profile.name,
-              onPress: openTypeNotice,
-            },
-            {
-              icon: 'locate-outline',
-              tint: 'peach',
-              label: 'main goal',
-              value: focus ?? EMPTY_VALUE,
-              onPress: openGoalsNotice,
-            },
-            {
-              icon: 'time-outline',
-              tint: 'blue',
-              label: 'daily commitment',
-              value: personalization.dailyCommitment ? `${minutes} minutes a day` : EMPTY_VALUE,
-            },
-            ...(personalization.resetReason
-              ? [
-                  {
-                    icon: 'heart-outline' as const,
-                    tint: 'peach' as const,
-                    label: 'reason',
-                    value: personalization.resetReason,
-                  },
-                ]
-              : []),
-          ]}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Share my reset"
+          onPress={() => void shareReset(profile)}
+          style={({ pressed }) => [styles.share, pressed ? styles.sharePressed : null]}
+        >
+          <Text style={styles.shareLabel} maxFontSizeMultiplier={1.3}>
+            Share my reset
+          </Text>
+        </Pressable>
+        <ProfileProgressCard
+          day={getCurrentPlanDay({ currentDay })}
+          checkIns={stats.checkIns}
+          streak={stats.streak}
+          onSeeAll={() => router.push('/journey-stats')}
         />
-        <ProgressLinkCard onPress={() => router.push('/journey-stats')} />
+        <ProfileAnswersCard rows={answerRows} />
         <ProfileLinkRows
           links={[
             {
-              icon: <Ionicons name="at-outline" size={22} color={colors.text.primary} />,
-              title: userId && username ? formatUsernameHandle(username) : 'choose username',
+              icon: <MascotIcon name="tag" size={22} />,
+              title: userId && username ? formatUsernameHandle(username) : 'Choose a username',
               onPress: () => router.push('/choose-username'),
             },
             {
-              icon: <Ionicons name="help-circle-outline" size={22} color={colors.text.primary} />,
-              title: 'help & support',
+              icon: <MascotIcon name="help" size={22} />,
+              title: 'Help & support',
               onPress: openHelpNotice,
             },
             {
-              icon: <Ionicons name="log-out-outline" size={22} color={colors.text.primary} />,
-              title: signingOut ? 'signing out…' : 'sign out',
+              icon: <MascotIcon name="book" size={22} />,
+              title: 'Terms of service',
+              onPress: () => openLegalDocument('terms'),
+            },
+            {
+              icon: <MascotIcon name="person" size={22} />,
+              title: 'Privacy policy',
+              onPress: () => openLegalDocument('privacy'),
+            },
+            {
+              icon: <MascotIcon name="door" size={22} />,
+              title: signingOut ? 'Signing out…' : 'Sign out',
               onPress: handleSignOut,
             },
           ]}
@@ -214,8 +240,30 @@ const styles = StyleSheet.create({
     maxWidth: PROFILE_COLUMN_MAX_WIDTH,
     alignSelf: 'center',
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xl,
     gap: spacing.md,
+  },
+  eyebrow: {
+    ...textVariants.stageEyebrow,
+    color: colors.stage.copySoft,
+    textAlign: 'center',
+    paddingVertical: spacing.xs,
+  },
+  share: {
+    minHeight: spacing.xxl + spacing.xxs,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.pill,
+    borderWidth: 1.5,
+    borderColor: colors.stage.chipBorder,
+    backgroundColor: colors.stage.chip,
+  },
+  sharePressed: {
+    transform: [{ scale: 0.98 }],
+  },
+  shareLabel: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.heavy,
+    color: colors.text.primary,
   },
 });

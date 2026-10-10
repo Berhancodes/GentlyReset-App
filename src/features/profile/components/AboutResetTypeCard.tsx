@@ -1,16 +1,12 @@
-import type { ComponentProps } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { AppText } from '@/components/ui';
+import { AppText, MascotIcon, type MascotIllustrationName } from '@/components/ui';
 import { colors, spacing } from '@/design-system';
 
 import { ProfileCard } from './ProfileCard';
 
-type IoniconName = ComponentProps<typeof Ionicons>['name'];
-
 type Insight = {
-  icon: IoniconName;
+  icon: MascotIllustrationName;
   label: string;
   value: string;
 };
@@ -29,9 +25,9 @@ export function AboutResetTypeCard({
   onPress,
 }: AboutResetTypeCardProps) {
   const insights: readonly Insight[] = [
-    { icon: 'star-outline', label: 'STRENGTH', value: strength },
-    { icon: 'bar-chart-outline', label: 'PATTERN', value: pattern },
-    { icon: 'leaf-outline', label: 'APPROACH', value: approach },
+    { icon: 'star', label: 'STRENGTH', value: strength },
+    { icon: 'chart', label: 'PATTERN', value: pattern },
+    { icon: 'leaf', label: 'APPROACH', value: approach },
   ];
 
   return (
@@ -41,12 +37,12 @@ export function AboutResetTypeCard({
     >
       <View style={styles.header}>
         <AppText variant="optionTitle">about my reset type</AppText>
-        <Ionicons name="chevron-forward" size={18} color={colors.text.helper} />
+        <MascotIcon name="chevron" size={18} color={colors.text.helper} />
       </View>
       <View style={styles.columns}>
         {insights.map((insight) => (
           <View key={insight.label} style={styles.column}>
-            <Ionicons name={insight.icon} size={18} color={colors.accent.gold} />
+            <MascotIcon name={insight.icon} size={20} />
             <AppText variant="label" color="helper" align="center">
               {insight.label}
             </AppText>

@@ -32,6 +32,6 @@ export function deriveResetApproach(
   return {
     time: timeId ? TIME_LABEL[timeId] : undefined,
     support: supportId ? SUPPORT_LABEL[supportId] : undefined,
-    length: '30 days',
+    length: 'a 30-day first season to build on',
   };
 }

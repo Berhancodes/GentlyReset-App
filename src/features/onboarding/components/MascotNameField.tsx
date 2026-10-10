@@ -110,13 +110,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   submitEnabled: {
-    backgroundColor: colors.action.primaryBackground,
+    backgroundColor: colors.stage.cta,
   },
   submitDisabled: {
     backgroundColor: colors.surface.disabled,
   },
   submitPressed: {
-    backgroundColor: colors.action.primaryBackgroundPressed,
+    backgroundColor: colors.stage.ctaPressed,
     transform: [{ scale: 0.96 }],
   },
   arrow: {

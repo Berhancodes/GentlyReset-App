@@ -1,6 +1,6 @@
 export const PAYWALL_BENEFITS = [
   {
-    title: 'Your personalized 30-day reset',
+    title: 'Your daily reset, built around you',
     detail: 'Daily steps built for you',
   },
   {

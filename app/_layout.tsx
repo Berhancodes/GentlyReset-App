@@ -65,6 +65,9 @@ function RootLayoutReady() {
         >
           <Stack.Screen name="index" />
           <Stack.Screen name="friend-invite/[token]" />
+          {/* Readable from anywhere, including the paywall and sign-up. */}
+          <Stack.Screen name="legal/terms" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="legal/privacy" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="(auth)" />
           <Stack.Protected guard={!hasCompletedOnboarding}>
             <Stack.Screen name="(onboarding)" />

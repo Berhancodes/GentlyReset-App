@@ -22,7 +22,9 @@ export function FinalScreen({ step }: FinalScreenProps) {
       illustrationPlacement="afterHero"
       hideProgress
       onBack={canGoBack ? goBack : undefined}
-      footer={<PrimaryButton label={step.ctaLabel} haptic="success" onPress={goToNext} />}
+      footer={
+        <PrimaryButton label={step.ctaLabel} tone="cocoa" haptic="success" onPress={goToNext} />
+      }
     >
       <PlanPreviewList items={step.preview} />
     </OnboardingScreenLayout>

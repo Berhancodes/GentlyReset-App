@@ -168,3 +168,144 @@ export function getJourneyShowUpMessage(checkIns: number): { title: string; body
   const times = checkIns === 1 ? 'once' : checkIns === 2 ? 'twice' : `${checkIns} times`;
   return { title: `You've shown up ${times}.`, body: 'Small steps still count.' };
 }
+
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+] as const;
+
+/** One square of the month calendar. `missed` is a past day since you started with no check-in. */
+export type JourneyCalendarCell =
+  | { kind: 'blank' }
+  | {
+      kind: 'day';
+      date: number;
+      dateKey: string;
+      state: 'checkedIn' | 'today' | 'missed' | 'upcoming' | 'beforeStart';
+    };
+
+export type JourneyCalendarMonth = {
+  /** e.g. "October". */
+  title: string;
+  /** Monday-first weeks; leading and trailing squares are blank. */
+  cells: readonly JourneyCalendarCell[];
+  canGoBack: boolean;
+  canGoForward: boolean;
+};
+
+/**
+ * The month `monthOffset` months from today's (0 is this month, -1 last month).
+ * You can page back as far as the month you started, and never past this month.
+ */
+export function getJourneyCalendarMonth(
+  checkInDates: ReadonlySet<string>,
+  today: string,
+  resetStartedOn: string | null,
+  monthOffset: number,
+): JourneyCalendarMonth {
+  const todayDate = parseLocalDateKey(today);
+  const first = new Date(todayDate.getFullYear(), todayDate.getMonth() + monthOffset, 1);
+  const year = first.getFullYear();
+  const month = first.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  // getDay() is Sunday-first; shift so Monday is 0.
+  const leading = (first.getDay() + 6) % 7;
+  const cells: JourneyCalendarCell[] = Array.from({ length: leading }, () => ({ kind: 'blank' }));
+
+  for (let date = 1; date <= daysInMonth; date += 1) {
+    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+    const fromToday = calendarDaysBetween(today, dateKey);
+    const beforeStart = resetStartedOn ? calendarDaysBetween(resetStartedOn, dateKey) < 0 : true;
+    const state = checkInDates.has(dateKey)
+      ? 'checkedIn'
+      : fromToday === 0
+        ? 'today'
+        : fromToday > 0
+          ? 'upcoming'
+          : beforeStart
+            ? 'beforeStart'
+            : 'missed';
+    cells.push({ kind: 'day', date, dateKey, state });
+  }
+  while (cells.length % 7 !== 0) {
+    cells.push({ kind: 'blank' });
+  }
+
+  const startDate = resetStartedOn ? parseLocalDateKey(resetStartedOn) : todayDate;
+  const startMonthIndex = startDate.getFullYear() * 12 + startDate.getMonth();
+  const shownMonthIndex = year * 12 + month;
+  return {
+    title: MONTH_NAMES[month] ?? '',
+    cells,
+    canGoBack: shownMonthIndex > startMonthIndex,
+    canGoForward: monthOffset < 0,
+  };
+}
+
+/** The most check-ins on back-to-back calendar days, ever. */
+export function getJourneyLongestStreak(checkInDates: ReadonlySet<string>): number {
+  const sorted = [...checkInDates].sort();
+  let longest = 0;
+  let run = 0;
+  let previous: string | null = null;
+  for (const date of sorted) {
+    run = previous !== null && calendarDaysBetween(previous, date) === 1 ? run + 1 : 1;
+    longest = Math.max(longest, run);
+    previous = date;
+  }
+  return longest;
+}
+
+export type JourneySeasonWeek = {
+  label: string;
+  checkIns: number;
+  days: number;
+  current: boolean;
+};
+
+/** Check-ins in each week of the first season, for the bar chart. */
+export function getJourneySeasonWeeks(
+  completedDays: readonly number[],
+  currentDay: number,
+): readonly JourneySeasonWeek[] {
+  const done = new Set(completedDays);
+  return [1, 2, 3, 4, 5].map((week) => {
+    const first = (week - 1) * 7 + 1;
+    const last = Math.min(week * 7, 30);
+    let checkIns = 0;
+    for (let day = first; day <= last; day += 1) {
+      if (done.has(day)) {
+        checkIns += 1;
+      }
+    }
+    return {
+      label: week === 5 ? 'Last' : `Week ${week}`,
+      checkIns,
+      days: last - first + 1,
+      current: currentDay >= first && currentDay <= last,
+    };
+  });
+}
+
+/** What he says under the stats: a nudge toward your longest streak. */
+export function getJourneyStreakLine(streak: number, longestStreak: number): string {
+  if (longestStreak <= 0) {
+    return 'Your first check-in starts the calendar.';
+  }
+  if (streak > 0 && streak >= longestStreak) {
+    return streak === 1
+      ? 'One day in. That’s how every streak starts.'
+      : `${streak} days in a row is your best yet.`;
+  }
+  return `Your longest streak is ${longestStreak} ${longestStreak === 1 ? 'day' : 'days'}. Want to beat it?`;
+}

@@ -1,17 +1,14 @@
-import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { AppText } from '@/components/ui';
+import { AppText, MascotIcon, type MascotIllustrationName } from '@/components/ui';
 import { colors, radius, spacing } from '@/design-system';
 
 import { ProfileCard } from './ProfileCard';
 
-type IoniconName = ComponentProps<typeof Ionicons>['name'];
 type IconTint = 'gold' | 'peach' | 'blue';
 
 type ResetFact = {
-  icon: IoniconName;
+  icon: MascotIllustrationName;
   tint: IconTint;
   label: string;
   value: string;
@@ -23,10 +20,10 @@ type MyResetCardProps = {
   onOpenType: () => void;
 };
 
-const TINT_COLORS: Record<IconTint, { well: string; icon: string }> = {
-  gold: { well: colors.tint.gold, icon: colors.accent.gold },
-  peach: { well: colors.tint.peach, icon: colors.accent.peach },
-  blue: { well: colors.tint.blue, icon: colors.accent.blue },
+const TINT_WELLS: Record<IconTint, string> = {
+  gold: colors.tint.gold,
+  peach: colors.tint.peach,
+  blue: colors.tint.blue,
 };
 
 export function MyResetCard({ facts, onOpenType }: MyResetCardProps) {
@@ -39,7 +36,7 @@ export function MyResetCard({ facts, onOpenType }: MyResetCardProps) {
         style={({ pressed }) => [styles.header, pressed ? styles.pressed : null]}
       >
         <AppText variant="navTitle">my reset</AppText>
-        <Ionicons name="chevron-forward" size={18} color={colors.text.helper} />
+        <MascotIcon name="chevron" size={18} color={colors.text.helper} />
       </Pressable>
       {facts.map((fact) => (
         <FactRow key={fact.label} fact={fact} />
@@ -49,15 +46,14 @@ export function MyResetCard({ facts, onOpenType }: MyResetCardProps) {
 }
 
 function FactRow({ fact }: { fact: ResetFact }) {
-  const tint = TINT_COLORS[fact.tint];
   const content = (
     <>
       <View
-        style={[styles.iconWell, { backgroundColor: tint.well }]}
+        style={[styles.iconWell, { backgroundColor: TINT_WELLS[fact.tint] }]}
         accessibilityElementsHidden
         importantForAccessibility="no"
       >
-        <Ionicons name={fact.icon} size={18} color={tint.icon} />
+        <MascotIcon name={fact.icon} size={24} />
       </View>
       <View style={styles.copy}>
         <AppText variant="label" color="helper">

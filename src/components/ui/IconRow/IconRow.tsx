@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { AppText } from '@/components/ui/Text';
 import { colors, radius, shadows, spacing } from '@/design-system';
+import { MascotIcon } from '../MascotIcon';
 
 type IconRowProps = {
   icon: ReactNode;
@@ -30,9 +30,7 @@ export function IconRow({ icon, title, subtitle, showChevron = false, onPress }:
           </AppText>
         ) : null}
       </View>
-      {showChevron ? (
-        <Ionicons name="chevron-forward" size={18} color={colors.text.helper} />
-      ) : null}
+      {showChevron ? <MascotIcon name="chevron" size={18} color={colors.text.helper} /> : null}
     </Pressable>
   );
 }

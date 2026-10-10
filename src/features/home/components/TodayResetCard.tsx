@@ -1,7 +1,6 @@
 import { StyleSheet, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { AppText, PrimaryButton } from '@/components/ui';
+import { AppText, MascotIcon, PrimaryButton } from '@/components/ui';
 import { colors, radius, shadows, spacing } from '@/design-system';
 import { formatMinutesLabel } from '@/features/reset/utils/getTaskForDay';
 
@@ -32,7 +31,7 @@ export function TodayResetCard({
     return (
       <View
         style={[styles.card, styles.cardComplete]}
-        accessibilityLabel={`Today's reset complete. ${title}. ${completionMessage}`}
+        accessibilityLabel={`Today's reset done. ${title}. ${completionMessage}`}
       >
         <AppText variant="label" color="helper">
           {"today's reset"}
@@ -65,7 +64,7 @@ export function TodayResetCard({
           {"today's reset"}
         </AppText>
         <View style={styles.duration}>
-          <Ionicons name="time-outline" size={14} color={colors.text.helper} />
+          <MascotIcon name="clock" size={14} />
           <AppText variant="label" color="helper">
             {formatMinutesLabel(minutes)}
           </AppText>
@@ -74,7 +73,7 @@ export function TodayResetCard({
 
       <View style={styles.taskRow}>
         <View style={styles.taskIcon} accessibilityElementsHidden importantForAccessibility="no">
-          <Ionicons name="book-outline" size={18} color={colors.text.primary} />
+          <MascotIcon name="book" size={18} />
         </View>
         <View style={styles.copy}>
           <AppText variant="optionTitle">{title}</AppText>
@@ -91,7 +90,7 @@ export function TodayResetCard({
 
       {started ? (
         <PrimaryButton
-          label="mark as complete"
+          label="check in for today"
           accessibilityHint="Marks today's reset as done"
           haptic="success"
           onPress={onComplete}

@@ -5,6 +5,8 @@ export { AppTabBar, getTabBarScenePadding, TAB_BAR_CONTENT_INSET } from './AppTa
 export { PrimaryButton } from './Button';
 export { AnimatedChoiceCard, ChoiceCard } from './ChoiceCard';
 export { MainTabHeader } from './MainTabHeader';
+export { MascotIcon } from './MascotIcon';
+export type { MascotIconName, MascotIllustrationName } from './MascotIcon';
 export { MascotPlaceholder } from './MascotPlaceholder';
 export { AnimatedProgress, ProgressBar } from './ProgressBar';
 export { SceneHero } from './SceneHero';

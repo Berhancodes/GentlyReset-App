@@ -1,160 +1,172 @@
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import type { View } from 'react-native';
 
-import { ChoiceCard, PrimaryButton } from '@/components/ui';
-import { spacing } from '@/design-system';
-import { ClimbingMascot } from '@/features/onboarding/components/ClimbingMascot';
-import { IllustratedChoiceCard } from '@/features/onboarding/components/IllustratedChoiceCard';
-import { IllustratedChoiceGrid } from '@/features/onboarding/components/IllustratedChoiceGrid';
-import { MissedDayChoices } from '@/features/onboarding/components/MissedDayChoices';
-import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
-import { OptionGrid } from '@/features/onboarding/components/OptionGrid';
-import { OptionIcon } from '@/features/onboarding/components/OptionIcon';
-import { SupportTimingChoices } from '@/features/onboarding/components/SupportTimingChoices';
-import { getOptionIconSource } from '@/features/onboarding/data/onboardingAssets';
+import { motion } from '@/design-system';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
+import { useStageFlight, useStageScene } from '@/features/onboarding/stage/stageHooks';
+import {
+  StageCardList,
+  StageChip,
+  StageChipRow,
+  StageOptionCard,
+} from '@/features/onboarding/stage/StageChoices';
+import { StageButton } from '@/features/onboarding/stage/StageButton';
+import { StageLayout } from '@/features/onboarding/stage/StageLayout';
+import { StageSlider } from '@/features/onboarding/stage/StageSlider';
+import { useStageStore } from '@/features/onboarding/stage/stageStore';
+import { useIsOutgoingStage } from '@/features/onboarding/stage/StageTransition';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
-import type { SingleChoiceStep } from '@/features/onboarding/types/onboarding';
-import { canProceed } from '@/features/onboarding/utils/canProceed';
+import type { OnboardingOption, SingleChoiceStep } from '@/features/onboarding/types/onboarding';
 import { getQuestionHelper } from '@/features/onboarding/utils/getQuestionHelper';
-import { shouldUseIllustratedGrid } from '@/features/onboarding/utils/shouldUseIllustratedGrid';
+import { hapticSelection } from '@/utils/haptics';
 
 type SingleChoiceScreenProps = {
   step: SingleChoiceStep;
 };
 
+/**
+ * One answer. Pills and cards move on by themselves after the mascot reacts;
+ * the slider waits for "next" because people drag through several answers.
+ */
 export function SingleChoiceScreen({ step }: SingleChoiceScreenProps) {
   const answer = useOnboardingStore((state) => state.answers[step.id]);
   const setAnswer = useOnboardingStore((state) => state.setAnswer);
-  const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
+  const { goToNext } = useOnboardingNavigation();
+  const show = useStageStore((state) => state.show);
+  const fly = useStageFlight();
+  const outgoing = useIsOutgoingStage();
+  const [leaving, setLeaving] = useState(false);
+  const optionRefs = useRef(new Map<string, View | null>());
+  const sliderLabelRef = useRef<View>(null);
+  const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedId = answer?.type === 'singleChoice' ? answer.optionId : undefined;
-  const layout = step.layout ?? 'stacked';
-  const illustratedGrid = shouldUseIllustratedGrid(step);
-  const denseGrid = illustratedGrid && step.options.length >= 8;
-  const isHardestStep = step.id === 'consistencyStage';
-  const isChangePatternStep = step.id === 'changePattern';
-  const isDesiredIdentityStep = step.id === 'desiredIdentity';
-  const isDailyCommitmentStep = step.id === 'dailyCommitment';
-  const isSupportStyleStep = step.id === 'supportStyle';
-  const isSupportTimingStep = step.id === 'supportTiming';
-  const isMissedDayStep = step.id === 'missedDayResponse';
-  const useGrid = illustratedGrid || layout === 'grid2' || layout === 'grid3';
-  const columns = illustratedGrid || layout === 'grid2' ? 2 : 3;
+  const layout = step.layout === 'slider' || step.layout === 'cards' ? step.layout : 'chips';
 
-  const cards = step.options.map((option) => {
-    const icon = getOptionIconSource(option.id);
-    const selected = selectedId === option.id;
-    const onPress = () => {
-      setAnswer(step.id, { type: 'singleChoice', optionId: option.id });
-    };
+  useStageScene(step.mascot?.pose ?? 'idle-listen', step.mascot?.line);
 
-    if (illustratedGrid) {
-      return (
-        <IllustratedChoiceCard
-          key={option.id}
-          compact={denseGrid || isDesiredIdentityStep || isSupportStyleStep}
-          label={option.label}
-          leading={
-            icon ? (
-              <OptionIcon
-                source={icon}
-                size={denseGrid || isDesiredIdentityStep || isSupportStyleStep ? 32 : 40}
-              />
-            ) : undefined
-          }
-          selected={selected}
-          haptic={option.selectHaptic ?? 'selection'}
-          onPress={onPress}
-        />
-      );
+  useEffect(() => {
+    if (layout !== 'slider' || selectedId || outgoing) {
+      return;
     }
+    const fallback =
+      step.defaultOptionId ?? step.options[Math.floor((step.options.length - 1) / 2)]?.id;
+    if (fallback) {
+      setAnswer(step.id, { type: 'singleChoice', optionId: fallback });
+    }
+  }, [layout, outgoing, selectedId, setAnswer, step.defaultOptionId, step.id, step.options]);
 
-    return (
-      <ChoiceCard
-        key={option.id}
-        compact={
-          isHardestStep ||
-          isChangePatternStep ||
-          isDailyCommitmentStep ||
-          Boolean(step.illustrationKey)
-        }
-        tight={isHardestStep}
-        label={option.label}
-        description={option.description}
-        leading={icon ? <OptionIcon source={icon} size={isHardestStep ? 28 : 40} /> : undefined}
-        selected={selected}
-        haptic={option.selectHaptic ?? 'selection'}
-        onPress={onPress}
-      />
+  useEffect(
+    () => () => {
+      if (advanceTimer.current) {
+        clearTimeout(advanceTimer.current);
+      }
+    },
+    [],
+  );
+
+  const react = (option: OnboardingOption) => {
+    if (option.reaction) {
+      show(option.reaction.pose, option.reaction.line ?? null);
+    }
+  };
+
+  const choose = (option: OnboardingOption) => {
+    if (leaving) {
+      return;
+    }
+    setLeaving(true);
+    void hapticSelection();
+    setAnswer(step.id, { type: 'singleChoice', optionId: option.id });
+    react(option);
+    fly([{ ref: { current: optionRefs.current.get(option.id) ?? null }, label: option.label }]);
+    advanceTimer.current = setTimeout(goToNext, motion.duration.stageAutoAdvance);
+  };
+
+  if (layout === 'slider') {
+    const selectedIndex = Math.max(
+      0,
+      step.options.findIndex((option) => option.id === selectedId),
     );
-  });
+    return (
+      <StageLayout
+        title={step.title}
+        eyebrow={step.eyebrow}
+        chapter={step.chapter}
+        subtitle={getQuestionHelper(step)}
+        footer={
+          <StageButton
+            label="continue"
+            disabled={!selectedId || leaving}
+            onPress={() => {
+              const option = step.options[selectedIndex];
+              setLeaving(true);
+              const flight = fly([{ ref: sliderLabelRef, label: option?.label ?? '' }]);
+              advanceTimer.current = setTimeout(
+                goToNext,
+                Math.max(0, flight - motion.duration.stageLeave / 2),
+              );
+            }}
+          />
+        }
+      >
+        <StageSlider
+          ref={sliderLabelRef}
+          options={step.options}
+          selectedIndex={selectedIndex}
+          accessibilityLabel={step.title.replace(/\n/g, ' ')}
+          onChange={(index) => {
+            const option = step.options[index];
+            if (!option) {
+              return;
+            }
+            void hapticSelection();
+            setAnswer(step.id, { type: 'singleChoice', optionId: option.id });
+            react(option);
+          }}
+        />
+      </StageLayout>
+    );
+  }
 
   return (
-    <OnboardingScreenLayout
-      tone="question"
-      compact
-      compactTitle={
-        isChangePatternStep || isDesiredIdentityStep || isDailyCommitmentStep || isSupportStyleStep
-      }
-      scrollEnabled={false}
+    <StageLayout
       title={step.title}
-      subtitle={getQuestionHelper(step)}
       eyebrow={step.eyebrow}
-      illustrationKey={step.illustrationKey}
-      illustrationSize={step.illustrationSize}
-      hideProgress={step.hideProgress}
-      onBack={canGoBack ? goBack : undefined}
-      footer={
-        <PrimaryButton label="next" disabled={!canProceed(step, answer)} onPress={goToNext} />
-      }
+      chapter={step.chapter}
+      subtitle={getQuestionHelper(step)}
     >
-      {isSupportTimingStep ? (
-        <SupportTimingChoices
-          options={step.options}
-          selectedId={selectedId}
-          onSelect={(optionId) => {
-            setAnswer(step.id, { type: 'singleChoice', optionId });
-          }}
-        />
-      ) : isMissedDayStep ? (
-        <MissedDayChoices
-          options={step.options}
-          selectedId={selectedId}
-          onSelect={(optionId) => {
-            setAnswer(step.id, { type: 'singleChoice', optionId });
-          }}
-        />
-      ) : isHardestStep ? (
-        <View style={styles.hardestBlock}>
-          <View style={styles.hardestChoices}>{cards}</View>
-          <ClimbingMascot />
-        </View>
-      ) : illustratedGrid ? (
-        <IllustratedChoiceGrid compact={denseGrid || isDesiredIdentityStep || isSupportStyleStep}>
-          {cards}
-        </IllustratedChoiceGrid>
-      ) : useGrid ? (
-        <OptionGrid columns={columns} compact={denseGrid}>
-          {cards}
-        </OptionGrid>
+      {layout === 'cards' ? (
+        <StageCardList>
+          {step.options.map((option) => (
+            <StageOptionCard
+              key={option.id}
+              ref={(node) => {
+                optionRefs.current.set(option.id, node);
+              }}
+              label={option.label}
+              description={option.description}
+              selected={selectedId === option.id}
+              disabled={leaving}
+              onPress={() => choose(option)}
+            />
+          ))}
+        </StageCardList>
       ) : (
-        <View style={styles.list}>{cards}</View>
+        <StageChipRow>
+          {step.options.map((option) => (
+            <StageChip
+              key={option.id}
+              ref={(node) => {
+                optionRefs.current.set(option.id, node);
+              }}
+              label={option.label}
+              selected={selectedId === option.id}
+              disabled={leaving}
+              onPress={() => choose(option)}
+            />
+          ))}
+        </StageChipRow>
       )}
-    </OnboardingScreenLayout>
+    </StageLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  list: {
-    gap: spacing.sm,
-  },
-  hardestBlock: {
-    flex: 1,
-    minHeight: 0,
-    gap: spacing.xs,
-    justifyContent: 'space-between',
-  },
-  hardestChoices: {
-    gap: spacing.xxs,
-    flexShrink: 1,
-  },
-});

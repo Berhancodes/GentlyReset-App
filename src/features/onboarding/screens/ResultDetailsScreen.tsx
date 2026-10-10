@@ -1,11 +1,12 @@
 import { StyleSheet, View } from 'react-native';
 
-import { AppText, PrimaryButton } from '@/components/ui';
-import { colors, radius, spacing } from '@/design-system';
-import { NoticedMascot } from '@/features/onboarding/components/NoticedMascot';
-import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
+import { AppText } from '@/components/ui';
+import { colors, radius, shadows, spacing } from '@/design-system';
 import { getNoticedCopy } from '@/features/onboarding/data/noticedCopy';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
+import { useStageScene } from '@/features/onboarding/stage/stageHooks';
+import { StageButton } from '@/features/onboarding/stage/StageButton';
+import { StageLayout } from '@/features/onboarding/stage/StageLayout';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import type { ResultDetailsStep } from '@/features/onboarding/types/onboarding';
 import { getResetProfileForAnswers } from '@/features/reset/data/resetProfiles';
@@ -14,115 +15,56 @@ type ResultDetailsScreenProps = {
   step: ResultDetailsStep;
 };
 
+/** What the mascot noticed: strengths, the pattern, and what helps. */
 export function ResultDetailsScreen({ step }: ResultDetailsScreenProps) {
-  const { goToNext, goBack, canGoBack } = useOnboardingNavigation();
+  const { goToNext } = useOnboardingNavigation();
   const answers = useOnboardingStore((state) => state.answers);
   const profile = getResetProfileForAnswers(answers);
   const copy = getNoticedCopy(profile.id);
 
+  useStageScene(step.mascot?.pose ?? 'react-warm', step.mascot?.line);
+
+  const facts = [
+    { label: "what's already there", value: profile.strengths.join(', ') },
+    { label: 'the pattern', value: copy.pattern[0] },
+    { label: 'what usually helps', value: profile.whatUsuallyHelps },
+  ];
+
   return (
-    <OnboardingScreenLayout
-      tone="story"
+    <StageLayout
       title={step.title}
       subtitle={copy.insight}
-      hideProgress
-      skipStorySpacer
-      onBack={canGoBack ? goBack : undefined}
-      footer={<PrimaryButton label={step.ctaLabel} showArrow onPress={goToNext} />}
+      footer={<StageButton label={step.ctaLabel} onPress={goToNext} />}
     >
-      <View style={styles.body}>
-        <NoticedMascot />
-        <View style={styles.section}>
-          <AppText variant="storyEyebrow" color="helper" align="center">
-            {"what's already there"}
-          </AppText>
-          <View style={styles.chips}>
-            <View style={styles.chipRow}>
-              {profile.strengths.slice(0, 2).map((value) => (
-                <View key={value} style={styles.chip}>
-                  <AppText variant="caption">{value}</AppText>
-                </View>
-              ))}
-            </View>
-            {profile.strengths.length > 2 ? (
-              <View style={styles.chipRow}>
-                {profile.strengths.slice(2).map((value) => (
-                  <View key={value} style={styles.chip}>
-                    <AppText variant="caption">{value}</AppText>
-                  </View>
-                ))}
-              </View>
-            ) : null}
+      <View style={styles.facts}>
+        {facts.map((fact) => (
+          <View
+            key={fact.label}
+            style={styles.fact}
+            accessible
+            accessibilityLabel={`${fact.label}: ${fact.value}`}
+          >
+            <AppText variant="storyEyebrow" color="helper">
+              {fact.label}
+            </AppText>
+            <AppText variant="optionTitle">{fact.value}</AppText>
           </View>
-        </View>
-        <View style={styles.section}>
-          <AppText variant="storyEyebrow" color="helper" align="center">
-            the pattern
-          </AppText>
-          <View style={styles.pattern}>
-            {copy.pattern.map((paragraph) => (
-              <AppText key={paragraph} variant="body" align="center">
-                {paragraph}
-              </AppText>
-            ))}
-          </View>
-        </View>
-        <View style={styles.divider} />
-        <View style={styles.closer} accessibilityRole="text">
-          <AppText variant="title" align="center">
-            {copy.closerLead}
-          </AppText>
-          <AppText variant="title" align="center">
-            {copy.closerEmphasis}
-          </AppText>
-          <AppText variant="title" color="secondary" align="center">
-            {copy.closerRest}
-          </AppText>
-        </View>
+        ))}
       </View>
-    </OnboardingScreenLayout>
+    </StageLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  body: {
-    gap: spacing.md,
+  facts: {
+    gap: spacing.xs,
   },
-  section: {
-    gap: spacing.sm,
-    alignItems: 'center',
-  },
-  chips: {
-    gap: spacing.sm,
-    alignItems: 'center',
-    width: '100%',
-  },
-  chipRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: spacing.sm,
-  },
-  chip: {
-    borderRadius: radius.pill,
+  fact: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderWidth: 1.5,
-    backgroundColor: colors.surface.raised,
-    borderColor: colors.accent.gold,
-  },
-  pattern: {
-    gap: spacing.sm,
-    paddingHorizontal: spacing.sm,
-  },
-  divider: {
-    alignSelf: 'center',
-    width: spacing.xxl,
-    height: 2,
-    backgroundColor: colors.accent.gold,
-  },
-  closer: {
-    gap: 0,
-    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.card,
+    backgroundColor: colors.stage.chip,
+    gap: spacing.xxs,
+    ...shadows.soft,
   },
 });

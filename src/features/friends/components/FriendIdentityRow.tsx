@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
-import { colors, radius, spacing } from '@/design-system';
+import { colors, fontFamilies, fontSizes, fontWeights, spacing } from '@/design-system';
+import { FriendAvatar } from '@/features/friends/components/FriendAvatar';
 import { formatUsernameHandle } from '@/features/friends/username';
 import type { PublicFriendIdentity } from '@/features/friends/types';
 
@@ -13,6 +14,10 @@ type FriendIdentityRowProps = {
   onCancel?: () => void;
   onRemove?: () => void;
   busy?: boolean;
+  /** Which warm fill the avatar uses, so neighbours differ. */
+  tone?: number;
+  /** Gold ring: they showed up today. */
+  showedUpToday?: boolean;
 };
 
 export function friendDisplayLabel(identity: PublicFriendIdentity): string {
@@ -38,6 +43,8 @@ export function FriendIdentityRow({
   onCancel,
   onRemove,
   busy = false,
+  tone = 0,
+  showedUpToday = false,
 }: FriendIdentityRowProps) {
   const handle = identity.username ? formatUsernameHandle(identity.username) : null;
   const label = friendDisplayLabel(identity);
@@ -48,15 +55,18 @@ export function FriendIdentityRow({
       accessibilityLabel={`${label}${handle ? `. ${handle}` : ''}`}
       style={styles.row}
     >
-      <View style={styles.avatar} accessibilityElementsHidden>
-        <AppText variant="label" color="primary">
-          {initial(identity)}
-        </AppText>
+      <View accessibilityElementsHidden>
+        <FriendAvatar
+          letter={initial(identity)}
+          tone={tone}
+          size={spacing.hitTarget}
+          ringed={showedUpToday}
+        />
       </View>
       <View style={styles.copy}>
-        <AppText variant="optionTitle" numberOfLines={1}>
+        <Text style={styles.name} numberOfLines={1} maxFontSizeMultiplier={1.3}>
           {label}
-        </AppText>
+        </Text>
         {handle && label !== handle ? (
           <AppText variant="caption" color="helper" numberOfLines={1}>
             {handle}
@@ -121,14 +131,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
-  avatar: {
-    width: spacing.hitTarget,
-    height: spacing.hitTarget,
-    borderRadius: radius.pill,
-    backgroundColor: colors.tint.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
+  name: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.heavy,
+    color: colors.text.primary,
   },
   copy: {
     flex: 1,

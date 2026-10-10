@@ -1,21 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-  AppState,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { AppState, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { getTabBarScenePadding, MainTabHeader, NoticeDialog, Screen } from '@/components/ui';
-import { colors, spacing } from '@/design-system';
+import { getTabBarScenePadding, MascotIcon, NoticeDialog, Screen } from '@/components/ui';
+import { colors, spacing, textVariants } from '@/design-system';
 import { useAuth } from '@/features/auth/session/useAuth';
 import { createFriendInvite, fetchFriendsHome } from '@/features/friends/api/friendsApi';
 import { buildFriendInviteDeepLink } from '@/features/friends/invite/pendingFriendInvite';
+import { friendDisplayLabel } from '@/features/friends/components/FriendIdentityRow';
 import type { FriendsHome } from '@/features/friends/types';
 import { getWorldFriendsPresentation } from '@/features/friends/worldState';
 import {
@@ -23,14 +16,11 @@ import {
   shareWorldInvite,
   type WorldNotice,
 } from '@/features/world/components/FriendsSection';
-import { WorldBackground } from '@/features/world/components/WorldBackground';
-import { WorldHeroMessage } from '@/features/world/components/WorldHeroMessage';
-import { WorldStatusCard } from '@/features/world/components/WorldStatusCard';
-import {
-  WORLD_COLUMN_MAX_WIDTH,
-  WORLD_STATS_OVERLAP,
-  getWorldHeroHeight,
-} from '@/features/world/layout/worldHeroLayout';
+import { WorldFriendCircle } from '@/features/world/components/WorldFriendCircle';
+import { WorldStarting } from '@/features/world/components/WorldStarting';
+import { WORLD_COLUMN_MAX_WIDTH } from '@/features/world/layout/worldHeroLayout';
+import { StageBackdrop } from '@/features/onboarding/stage/StageBackdrop';
+import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 
@@ -49,8 +39,6 @@ export function WorldScreen() {
   useSyncResetDay();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { height: windowHeight } = useWindowDimensions();
-  const heroHeight = getWorldHeroHeight(windowHeight);
   const userId = useAuth().user?.id ?? null;
   const currentDay = useResetStore((state) => state.currentDay);
   const [notice, setNotice] = useState<WorldNotice | null>(null);
@@ -90,6 +78,27 @@ export function WorldScreen() {
     currentDay,
   });
 
+  // Before you have friends, World explains itself; after, your friends sit around him.
+  const starting = !socialHome.username || presentation.friends.length === 0;
+  const circleFriends = presentation.friends.map((friend) => ({
+    id: friend.userId,
+    letter: friendDisplayLabel(friend).replace(/^@/, '').slice(0, 1).toUpperCase(),
+    name: friendDisplayLabel(friend).split(' ')[0] ?? '',
+    showedUpToday: presentation.progressByUserId[friend.userId]?.completedToday ?? false,
+  }));
+  const showedUp = circleFriends.filter((friend) => friend.showedUpToday).length;
+  const friendCount = circleFriends.length;
+  const circleTitle =
+    friendCount === 1
+      ? `${circleFriends[0]?.name ?? 'Your friend'} ${showedUp ? 'showed up today' : 'is taking today gently'}`
+      : `${showedUp} of ${friendCount} friends showed up today`;
+  const circleSubtitle = [
+    presentation.usernameHandle ? `You’re ${presentation.usernameHandle}` : null,
+    presentation.ownDayLabel ? capitalizeHeading(presentation.ownDayLabel) : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
   const openUsername = () => {
     router.push('/choose-username');
   };
@@ -128,49 +137,72 @@ export function WorldScreen() {
       includeTopSafeArea={false}
       includeBottomSafeArea={false}
       padded={false}
-      backgroundColor={colors.background.primary}
+      backgroundColor={colors.stage.floor}
     >
+      <StageBackdrop />
       <ScrollView
         testID="world-scroll"
         style={styles.scroll}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: getTabBarScenePadding(insets.bottom) + spacing.md },
+          {
+            paddingTop: insets.top + spacing.xs,
+            paddingBottom: getTabBarScenePadding(insets.bottom) + spacing.md,
+          },
         ]}
         showsVerticalScrollIndicator={false}
         bounces
       >
-        <View style={[styles.hero, { height: heroHeight }]}>
-          <WorldBackground accessibilityLabel="Two mascots sitting together on a log by a lake at sunset, with a tree on the left and a cabin on the right." />
-          <MainTabHeader
-            title="world"
-            subtitle="don't reset alone."
-            transparent
-            contentSpacing="roomy"
-            rightAction={
+        <View style={styles.column}>
+          <View style={styles.topBar}>
+            {socialHome.username ? (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="invite a friend"
-                onPress={openInvite}
-                style={styles.addFriend}
+                accessibilityLabel="Find a friend"
+                onPress={openFindFriend}
+                style={styles.topButton}
               >
-                <Ionicons
-                  name="person-add-outline"
-                  size={24}
-                  color={colors.text.primary}
-                  accessibilityElementsHidden
-                />
+                <MascotIcon name="people" size={24} />
               </Pressable>
-            }
-          />
-          <View style={styles.messageWell} pointerEvents="none">
-            <WorldHeroMessage />
+            ) : (
+              <View style={styles.topButton} />
+            )}
+            <Text style={styles.eyebrow} accessibilityRole="header" maxFontSizeMultiplier={1.3}>
+              your world
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Invite a friend"
+              onPress={openInvite}
+              style={styles.topButton}
+            >
+              <MascotIcon name="personAdd" size={24} />
+            </Pressable>
           </View>
-        </View>
-        <View style={styles.sheet}>
-          <View style={styles.statsAnchor}>
-            <WorldStatusCard title={presentation.statusTitle} body={presentation.statusBody} />
-          </View>
+
+          {starting ? (
+            <WorldStarting
+              hasUsername={Boolean(socialHome.username)}
+              onChooseUsername={openUsername}
+              onInvite={openInvite}
+              onFindFriend={openFindFriend}
+            />
+          ) : (
+            <View style={styles.circleBlock}>
+              <WorldFriendCircle friends={circleFriends} onInvite={openInvite} />
+              <View style={styles.circleCopy} accessibilityRole="header">
+                <Text style={styles.title} maxFontSizeMultiplier={1.25}>
+                  {circleTitle}
+                </Text>
+                {circleSubtitle ? (
+                  <Text style={styles.subtitle} maxFontSizeMultiplier={1.3}>
+                    {circleSubtitle}
+                  </Text>
+                ) : null}
+              </View>
+            </View>
+          )}
+
           <FriendsSection
             presentation={presentation}
             nowMs={nowMs}
@@ -179,6 +211,7 @@ export function WorldScreen() {
             onInviteFriend={openInvite}
             onRefresh={refresh}
             onNotice={setNotice}
+            hideActionCards
           />
         </View>
       </ScrollView>
@@ -195,43 +228,49 @@ export function WorldScreen() {
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: colors.background.primary,
   },
   scrollContent: {
     flexGrow: 1,
     width: '100%',
-    overflow: 'visible',
   },
-  hero: {
+  column: {
     width: '100%',
-    overflow: 'hidden',
+    maxWidth: WORLD_COLUMN_MAX_WIDTH,
+    alignSelf: 'center',
+    paddingHorizontal: spacing.lg,
+    gap: spacing.md,
   },
-  addFriend: {
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: -spacing.xs,
+  },
+  topButton: {
     width: spacing.hitTarget,
     height: spacing.hitTarget,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  messageWell: {
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.xl,
+  eyebrow: {
+    ...textVariants.stageEyebrow,
+    color: colors.stage.copySoft,
+  },
+  circleBlock: {
+    gap: spacing.xs,
+  },
+  circleCopy: {
     alignItems: 'center',
-    width: '100%',
+    gap: spacing.xxs,
   },
-  sheet: {
-    width: '100%',
-    maxWidth: WORLD_COLUMN_MAX_WIDTH,
-    alignSelf: 'center',
-    backgroundColor: colors.background.primary,
-    paddingHorizontal: spacing.lg,
-    paddingTop: WORLD_STATS_OVERLAP,
-    gap: spacing.md,
-    overflow: 'visible',
+  title: {
+    ...textVariants.stageTitle,
+    color: colors.text.primary,
+    textAlign: 'center',
   },
-  statsAnchor: {
-    marginTop: -(WORLD_STATS_OVERLAP + WORLD_STATS_OVERLAP),
-    zIndex: 3,
-    elevation: 6,
-    overflow: 'visible',
+  subtitle: {
+    ...textVariants.stageSubtitle,
+    color: colors.stage.copySoft,
+    textAlign: 'center',
   },
 });

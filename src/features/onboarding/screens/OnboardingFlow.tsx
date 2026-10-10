@@ -15,16 +15,17 @@ import { colors } from '@/design-system';
 import { MOTION_EASING_STANDARD, motion } from '@/design-system/motion';
 import { DevStepJumper } from '@/features/onboarding/components/DevStepJumper';
 import { OnboardingAssetWarmup } from '@/features/onboarding/components/OnboardingAssetWarmup';
-import { OnboardingQuestionNav } from '@/features/onboarding/components/OnboardingQuestionNav';
-import { OnboardingQuestionnaireShellProvider } from '@/features/onboarding/components/OnboardingQuestionnaireShell';
 import { OnboardingRenderer } from '@/features/onboarding/components/OnboardingRenderer';
-import { QuestionTransition } from '@/features/onboarding/components/QuestionTransition';
 import { ResetRevealHandoff } from '@/features/onboarding/components/ResetRevealHandoff';
 import { ONBOARDING_STEPS } from '@/features/onboarding/data/onboardingSteps';
 import { useCurrentOnboardingStep } from '@/features/onboarding/hooks/useCurrentOnboardingStep';
 import { useOnboardingNavigation } from '@/features/onboarding/hooks/useOnboardingNavigation';
 import type { OnboardingStep } from '@/features/onboarding/types/onboarding';
-import { isQuestionnaireStep } from '@/features/onboarding/utils/isQuestionnaireStep';
+import { StageBackdrop } from '@/features/onboarding/stage/StageBackdrop';
+import { StageMascot } from '@/features/onboarding/stage/StageMascot';
+import { StageTopBar } from '@/features/onboarding/stage/StageTopBar';
+import { StageTransition } from '@/features/onboarding/stage/StageTransition';
+import { isStageStep } from '@/features/onboarding/utils/isStageStep';
 import {
   registerOnboardingPageShift,
   releaseOnboardingPageShift,
@@ -63,7 +64,7 @@ export function OnboardingFlow() {
         toIndex ?? (direction === 'forward' ? currentStepIndex + 1 : currentStepIndex - 1);
       const fromStep = ONBOARDING_STEPS[currentStepIndex];
       const toStep = ONBOARDING_STEPS[targetIndex];
-      const useQuestionTransition = isQuestionnaireStep(fromStep) && isQuestionnaireStep(toStep);
+      const useQuestionTransition = isStageStep(fromStep) && isStageStep(toStep);
       const useRevealHandoff =
         (fromStep?.id === 'buildingResetLoading' && toStep?.id === 'resetReveal') ||
         (fromStep?.id === 'resetReveal' && toStep?.id === 'buildingResetLoading');
@@ -123,28 +124,32 @@ export function OnboardingFlow() {
     );
   }
 
-  const questionnaire = isQuestionnaireStep(step);
+  const onStage = isStageStep(step);
 
   return (
     <View style={styles.root}>
       <Animated.View style={[styles.frame, shiftStyle]}>
-        {questionnaire ? (
-          <OnboardingQuestionnaireShellProvider>
-            <Screen>
-              <OnboardingQuestionNav
-                onBack={canGoBack ? goBack : undefined}
-                hideProgress={step.hideProgress}
-              />
-              <QuestionTransition
+        {onStage ? (
+          <Screen backgroundColor={colors.stage.floor}>
+            <StageBackdrop />
+            <StageTopBar stepId={step.id} onBack={canGoBack ? goBack : undefined} />
+            <View style={styles.stage}>
+              <StageTransition
                 contentKey={step.id}
                 outgoingKey={exitingStep?.id}
-                outgoing={exitingStep ? <OnboardingRenderer step={exitingStep} /> : null}
+                outgoing={
+                  exitingStep ? (
+                    <OnboardingRenderer key={exitingStep.id} step={exitingStep} />
+                  ) : null
+                }
                 onSettled={settleQuestionTransition}
               >
-                <OnboardingRenderer step={step} />
-              </QuestionTransition>
-            </Screen>
-          </OnboardingQuestionnaireShellProvider>
+                {/* Keyed so back-to-back steps of the same type start fresh. */}
+                <OnboardingRenderer key={step.id} step={step} />
+              </StageTransition>
+              <StageMascot />
+            </View>
+          </Screen>
         ) : step.type === 'loading' || step.type === 'result' ? (
           <ResetRevealHandoff step={step} />
         ) : (
@@ -165,5 +170,9 @@ const styles = StyleSheet.create({
   },
   frame: {
     flex: 1,
+  },
+  stage: {
+    flex: 1,
+    minHeight: 0,
   },
 });

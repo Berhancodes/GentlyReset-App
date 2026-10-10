@@ -65,18 +65,18 @@ export function DayProgressHeader({
     <View style={inline ? styles.inlineRoot : styles.root}>
       <View style={inline ? styles.inlineLabel : styles.row}>
         <AppText variant="caption" color={inline ? 'primary' : 'secondary'}>
-          day {currentDay} of {PLAN_DAY_COUNT}
+          day {currentDay} · first season
         </AppText>
         {showCount && !inline ? (
           <AppText variant="caption" color="helper">
-            {safeCompleted}/{PLAN_DAY_COUNT}
+            {safeCompleted} checked in
           </AppText>
         ) : null}
       </View>
       <View style={inline ? styles.inlineTrack : styles.trackWrap}>
         <ProgressBar
           progress={progress}
-          accessibilityLabel="30-day reset progress"
+          accessibilityLabel="First season progress"
           thickness={trackThickness}
           fillColor={fillColor}
           trackColor={resolvedTrack}
