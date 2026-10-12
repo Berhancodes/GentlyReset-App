@@ -35,6 +35,8 @@ export function friendsErrorMessage(code: FriendActionCode): string {
       return 'couldn’t update that friendship. try again.';
     case 'too_soon':
       return 'you already sent that recently. try another note, or wait until tomorrow.';
+    case 'rate_limited':
+      return 'you’re going a little fast. take a breath and try again in a few minutes.';
     case 'invalid_kind':
       return 'that note isn’t available.';
     default:

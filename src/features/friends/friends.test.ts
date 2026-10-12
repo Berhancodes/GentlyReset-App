@@ -42,6 +42,7 @@ import {
   hasOnlyPublicIdentityFields,
   inviteResolutionCreatesFriendship,
 } from './privacy';
+import { friendsErrorMessage } from './api/mapFriendsError';
 import { normalizeUsername, usernameIssueMessage } from './username';
 import { getWorldFriendsPresentation } from './worldState';
 import { getAccessDestination } from '../subscription/access/getAccessDestination';
@@ -602,6 +603,11 @@ check(
     subscriptionInitializing: false,
     isPro: false,
   }) === 'paywall',
+);
+
+check(
+  'rate-limited friend actions get a gentle message, not a generic error',
+  friendsErrorMessage('rate_limited').includes('a little fast'),
 );
 
 if (failed > 0) {

@@ -272,7 +272,9 @@ export async function searchUserByUsername(
     target_username: normalized.username,
   });
   if (error) {
-    return { ok: false, message: friendsErrorMessage('conflict') };
+    // The server raises 'rate_limited' after too many lookups in a minute.
+    const code = error.message?.includes('rate_limited') ? 'rate_limited' : 'conflict';
+    return { ok: false, message: friendsErrorMessage(code) };
   }
 
   const row = Array.isArray(data) ? data[0] : data;

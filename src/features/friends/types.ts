@@ -37,6 +37,7 @@ export type FriendsHome = {
 };
 
 export type FriendActionCode =
+  | 'rate_limited'
   | 'sent'
   | 'already_pending'
   | 'already_friends'
