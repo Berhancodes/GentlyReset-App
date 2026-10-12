@@ -13,6 +13,7 @@ import {
   spacing,
   textVariants,
 } from '@/design-system';
+import { clearDeviceData } from '@/features/account/clearDeviceData';
 import { useAuth } from '@/features/auth/session/useAuth';
 import { fetchOwnSocialProfile } from '@/features/friends/api/friendsApi';
 import { formatUsernameHandle } from '@/features/friends/username';
@@ -53,12 +54,13 @@ type Notice = {
 export function ProfileScreen() {
   useSyncResetDay();
   const router = useRouter();
-  const { isAuthenticated, signOut, user } = useAuth();
+  const { isAuthenticated, signOut, deleteAccount, user } = useAuth();
   const userId = user?.id ?? null;
   const [notice, setNotice] = useState<Notice | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { restorePurchases } = useSubscription();
   const [widgetSheetOpen, setWidgetSheetOpen] = useState(false);
   const currentDay = useResetStore((state) => state.currentDay);
@@ -68,7 +70,6 @@ export function ProfileScreen() {
   const streak = useResetStore((state) => state.streak);
   const resetStartedOn = useResetStore((state) => state.resetStartedOn);
   const insets = useSafeAreaInsets();
-  const resetOnboarding = useOnboardingStore((state) => state.resetOnboarding);
   const resetTypeId = useResetStore((state) => state.resetTypeId);
   const personalization = useResetStore((state) => state.personalization);
   const answers = useOnboardingStore((state) => state.answers);
@@ -163,9 +164,38 @@ export function ProfileScreen() {
   };
 
   const returnToFirstOnboarding = () => {
-    resetOnboarding();
+    clearDeviceData();
     router.replace('/(onboarding)/flow');
     setSigningOut(false);
+  };
+
+  /** Apple requires deleting the account in the app. Two clear asks, since it can't be undone. */
+  const confirmDeleteAccount = () => {
+    if (deleting) {
+      return;
+    }
+    Alert.alert(
+      'Delete your account?',
+      'This permanently deletes your account, progress, journal and friends. It can’t be undone.\n\nDeleting your account doesn’t cancel your subscription. To stop being charged, cancel it in Settings › your name › Subscriptions.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete account', style: 'destructive', onPress: handleDeleteAccount },
+      ],
+    );
+  };
+
+  const handleDeleteAccount = () => {
+    setDeleting(true);
+    void deleteAccount()
+      .then((result) => {
+        if (!result.ok) {
+          setNotice({ title: 'couldn’t delete your account', body: result.message });
+          return;
+        }
+        clearDeviceData();
+        router.replace('/(onboarding)/flow');
+      })
+      .finally(() => setDeleting(false));
   };
 
   /** Only shown with an account; asks first, since signing out clears this device. */
@@ -303,6 +333,11 @@ export function ProfileScreen() {
                     icon: <MascotIcon name="door" size={22} />,
                     title: signingOut ? 'Signing out…' : 'Sign out',
                     onPress: confirmSignOut,
+                  },
+                  {
+                    icon: <MascotIcon name="leaf" size={22} />,
+                    title: deleting ? 'Deleting account…' : 'Delete account',
+                    onPress: confirmDeleteAccount,
                   },
                 ]
               : []),

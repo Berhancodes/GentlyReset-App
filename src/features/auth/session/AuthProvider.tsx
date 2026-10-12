@@ -1,7 +1,7 @@
 import { createContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 
-import { signIn, signOut, signUp } from '@/features/auth/api/authApi';
+import { deleteAccount, signIn, signOut, signUp } from '@/features/auth/api/authApi';
 import { syncProfileTimezone } from '@/features/auth/api/syncProfileTimezone';
 import { isSupabaseConfigured, supabase } from '@/features/auth/supabase/client';
 import type { AuthActionResult, AuthSnapshot } from '@/features/auth/types';
@@ -10,6 +10,7 @@ export type AuthContextValue = AuthSnapshot & {
   signUp: (email: string, password: string) => Promise<AuthActionResult>;
   signIn: (email: string, password: string) => Promise<AuthActionResult>;
   signOut: () => Promise<AuthActionResult>;
+  deleteAccount: () => Promise<AuthActionResult>;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -73,6 +74,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       signUp,
       signIn,
       signOut,
+      deleteAccount,
     }),
     [initializing, session, user],
   );

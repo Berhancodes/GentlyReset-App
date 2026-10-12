@@ -12,7 +12,7 @@ export type SignInErrors = Partial<Record<SignInField | 'form', string>>;
 export type SignUpValues = SignInValues;
 export type SignUpErrors = SignInErrors;
 
-export type AuthSuccessKind = 'signed_in' | 'confirmation_required' | 'signed_out';
+export type AuthSuccessKind = 'signed_in' | 'confirmation_required' | 'signed_out' | 'deleted';
 
 export type AuthActionResult = { ok: true; kind: AuthSuccessKind } | { ok: false; message: string };
 

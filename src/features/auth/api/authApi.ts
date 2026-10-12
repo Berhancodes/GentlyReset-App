@@ -87,3 +87,31 @@ export async function signOut(): Promise<AuthActionResult> {
     return authFailure(error);
   }
 }
+
+/**
+ * Permanently deletes the signed-in account and all of its data on the server
+ * (`delete_my_account`), then ends the session on this device. It does not cancel
+ * an App Store subscription; only the user can do that in Settings.
+ */
+export async function deleteAccount(): Promise<AuthActionResult> {
+  const client = supabase;
+  if (!client) {
+    return UNAVAILABLE;
+  }
+
+  try {
+    const { data, error } = await client.rpc('delete_my_account');
+    const result = (data ?? null) as { ok?: boolean; code?: string } | null;
+    if (error || !result?.ok) {
+      return {
+        ok: false,
+        message: 'your account couldn’t be deleted right now. check your connection and try again.',
+      };
+    }
+    // The account is gone on the server; clear the leftover session on this device.
+    await client.auth.signOut({ scope: 'local' });
+    return authSuccess('deleted');
+  } catch (error) {
+    return authFailure(error);
+  }
+}
