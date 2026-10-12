@@ -23,7 +23,10 @@ type OnboardingState = {
   currentStepIndex: number;
   answers: Record<string, OnboardingAnswer>;
   hasCompletedOnboarding: boolean;
-  /** Temporary Home access until auth / billing is wired. */
+  /**
+   * Preview pass for development builds (Expo Go, web), where store purchases can't
+   * run. Release builds ignore it; only Pro opens the app there (see canEnterApp).
+   */
   hasLocalAppAccess: boolean;
 };
 

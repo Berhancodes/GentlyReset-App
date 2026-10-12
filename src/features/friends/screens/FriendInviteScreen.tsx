@@ -11,6 +11,7 @@ import { rememberFriendInviteToken } from '@/features/friends/invite/pendingFrie
 import type { PublicFriendIdentity } from '@/features/friends/types';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { BackChevron } from '@/features/onboarding/components/BackChevron';
+import { canEnterApp } from '@/features/subscription/access/canEnterApp';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
 import { getRootHref } from '@/navigation/getRootHref';
 
@@ -23,11 +24,15 @@ export function FriendInviteScreen() {
   const { isPro } = useSubscription();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
   const hasLocalAppAccess = useOnboardingStore((state) => state.hasLocalAppAccess);
-  const canEnterApp = isPro || hasLocalAppAccess;
+  const appOpen = canEnterApp({
+    isPro,
+    hasPreviewAccess: hasLocalAppAccess,
+    isDevelopmentBuild: __DEV__,
+  });
   const [identity, setIdentity] = useState<PublicFriendIdentity | null>(null);
   const [message, setMessage] = useState('opening invite…');
   const [sending, setSending] = useState(false);
-  const canOpenInvite = hasCompletedOnboarding && canEnterApp;
+  const canOpenInvite = hasCompletedOnboarding && appOpen;
 
   useEffect(() => {
     if (token) {

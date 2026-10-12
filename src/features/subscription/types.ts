@@ -9,7 +9,12 @@ export type CustomerInfoLike = {
 export type PresentedPackage = {
   identifier: string;
   title: string;
+  /** Localized by the store, e.g. "$79.99" or "79,99 €". */
   priceString: string;
+  /** The same price as a number in the store's currency, for comparing plans. */
+  price: number | null;
+  /** The price spread over a month, localized by the store; null when it can't say. */
+  pricePerMonthString: string | null;
   billingPeriod: string;
   hasIntroOffer: boolean;
 };

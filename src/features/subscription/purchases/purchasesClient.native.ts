@@ -13,6 +13,8 @@ type NativePackage = {
   product?: {
     title?: string;
     priceString?: string;
+    price?: number;
+    pricePerMonthString?: string | null;
     introPrice?: unknown;
   };
 };

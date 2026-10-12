@@ -58,13 +58,24 @@ export function HardPaywallScreen() {
   const router = useRouter();
   const grantLocalAppAccess = useOnboardingStore((state) => state.grantLocalAppAccess);
   const answers = useOnboardingStore((state) => state.answers);
-  const { packages, unexpectedTrial, restorePurchases } = useSubscription();
-  const plans = useMemo(() => buildPaywallPlans(packages), [packages]);
+  const {
+    available,
+    packages,
+    unexpectedTrial,
+    purchasePackage,
+    restorePurchases,
+    refreshCustomerInfo,
+  } = useSubscription();
+  // Made-up prices only ever show in development; a release build shows the store's or none.
+  const plans = useMemo(
+    () => buildPaywallPlans(packages, { allowPreviewPrices: __DEV__ }),
+    [packages],
+  );
   const [selectedId, setSelectedId] = useState<string | null>(
     () => peekPaywallUnlock()?.packageIdentifier ?? ANNUAL_PACKAGE_ID,
   );
-  const [busy, setBusy] = useState<'purchase' | 'restore' | null>(null);
-  const [restoreStatus, setRestoreStatus] = useState<string | null>(null);
+  const [busy, setBusy] = useState<'purchase' | 'restore' | 'reload' | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const usableHeight = windowHeight - insets.top - insets.bottom;
@@ -86,14 +97,39 @@ export function HardPaywallScreen() {
     setSelectedId(packageIdentifier);
   };
 
-  const beginUnlock = () => {
-    if (busy) {
+  const openApp = () => {
+    // Development builds also keep a local pass, so a reload of the preview stays unlocked.
+    if (__DEV__) {
+      grantLocalAppAccess();
+    }
+    router.replace('/(app)/(tabs)/home');
+  };
+
+  /** Buys the selected plan through the App Store. The app opens only once Pro is active. */
+  const beginUnlock = async () => {
+    if (busy || !selected) {
+      return;
+    }
+    setStatus(null);
+    if (!available) {
+      if (__DEV__) {
+        openApp();
+        return;
+      }
+      setStatus('the App Store isn’t reachable right now. check your connection and try again.');
       return;
     }
     setBusy('purchase');
-    grantLocalAppAccess();
-    router.replace('/(app)/(tabs)/home');
+    const result = await purchasePackage(selected.identifier);
     setBusy(null);
+    if (result.ok) {
+      openApp();
+      return;
+    }
+    // Closing Apple's sheet is a choice, not an error.
+    if (result.kind !== 'cancelled') {
+      setStatus(result.message);
+    }
   };
 
   const restore = async () => {
@@ -101,17 +137,35 @@ export function HardPaywallScreen() {
       return;
     }
     setBusy('restore');
-    setRestoreStatus(null);
+    setStatus(null);
     const result = await restorePurchases();
     setBusy(null);
     if (!result.ok) {
-      setRestoreStatus(result.message);
-    } else if (!result.unlocked) {
-      setRestoreStatus('no Pro purchase found for this Apple ID.');
+      setStatus(result.message);
+    } else if (result.unlocked) {
+      openApp();
+    } else {
+      setStatus('no Pro purchase found for this Apple ID.');
     }
   };
 
-  const canUnlock = busy === null;
+  const reloadPrices = async () => {
+    if (busy) {
+      return;
+    }
+    setBusy('reload');
+    setStatus(null);
+    try {
+      await refreshCustomerInfo();
+    } catch {
+      setStatus('prices still couldn’t load. try again in a moment.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const pricesUnavailable = plans.length === 0;
+  const canUnlock = busy === null && selected !== undefined && (selected.purchasable || __DEV__);
 
   return (
     <View style={styles.root} testID="hard-paywall">
@@ -185,6 +239,23 @@ export function HardPaywallScreen() {
             <Text style={styles.status} accessibilityLiveRegion="polite">
               a trial offer appeared in the store. Gently Reset does not sell trials.
             </Text>
+          ) : pricesUnavailable ? (
+            <View style={styles.unavailable}>
+              <Text style={styles.status} accessibilityLiveRegion="polite">
+                prices couldn’t load. check your connection, then try again.
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Try loading prices again"
+                onPress={() => void reloadPrices()}
+                hitSlop={spacing.xs}
+                style={styles.legalLink}
+              >
+                <Text style={[styles.legalLabel, styles.legalStrong]}>
+                  {busy === 'reload' ? 'Loading…' : 'Try again'}
+                </Text>
+              </Pressable>
+            </View>
           ) : (
             <View style={styles.plans} accessibilityRole="radiogroup">
               {plans.map((plan) => (
@@ -203,7 +274,7 @@ export function HardPaywallScreen() {
               label={getPaywallUnlockLabel(busy === 'purchase')}
               tone="cocoa"
               disabled={!canUnlock}
-              onPress={beginUnlock}
+              onPress={() => void beginUnlock()}
             />
             {selected ? (
               <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.fine}>
@@ -223,9 +294,9 @@ export function HardPaywallScreen() {
                 </Text>
               </Pressable>
             )}
-            {restoreStatus ? (
+            {status ? (
               <Text style={styles.status} accessibilityLiveRegion="polite">
-                {restoreStatus}
+                {status}
               </Text>
             ) : null}
             <View style={styles.legal}>
@@ -320,7 +391,9 @@ function PlanCard({
       </View>
       <View style={styles.planCopy}>
         <Text style={styles.planTitle}>{plan.title}</Text>
-        <Text style={styles.planDetail}>{plan.monthlyEquivalent}/month</Text>
+        {plan.monthlyEquivalent ? (
+          <Text style={styles.planDetail}>{plan.monthlyEquivalent}/month</Text>
+        ) : null}
       </View>
       <View style={styles.planPrices}>
         <Text style={styles.planPrice}>{plan.priceString}</Text>
@@ -338,6 +411,11 @@ const styles = StyleSheet.create({
   },
   safe: {
     flex: 1,
+  },
+  unavailable: {
+    alignItems: 'center',
+    gap: spacing.xxs,
+    paddingVertical: spacing.sm,
   },
   steps: {
     flexDirection: 'row',

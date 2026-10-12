@@ -13,6 +13,7 @@ import { useAuth } from '@/features/auth/session/useAuth';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { ResetSyncController } from '@/features/reset/sync/ResetSyncController';
 import { WidgetSyncController } from '@/features/widgets/sync/WidgetSyncController';
+import { canEnterApp } from '@/features/subscription/access/canEnterApp';
 import { SubscriptionProvider } from '@/features/subscription/session/SubscriptionProvider';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
 import { usePersistedStoresHydrated } from '@/hooks/usePersistedStoresHydrated';
@@ -35,7 +36,11 @@ function RootLayoutReady() {
   const { initializing: subscriptionInitializing, isPro } = useSubscription();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
   const hasLocalAppAccess = useOnboardingStore((state) => state.hasLocalAppAccess);
-  const canEnterApp = isPro || hasLocalAppAccess;
+  const appOpen = canEnterApp({
+    isPro,
+    hasPreviewAccess: hasLocalAppAccess,
+    isDevelopmentBuild: __DEV__,
+  });
   const ready = storesHydrated && !authInitializing && !subscriptionInitializing;
 
   useEffect(() => {
@@ -74,10 +79,10 @@ function RootLayoutReady() {
           <Stack.Protected guard={!hasCompletedOnboarding}>
             <Stack.Screen name="(onboarding)" />
           </Stack.Protected>
-          <Stack.Protected guard={hasCompletedOnboarding && !canEnterApp}>
+          <Stack.Protected guard={hasCompletedOnboarding && !appOpen}>
             <Stack.Screen name="(paywall)" />
           </Stack.Protected>
-          <Stack.Protected guard={hasCompletedOnboarding && canEnterApp}>
+          <Stack.Protected guard={hasCompletedOnboarding && appOpen}>
             <Stack.Screen name="(app)" />
           </Stack.Protected>
         </Stack>

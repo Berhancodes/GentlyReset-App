@@ -1,5 +1,6 @@
 import type { Href } from 'expo-router';
 
+import { canEnterApp } from '@/features/subscription/access/canEnterApp';
 import { getAccessDestination } from '@/features/subscription/access/getAccessDestination';
 
 /**
@@ -16,7 +17,11 @@ export function getRootHref(state: RootNavigationState): Href {
   const destination = getAccessDestination({
     hasCompletedOnboarding: state.hasCompletedOnboarding,
     subscriptionInitializing: false,
-    isPro: state.isPro || Boolean(state.hasLocalAppAccess),
+    isPro: canEnterApp({
+      isPro: state.isPro,
+      hasPreviewAccess: Boolean(state.hasLocalAppAccess),
+      isDevelopmentBuild: __DEV__,
+    }),
   });
 
   switch (destination) {

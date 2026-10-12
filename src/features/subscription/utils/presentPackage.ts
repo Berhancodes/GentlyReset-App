@@ -4,6 +4,8 @@ import type { PresentedPackage } from '@/features/subscription/types';
 type StoreProductLike = {
   title?: string;
   priceString?: string;
+  price?: number;
+  pricePerMonthString?: string | null;
   introPrice?: unknown;
 };
 
@@ -22,6 +24,9 @@ export function presentPackage(nativePackage: NativePackageLike): PresentedPacka
     identifier,
     title,
     priceString,
+    price:
+      typeof product?.price === 'number' && Number.isFinite(product.price) ? product.price : null,
+    pricePerMonthString: product?.pricePerMonthString?.trim() || null,
     billingPeriod: billingPeriod(identifier),
     hasIntroOffer: product?.introPrice != null,
   };

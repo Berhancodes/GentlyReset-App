@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 
@@ -25,7 +25,9 @@ import {
   ProfileProgressCard,
 } from '@/features/profile/components/ProfileSummaryCards';
 import { ResetTypeCard } from '@/features/profile/components/ResetTypeCard';
+import { LEGAL_DETAILS } from '@/features/legal/data/legalDetails';
 import { openLegalDocument } from '@/features/legal/utils/openLegalDocument';
+import { hasSupportEmail, openSupportEmail } from '@/features/legal/utils/openSupport';
 import { ProfileLinkRows } from '@/features/profile/components/ProfileLinkRows';
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
@@ -36,6 +38,8 @@ import { useResetStore } from '@/features/reset/store/useResetStore';
 import { minutesFromCommitment } from '@/features/reset/utils/getTaskForDay';
 import { toLocalDateKey } from '@/features/reset/utils/calendar';
 import { getCurrentPlanDay } from '@/features/reset/utils/resetSelectors';
+import { useSubscription } from '@/features/subscription/session/useSubscription';
+import { openManageSubscriptions } from '@/features/subscription/utils/openManageSubscriptions';
 import { AddWidgetSheet } from '@/features/widgets/components/AddWidgetSheet';
 import { widgetsAvailable } from '@/features/widgets/native/widgetsAvailability';
 
@@ -54,6 +58,8 @@ export function ProfileScreen() {
   const [notice, setNotice] = useState<Notice | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const { restorePurchases } = useSubscription();
   const [widgetSheetOpen, setWidgetSheetOpen] = useState(false);
   const currentDay = useResetStore((state) => state.currentDay);
   const completedDays = useResetStore((state) => state.completedDays);
@@ -108,10 +114,51 @@ export function ProfileScreen() {
     }, [userId]),
   );
 
-  const openHelpNotice = () => {
-    setNotice({
-      title: 'Help & support',
-      body: 'this part of Gently Reset is coming later.',
+  const openHelp = () => {
+    void openSupportEmail().then((opened) => {
+      if (opened) {
+        return;
+      }
+      setNotice({
+        title: 'Help & support',
+        body: hasSupportEmail()
+          ? `email us at ${LEGAL_DETAILS.contactEmail} and we’ll get back to you.`
+          : 'support isn’t set up yet. please try again later.',
+      });
+    });
+  };
+
+  const restore = () => {
+    if (restoring) {
+      return;
+    }
+    setRestoring(true);
+    void restorePurchases()
+      .then((result) => {
+        if (!result.ok) {
+          setNotice({ title: 'couldn’t restore', body: result.message });
+          return;
+        }
+        setNotice(
+          result.unlocked
+            ? { title: 'all set', body: 'your Gently Reset Pro is active on this device.' }
+            : {
+                title: 'nothing to restore',
+                body: 'there’s no Gently Reset Pro purchase on this Apple ID.',
+              },
+        );
+      })
+      .finally(() => setRestoring(false));
+  };
+
+  const manageSubscription = () => {
+    void openManageSubscriptions().then((opened) => {
+      if (!opened) {
+        setNotice({
+          title: 'Manage subscription',
+          body: 'open Settings, tap your name, then Subscriptions.',
+        });
+      }
     });
   };
 
@@ -119,6 +166,21 @@ export function ProfileScreen() {
     resetOnboarding();
     router.replace('/(onboarding)/flow');
     setSigningOut(false);
+  };
+
+  /** Only shown with an account; asks first, since signing out clears this device. */
+  const confirmSignOut = () => {
+    if (signingOut) {
+      return;
+    }
+    Alert.alert(
+      'Sign out?',
+      'This clears Gently Reset from this device and takes you back to the start.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Sign out', style: 'destructive', onPress: handleSignOut },
+      ],
+    );
   };
 
   const handleSignOut = () => {
@@ -211,9 +273,19 @@ export function ProfileScreen() {
                 ]
               : []),
             {
+              icon: <MascotIcon name="heart" size={22} />,
+              title: 'Manage subscription',
+              onPress: manageSubscription,
+            },
+            {
+              icon: <MascotIcon name="checkCircle" size={22} />,
+              title: restoring ? 'Restoring…' : 'Restore purchases',
+              onPress: restore,
+            },
+            {
               icon: <MascotIcon name="help" size={22} />,
               title: 'Help & support',
-              onPress: openHelpNotice,
+              onPress: openHelp,
             },
             {
               icon: <MascotIcon name="book" size={22} />,
@@ -225,11 +297,15 @@ export function ProfileScreen() {
               title: 'Privacy policy',
               onPress: () => openLegalDocument('privacy'),
             },
-            {
-              icon: <MascotIcon name="door" size={22} />,
-              title: signingOut ? 'Signing out…' : 'Sign out',
-              onPress: handleSignOut,
-            },
+            ...(isAuthenticated
+              ? [
+                  {
+                    icon: <MascotIcon name="door" size={22} />,
+                    title: signingOut ? 'Signing out…' : 'Sign out',
+                    onPress: confirmSignOut,
+                  },
+                ]
+              : []),
           ]}
         />
       </ScrollView>

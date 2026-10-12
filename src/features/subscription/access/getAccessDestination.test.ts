@@ -1,3 +1,4 @@
+import { canEnterApp } from './canEnterApp';
 import { getAccessDestination } from './getAccessDestination';
 import { getPaywallUnlockLabel, getPaywallUnlockNextStep } from './getPaywallPrimaryAction';
 import {
@@ -10,6 +11,7 @@ import { isProEntitlementActive } from './isProEntitlementActive';
 import { offeringHasUnexpectedTrial } from './packageHasUnexpectedTrial';
 import { PRO_ENTITLEMENT_ID } from '../constants';
 import type { CustomerInfoLike } from '../types';
+import { buildPaywallPlans, getYearlySavingsLabel } from '../utils/buildPaywallPlans';
 import { mapPurchaseError } from '../utils/mapPurchaseError';
 
 let failed = 0;
@@ -151,6 +153,8 @@ check(
       identifier: '$rc_monthly',
       title: 'Monthly',
       priceString: '$9.99',
+      price: 9.99,
+      pricePerMonthString: '$9.99',
       billingPeriod: 'month',
       hasIntroOffer: true,
     },
@@ -164,11 +168,70 @@ check(
       identifier: '$rc_monthly',
       title: 'Monthly',
       priceString: '$9.99',
+      price: 9.99,
+      pricePerMonthString: '$9.99',
       billingPeriod: 'month',
       hasIntroOffer: false,
     },
   ]) === false,
 );
+
+check(
+  'release build: Pro opens the app',
+  canEnterApp({ isPro: true, hasPreviewAccess: false, isDevelopmentBuild: false }),
+);
+check(
+  'release build: the old local pass does not open the app without Pro',
+  !canEnterApp({ isPro: false, hasPreviewAccess: true, isDevelopmentBuild: false }),
+);
+check(
+  'development build: the local pass still opens the app for previews',
+  canEnterApp({ isPro: false, hasPreviewAccess: true, isDevelopmentBuild: true }),
+);
+check(
+  'no Pro and no pass stays on the paywall',
+  !canEnterApp({ isPro: false, hasPreviewAccess: false, isDevelopmentBuild: true }),
+);
+
+const euroStore = [
+  {
+    identifier: '$rc_annual',
+    title: 'Yearly',
+    priceString: '79,99 €',
+    price: 79.99,
+    pricePerMonthString: '6,67 €',
+    billingPeriod: 'year',
+    hasIntroOffer: false,
+  },
+  {
+    identifier: '$rc_monthly',
+    title: 'Monthly',
+    priceString: '9,99 €',
+    price: 9.99,
+    pricePerMonthString: '9,99 €',
+    billingPeriod: 'month',
+    hasIntroOffer: false,
+  },
+];
+const euroPlans = buildPaywallPlans(euroStore, { allowPreviewPrices: false });
+check(
+  'store prices are shown exactly as the store localizes them',
+  euroPlans[0]?.priceString === '79,99 €' && euroPlans[0]?.monthlyEquivalent === '6,67 €',
+);
+check('savings come from the numbers, not the text', euroPlans[0]?.savingsLabel === 'save 33%');
+check(
+  'release build with no store plans shows no made-up prices',
+  buildPaywallPlans([], { allowPreviewPrices: false }).length === 0,
+);
+check(
+  'development build fills in preview plans that cannot be bought',
+  buildPaywallPlans([], { allowPreviewPrices: true }).every((plan) => !plan.purchasable),
+);
+check(
+  'only the plans the store returned are shown',
+  buildPaywallPlans([euroStore[0]!], { allowPreviewPrices: false }).length === 1,
+);
+check('no savings label when yearly costs more', getYearlySavingsLabel(130, 9.99) === undefined);
 
 if (failed > 0) {
   throw new Error(`${failed} access-decision check(s) failed`);
