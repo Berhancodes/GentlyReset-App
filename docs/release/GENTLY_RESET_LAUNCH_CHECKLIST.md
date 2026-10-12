@@ -19,7 +19,7 @@
   - *Accept:* a fresh install plus Restore with the sandbox Apple ID unlocks; "nothing to restore" is handled.
 - [ ] 🟡 **P0-3 Real localized prices only.** *(Code done Oct 11: store strings and numbers, unavailable state with Try again. Needs non-USD and airplane test.)* No hard-coded `$` or preview prices; there's an unavailable state when the offering fails.
   - *Accept:* a non-USD sandbox storefront shows correct strings; airplane mode shows "prices unavailable" and a disabled button.
-- [ ] 🟡 **P0-4 In-app account deletion.** *(Code done Oct 11: migration `20261011120000_create_delete_my_account.sql` must be applied to production Supabase.)* Confirmation, a server-side delete (RPC or Edge Function), sign-out, `Purchases.logOut()`, local wipe, and a note about cancelling the Apple subscription.
+- [ ] 🟡 **P0-4 In-app account deletion.** *(Done Oct 11: migration applied to Gentlyreset-ios-app and verified to delete the user and cascade. Needs a device test.)* Confirmation, a server-side delete (RPC or Edge Function), sign-out, `Purchases.logOut()`, local wipe, and a note about cancelling the Apple subscription.
   - *Accept:* the deleted account can't sign in, and its rows are gone in Supabase.
 - [ ] 🟡 **P0-5 Legal details filled** (operator, contact email, governing law) and **hosted** Privacy and Terms URLs.
   - *Accept:* no `[brackets]` remain in the legal pages; public https links work.
@@ -33,14 +33,14 @@
 
 ## P1 — strongly recommended before launch
 
-- [ ] ❌ **P1-1 Journal entries are never overwritten across missed days.** Key by calendar date, with a cloud migration to `(cycle_id, calendar_date)`.
+- [ ] 🟡 **P1-1 Journal entries are never overwritten across missed days.** *(Done Oct 11: keyed by calendar date locally and in the cloud; migration applied. Needs a device test.)* Key by calendar date, with a cloud migration to `(cycle_id, calendar_date)`.
   - *Accept:* write on day N, skip a day, write again: both entries survive, locally and after reinstall plus restore.
-- [ ] ❌ **P1-2 A returning user who signs in gets their progress back without re-onboarding.**
+- [ ] 🟡 **P1-2 A returning user who signs in gets their progress back without re-onboarding.** *(Code done Oct 11: sign-in waits for the restore and skips onboarding. Needs a reinstall test.)*
   - *Accept:* delete the app, reinstall, sign in: the app lands on Home with the right day, streak and journal.
 - [x] ✅ **P1-3 Sign-out is safe.** *(Oct 11: hidden without an account, asks first, wipes the device.)* Hidden when not signed in, confirmation required, no silent loss of unsynced data.
   - *Accept:* tapping it asks first; anonymous users don't see it.
-- [ ] ❌ **P1-4 "Forgot password?"** works through Supabase email reset.
-- [ ] 🟡 **P1-5 Email confirmation:** either disable it in Supabase or show a "check your inbox" state.
+- [ ] 🟡 **P1-4 "Forgot password?"** works through Supabase email reset. *(Code done Oct 11: 6-digit emailed code. The Supabase "Reset password" email template must include `{{ .Token }}`.)*
+- [ ] 🟡 **P1-5 Email confirmation:** decided Oct 11: turn it **off** in Supabase (Authentication → Sign In / Providers → Email → Confirm email). A welcome email comes later.
 - [x] ✅ **P1-6 "Manage subscription"** link in You. *(Oct 11)*
 - [ ] 🟡 **P1-7 `npx expo install --fix`** (9 Expo patch versions), then full retest. Needs your approval.
 - [ ] 📱 **P1-8 Offline launch keeps a paying user in.** Verify first; fix only if it fails.
