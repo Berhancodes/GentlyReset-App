@@ -10,9 +10,9 @@ type AuthTextFieldProps = {
   onChangeText: (value: string) => void;
   error?: string;
   secureTextEntry?: boolean;
-  autoComplete?: 'email' | 'password' | 'new-password';
-  textContentType?: 'emailAddress' | 'password' | 'newPassword';
-  keyboardType?: 'email-address' | 'default';
+  autoComplete?: 'email' | 'password' | 'new-password' | 'one-time-code';
+  textContentType?: 'emailAddress' | 'password' | 'newPassword' | 'oneTimeCode';
+  keyboardType?: 'email-address' | 'default' | 'number-pad';
   returnKeyType?: 'next' | 'done';
   onSubmitEditing?: () => void;
 };

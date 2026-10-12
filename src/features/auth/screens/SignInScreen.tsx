@@ -11,9 +11,8 @@ import { canSubmitSignIn, validateSignIn } from '@/features/auth/utils/validateS
 import { OnboardingScreenLayout } from '@/features/onboarding/components/OnboardingScreenLayout';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
-import { requestResetCloudSyncForCurrentUser } from '@/features/reset/sync/requestResetCloudSync';
-import { restoreProgressAfterSignIn } from '@/features/reset/sync/restoreProgressAfterSignIn';
 import { getRootHref } from '@/navigation/getRootHref';
+import { useFinishSignIn } from '@/navigation/useFinishSignIn';
 
 const EMPTY_VALUES: SignInValues = {
   email: '',
@@ -26,11 +25,10 @@ export function SignInScreen() {
   const { isPro } = useSubscription();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
   const hasLocalAppAccess = useOnboardingStore((state) => state.hasLocalAppAccess);
-  const completeOnboarding = useOnboardingStore((state) => state.completeOnboarding);
   const [values, setValues] = useState<SignInValues>(EMPTY_VALUES);
   const [errors, setErrors] = useState<SignInErrors>({});
   const [submitting, setSubmitting] = useState(false);
-  const [restoring, setRestoring] = useState(false);
+  const { restoring, finishSignIn } = useFinishSignIn();
 
   const updateField = <Field extends keyof SignInValues>(
     field: Field,
@@ -70,20 +68,7 @@ export function SignInScreen() {
           setErrors({ form: result.message });
           return;
         }
-        // A returning user on a fresh phone: bring their reset back and skip onboarding.
-        if (!hasCompletedOnboarding) {
-          setRestoring(true);
-          const restored = await restoreProgressAfterSignIn();
-          setRestoring(false);
-          if (restored) {
-            completeOnboarding();
-            // The index route reads the fresh state and picks Home or the paywall.
-            router.replace('/');
-            return;
-          }
-        }
-        requestResetCloudSyncForCurrentUser();
-        goToAccessDestination();
+        await finishSignIn();
       })
       .finally(() => {
         setSubmitting(false);
@@ -154,6 +139,17 @@ export function SignInScreen() {
             signing in does not change your local reset.
           </AppText>
         )}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Forgot password"
+          onPress={() => router.push('/(auth)/forgot-password')}
+          hitSlop={spacing.xs}
+          style={({ pressed }) => [styles.forgot, pressed ? styles.pressed : null]}
+        >
+          <AppText variant="caption" color="gold">
+            forgot password?
+          </AppText>
+        </Pressable>
       </View>
     </OnboardingScreenLayout>
   );
@@ -172,6 +168,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xs,
+  },
+  forgot: {
+    alignSelf: 'flex-start',
+    minHeight: spacing.hitTarget,
+    justifyContent: 'center',
   },
   pressed: {
     opacity: 0.7,

@@ -115,3 +115,60 @@ export async function deleteAccount(): Promise<AuthActionResult> {
     return authFailure(error);
   }
 }
+
+/**
+ * Emails a 6-digit code for resetting the password. The "Reset password" email
+ * template in Supabase must include {{ .Token }} so the code is in the email.
+ * Always reports success, so the screen never reveals whether an email has an account.
+ */
+export async function requestPasswordResetCode(email: string): Promise<AuthActionResult> {
+  const client = supabase;
+  if (!client) {
+    return UNAVAILABLE;
+  }
+
+  try {
+    const { error } = await client.auth.resetPasswordForEmail(normalizeEmail(email));
+    if (error && error.status === 429) {
+      return { ok: false, message: mapAuthError(error) };
+    }
+    return authSuccess('code_sent');
+  } catch (error) {
+    return authFailure(error);
+  }
+}
+
+/** Checks the emailed code, which signs the user in, then sets their new password. */
+export async function resetPasswordWithCode(
+  email: string,
+  code: string,
+  newPassword: string,
+): Promise<AuthActionResult> {
+  const client = supabase;
+  if (!client) {
+    return UNAVAILABLE;
+  }
+
+  try {
+    const verified = await client.auth.verifyOtp({
+      email: normalizeEmail(email),
+      token: code.trim(),
+      type: 'recovery',
+    });
+    if (verified.error) {
+      return { ok: false, message: 'that code didn’t work. check it, or send a new one.' };
+    }
+
+    const updated = await client.auth.updateUser({ password: newPassword });
+    if (updated.error) {
+      return { ok: false, message: mapAuthError(updated.error) };
+    }
+
+    if (verified.data.session?.user.id) {
+      await syncProfileTimezone(verified.data.session.user.id);
+    }
+    return authSuccess('password_updated');
+  } catch (error) {
+    return authFailure(error);
+  }
+}
