@@ -3,6 +3,8 @@ import { LoadingScreen } from '@/features/onboarding/screens/LoadingScreen';
 import { MascotRunIntroScreen } from '@/features/onboarding/screens/MascotRunIntroScreen';
 import { MultiChoiceScreen } from '@/features/onboarding/screens/MultiChoiceScreen';
 import { PaywallScreen } from '@/features/onboarding/screens/PaywallScreen';
+import { PlanReadyScreen } from '@/features/onboarding/screens/PlanReadyScreen';
+import { PromiseScreen } from '@/features/onboarding/screens/PromiseScreen';
 import { ResultDetailsScreen } from '@/features/onboarding/screens/ResultDetailsScreen';
 import { ResultScreen } from '@/features/onboarding/screens/ResultScreen';
 import { ScaleScreen } from '@/features/onboarding/screens/ScaleScreen';
@@ -44,6 +46,10 @@ export function OnboardingRenderer({ step }: OnboardingRendererProps) {
       return <SharePreviewScreen step={step} />;
     case 'final':
       return <FinalScreen step={step} />;
+    case 'planReady':
+      return <PlanReadyScreen step={step} />;
+    case 'promise':
+      return <PromiseScreen step={step} />;
     case 'paywall':
       return <PaywallScreen step={step} />;
     default:

@@ -217,6 +217,34 @@ export type FinalStep = BaseOnboardingStep & {
   preview: readonly PlanPreviewItem[];
 };
 
+/** "This was made for me": the plan built from their answers, just before the paywall. */
+export type PlanReadyStep = BaseOnboardingStep & {
+  type: 'planReady';
+  ctaLabel: string;
+};
+
+/** One row of the promise screen's timeline, from this week out to the whole year. */
+export type SeasonTimelineItem = {
+  when: string;
+  title: string;
+  body: string;
+};
+
+/** The whole year, season by season, then a small promise they press and hold to make. */
+export type PromiseStep = BaseOnboardingStep & {
+  type: 'promise';
+  timeline: readonly SeasonTimelineItem[];
+  reassurance: string;
+  promise: string;
+  kicker: string;
+  hint: string;
+  promisedKicker: string;
+  promisedHint: string;
+  ctaLabel: string;
+  /** The button's label until the promise is made. */
+  lockedCtaLabel: string;
+};
+
 export type PaywallStep = BaseOnboardingStep & {
   type: 'paywall';
   ctaLabel: string;
@@ -237,6 +265,8 @@ export type OnboardingStep =
   | ResultDetailsStep
   | SharePreviewStep
   | FinalStep
+  | PlanReadyStep
+  | PromiseStep
   | PaywallStep;
 
 export type OnboardingAnswer =

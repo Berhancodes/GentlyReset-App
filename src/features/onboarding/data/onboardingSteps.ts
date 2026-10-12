@@ -33,6 +33,9 @@ export const CORE_QUESTION_IDS = [
   'resetReason',
 ] as const;
 
+/** The three screens of the unlock: the plan, the promise, then the paywall. */
+export const UNLOCK_STEP_IDS = ['planReady', 'promise', 'paywall'] as const;
+
 export type CoreQuestionId = (typeof CORE_QUESTION_IDS)[number];
 
 export const CORE_QUESTION_COUNT: 13 = CORE_QUESTION_IDS.length;
@@ -677,6 +680,53 @@ export const ONBOARDING_STEPS = [
     hideProgress: true,
     required: false,
     mascot: { pose: 'react-warm', line: "I've got you." },
+  },
+  {
+    id: 'planReady',
+    type: 'planReady',
+    eyebrow: 'your reset is ready',
+    title: 'this is your plan.',
+    ctaLabel: 'show me how it works',
+    hideProgress: true,
+    required: false,
+  },
+  {
+    id: 'promise',
+    type: 'promise',
+    eyebrow: 'season 1 of 12',
+    title: 'A whole year. One small step at a time.',
+    timeline: [
+      {
+        when: 'this week',
+        title: 'Find your rhythm',
+        body: 'A cozy corner and your first small steps.',
+      },
+      {
+        when: 'this month',
+        title: 'Season 1 grows with you',
+        body: 'Your corner becomes a nook, a room, then a home.',
+      },
+      {
+        when: 'every month after',
+        title: 'A new season, a new room',
+        body: '12 seasons to fill a whole year.',
+      },
+      {
+        when: 'all year',
+        title: 'A calmer you, for good',
+        body: 'Small steps that finally stick.',
+      },
+    ],
+    reassurance: 'Miss a day? Nothing is lost. Just continue.',
+    promise: 'I’ll show up for myself, gently, one day at a time.',
+    kicker: 'one small promise',
+    hint: 'press and hold the circle',
+    promisedKicker: 'promise made 🤍',
+    promisedHint: 'I’m proud of you already.',
+    ctaLabel: 'continue',
+    lockedCtaLabel: 'hold to promise first',
+    hideProgress: true,
+    required: false,
   },
   {
     id: 'paywall',

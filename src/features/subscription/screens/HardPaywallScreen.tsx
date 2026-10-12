@@ -25,6 +25,7 @@ import {
   textVariants,
 } from '@/design-system';
 import { openLegalDocument } from '@/features/legal/utils/openLegalDocument';
+import { UnlockStepsBar } from '@/features/onboarding/components/UnlockStepsBar';
 import { STAGE_POSE_ART, STAGE_POSE_SCALE } from '@/features/onboarding/stage/stagePoses';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { getResetProfileForAnswers } from '@/features/reset/data/resetProfiles';
@@ -57,12 +58,13 @@ export function HardPaywallScreen() {
   const router = useRouter();
   const grantLocalAppAccess = useOnboardingStore((state) => state.grantLocalAppAccess);
   const answers = useOnboardingStore((state) => state.answers);
-  const { packages, unexpectedTrial } = useSubscription();
+  const { packages, unexpectedTrial, restorePurchases } = useSubscription();
   const plans = useMemo(() => buildPaywallPlans(packages), [packages]);
   const [selectedId, setSelectedId] = useState<string | null>(
     () => peekPaywallUnlock()?.packageIdentifier ?? ANNUAL_PACKAGE_ID,
   );
-  const [busy, setBusy] = useState<'purchase' | null>(null);
+  const [busy, setBusy] = useState<'purchase' | 'restore' | null>(null);
+  const [restoreStatus, setRestoreStatus] = useState<string | null>(null);
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const usableHeight = windowHeight - insets.top - insets.bottom;
@@ -94,6 +96,21 @@ export function HardPaywallScreen() {
     setBusy(null);
   };
 
+  const restore = async () => {
+    if (busy) {
+      return;
+    }
+    setBusy('restore');
+    setRestoreStatus(null);
+    const result = await restorePurchases();
+    setBusy(null);
+    if (!result.ok) {
+      setRestoreStatus(result.message);
+    } else if (!result.unlocked) {
+      setRestoreStatus('no Pro purchase found for this Apple ID.');
+    }
+  };
+
   const canUnlock = busy === null;
 
   return (
@@ -108,6 +125,10 @@ export function HardPaywallScreen() {
           onLayout={(event) => setViewportHeight(event.nativeEvent.layout.height)}
           onContentSizeChange={(_, height) => setContentHeight(height)}
         >
+          {/* The last of the three unlock screens after onboarding. */}
+          <View style={styles.steps}>
+            <UnlockStepsBar stepId="paywall" />
+          </View>
           <View
             style={[styles.hero, tight ? styles.heroHidden : null]}
             accessibilityElementsHidden
@@ -202,7 +223,27 @@ export function HardPaywallScreen() {
                 </Text>
               </Pressable>
             )}
+            {restoreStatus ? (
+              <Text style={styles.status} accessibilityLiveRegion="polite">
+                {restoreStatus}
+              </Text>
+            ) : null}
             <View style={styles.legal}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Restore purchases"
+                accessibilityState={{ disabled: busy !== null }}
+                onPress={() => void restore()}
+                hitSlop={spacing.xs}
+                style={styles.legalLink}
+              >
+                <Text style={[styles.legalLabel, styles.legalStrong]}>
+                  {busy === 'restore' ? 'Restoring…' : 'Restore'}
+                </Text>
+              </Pressable>
+              <Text style={styles.legalDot} accessibilityElementsHidden>
+                ·
+              </Text>
               {tight ? (
                 <>
                   <Pressable
@@ -297,6 +338,11 @@ const styles = StyleSheet.create({
   },
   safe: {
     flex: 1,
+  },
+  steps: {
+    flexDirection: 'row',
+    minHeight: spacing.lg,
+    alignItems: 'center',
   },
   content: {
     flexGrow: 1,

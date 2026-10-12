@@ -6,6 +6,7 @@ import {
   SCALE_ICON_SOURCES,
 } from '@/features/onboarding/data/onboardingAssets';
 import { ONBOARDING_STEPS } from '@/features/onboarding/data/onboardingSteps';
+import { UNLOCK_ART } from '@/features/onboarding/data/unlockArt';
 import { STAGE_POSE_ART, type StagePose } from '@/features/onboarding/stage/stagePoses';
 import { WELCOME_SACK_FRAMES } from '@/features/onboarding/stage/welcomeSackFrames';
 import type { OnboardingStep } from '@/features/onboarding/types/onboarding';
@@ -48,6 +49,10 @@ function getSceneSources(step: OnboardingStep): ImageSourcePropType[] {
       return [MASCOT_RUN, MASCOT_RUN_FINAL];
     case 'loading':
       return step.scene === 'building' ? [BUILD_LOOP, BUILD_STILL] : [];
+    case 'planReady':
+      return [UNLOCK_ART.plan.source];
+    case 'promise':
+      return [UNLOCK_ART.holding];
     case 'paywall':
       return [STAGE_POSE_ART['react-hopeful'].source];
     default:

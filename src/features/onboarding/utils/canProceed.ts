@@ -16,6 +16,8 @@ export function canProceed(step: OnboardingStep, answer: OnboardingAnswer | unde
     case 'resultDetails':
     case 'sharePreview':
     case 'final':
+    case 'planReady':
+    case 'promise':
     case 'paywall':
       return true;
     case 'singleChoice':
