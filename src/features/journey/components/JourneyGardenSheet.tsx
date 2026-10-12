@@ -34,7 +34,7 @@ import { shortenSheetDescription } from '@/features/journey/utils/shortenSheetDe
 import { StageButton } from '@/features/onboarding/stage/StageButton';
 import { STAGE_POSE_ART } from '@/features/onboarding/stage/stagePoses';
 import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
-import { hapticSuccess } from '@/utils/haptics';
+import { hapticConfetti } from '@/utils/haptics';
 
 const SHEET_OPEN_MS = 280;
 const SHEET_SPRING = { damping: 22, stiffness: 190, mass: 0.9 } as const;
@@ -246,7 +246,8 @@ function SheetContent({ model, onPrimary, onStepTicked }: SheetContentProps) {
                   if (checkedCount === null) {
                     return;
                   }
-                  void hapticSuccess();
+                  // A pop and a sprinkle of taps to go with the confetti.
+                  hapticConfetti();
                   const center = chipCenters[index] ?? { x: 0, y: 0 };
                   setBurst((previous) => ({
                     key: previous.key + 1,

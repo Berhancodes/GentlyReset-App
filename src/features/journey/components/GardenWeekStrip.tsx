@@ -10,7 +10,7 @@ type GardenWeekStripProps = {
   onPressDay: (day: number) => void;
 };
 
-/** This week's days: sage once checked in, gold for today, pale for days ahead. */
+/** This week's days: cocoa once checked in, gold for today, pale for days ahead. */
 export function GardenWeekStrip({ days, onPressDay }: GardenWeekStripProps) {
   return (
     <View style={styles.row} accessibilityLabel="This week">
@@ -72,8 +72,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.stage.track,
   },
+  /** Same cocoa as the buttons and the stats calendar's checked-in days. */
   dayDone: {
-    backgroundColor: colors.stage.sprout,
+    backgroundColor: colors.stage.cta,
   },
   dayNow: {
     backgroundColor: colors.accent.gold,

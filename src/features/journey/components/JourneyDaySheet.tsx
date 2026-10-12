@@ -34,7 +34,7 @@ import { useJourneyVisualStore } from '@/features/journey/store/useJourneyVisual
 import type { JourneySeason } from '@/features/journey/utils/getJourneySeason';
 import type { JourneySheetModel } from '@/features/journey/utils/getJourneySheetModel';
 import { shortenSheetDescription } from '@/features/journey/utils/shortenSheetDescription';
-import { hapticSuccess } from '@/utils/haptics';
+import { hapticConfetti } from '@/utils/haptics';
 
 const SHEET_OPEN_MS = 280;
 /** Opens with a soft settle rather than a hard stop. */
@@ -443,8 +443,8 @@ function DaySteps({ day, onTicked }: DayStepsProps) {
               if (checkedCount === null) {
                 return;
               }
-              // A real buzz to go with the confetti.
-              void hapticSuccess();
+              // A pop and a sprinkle of taps to go with the confetti.
+              hapticConfetti();
               // The box sits at the right end of the row.
               onTicked(
                 rowWidth - STEP_BOX_SIZE / 2,

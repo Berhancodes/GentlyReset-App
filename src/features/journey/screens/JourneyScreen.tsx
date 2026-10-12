@@ -172,7 +172,7 @@ export function JourneyScreen() {
   const weekDays = chapter
     ? getJourneyChapterDays(chapter).map((day) => ({
         day,
-        // Checked-in days turn sage straight away; the gold ring follows the heading day.
+        // Checked-in days turn cocoa straight away; the gold ring follows the heading day.
         kind: completedDays.includes(day)
           ? ('completed' as const)
           : day === headingDay
@@ -233,6 +233,7 @@ export function JourneyScreen() {
       ) : null}
       <JourneyDayCelebration
         active={celebration === 'playing'}
+        day={currentDay}
         onDone={() => setCelebration('none')}
       />
     </Screen>

@@ -344,15 +344,16 @@ export const JOURNEY_SEASON_MASCOT_ART = {
 } as const;
 
 /**
- * Day-complete jump `assets/videos/journey/mascot-day-done.mov` (720 x 1280,
- * transparent). First and last frames match the idle pose, so it swaps in place.
+ * Day-complete cheer `assets/images/mascot/stage/cheer.png` (426 x 485, trimmed
+ * to the art). He hops in place for the celebration.
  */
 export const JOURNEY_DAY_DONE_MASCOT_ART = {
-  width: 720,
-  height: 1280,
-  bodyCenterX: 0.4875,
-  feetY: 0.749,
-  brimWidth: 0.833,
+  width: 426,
+  height: 485,
+  /** Raised arms widen the trim, so his body sits a little right of centre. */
+  bodyCenterX: 0.533,
+  feetY: 0.985,
+  brimWidth: 0.8,
 } as const;
 
 /**
@@ -377,7 +378,7 @@ export const JOURNEY_SEASON_MASCOT_LAYOUT = {
 export type JourneySeasonSceneLayout = {
   background: JourneyRect;
   mascot: JourneyRect;
-  /** Same feet and size as `mascot`, framed for the day-complete video. */
+  /** Same feet and size as `mascot`, framed for the day-complete cheer. */
   celebrationMascot: JourneyRect;
   shadow: JourneyRect;
 };

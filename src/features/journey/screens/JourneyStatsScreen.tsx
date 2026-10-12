@@ -29,17 +29,8 @@ import { STAGE_POSE_ART } from '@/features/onboarding/stage/stagePoses';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { toLocalDateKey } from '@/features/reset/utils/calendar';
 
-/** Monday-first, matching the calendar rows. */
-const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as const;
-const WEEKDAY_NAMES = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
-] as const;
+/** Seven dates to a row. */
+const CALENDAR_COLUMNS = 7;
 const BAR_MAX_HEIGHT = 80;
 const BAR_MIN_HEIGHT = 6;
 const MASCOT_HEIGHT = 76;
@@ -56,6 +47,10 @@ export function JourneyStatsScreen() {
   const currentDay = useResetStore((state) => state.currentDay);
   const todayCompleted = useResetStore((state) => state.todayCompleted);
   const [monthOffset, setMonthOffset] = useState(0);
+  // Whole-pixel columns: seven 1/7 percentages can round past the row and push Sunday off.
+  const [calendarWidth, setCalendarWidth] = useState(0);
+  const cellSize = Math.floor(calendarWidth / CALENDAR_COLUMNS);
+  const gridStyle = cellSize > 0 ? { width: cellSize * CALENDAR_COLUMNS } : null;
 
   const input = {
     completedDays,
@@ -68,6 +63,9 @@ export function JourneyStatsScreen() {
   const stats = getJourneyStats(input);
   const checkInDates = getJourneyCheckInDates(input);
   const month = getJourneyCalendarMonth(checkInDates, input.today, resetStartedOn, monthOffset);
+  const monthDays = month.cells.filter(
+    (cell): cell is Extract<JourneyCalendarCell, { kind: 'day' }> => cell.kind === 'day',
+  );
   const weeks = getJourneySeasonWeeks(completedDays, currentDay);
   const streakLine = getJourneyStreakLine(stats.streak, getJourneyLongestStreak(checkInDates));
 
@@ -129,21 +127,21 @@ export function JourneyStatsScreen() {
               onPress={() => setMonthOffset((offset) => offset + 1)}
             />
           </View>
-          <View style={styles.grid} accessibilityElementsHidden>
-            {WEEKDAYS.map((letter, index) => (
-              <Text key={WEEKDAY_NAMES[index]} style={styles.weekday} maxFontSizeMultiplier={1.2}>
-                {letter}
-              </Text>
-            ))}
-          </View>
-          <View style={styles.grid}>
-            {month.cells.map((cell, index) => (
-              <CalendarSquare
-                key={cell.kind === 'day' ? cell.dateKey : `blank-${index}`}
-                cell={cell}
-                month={month.title}
-              />
-            ))}
+          <View
+            style={styles.calendar}
+            onLayout={(event) => setCalendarWidth(event.nativeEvent.layout.width)}
+          >
+            <View style={[styles.grid, gridStyle]}>
+              {/* Just the month's dates, 1 to the last day; no empty boxes before the 1st. */}
+              {monthDays.map((cell) => (
+                <CalendarSquare
+                  key={cell.dateKey}
+                  cell={cell}
+                  month={month.title}
+                  size={cellSize}
+                />
+              ))}
+            </View>
           </View>
         </View>
 
@@ -227,15 +225,22 @@ const STATE_WORDS = {
   beforeStart: 'before you started',
 } as const;
 
-function CalendarSquare({ cell, month }: { cell: JourneyCalendarCell; month: string }) {
-  if (cell.kind === 'blank') {
-    return <View style={styles.square} />;
-  }
+function CalendarSquare({
+  cell,
+  month,
+  size,
+}: {
+  cell: Extract<JourneyCalendarCell, { kind: 'day' }>;
+  month: string;
+  /** Exact column width in points; 0 until the calendar is measured. */
+  size: number;
+}) {
+  const sizeStyle = size > 0 ? { width: size } : null;
   return (
     <View
       accessible
       accessibilityLabel={`${month} ${cell.date}, ${STATE_WORDS[cell.state]}`}
-      style={styles.square}
+      style={[styles.square, sizeStyle]}
     >
       <View
         style={[
@@ -424,16 +429,15 @@ const styles = StyleSheet.create({
   flipped: {
     transform: [{ scaleX: -1 }],
   },
+  calendar: {
+    gap: spacing.sm,
+    alignItems: 'center',
+  },
+  /** Full width until measured, then exactly seven whole columns, centred. */
   grid: {
+    width: '100%',
     flexDirection: 'row',
     flexWrap: 'wrap',
-  },
-  weekday: {
-    width: `${100 / 7}%`,
-    textAlign: 'center',
-    ...textVariants.stageEyebrow,
-    letterSpacing: 0,
-    color: colors.stage.copySoft,
   },
   square: {
     width: `${100 / 7}%`,
