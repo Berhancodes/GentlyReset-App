@@ -6,7 +6,7 @@
 export const LEGAL_DETAILS = {
   appName: 'Gently Reset',
   /** The person or company that runs the app. */
-  operator: '[Your name or company]',
+  operator: 'Gentlyreset',
   /** Where people send privacy requests, deletion requests and questions. */
   contactEmail: '[support email]',
   /** Whose laws govern the Terms, e.g. "the Province of Alberta, Canada". */
