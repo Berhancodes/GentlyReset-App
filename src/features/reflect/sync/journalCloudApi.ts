@@ -110,7 +110,7 @@ export function createSupabaseJournalCloudGateway(): JournalCloudGateway {
             body: entry.body,
             photo_url: null,
           })),
-          { onConflict: 'cycle_id,local_day' },
+          { onConflict: 'cycle_id,calendar_date' },
         )
         .select(
           'id, user_id, cycle_id, local_day, calendar_date, mood, prompt, body, photo_url, updated_at',

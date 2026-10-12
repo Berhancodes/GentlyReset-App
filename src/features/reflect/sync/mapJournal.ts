@@ -1,5 +1,6 @@
 import type { JournalEntry, JournalMood } from '../../reset/types';
 import { isValidCalendarDate } from '../../reset/sync/calendarDate';
+import { compareJournalEntries, journalEntryKey } from '../../reset/utils/journalEntryKey';
 import type { CloudJournalRow, CloudJournalWrite } from './types';
 
 const PLAN_DAY_MIN = 1;
@@ -24,9 +25,18 @@ export function moodFromCloud(value: string | null): JournalMood {
   return 3;
 }
 
+/** The same identity as a local entry's journalEntryKey, from a cloud row. */
+export function cloudJournalKey(row: Pick<CloudJournalRow, 'calendarDate' | 'localDay'>): string {
+  return journalEntryKey({
+    date: isValidCalendarDate(row.calendarDate) ? row.calendarDate : '',
+    day: clampJournalDay(row.localDay),
+  });
+}
+
 /**
  * Local Reflection → cloud row.
- * Identity is cycle_id + local_day, never user_id + day.
+ * Identity is cycle_id + calendar_date, so each day's entry is its own row.
+ * An entry without a valid date stays on the device rather than risk overwriting another.
  * photo_url stays null — Journal photos are still a placeholder.
  */
 export function mapReflectionToCloud(
@@ -34,14 +44,14 @@ export function mapReflectionToCloud(
   cycleId: string,
 ): CloudJournalWrite | null {
   const body = entry.text.trim();
-  if (!body) {
+  if (!body || !isValidCalendarDate(entry.date)) {
     return null;
   }
 
   return {
     cycleId,
     localDay: clampJournalDay(entry.day),
-    calendarDate: isValidCalendarDate(entry.date) ? entry.date : null,
+    calendarDate: entry.date,
     mood: moodToCloud(entry.mood),
     prompt: entry.prompt,
     body,
@@ -72,6 +82,6 @@ export function journalFingerprint(reflections: readonly JournalEntry[]): string
         text: entry.text,
         savedAt: entry.savedAt,
       }))
-      .sort((left, right) => left.day - right.day),
+      .sort(compareJournalEntries),
   );
 }

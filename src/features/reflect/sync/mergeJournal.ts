@@ -1,5 +1,6 @@
 import type { JournalEntry } from '../../reset/types';
-import { mapCloudToReflection, mapReflectionToCloud } from './mapJournal';
+import { compareJournalEntries, journalEntryKey } from '../../reset/utils/journalEntryKey';
+import { cloudJournalKey, mapCloudToReflection, mapReflectionToCloud } from './mapJournal';
 import type { CloudJournalRow, CloudJournalWrite } from './types';
 
 export type JournalMergeSuccess = {
@@ -60,32 +61,30 @@ function laterEntry(
 }
 
 /**
- * One reflection per local day. Later savedAt / updated_at wins.
- * Does not concatenate text. Does not invent a second Day N row.
+ * One reflection per calendar date (so a missed day's entry survives next to
+ * the one after it). Later savedAt / updated_at wins. Does not concatenate text.
  */
 export function mergeJournalEntries(
   local: readonly JournalEntry[],
   cloud: readonly CloudJournalRow[],
   cycleId: string,
 ): JournalMergeResult {
-  const localByDay = new Map<number, JournalEntry>();
+  const localByKey = new Map<string, JournalEntry>();
   for (const entry of local) {
-    localByDay.set(entry.day, entry);
+    localByKey.set(journalEntryKey(entry), entry);
   }
-  const cloudByDay = new Map<number, CloudJournalRow>();
+  const cloudByKey = new Map<string, CloudJournalRow>();
   for (const row of cloud) {
-    cloudByDay.set(row.localDay, row);
+    cloudByKey.set(cloudJournalKey(row), row);
   }
 
-  const days = [...new Set([...localByDay.keys(), ...cloudByDay.keys()])].sort(
-    (left, right) => left - right,
-  );
+  const keys = [...new Set([...localByKey.keys(), ...cloudByKey.keys()])];
   const reflections: JournalEntry[] = [];
   const uploads: CloudJournalWrite[] = [];
   let ambiguous = false;
 
-  for (const day of days) {
-    const chosen = laterEntry(localByDay.get(day), cloudByDay.get(day));
+  for (const key of keys) {
+    const chosen = laterEntry(localByKey.get(key), cloudByKey.get(key));
     if (!chosen) {
       continue;
     }
@@ -102,7 +101,7 @@ export function mergeJournalEntries(
     }
   }
 
-  reflections.sort((left, right) => left.day - right.day);
+  reflections.sort(compareJournalEntries);
 
   if (ambiguous) {
     return {

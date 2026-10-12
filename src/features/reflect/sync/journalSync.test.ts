@@ -9,6 +9,7 @@ import { getTaskForDay } from '../../reset/utils/getTaskForDay';
 import { INITIAL_SYNC_OWNERSHIP, ResetSyncNetworkError } from '../../reset/sync/types';
 import { syncJournalWithCloud } from './createJournalSyncService';
 import { mapReflectionToCloud } from './mapJournal';
+import { mergeJournalEntries } from './mergeJournal';
 import type { CloudJournalRow, CloudJournalWrite, JournalCloudGateway } from './types';
 
 let failed = 0;
@@ -72,7 +73,7 @@ function memoryRepository(initial: ResetSnapshot): ResetRepository {
 function cloudRow(write: CloudJournalWrite, updatedAt = write.savedAt): CloudJournalRow {
   return {
     ...write,
-    id: `journal-${write.cycleId}-${write.localDay}`,
+    id: `journal-${write.cycleId}-${write.calendarDate}`,
     userId: 'user-a',
     updatedAt,
   };
@@ -116,13 +117,17 @@ function createMemoryGateway(options: {
         if (options.offline) {
           throw new ResetSyncNetworkError('offline');
         }
-        const byDay = new Map(entries.map((row) => [row.localDay, row]));
+        // Mirrors the table's unique (cycle_id, calendar_date).
+        const byDate = new Map(entries.map((row) => [`${row.cycleId}|${row.calendarDate}`, row]));
         for (const row of incoming) {
-          byDay.set(row.localDay, cloudRow(row, '2026-09-27T16:00:00.000Z'));
+          byDate.set(
+            `${row.cycleId}|${row.calendarDate}`,
+            cloudRow(row, '2026-09-27T16:00:00.000Z'),
+          );
         }
-        entries = [...byDay.values()];
+        entries = [...byDate.values()];
         return incoming
-          .map((row) => byDay.get(row.localDay))
+          .map((row) => byDate.get(`${row.cycleId}|${row.calendarDate}`))
           .filter((row): row is CloudJournalRow => !!row);
       },
     },
@@ -352,6 +357,41 @@ async function run(): Promise<void> {
     check(
       'journal waits for ResetSyncService to provide Cycle 1',
       ensured && result.cycleId === 'cycle-1',
+    );
+  }
+
+  {
+    // A missed day: the plan day stays 3, so two dates share it.
+    const missed = entry({ date: '2026-09-27', text: 'missed day note' });
+    const nextDay = entry({
+      date: '2026-09-28',
+      text: 'next day note',
+      savedAt: '2026-09-28T15:00:00.000Z',
+    });
+    const merged = mergeJournalEntries([missed, nextDay], [], 'cycle-1');
+    check(
+      'a missed day and the next day both survive the merge',
+      merged.reflections.length === 2 &&
+        merged.reflections[0]?.text === 'missed day note' &&
+        merged.reflections[1]?.text === 'next day note',
+    );
+    check(
+      'both upload as separate rows, one per date',
+      merged.uploads.length === 2 &&
+        merged.uploads[0]?.calendarDate !== merged.uploads[1]?.calendarDate,
+    );
+    const fromCloud = mergeJournalEntries(
+      [],
+      merged.uploads.map((write) => cloudRow(write)),
+      'cycle-1',
+    );
+    check(
+      'restoring from the cloud brings both entries back',
+      fromCloud.reflections.length === 2 && fromCloud.uploads.length === 0,
+    );
+    check(
+      'an entry with no valid date stays on the device instead of uploading',
+      mapReflectionToCloud(entry({ date: '' }), 'cycle-1') === null,
     );
   }
 

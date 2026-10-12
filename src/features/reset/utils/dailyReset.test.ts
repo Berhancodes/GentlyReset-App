@@ -274,10 +274,7 @@ const sameDayNote = applySaveReflection(
   { mood: 4, text: 'updated same day', prompt: 'how did it feel?' },
   dateOn('2026-09-19'),
 );
-check(
-  'journal upserts by plan day on the same calendar date',
-  sameDayNote.reflections.length === 1,
-);
+check('journal upserts by calendar date on the same day', sameDayNote.reflections.length === 1);
 check(
   'journal upsert replaces the same plan-day entry',
   sameDayNote.reflections[0]?.text === 'updated same day' && sameDayNote.reflections[0]?.mood === 4,
@@ -290,14 +287,16 @@ const laterCalendarNote = applySaveReflection(
   dateOn('2026-09-20'),
 );
 check(
-  'same plan day across two calendar dates overwrites the prior reflection',
-  laterCalendarNote.reflections.length === 1 &&
-    laterCalendarNote.reflections[0]?.day === 1 &&
-    laterCalendarNote.reflections[0]?.date === '2026-09-20' &&
-    laterCalendarNote.reflections[0]?.text === 'second calendar',
+  'a missed day keeps its journal entry when the next day is written (same plan day)',
+  laterCalendarNote.reflections.length === 2 &&
+    laterCalendarNote.reflections[0]?.date === '2026-09-19' &&
+    laterCalendarNote.reflections[0]?.text === 'updated same day' &&
+    laterCalendarNote.reflections[1]?.date === '2026-09-20' &&
+    laterCalendarNote.reflections[1]?.text === 'second calendar' &&
+    laterCalendarNote.reflections.every((entry) => entry.day === 1),
 );
 check(
-  'journal overwrite does not complete or advance the plan day',
+  'writing the journal does not complete or advance the plan day',
   laterCalendarNote.todayCompleted === false && laterCalendarNote.currentDay === 1,
 );
 

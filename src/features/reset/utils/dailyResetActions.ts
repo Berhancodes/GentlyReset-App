@@ -3,6 +3,7 @@ import { PLAN_DAY_COUNT } from '../data/thirtyDayPlan';
 import { processDateRollover } from './applyDateRollover';
 import { shiftDateKey, toLocalDateKey } from './calendar';
 import { getCurrentResetTask } from './resetSelectors';
+import { compareJournalEntries, journalEntryKey } from './journalEntryKey';
 
 export function applyStartToday(state: ResetSnapshot): ResetSnapshot {
   if (!state.resetStartedOn || state.todayCompleted) {
@@ -70,12 +71,13 @@ export function applySaveReflection(
     text,
     savedAt: now.toISOString(),
   };
+  // Rewriting today replaces today's entry only; a missed day keeps its own.
   const remaining = (rolled.reflections ?? []).filter(
-    (reflection) => reflection.day !== rolled.currentDay,
+    (reflection) => journalEntryKey(reflection) !== journalEntryKey(entry),
   );
 
   return {
     ...rolled,
-    reflections: [...remaining, entry].sort((left, right) => left.day - right.day),
+    reflections: [...remaining, entry].sort(compareJournalEntries),
   };
 }
