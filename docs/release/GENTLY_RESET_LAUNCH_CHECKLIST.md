@@ -1,6 +1,6 @@
 # Gently Reset — Launch Checklist
 
-**As of October 10, 2026, branch `snapshot/before-appllama` @ `9593a69`.** Details and evidence are in `GENTLY_RESET_RELEASE_READINESS.md`.
+**As of October 10, 2026, branch `snapshot/before-appllama` @ `9593a69`. Updated October 11 on `feature/home-widgets`: code for P0-1–4, P0-6, P0-7, P1-3 and P1-6 is in; each still needs the device check in its Accept line.** Details and evidence are in `GENTLY_RESET_RELEASE_READINESS.md`.
 
 **Status key**
 - ✅ Verified
@@ -12,20 +12,20 @@
 
 ## P0 — must fix to submit
 
-- [ ] ❌ **P0-1 Paywall charges before unlocking.**
+- [ ] 🟡 **P0-1 Paywall charges before unlocking.** *(Code done Oct 11: RevenueCat purchase; local pass only in dev builds. Needs sandbox test.)*
   - Change: "Unlock" calls `purchasePackage`; `hasLocalAppAccess` is removed from every gate, and old persisted flags are ignored.
   - *Accept:* the app opens only after a sandbox purchase; cancelling stays on the paywall; an expired sandbox subscription relocks.
-- [ ] ❌ **P0-2 Restore Purchases** on the paywall and in You. The fake onboarding "Restore Purchases" label is removed or wired.
+- [ ] 🟡 **P0-2 Restore Purchases** on the paywall and in You. *(Code done Oct 11. Needs sandbox test.)* The fake onboarding "Restore Purchases" label is removed or wired.
   - *Accept:* a fresh install plus Restore with the sandbox Apple ID unlocks; "nothing to restore" is handled.
-- [ ] ❌ **P0-3 Real localized prices only.** No hard-coded `$` or preview prices; there's an unavailable state when the offering fails.
+- [ ] 🟡 **P0-3 Real localized prices only.** *(Code done Oct 11: store strings and numbers, unavailable state with Try again. Needs non-USD and airplane test.)* No hard-coded `$` or preview prices; there's an unavailable state when the offering fails.
   - *Accept:* a non-USD sandbox storefront shows correct strings; airplane mode shows "prices unavailable" and a disabled button.
-- [ ] ❌ **P0-4 In-app account deletion.** Confirmation, a server-side delete (RPC or Edge Function), sign-out, `Purchases.logOut()`, local wipe, and a note about cancelling the Apple subscription.
+- [ ] 🟡 **P0-4 In-app account deletion.** *(Code done Oct 11: migration `20261011120000_create_delete_my_account.sql` must be applied to production Supabase.)* Confirmation, a server-side delete (RPC or Edge Function), sign-out, `Purchases.logOut()`, local wipe, and a note about cancelling the Apple subscription.
   - *Accept:* the deleted account can't sign in, and its rows are gone in Supabase.
 - [ ] 🟡 **P0-5 Legal details filled** (operator, contact email, governing law) and **hosted** Privacy and Terms URLs.
   - *Accept:* no `[brackets]` remain in the legal pages; public https links work.
-- [ ] ❌ **P0-6 "Help & support" works** (mailto or the support page).
+- [ ] 🟡 **P0-6 "Help & support" works** (mailto or the support page). *(Code done Oct 11: opens Mail to `LEGAL_DETAILS.contactEmail`, which needs your real address.)*
   - *Accept:* tapping it opens Mail or the page.
-- [ ] 🟡 **P0-7 EAS ready.**
+- [ ] 🟡 **P0-7 EAS ready.** *(Oct 11: `eas.json` with preview and production profiles and `usesNonExemptEncryption: false` are in. Still needs `eas init` and the EAS env vars.)*
   - Needs: `eas.json` production profile with autoIncrement, EAS env vars (Supabase URL and anon key, RevenueCat `appl_` key, legal URLs), and `ITSAppUsesNonExemptEncryption: false`.
   - *Accept:* `eas build -p ios --profile production` succeeds and the build appears in TestFlight.
 - [ ] 🟡 **P0-8 Store setup complete.** App Store Connect subscriptions (monthly and annual, one group, **no intro offer**), Paid Apps agreement, tax and banking active, RevenueCat products, entitlement `gentlyreset_ios_app_pro`, offering `default` (current) with `$rc_monthly`/`$rc_annual`, server notifications, sandbox tester.
@@ -37,11 +37,11 @@
   - *Accept:* write on day N, skip a day, write again: both entries survive, locally and after reinstall plus restore.
 - [ ] ❌ **P1-2 A returning user who signs in gets their progress back without re-onboarding.**
   - *Accept:* delete the app, reinstall, sign in: the app lands on Home with the right day, streak and journal.
-- [ ] ❌ **P1-3 Sign-out is safe.** Hidden when not signed in, confirmation required, no silent loss of unsynced data.
+- [x] ✅ **P1-3 Sign-out is safe.** *(Oct 11: hidden without an account, asks first, wipes the device.)* Hidden when not signed in, confirmation required, no silent loss of unsynced data.
   - *Accept:* tapping it asks first; anonymous users don't see it.
 - [ ] ❌ **P1-4 "Forgot password?"** works through Supabase email reset.
 - [ ] 🟡 **P1-5 Email confirmation:** either disable it in Supabase or show a "check your inbox" state.
-- [ ] ❌ **P1-6 "Manage subscription"** link in You.
+- [x] ✅ **P1-6 "Manage subscription"** link in You. *(Oct 11)*
 - [ ] 🟡 **P1-7 `npx expo install --fix`** (9 Expo patch versions), then full retest. Needs your approval.
 - [ ] 📱 **P1-8 Offline launch keeps a paying user in.** Verify first; fix only if it fails.
 - [ ] 🟡 **P1-9 Release branch merged to `main`**, or the build comes from the branch. Homepage stars are committed or dropped.

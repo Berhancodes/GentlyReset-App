@@ -10,7 +10,10 @@
     "ios": {
       "supportsTablet": false,
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.gentlyreset.app"
+      "bundleIdentifier": "com.gentlyreset.app",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
