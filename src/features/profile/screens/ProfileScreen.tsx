@@ -36,6 +36,8 @@ import { useResetStore } from '@/features/reset/store/useResetStore';
 import { minutesFromCommitment } from '@/features/reset/utils/getTaskForDay';
 import { toLocalDateKey } from '@/features/reset/utils/calendar';
 import { getCurrentPlanDay } from '@/features/reset/utils/resetSelectors';
+import { AddWidgetSheet } from '@/features/widgets/components/AddWidgetSheet';
+import { widgetsAvailable } from '@/features/widgets/native/widgetsAvailability';
 
 const PROFILE_COLUMN_MAX_WIDTH = 430;
 
@@ -52,6 +54,7 @@ export function ProfileScreen() {
   const [notice, setNotice] = useState<Notice | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+  const [widgetSheetOpen, setWidgetSheetOpen] = useState(false);
   const currentDay = useResetStore((state) => state.currentDay);
   const completedDays = useResetStore((state) => state.completedDays);
   const completionDates = useResetStore((state) => state.completionDates);
@@ -198,6 +201,15 @@ export function ProfileScreen() {
               title: userId && username ? formatUsernameHandle(username) : 'Choose a username',
               onPress: () => router.push('/choose-username'),
             },
+            ...(widgetsAvailable
+              ? [
+                  {
+                    icon: <MascotIcon name="star" size={22} />,
+                    title: 'Add the home screen widget',
+                    onPress: () => setWidgetSheetOpen(true),
+                  },
+                ]
+              : []),
             {
               icon: <MascotIcon name="help" size={22} />,
               title: 'Help & support',
@@ -221,6 +233,11 @@ export function ProfileScreen() {
           ]}
         />
       </ScrollView>
+      <AddWidgetSheet
+        visible={widgetSheetOpen}
+        day={getCurrentPlanDay({ currentDay })}
+        onClose={() => setWidgetSheetOpen(false)}
+      />
       <NoticeDialog
         visible={notice !== null}
         title={notice?.title ?? ''}

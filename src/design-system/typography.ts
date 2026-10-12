@@ -26,7 +26,7 @@ export const fontSizes = {
   homeGreeting: 29,
   journalInput: 18,
   homeDay: 19,
-  homeBubble: 20,
+  homeBubble: 16,
   nav: 22,
   xl: 28,
   questionCompact: 28,
@@ -45,6 +45,14 @@ export const fontSizes = {
   journeySheetTitle: 34,
   profileName: 28,
   hero: 52,
+  unlockTitle: 27,
+  unlockLabel: 11,
+  unlockValue: 15,
+  unlockBody: 13,
+  unlockBadge: 10,
+  unlockSmall: 12,
+  unlockName: 19,
+  celebrationShout: 46,
 } as const;
 
 export const lineHeights = {
@@ -59,7 +67,7 @@ export const lineHeights = {
   homeGreeting: 33,
   journalInput: 27,
   homeDay: 24,
-  homeBubble: 24,
+  homeBubble: 21,
   nav: 28,
   xl: 34,
   questionCompact: 34,
@@ -78,6 +86,14 @@ export const lineHeights = {
   journeySheetTitle: 38,
   profileName: 32,
   hero: 58,
+  unlockTitle: 30,
+  unlockLabel: 14,
+  unlockValue: 19,
+  unlockBody: 18,
+  unlockBadge: 13,
+  unlockSmall: 16,
+  unlockName: 22,
+  celebrationShout: 48,
 } as const;
 
 export const fontWeights = {
@@ -158,11 +174,11 @@ export const textVariants = {
     fontWeight: fontWeights.medium,
   },
   homeBubble: {
-    fontFamily: fontFamilies.sans,
+    fontFamily: fontFamilies.rounded,
     fontSize: fontSizes.homeBubble,
     lineHeight: lineHeights.homeBubble,
-    fontWeight: fontWeights.semibold,
-    letterSpacing: -0.2,
+    fontWeight: fontWeights.heavy,
+    letterSpacing: -0.1,
   },
   subtitle: {
     fontFamily: fontFamilies.sans,
@@ -399,6 +415,71 @@ export const textVariants = {
     fontSize: fontSizes.statLabel,
     lineHeight: lineHeights.statLabel,
     fontWeight: fontWeights.medium,
+  },
+  /** Unlock screens: the rose label above the title. */
+  unlockEyebrow: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.unlockLabel,
+    lineHeight: lineHeights.unlockLabel,
+    fontWeight: fontWeights.heavy,
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
+  },
+  /** Unlock screens: the big left-aligned title. */
+  unlockTitle: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.unlockTitle,
+    lineHeight: lineHeights.unlockTitle,
+    fontWeight: fontWeights.heavy,
+    letterSpacing: -0.4,
+  },
+  /** Unlock screens: small caps label on a card. */
+  unlockLabel: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.unlockLabel,
+    lineHeight: lineHeights.unlockLabel,
+    fontWeight: fontWeights.heavy,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  unlockValue: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.unlockValue,
+    lineHeight: lineHeights.unlockValue,
+    fontWeight: fontWeights.heavy,
+  },
+  unlockBody: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.unlockBody,
+    lineHeight: lineHeights.unlockBody,
+    fontWeight: fontWeights.bold,
+  },
+  unlockSmall: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.unlockSmall,
+    lineHeight: lineHeights.unlockSmall,
+    fontWeight: fontWeights.bold,
+  },
+  unlockName: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.unlockName,
+    lineHeight: lineHeights.unlockName,
+    fontWeight: fontWeights.heavy,
+  },
+  /** Journey's day-complete sticker: the big WOOOO! */
+  celebrationShout: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.celebrationShout,
+    lineHeight: lineHeights.celebrationShout,
+    fontWeight: fontWeights.heavy,
+    letterSpacing: -1,
+  },
+  unlockBadge: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.unlockBadge,
+    lineHeight: lineHeights.unlockBadge,
+    fontWeight: fontWeights.heavy,
+    letterSpacing: 0.6,
   },
 } as const satisfies Record<string, TextStyle>;
 

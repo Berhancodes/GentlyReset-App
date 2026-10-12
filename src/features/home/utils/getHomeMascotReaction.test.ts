@@ -114,6 +114,30 @@ check(
     getHomeMascotIdleBubble(20) === 'how was today?',
 );
 
+const tipLines = new Set<string>();
+for (let step = 0; step < 200; step += 1) {
+  tipLines.add(getHomeMascotBubble('wave', fresh, draws(TIP, step / 200)));
+}
+check(
+  'tips explain how the room grows',
+  tipLines.has('Every check-in on Journey adds a new friend to our room.'),
+);
+const cuteSamples = [
+  "I'm small, but my cheering is loud.",
+  "I named my hat. It's called Hat.",
+  "Psst. You're doing better than you think.",
+];
+const cuteSeen = [...tipLines].filter((line) => cuteSamples.includes(line)).length;
+check(
+  'tips are mostly helpful, with a little fun mixed in',
+  cuteSeen > 0 && tipLines.size - cuteSeen > cuteSeen * 3,
+);
+check(
+  'reactions and tips come up about equally',
+  getHomeMascotBubble('wave', fresh, draws(0.49, 0)) !==
+    getHomeMascotBubble('wave', fresh, draws(0.51, 0)),
+);
+
 if (failed > 0) {
   throw new Error(`${failed} home mascot reaction check(s) failed`);
 }

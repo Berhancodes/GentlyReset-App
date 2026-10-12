@@ -14,7 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { AppText } from '@/components/ui';
-import { colors, motion, radius, shadows, spacing } from '@/design-system';
+import { colors, motion, radius, shadows } from '@/design-system';
 
 type MascotSpeechBubbleProps = {
   text: string;
@@ -26,14 +26,16 @@ type MascotSpeechBubbleProps = {
   swapDelay?: number;
 };
 
-const BUBBLE_PADDING_HORIZONTAL = 20;
-const TAIL_WIDTH = 16;
-const TAIL_HEIGHT = 11;
-const TAIL_SQUARE = 14;
+const BUBBLE_PADDING_HORIZONTAL = 15;
+const BUBBLE_PADDING_VERTICAL = 9;
+const OUTLINE_WIDTH = 2.5;
+/** The tail is a small rotated square: outline on its two lower sides only. */
+const TAIL_SQUARE = 12;
 /** Roughly one space at the bubble's font size. */
-const WORD_GAP = 5;
+const WORD_GAP = 4;
 const POP_SPRING = { damping: 12, stiffness: 260 } as const;
-const bubbleFill = colors.surface.raised;
+const bubbleFill = colors.speechBubble.fill;
+const bubbleOutline = colors.speechBubble.outline;
 
 /**
  * Soft Home speech bubble. Sits above the mascot without owning playback.
@@ -150,9 +152,7 @@ export function MascotSpeechBubble({
           ))}
         </View>
       </View>
-      <View style={styles.tailClip}>
-        <View style={styles.tail} />
-      </View>
+      <View style={styles.tail} />
     </Animated.View>
   );
 }
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   root: {
     alignSelf: 'center',
     alignItems: 'center',
-    maxWidth: '75%',
+    maxWidth: '68%',
   },
   body: {
     zIndex: 1,
@@ -200,10 +200,12 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     maxWidth: '100%',
     paddingHorizontal: BUBBLE_PADDING_HORIZONTAL,
-    paddingVertical: spacing.md,
+    paddingVertical: BUBBLE_PADDING_VERTICAL,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: radius.homeBubble,
+    borderWidth: OUTLINE_WIDTH,
+    borderColor: bubbleOutline,
     backgroundColor: bubbleFill,
     ...shadows.homeBubble,
   },
@@ -213,26 +215,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     columnGap: WORD_GAP,
   },
-  tailClip: {
-    zIndex: 2,
-    width: TAIL_WIDTH,
-    height: TAIL_HEIGHT,
-    marginTop: -2,
-    overflow: 'hidden',
-    alignItems: 'center',
-    opacity: 1,
-    elevation: 0,
-    backgroundColor: 'transparent',
-  },
   tail: {
+    zIndex: 2,
     width: TAIL_SQUARE,
     height: TAIL_SQUARE,
-    marginTop: -(TAIL_SQUARE / 2) + 1,
-    borderRadius: 2,
+    // Sits over the bubble's bottom outline so the two join without a seam.
+    marginTop: -(TAIL_SQUARE / 2) - OUTLINE_WIDTH / 2,
+    borderRightWidth: OUTLINE_WIDTH,
+    borderBottomWidth: OUTLINE_WIDTH,
+    borderColor: bubbleOutline,
+    borderBottomRightRadius: 3,
     backgroundColor: bubbleFill,
-    opacity: 1,
-    elevation: 0,
-    shadowOpacity: 0,
     transform: [{ rotate: '45deg' }],
   },
 });

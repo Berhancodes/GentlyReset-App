@@ -29,7 +29,8 @@ function createShadow(
 export const shadows = {
   none: {} satisfies ViewStyle,
   whisper: createShadow(2, 0.07, 8, 2),
-  homeBubble:
+  /** The onboarding intro's soft speech-bubble shadow. */
+  onboardingBubble:
     Platform.OS === 'web'
       ? ({
           boxShadow: '0 5px 12px rgba(0, 0, 0, 0.06)',
@@ -40,6 +41,45 @@ export const shadows = {
           shadowOpacity: 0.06,
           shadowRadius: 12,
           elevation: 2,
+        } satisfies ViewStyle),
+  /** A crisp blush "sticker" shadow under Home's speech bubble. */
+  homeBubble:
+    Platform.OS === 'web'
+      ? ({
+          boxShadow: '0 4px 0 #F6B7A8',
+        } satisfies ViewStyle)
+      : ({
+          shadowColor: '#F6B7A8',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 1,
+          shadowRadius: 0,
+          elevation: 2,
+        } satisfies ViewStyle),
+  /** The unlock screens' white cards: a crisp blush sticker edge. */
+  unlockSticker:
+    Platform.OS === 'web'
+      ? ({
+          boxShadow: `0 4px 0 ${colors.unlock.stickerShadow}`,
+        } satisfies ViewStyle)
+      : ({
+          shadowColor: colors.unlock.stickerShadow,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 1,
+          shadowRadius: 0,
+          elevation: 2,
+        } satisfies ViewStyle),
+  /** Journey's day-complete sticker: a deeper blush sticker edge. */
+  celebrationSticker:
+    Platform.OS === 'web'
+      ? ({
+          boxShadow: `0 6px 0 ${colors.celebration.shadow}`,
+        } satisfies ViewStyle)
+      : ({
+          shadowColor: colors.celebration.shadow,
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 1,
+          shadowRadius: 0,
+          elevation: 3,
         } satisfies ViewStyle),
   soft: createShadow(6, 0.08, 16, 3),
   medium: createShadow(8, 0.12, 20, 5),

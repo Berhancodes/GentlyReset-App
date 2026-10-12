@@ -26,8 +26,8 @@ export type HomeMascotBubbleContext = {
   previousLine?: string;
 };
 
-/** About one tap in three is a tip (nudge, app fact or cute line) instead of a reaction. */
-const TIP_CHANCE = 1 / 3;
+/** About every other tap is a tip (nudge, how the app works, or a cute line) instead of a reaction. */
+const TIP_CHANCE = 1 / 2;
 
 /** Gentle nudges that fit where today stands. Never guilt. */
 const NUDGES: Record<HomeMascotDayState, readonly string[]> = {
@@ -37,29 +37,37 @@ const NUDGES: Record<HomeMascotDayState, readonly string[]> = {
   missedYesterday: ["No restart needed. Just today's step.", 'Pick up right where you left off.'],
 };
 
-/** True things about the app, true in every state. */
-const APP_FACTS: readonly string[] = [
+/**
+ * How the app works, in the mascot's voice. True in every state, so any can come up any day.
+ * There are deliberately more of these than cute lines, so tips are mostly helpful.
+ */
+const APP_GUIDE: readonly string[] = [
+  'Every check-in on Journey adds a new friend to our room.',
+  'Every 7 days our room gets a big upgrade. Day 7 brings a window!',
+  'Finish 30 days and our room becomes a home. That’s one season.',
+  'Tap “Season 1” up top to see all 12 rooms in your year.',
+  'Missed a day? Nothing in our room disappears. Just continue.',
+  'Check in on Journey, then come back. Something new will be here.',
+  'Short on time? Today’s step only takes a few minutes.',
   'Did you know? Your Journey changes with the real seasons.',
   'Did you know? Tap me on Journey to open your reset.',
-  'Did you know? The map on Journey shows your streak.',
-  'Did you know? One line in your journal is enough.',
+  'Did you know? The map on Journey shows your streak and calendar.',
+  'One line in your journal is enough. It’s private, just for you.',
+  'In Journal, slide the sack to show how heavy today felt.',
+  'Add a friend in World and they can send you a kind postcard.',
+  'Friends only see your day. Never your journal.',
+  'Sign in on You and your progress is backed up.',
 ];
 
-/** Just for fun. */
+/** Just for fun, a few at a time. */
 const CUTE_LINES: readonly string[] = [
-  'Did you know? I practise my jump every night.',
-  'Did you know? My hat has seen every season.',
   "Small steps count. I'm basically all small steps.",
-  'My backpack is full of snacks. And hope.',
   "I named my hat. It's called Hat.",
   'Did you know? I nap best after you check in.',
   "Psst. You're doing better than you think.",
-  "Boop. Hi. That's all.",
   "I'm small, but my cheering is loud.",
-  'This hat is 90% shade, 10% style.',
   'Did you know? Leaves always come back. So do you.',
   "I'd high-five you, but my arms are tiny.",
-  'I saved you the comfiest rock.',
   "Did you know? I'm your biggest fan. Literally.",
 ];
 
@@ -121,7 +129,7 @@ export function getHomeMascotBubble(
 ): string {
   const useTip = random() < TIP_CHANCE;
   const pool = useTip
-    ? [...NUDGES[context.dayState], ...APP_FACTS, ...CUTE_LINES]
+    ? [...NUDGES[context.dayState], ...APP_GUIDE, ...CUTE_LINES]
     : getReactionLines(reaction, context);
   const fresh = pool.filter((line) => fillName(line, context.firstName) !== context.previousLine);
   const choices = fresh.length > 0 ? fresh : pool;
@@ -144,7 +152,8 @@ function fillName(line: string, firstName: string | undefined): string {
   if (!line.includes(NAME)) {
     return line;
   }
-  const name = firstName?.trim();
+  const trimmed = firstName?.trim();
+  const name = trimmed ? trimmed.charAt(0).toUpperCase() + trimmed.slice(1) : '';
   return name ? line.replace(NAME, name) : 'Hey 👋';
 }
 

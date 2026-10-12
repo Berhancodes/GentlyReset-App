@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { useJourneyVisualStore } from '@/features/journey/store/useJourneyVisualStore';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { useJournalDraftStore } from '@/features/reflect/store/useJournalDraftStore';
+import { useRoomStore } from '@/features/room/store/useRoomStore';
+import { useWidgetStore } from '@/features/widgets/store/useWidgetStore';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import { useResetSyncStore } from '@/features/reset/sync/useResetSyncStore';
 
@@ -12,7 +14,9 @@ function bothHydrated(): boolean {
     useResetStore.persist.hasHydrated() &&
     useJourneyVisualStore.persist.hasHydrated() &&
     useResetSyncStore.persist.hasHydrated() &&
-    useJournalDraftStore.persist.hasHydrated()
+    useJournalDraftStore.persist.hasHydrated() &&
+    useRoomStore.persist.hasHydrated() &&
+    useWidgetStore.persist.hasHydrated()
   );
 }
 

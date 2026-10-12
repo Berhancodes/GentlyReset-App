@@ -12,6 +12,7 @@ import { AuthProvider } from '@/features/auth/session/AuthProvider';
 import { useAuth } from '@/features/auth/session/useAuth';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { ResetSyncController } from '@/features/reset/sync/ResetSyncController';
+import { WidgetSyncController } from '@/features/widgets/sync/WidgetSyncController';
 import { SubscriptionProvider } from '@/features/subscription/session/SubscriptionProvider';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
 import { usePersistedStoresHydrated } from '@/hooks/usePersistedStoresHydrated';
@@ -56,6 +57,7 @@ function RootLayoutReady() {
       <GestureHandlerRootView style={styles.root}>
         <StatusBar style="dark" />
         <ResetSyncController />
+        <WidgetSyncController />
         <Stack
           screenOptions={{
             headerShown: false,

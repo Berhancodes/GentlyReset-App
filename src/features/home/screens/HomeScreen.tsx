@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -8,6 +9,7 @@ import { HomeMascot } from '@/features/home/components/HomeMascot';
 import { HomeDriftingClouds } from '@/features/home/components/HomeDriftingClouds';
 import { HomeSeasonDrift } from '@/features/home/components/HomeSeasonDrift';
 import { HomeSky } from '@/features/home/components/HomeSky';
+import { HomeStars } from '@/features/home/components/HomeStars';
 import { HomeWarmWash } from '@/features/home/components/HomeWarmWash';
 import { useJourneyVisualStore } from '@/features/journey/store/useJourneyVisualStore';
 import { getJourneySeason } from '@/features/journey/utils/getJourneySeason';
@@ -15,9 +17,24 @@ import { getHomeMascotDayState } from '@/features/home/utils/getHomeMascotReacti
 import { HOME_STREAK_REMINDER } from '@/features/home/utils/homeCopy';
 import { getCompanionPresentation } from '@/features/home/utils/getCompanionPresentation';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { HomeRoomBackdrop, type RoomLook } from '@/features/room/components/HomeRoom';
+import { RoomMilestoneCard } from '@/features/room/components/RoomMilestoneCard';
+import { SeasonMapSheet } from '@/features/room/components/SeasonMapSheet';
+import { SeasonPill } from '@/features/room/components/SeasonPill';
+import { ROOM_INTRO } from '@/features/room/data/roomStages';
+import { getCelebratedStageIndex, useRoomStore } from '@/features/room/store/useRoomStore';
+import {
+  fillMascotName,
+  getPendingRoomMilestone,
+  getRoomState,
+  getSeasonLabel,
+} from '@/features/room/utils/getRoomState';
 import { getMascotIntroName } from '@/features/onboarding/utils/answerReaders';
 import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
+import { AddWidgetSheet } from '@/features/widgets/components/AddWidgetSheet';
+import { widgetsAvailable } from '@/features/widgets/native/widgetsAvailability';
+import { useWidgetStore } from '@/features/widgets/store/useWidgetStore';
 import { useResetStore } from '@/features/reset/store/useResetStore';
 import {
   getCompletedDayCount,
@@ -28,6 +45,10 @@ import {
 const HOME_COLUMN_MAX_WIDTH = 430;
 /** The greeting starts this far below the safe area, a little below the top of the sun. */
 const HERO_TOP_GAP = spacing.xxl;
+/** Walled room, or the room's pieces placed straight on the background. */
+const HOME_ROOM_LOOK: RoomLook = 'open';
+/** The room's upgrade card puts itself away after this long. */
+const MILESTONE_CARD_MS = 6000;
 
 function homeGreetingLines(greeting: string): readonly string[] {
   const commaIndex = greeting.lastIndexOf(', ');
@@ -62,6 +83,47 @@ export function HomeScreen() {
     streak,
   };
 
+  const room = getRoomState(getCompletedDayCount({ completedDays }));
+  const introSeen = useRoomStore((state) => state.introSeen);
+  const finishIntro = useRoomStore((state) => state.finishIntro);
+  const celebratedStageIndex = useRoomStore((state) =>
+    getCelebratedStageIndex(state, resetStartedOn ?? ''),
+  );
+  const markCelebrated = useRoomStore((state) => state.markCelebrated);
+  const widgetPromptSeen = useWidgetStore((state) => state.promptSeen);
+  const markWidgetPromptSeen = useWidgetStore((state) => state.markPromptSeen);
+  const [seasonMapOpen, setSeasonMapOpen] = useState(false);
+  /** The upgrade card sits just under the greeting block, over the top of the room. */
+  const [heroBottom, setHeroBottom] = useState(0);
+  /** The space under the greeting; the room never grows past its top. */
+  const [stageHeight, setStageHeight] = useState(0);
+  const stagePaddingBottom = getTabBarScenePadding(insets.bottom);
+  const pendingStage = resetStartedOn ? getPendingRoomMilestone(room, celebratedStageIndex) : null;
+  // When the room reaches a new stage, its card shows (and the mascot says so) until dismissed.
+  const milestone =
+    pendingStage?.milestone && resetStartedOn
+      ? { key: `${resetStartedOn}-${pendingStage.id}`, milestone: pendingStage.milestone }
+      : null;
+  const stageIndex = room.stageIndex;
+  const dismissMilestone = () => {
+    if (resetStartedOn) {
+      markCelebrated(stageIndex, resetStartedOn);
+    }
+  };
+
+  const milestoneKey = milestone?.key ?? null;
+  useEffect(() => {
+    if (!milestoneKey || !resetStartedOn) {
+      return;
+    }
+    const timer = setTimeout(() => markCelebrated(stageIndex, resetStartedOn), MILESTONE_CARD_MS);
+    return () => clearTimeout(timer);
+  }, [markCelebrated, milestoneKey, resetStartedOn, stageIndex]);
+
+  const roomIntro = introSeen
+    ? undefined
+    : ROOM_INTRO.map((beat) => ({ ...beat, line: fillMascotName(beat.line, firstName) }));
+
   if (!resetStartedOn) {
     return (
       <Screen
@@ -70,6 +132,7 @@ export function HomeScreen() {
         padded={false}
         backgroundColor={colors.background.home}
       >
+        <HomeStars />
         <HomeDriftingClouds />
         <HomeSeasonDrift season={season} />
         <HomeSky top={insets.top + spacing.xs} />
@@ -111,10 +174,16 @@ export function HomeScreen() {
       backgroundColor={colors.background.home}
     >
       <HomeWarmWash warm={todayCompleted} />
+      <HomeStars />
       <HomeDriftingClouds />
       <HomeSeasonDrift season={season} />
       <HomeSky top={insets.top + spacing.xs} glowing={todayCompleted} />
-      <View style={[styles.hero, { paddingTop: insets.top + HERO_TOP_GAP }]}>
+      <View
+        style={[styles.hero, { paddingTop: insets.top + HERO_TOP_GAP }]}
+        onLayout={(event) =>
+          setHeroBottom(event.nativeEvent.layout.y + event.nativeEvent.layout.height)
+        }
+      >
         <View style={styles.greetingLines}>
           {homeGreetingLines(companion.greeting).map((line) => (
             <AppText key={line} variant="homeGreeting" color="home">
@@ -132,10 +201,63 @@ export function HomeScreen() {
         <AppText variant="homeStatus" color="homeMuted">
           {HOME_STREAK_REMINDER}
         </AppText>
+        <SeasonPill label={getSeasonLabel(room)} onPress={() => setSeasonMapOpen(true)} />
       </View>
-      <View style={[styles.stage, { paddingBottom: getTabBarScenePadding(insets.bottom) }]}>
-        <HomeMascot bubbleContext={bubbleContext} />
+      <View
+        style={[styles.stage, { paddingBottom: stagePaddingBottom }]}
+        onLayout={(event) => setStageHeight(event.nativeEvent.layout.height)}
+      >
+        <HomeMascot
+          bubbleContext={bubbleContext}
+          script={roomIntro}
+          onScriptDone={finishIntro}
+          announcement={
+            milestone
+              ? {
+                  key: milestone.key,
+                  reaction: milestone.milestone.reaction,
+                  line: milestone.milestone.line,
+                }
+              : undefined
+          }
+          backdrop={(layout) => (
+            <HomeRoomBackdrop
+              layout={layout}
+              look={HOME_ROOM_LOOK}
+              maxRise={
+                stageHeight > 0
+                  ? (stageHeight - stagePaddingBottom - layout.frameHeight) / 2 +
+                    layout.feetY -
+                    spacing.xs
+                  : undefined
+              }
+              stageIndex={room.stageIndex}
+              itemCount={room.itemCount}
+              newestItem={todayCompleted ? room.newestItem : null}
+            />
+          )}
+        />
       </View>
+      {milestone ? (
+        <RoomMilestoneCard
+          milestone={milestone.milestone}
+          top={heroBottom + spacing.xs}
+          onDismiss={dismissMilestone}
+        />
+      ) : null}
+      <AddWidgetSheet
+        visible={
+          widgetsAvailable &&
+          !widgetPromptSeen &&
+          introSeen &&
+          !milestone &&
+          !seasonMapOpen &&
+          room.checkIns >= 1
+        }
+        day={planDay}
+        onClose={markWidgetPromptSeen}
+      />
+      <SeasonMapSheet visible={seasonMapOpen} room={room} onClose={() => setSeasonMapOpen(false)} />
     </Screen>
   );
 }

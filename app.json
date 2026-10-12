@@ -36,7 +36,29 @@
         }
       ],
       "expo-asset",
-      "expo-video"
+      "expo-video",
+      [
+        "expo-widgets",
+        {
+          "groupIdentifier": "group.com.gentlyreset.app",
+          "widgets": [
+            {
+              "name": "GentlyReset",
+              "displayName": "Gently Reset",
+              "description": "Your day, your streak and a little wave from the mascot.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "accessoryCircular",
+                  "accessoryRectangular",
+                  "accessoryInline"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

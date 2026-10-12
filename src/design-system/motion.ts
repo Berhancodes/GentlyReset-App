@@ -27,6 +27,9 @@ export const motion = {
     stageBreath: 1700,
     stageNoteTuck: 1500,
     stagePlantCheer: 1400,
+    /** Unlock: how long to press and hold to make the promise, and how fast it lets go. */
+    promiseHold: 1400,
+    promiseRelease: 240,
     /** Opening screen: he walks in, worries drop into his sack, then he sets it down. */
     welcomeWalk: 1300,
     welcomeWorryEvery: 1300,

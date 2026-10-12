@@ -227,11 +227,11 @@ const styles = StyleSheet.create({
   card: {
     zIndex: 1,
     maxWidth: '100%',
-    borderRadius: radius.homeBubble,
+    borderRadius: radius.onboardingBubble,
     backgroundColor: bubbleFill,
     paddingHorizontal: bubblePaddingHorizontal,
     paddingVertical: bubblePaddingVertical,
-    ...shadows.homeBubble,
+    ...shadows.onboardingBubble,
   },
   /** Invisible copy of the current line; it alone decides the card's size. */
   reserve: {
