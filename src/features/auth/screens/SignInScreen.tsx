@@ -12,6 +12,7 @@ import { OnboardingScreenLayout } from '@/features/onboarding/components/Onboard
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
 import { requestResetCloudSyncForCurrentUser } from '@/features/reset/sync/requestResetCloudSync';
+import { restoreProgressAfterSignIn } from '@/features/reset/sync/restoreProgressAfterSignIn';
 import { getRootHref } from '@/navigation/getRootHref';
 
 const EMPTY_VALUES: SignInValues = {
@@ -25,9 +26,11 @@ export function SignInScreen() {
   const { isPro } = useSubscription();
   const hasCompletedOnboarding = useOnboardingStore((state) => state.hasCompletedOnboarding);
   const hasLocalAppAccess = useOnboardingStore((state) => state.hasLocalAppAccess);
+  const completeOnboarding = useOnboardingStore((state) => state.completeOnboarding);
   const [values, setValues] = useState<SignInValues>(EMPTY_VALUES);
   const [errors, setErrors] = useState<SignInErrors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [restoring, setRestoring] = useState(false);
 
   const updateField = <Field extends keyof SignInValues>(
     field: Field,
@@ -62,10 +65,22 @@ export function SignInScreen() {
 
     setSubmitting(true);
     void signIn(values.email, values.password)
-      .then((result) => {
+      .then(async (result) => {
         if (!result.ok) {
           setErrors({ form: result.message });
           return;
+        }
+        // A returning user on a fresh phone: bring their reset back and skip onboarding.
+        if (!hasCompletedOnboarding) {
+          setRestoring(true);
+          const restored = await restoreProgressAfterSignIn();
+          setRestoring(false);
+          if (restored) {
+            completeOnboarding();
+            // The index route reads the fresh state and picks Home or the paywall.
+            router.replace('/');
+            return;
+          }
         }
         requestResetCloudSyncForCurrentUser();
         goToAccessDestination();
@@ -86,7 +101,9 @@ export function SignInScreen() {
       footer={
         <View style={styles.footer}>
           <PrimaryButton
-            label={submitting ? 'signing in…' : 'sign in →'}
+            label={
+              restoring ? 'bringing back your reset…' : submitting ? 'signing in…' : 'sign in →'
+            }
             disabled={!canSubmitSignIn(values) || submitting}
             onPress={submit}
           />

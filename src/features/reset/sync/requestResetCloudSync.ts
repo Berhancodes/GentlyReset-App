@@ -7,7 +7,7 @@ import { syncResetWithCloud } from './createResetSyncService';
 import { createSupabaseResetCloudGateway } from './resetCloudApi';
 import { readSyncOwnership, useResetSyncStore } from './useResetSyncStore';
 
-let inFlight = false;
+let running: Promise<void> | null = null;
 let queuedUserId: string | null = null;
 
 /**
@@ -19,12 +19,26 @@ export async function requestResetCloudSync(userId: string | null): Promise<void
     return;
   }
 
-  if (inFlight) {
+  if (running) {
     queuedUserId = userId;
     return;
   }
 
-  inFlight = true;
+  running = runResetCloudSync(userId);
+  await running;
+}
+
+/**
+ * Resolves once no sync is running or queued. Only for flows that must wait for
+ * the cloud, like restoring a returning user's progress right after sign-in.
+ */
+export async function waitForResetCloudSyncIdle(): Promise<void> {
+  while (running) {
+    await running;
+  }
+}
+
+async function runResetCloudSync(userId: string): Promise<void> {
   useResetSyncStore.setState({ status: 'syncing' });
 
   try {
@@ -38,8 +52,11 @@ export async function requestResetCloudSync(userId: string | null): Promise<void
     if (result.kind !== 'conflict' && result.kind !== 'skipped') {
       void requestJournalCloudSync(userId);
     }
+  } catch {
+    // Callers never await a rejection; record it and let the next sync retry.
+    useResetSyncStore.setState({ status: 'error' });
   } finally {
-    inFlight = false;
+    running = null;
     if (queuedUserId) {
       const nextUserId = queuedUserId;
       queuedUserId = null;
