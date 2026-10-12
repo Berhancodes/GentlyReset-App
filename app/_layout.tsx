@@ -16,9 +16,11 @@ import { WidgetSyncController } from '@/features/widgets/sync/WidgetSyncControll
 import { canEnterApp } from '@/features/subscription/access/canEnterApp';
 import { SubscriptionProvider } from '@/features/subscription/session/SubscriptionProvider';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
+import { registerDevCommands } from '@/utils/registerDevCommands';
 import { usePersistedStoresHydrated } from '@/hooks/usePersistedStoresHydrated';
 
 void SplashScreen.preventAutoHideAsync();
+registerDevCommands();
 
 export default function RootLayout() {
   return (
