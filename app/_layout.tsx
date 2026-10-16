@@ -16,13 +16,15 @@ import { WidgetSyncController } from '@/features/widgets/sync/WidgetSyncControll
 import { canEnterApp } from '@/features/subscription/access/canEnterApp';
 import { SubscriptionProvider } from '@/features/subscription/session/SubscriptionProvider';
 import { useSubscription } from '@/features/subscription/session/useSubscription';
+import { initCrashReporting, wrapWithCrashReporting } from '@/utils/crashReporting';
 import { registerDevCommands } from '@/utils/registerDevCommands';
 import { usePersistedStoresHydrated } from '@/hooks/usePersistedStoresHydrated';
 
+initCrashReporting();
 void SplashScreen.preventAutoHideAsync();
 registerDevCommands();
 
-export default function RootLayout() {
+function RootLayout() {
   return (
     <AuthProvider>
       <SubscriptionProvider>
@@ -99,3 +101,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
   },
 });
+
+export default wrapWithCrashReporting(RootLayout);

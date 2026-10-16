@@ -61,6 +61,14 @@
             }
           ]
         }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "gentlyreset",
+          "project": "react-native",
+          "url": "https://sentry.io/"
+        }
       ]
     ],
     "experiments": {
