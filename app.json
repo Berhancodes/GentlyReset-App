@@ -74,6 +74,29 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "ExpoWidgetsTarget",
+                  "bundleIdentifier": "com.gentlyreset.app.ExpoWidgetsTarget",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.gentlyreset.app"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "0b47d509-32de-4921-a535-6da8d016f474"
+      }
     }
   }
 }

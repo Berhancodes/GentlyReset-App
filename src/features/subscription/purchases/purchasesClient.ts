@@ -32,9 +32,9 @@ const PREVIEW_OFFERING: OfferingLike = {
     {
       identifier: ANNUAL_PACKAGE_ID,
       title: 'Yearly',
-      priceString: '$79.99',
-      price: 79.99,
-      pricePerMonthString: '$6.67',
+      priceString: '$59.99',
+      price: 59.99,
+      pricePerMonthString: '$5.00',
       billingPeriod: 'year',
       hasIntroOffer: false,
     },
