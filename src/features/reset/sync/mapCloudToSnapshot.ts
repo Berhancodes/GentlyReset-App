@@ -12,6 +12,9 @@ function readPersonalization(value: ResetPersonalization): ResetPersonalization 
     resetReason: value.resetReason,
     desiredFeelings: [...(value.desiredFeelings ?? [])],
     missedDayResponse: value.missedDayResponse,
+    ...(value.focusAreas ? { focusAreas: [...value.focusAreas] } : {}),
+    ...(value.season ? { season: { ...value.season } } : {}),
+    ...(value.pastFocusAreas ? { pastFocusAreas: [...value.pastFocusAreas] } : {}),
   };
 }
 

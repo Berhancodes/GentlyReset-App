@@ -23,6 +23,8 @@ export type JourneySheetModel = {
   minutes: number;
   minutesLabel: string;
   description: string;
+  /** The day's checklist labels, in JOURNEY_DAY_STEPS order. */
+  steps: readonly string[];
   rememberLine: string | null;
   footnote: string | null;
   completeLabel: string | null;
@@ -78,6 +80,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
       minutes: task.minutes,
       minutesLabel: formatMinutesLabel(task.minutes),
       description: task.description,
+      steps: task.steps,
       rememberLine: null,
       footnote: "you'll get here soon.",
       completeLabel: null,
@@ -97,6 +100,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
       minutes: task.minutes,
       minutesLabel: formatMinutesLabel(task.minutes),
       description: task.description,
+      steps: task.steps,
       rememberLine: null,
       footnote: 'you showed up.',
       completeLabel: state.kind === 'current' ? '✓ checked in' : '✓ done',
@@ -116,6 +120,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
     minutes: task.minutes,
     minutesLabel: formatMinutesLabel(task.minutes),
     description: task.description,
+    steps: task.steps,
     rememberLine: input.rememberLine,
     footnote: null,
     completeLabel: null,

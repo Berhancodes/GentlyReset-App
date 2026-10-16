@@ -1,3 +1,5 @@
+import type { FocusAreaId } from './focusAreas';
+
 export const ROADMAP_PHASES = ['stabilize', 'change', 'pattern', 'independence', 'close'] as const;
 
 export type RoadmapPhase = (typeof ROADMAP_PHASES)[number];
@@ -49,4 +51,6 @@ export type ResolvedResetTask = {
   reflectionPrompt: string;
   primitiveId: string;
   uniqueTaskId?: string;
+  focusAreaId: FocusAreaId;
+  steps: readonly string[];
 };

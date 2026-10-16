@@ -48,7 +48,7 @@ check('B PLAN_DAY_COUNT aliases DEFAULT_CYCLE_LENGTH', PLAN_DAY_COUNT === DEFAUL
 check('B there are 30 canonical titles', PLAN_DAY_TITLES.length === 30);
 
 const defaultTask = getTaskForDay(1, personalization(), 'overloaded-dreamer');
-const twenty = getTaskForDay(4, personalization({ dailyCommitment: 'twenty' }), 'almost-starter');
+const twenty = getTaskForDay(24, personalization({ dailyCommitment: 'twenty' }), 'almost-starter');
 const tooMuch = getTaskForDay(
   2,
   personalization({ primaryObstacle: 'too-much' }),

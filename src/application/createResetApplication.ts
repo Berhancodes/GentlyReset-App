@@ -1,4 +1,5 @@
 import type { JournalMood } from '../domain/journal/types';
+import type { FocusAreaId } from '../domain/reset/roadmap';
 import type { OnboardingAnswer } from '../features/onboarding/types/onboarding';
 import { saveReflection as saveReflectionOnSnapshot } from './journal/saveReflection';
 import { completeResetDay as completeResetDayOnSnapshot } from './reset/completeResetDay';
@@ -8,6 +9,7 @@ import {
   ensureSeeded as ensureSeededOnSnapshot,
   startReset as startResetOnSnapshot,
 } from './reset/startReset';
+import { startNextSeason as startNextSeasonOnSnapshot } from './reset/startNextSeason';
 import { startResetDay as startResetDayOnSnapshot } from './reset/startResetDay';
 
 function runResetCommand(
@@ -48,6 +50,11 @@ export function createResetApplication(repository: ResetRepository) {
     completeResetDay(now: Date = new Date()) {
       return runResetCommand(repository, () =>
         completeResetDayOnSnapshot(repository.getSnapshot(), now),
+      );
+    },
+    startNextSeason(focusAreaId: FocusAreaId, now: Date = new Date()) {
+      return runResetCommand(repository, () =>
+        startNextSeasonOnSnapshot(repository.getSnapshot(), focusAreaId, now),
       );
     },
     saveReflection(

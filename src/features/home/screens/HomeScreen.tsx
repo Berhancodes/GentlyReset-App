@@ -36,6 +36,10 @@ import { AddWidgetSheet } from '@/features/widgets/components/AddWidgetSheet';
 import { widgetsAvailable } from '@/features/widgets/native/widgetsAvailability';
 import { useWidgetStore } from '@/features/widgets/store/useWidgetStore';
 import { useResetStore } from '@/features/reset/store/useResetStore';
+import { isSeasonFinished } from '@/features/reset/utils/dailyResetActions';
+import { SeasonCompleteCard } from '@/features/season/components/SeasonCompleteCard';
+import { getNextSeasonOptions, resolveSeason } from '@/domain/reset/roadmap';
+import { hapticCelebration } from '@/utils/haptics';
 import {
   getCompletedDayCount,
   getCurrentPlanDay,
@@ -73,6 +77,8 @@ export function HomeScreen() {
   const missedYesterday = useResetStore((state) => state.missedYesterday);
   const streak = useResetStore((state) => state.streak);
   const resetTypeId = useResetStore((state) => state.resetTypeId);
+  const personalization = useResetStore((state) => state.personalization);
+  const startNextSeason = useResetStore((state) => state.startNextSeason);
   const devSeason = useJourneyVisualStore((state) => state.devSeason);
   const season = devSeason ?? getJourneySeason(new Date());
   const onboardingAnswers = useOnboardingStore((state) => state.answers);
@@ -119,6 +125,12 @@ export function HomeScreen() {
     const timer = setTimeout(() => markCelebrated(stageIndex, resetStartedOn), MILESTONE_CARD_MS);
     return () => clearTimeout(timer);
   }, [markCelebrated, milestoneKey, resetStartedOn, stageIndex]);
+
+  const seasonNumber = resolveSeason(personalization, resetTypeId).number;
+  const seasonChoices =
+    resetStartedOn && isSeasonFinished({ completedDays }) && !milestone
+      ? getNextSeasonOptions(personalization, resetTypeId)
+      : null;
 
   const roomIntro = introSeen
     ? undefined
@@ -201,7 +213,10 @@ export function HomeScreen() {
         <AppText variant="homeStatus" color="homeMuted">
           {HOME_STREAK_REMINDER}
         </AppText>
-        <SeasonPill label={getSeasonLabel(room)} onPress={() => setSeasonMapOpen(true)} />
+        <SeasonPill
+          label={getSeasonLabel(room, seasonNumber)}
+          onPress={() => setSeasonMapOpen(true)}
+        />
       </View>
       <View
         style={[styles.stage, { paddingBottom: stagePaddingBottom }]}
@@ -245,19 +260,37 @@ export function HomeScreen() {
           onDismiss={dismissMilestone}
         />
       ) : null}
+      {seasonChoices ? (
+        <SeasonCompleteCard
+          seasonNumber={seasonNumber}
+          deeper={seasonChoices.deeper}
+          next={seasonChoices.next}
+          top={heroBottom + spacing.xs}
+          onChoose={(focusAreaId) => {
+            hapticCelebration();
+            startNextSeason(focusAreaId);
+          }}
+        />
+      ) : null}
       <AddWidgetSheet
         visible={
           widgetsAvailable &&
           !widgetPromptSeen &&
           introSeen &&
           !milestone &&
+          !seasonChoices &&
           !seasonMapOpen &&
           room.checkIns >= 1
         }
         day={planDay}
         onClose={markWidgetPromptSeen}
       />
-      <SeasonMapSheet visible={seasonMapOpen} room={room} onClose={() => setSeasonMapOpen(false)} />
+      <SeasonMapSheet
+        visible={seasonMapOpen}
+        room={room}
+        seasonNumber={seasonNumber}
+        onClose={() => setSeasonMapOpen(false)}
+      />
     </Screen>
   );
 }

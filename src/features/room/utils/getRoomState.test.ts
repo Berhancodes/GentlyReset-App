@@ -50,7 +50,8 @@ check(
 );
 check(
   'season label',
-  getSeasonLabel(three) === 'Season 1' && getSeasonLabel(getRoomState(30)) === 'Season 1 complete',
+  getSeasonLabel(three, 1) === 'Season 1' &&
+    getSeasonLabel(getRoomState(30), 2) === 'Season 2 complete',
 );
 
 check(

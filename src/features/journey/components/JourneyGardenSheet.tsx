@@ -224,12 +224,13 @@ function SheetContent({ model, onPrimary, onStepTicked }: SheetContentProps) {
         >
           {JOURNEY_DAY_STEPS.map((step, index) => {
             const isChecked = checked.includes(index);
+            const label = model.steps[index] ?? step.title;
             return (
               <Pressable
                 key={step.title}
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: isChecked, disabled: isChecked }}
-                accessibilityLabel={step.title}
+                accessibilityLabel={label}
                 accessibilityHint={step.hint}
                 disabled={isChecked}
                 onLayout={(event) => {
@@ -266,7 +267,7 @@ function SheetContent({ model, onPrimary, onStepTicked }: SheetContentProps) {
                   {isChecked ? <View style={styles.tickMark} /> : null}
                 </View>
                 <Text style={styles.chipLabel} maxFontSizeMultiplier={1.3}>
-                  {step.title}
+                  {label}
                 </Text>
               </Pressable>
             );

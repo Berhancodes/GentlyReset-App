@@ -39,6 +39,7 @@ function legacySnapshot(overrides: Partial<ResetSnapshot> = {}): ResetSnapshot {
       title: 'legacy',
       description: 'legacy persisted task',
       minutes: 5,
+      steps: [],
     },
     resetStartedOn: '2026-09-01',
     lastSeenOn: '2026-09-19',

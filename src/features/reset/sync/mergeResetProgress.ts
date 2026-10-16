@@ -6,6 +6,7 @@ import { getTaskForDay } from '../utils/getTaskForDay';
 import { earlierCalendarDate, isValidCalendarDate, laterCalendarDate } from './calendarDate';
 import { clampPlanDay, uniquePlanDays } from './clampPlanDay';
 import { mapCloudToSnapshot } from './mapCloudToSnapshot';
+import { getSnapshotSeasonNumber, mapCompletedDaysToCloud } from './mapSnapshotToCloud';
 import type { CloudCompletionWrite, CloudCycleRecord } from './types';
 
 export type MergeSuccess = {
@@ -101,6 +102,9 @@ function personalizationFingerprint(value: ResetSnapshot['personalization']): st
     resetReason: value.resetReason ?? null,
     desiredFeelings: [...value.desiredFeelings],
     missedDayResponse: value.missedDayResponse ?? null,
+    focusAreas: value.focusAreas ? [...value.focusAreas] : null,
+    season: value.season ?? null,
+    pastFocusAreas: value.pastFocusAreas ? [...value.pastFocusAreas] : null,
   });
 }
 
@@ -124,7 +128,10 @@ function snapshotsCloudEqual(left: ResetSnapshot, right: ResetSnapshot): boolean
 }
 
 /**
- * Deterministic Cycle 1 merge. Not "latest updated_at wins."
+ * Deterministic merge. Not "latest updated_at wins."
+ *
+ * Seasons: if local and cloud are on different seasons, the newer season wins whole.
+ * Within one season:
  *
  * completedDays: UNION
  * currentDay: never rewind; furthest valid 1–30
@@ -162,6 +169,40 @@ export function mergeResetProgress(
     };
   }
 
+  // Different seasons never mix days: the newer season is the truth.
+  const localSeason = getSnapshotSeasonNumber(local);
+  if (localSeason !== cloud.cycle.sequence) {
+    const newer = localSeason > cloud.cycle.sequence ? local : cloudSnapshot;
+    const rolledNewer = applyDateRollover(newer, timeZoneToday);
+    return {
+      kind: 'merged',
+      snapshot: {
+        ...rolledNewer,
+        todayTask: getTaskForDay(
+          rolledNewer.currentDay,
+          rolledNewer.personalization,
+          rolledNewer.resetTypeId,
+        ),
+        reflections: local.reflections.map((entry) => ({ ...entry })),
+      },
+      completions:
+        newer === local
+          ? mapCompletedDaysToCloud(
+              local.completedDays,
+              local.lastCompletedOn,
+              local.completionDates,
+            )
+          : cloud.completions.map((row) => ({ ...row })),
+    };
+  }
+
+  // Cloud identity stays frozen, but a backup from before focus areas learns them from this device.
+  const personalization =
+    cloudSnapshot.personalization.focusAreas === undefined &&
+    local.personalization.focusAreas !== undefined
+      ? { ...cloudSnapshot.personalization, focusAreas: [...local.personalization.focusAreas] }
+      : cloudSnapshot.personalization;
+
   const completions = mergeCompletionDates(
     local.completedDays,
     local.lastCompletedOn,
@@ -196,7 +237,7 @@ export function mergeResetProgress(
     completedDays,
     todayCompleted: flagSource.todayCompleted,
     todayStarted: flagSource.todayStarted,
-    todayTask: getTaskForDay(currentDay, cloudSnapshot.personalization, cloudSnapshot.resetTypeId),
+    todayTask: getTaskForDay(currentDay, personalization, cloudSnapshot.resetTypeId),
     resetStartedOn,
     lastSeenOn,
     lastCompletedOn,
@@ -204,7 +245,7 @@ export function mergeResetProgress(
     missedYesterday: flagSource.missedYesterday,
     resetTypeId: cloudType.length > 0 ? cloudSnapshot.resetTypeId : local.resetTypeId,
     profileAccuracy: cloudSnapshot.profileAccuracy ?? local.profileAccuracy,
-    personalization: cloudSnapshot.personalization,
+    personalization,
     reflections: local.reflections.map((entry) => ({ ...entry })),
   };
 

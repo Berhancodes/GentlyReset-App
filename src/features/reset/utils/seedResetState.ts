@@ -1,3 +1,4 @@
+import { isFocusAreaId, type FocusAreaId } from '../../../domain/reset/roadmap';
 import type { OnboardingAnswer } from '../../onboarding/types/onboarding';
 import {
   getMultiChoiceIds,
@@ -28,6 +29,29 @@ function commitmentIdFromApproachTime(time?: string): string | undefined {
   return undefined;
 }
 
+/** Where a goal from "what's actually getting better?" points the daily actions. */
+const FOCUS_AREA_BY_OUTCOME: Record<string, FocusAreaId> = {
+  'wake-up-better': 'energy',
+  consistent: 'habits',
+  'quieter-mind': 'mind',
+  'trust-myself': 'confidence',
+  'taking-care': 'energy',
+  'feel-like-me': 'direction',
+};
+
+/**
+ * Plan focus, most important first: what feels out of balance, then the
+ * hoped-for outcomes. Later entries are kept for future seasons.
+ */
+export function focusAreasFromAnswers(answers: Record<string, OnboardingAnswer>): FocusAreaId[] {
+  const fromBalance = getMultiChoiceIds(answers, 'outOfBalance').filter(isFocusAreaId);
+  const fromOutcome = getMultiChoiceIds(answers, 'thirtyDayOutcome').flatMap((outcomeId) => {
+    const areaId = FOCUS_AREA_BY_OUTCOME[outcomeId];
+    return areaId ? [areaId] : [];
+  });
+  return [...new Set([...fromBalance, ...fromOutcome])];
+}
+
 export function personalizationFromAnswers(
   answers: Record<string, OnboardingAnswer>,
 ): ResetPersonalization {
@@ -42,6 +66,7 @@ export function personalizationFromAnswers(
     resetReason: getTextInputValue(answers, 'resetReason'),
     desiredFeelings: getMultiChoiceIds(answers, 'desiredFeelings'),
     missedDayResponse: retention.missedDayResponse,
+    focusAreas: focusAreasFromAnswers(answers),
   };
 }
 
@@ -88,8 +113,26 @@ export function applyEnsureSeeded(
     const rolled = processDateRollover(state, now);
     const resetTypeId = resolveStoredResetTypeId(rolled.resetTypeId, answers);
     const profileAccuracy = rolled.profileAccuracy ?? getSingleChoiceId(answers, 'profileAccuracy');
-    if (resetTypeId !== rolled.resetTypeId || profileAccuracy !== rolled.profileAccuracy) {
-      return { ...rolled, resetTypeId, profileAccuracy };
+    // Resets started before plans had focus areas pick them up once from the stored answers.
+    const backfilledFocusAreas =
+      rolled.personalization.focusAreas === undefined && Object.keys(answers).length > 0
+        ? focusAreasFromAnswers(answers)
+        : undefined;
+    if (
+      resetTypeId !== rolled.resetTypeId ||
+      profileAccuracy !== rolled.profileAccuracy ||
+      backfilledFocusAreas
+    ) {
+      return {
+        ...rolled,
+        resetTypeId,
+        profileAccuracy,
+        ...(backfilledFocusAreas
+          ? {
+              personalization: { ...rolled.personalization, focusAreas: backfilledFocusAreas },
+            }
+          : {}),
+      };
     }
     return rolled;
   }

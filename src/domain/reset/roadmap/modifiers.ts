@@ -1,4 +1,6 @@
 import { isResetTypeId, LEGACY_FALLBACK_RESET_TYPE_ID, type ResetTypeId } from '../types';
+import { getRoadmapPhaseForDay } from './phase';
+import { ROADMAP_PHASES } from './types';
 
 export function resolveContentResetTypeId(resetTypeId?: string): ResetTypeId {
   if (resetTypeId && isResetTypeId(resetTypeId)) {
@@ -26,6 +28,35 @@ export function formatMinutesLabel(minutes: number): string {
 }
 
 /**
+ * Minutes grow across the season so the plan builds: about half the chosen
+ * time in week 1, the full time from week 4. Indexed by roadmap phase.
+ */
+const MINUTES_RAMP_BY_COMMITMENT: Record<string, readonly number[]> = {
+  five: [3, 4, 5, 5, 5],
+  ten: [5, 7, 8, 10, 10],
+  twenty: [10, 12, 15, 20, 20],
+  'thirty-plus': [15, 20, 25, 30, 30],
+};
+
+/** Later seasons skip the gentle warm-up: they start where week 3 of season 1 was. */
+const LATER_SEASON_RAMP_HEAD_START = 2;
+
+function rampedMinutes(
+  day: number,
+  dailyCommitment: string | undefined,
+  seasonNumber: number,
+): number {
+  const ramp =
+    MINUTES_RAMP_BY_COMMITMENT[dailyCommitment ?? 'five'] ?? MINUTES_RAMP_BY_COMMITMENT.five;
+  const headStart = seasonNumber > 1 ? LATER_SEASON_RAMP_HEAD_START : 0;
+  const phaseIndex = Math.min(
+    ROADMAP_PHASES.length - 1,
+    ROADMAP_PHASES.indexOf(getRoadmapPhaseForDay(day)) + headStart,
+  );
+  return ramp?.[phaseIndex] ?? minutesFromCommitment(dailyCommitment);
+}
+
+/**
  * Quiet Drain stays capacity-safe. All-In Heart does not get a harder Week 1
  * for choosing 30+ minutes — stopping at enough is the lesson.
  */
@@ -33,24 +64,15 @@ export function minutesForResetDay(
   day: number,
   resetTypeId: ResetTypeId,
   dailyCommitment?: string,
+  seasonNumber: number = 1,
 ): number {
-  const requested = minutesFromCommitment(dailyCommitment);
+  const ramped = rampedMinutes(day, dailyCommitment, seasonNumber);
 
-  if (resetTypeId === 'quiet-drain') {
-    if (day <= 14) {
-      return Math.min(requested, 10);
-    }
-    return Math.min(requested, 20);
+  if (resetTypeId === 'quiet-drain' || resetTypeId === 'all-in-heart') {
+    return Math.min(ramped, day <= 14 ? 10 : 20);
   }
 
-  if (resetTypeId === 'all-in-heart') {
-    if (day <= 14) {
-      return Math.min(requested, 10);
-    }
-    return Math.min(requested, 20);
-  }
-
-  return requested;
+  return ramped;
 }
 
 const TONE_BY_SUPPORT_STYLE: Record<string, string> = {

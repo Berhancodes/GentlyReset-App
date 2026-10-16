@@ -77,7 +77,7 @@ const stale = snapshot({
 check(
   'getCurrentResetTask does not read persisted todayTask',
   getCurrentResetTask(stale).title === getTaskForDay(3, twentyMinutes, 'soft-restarter').title &&
-    getCurrentResetTask(stale).minutes === 20 &&
+    getCurrentResetTask(stale).minutes === 10 &&
     getCurrentResetTask(stale).title !== stale.todayTask.title,
 );
 

@@ -4,6 +4,8 @@ import { TASK_PRIMITIVES, getTaskPrimitive } from './primitives';
 import { TYPE_PLAYLISTS } from './playlists';
 import { getRoadmapPhaseForDay } from './phase';
 import { getTaskForDay, resolveTaskForDay } from './resolveTask';
+import { AREA_DEEP_MOVES, AREA_MOVES } from './areaMoves';
+import { FOCUS_AREA_IDS } from './focusAreas';
 import { minutesForResetDay } from './modifiers';
 
 let failed = 0;
@@ -63,7 +65,7 @@ for (const typeId of RESET_TYPE_IDS) {
     check(`${typeId} d${slot.day} resolves title`, resolved.title === slot.title);
     check(
       `${typeId} d${slot.day} resolves minutes`,
-      resolved.minutes >= 5 && resolved.minutes <= 30,
+      resolved.minutes >= 3 && resolved.minutes <= 30,
     );
     check(`${typeId} d${slot.day} id is day-N`, resolved.id === `day-${slot.day}`);
     check(
@@ -95,9 +97,79 @@ check(
         .objective,
 );
 
-const twenty = getTaskForDay(10, personalization({ dailyCommitment: 'twenty' }), 'fading-flame');
-const five = getTaskForDay(10, personalization({ dailyCommitment: 'five' }), 'fading-flame');
+const twenty = getTaskForDay(24, personalization({ dailyCommitment: 'twenty' }), 'fading-flame');
+const five = getTaskForDay(24, personalization({ dailyCommitment: 'five' }), 'fading-flame');
 check('commitment changes minutes for ordinary types', twenty.minutes === 20 && five.minutes === 5);
+
+const rampDays = [1, 8, 15, 22, 29].map(
+  (day) =>
+    getTaskForDay(day, personalization({ dailyCommitment: 'twenty' }), 'fading-flame').minutes,
+);
+check(
+  'minutes grow across the season',
+  rampDays.join(',') === '10,12,15,20,20',
+  rampDays.join(','),
+);
+check(
+  'week 1 starts below the chosen time',
+  getTaskForDay(2, personalization({ dailyCommitment: 'five' }), 'fading-flame').minutes === 3,
+);
+
+for (const areaId of FOCUS_AREA_IDS) {
+  const levelTwo = AREA_DEEP_MOVES[areaId];
+  check(`${areaId} level 2 has 30 moves`, levelTwo.length === PLAN_DAY_COUNT);
+  for (const [index, areaMove] of levelTwo.entries()) {
+    check(
+      `${areaId} level 2 d${index + 1} labels are short`,
+      areaMove.prep.length <= 24 && areaMove.act.length <= 24,
+      `${areaMove.prep} / ${areaMove.act}`,
+    );
+    check(
+      `${areaId} level 2 d${index + 1} differs from level 1`,
+      areaMove.detail !== AREA_MOVES[areaId][index]?.detail,
+    );
+  }
+  const moves = AREA_MOVES[areaId];
+  check(`${areaId} has 30 moves`, moves.length === PLAN_DAY_COUNT);
+  for (const [index, areaMove] of moves.entries()) {
+    check(
+      `${areaId} d${index + 1} labels are short`,
+      areaMove.prep.length <= 24 && areaMove.act.length <= 24,
+      `${areaMove.prep} / ${areaMove.act}`,
+    );
+  }
+}
+
+const energyDay = resolveTaskForDay(
+  4,
+  personalization({ dailyCommitment: 'ten', focusAreas: ['energy', 'mind'] }),
+  'overloaded-dreamer',
+);
+check(
+  'first focus area drives the concrete action',
+  energyDay.focusAreaId === 'energy' &&
+    energyDay.steps[1] === 'Easy walk 5 min' &&
+    energyDay.description.startsWith('Take an easy 5-minute walk'),
+  energyDay.description,
+);
+check('steps end with check in', energyDay.steps.length === 3 && energyDay.steps[2] === 'Check in');
+check(
+  'no focus area falls back to the type area',
+  resolveTaskForDay(4, personalization(), 'quiet-drain').focusAreaId === 'energy',
+);
+check(
+  'unknown focus areas are skipped',
+  resolveTaskForDay(4, personalization({ focusAreas: ['routine', 'mind'] }), 'quiet-drain')
+    .focusAreaId === 'mind',
+);
+check(
+  'no unfilled minute placeholders',
+  FOCUS_AREA_IDS.every((areaId) =>
+    Array.from({ length: PLAN_DAY_COUNT }, (_, index) =>
+      resolveTaskForDay(index + 1, personalization({ focusAreas: [areaId] }), 'soft-scatter'),
+    ).every((task) => !task.description.includes('{m}') && !task.steps.join(' ').includes('{m}')),
+  ),
+);
 
 check(
   'Quiet Drain week 1 caps 30+ at 10',
@@ -107,7 +179,7 @@ check(
   'Quiet Drain week 3 caps 30+ at 20',
   minutesForResetDay(18, 'quiet-drain', 'thirty-plus') === 20,
 );
-check('Quiet Drain keeps a 5-minute choice', minutesForResetDay(3, 'quiet-drain', 'five') === 5);
+check('Quiet Drain keeps a 5-minute choice', minutesForResetDay(25, 'quiet-drain', 'five') === 5);
 check(
   'All-In Heart week 1 does not reward 30+',
   minutesForResetDay(2, 'all-in-heart', 'thirty-plus') === 10,

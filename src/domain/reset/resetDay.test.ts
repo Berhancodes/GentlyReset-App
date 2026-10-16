@@ -105,7 +105,7 @@ check('C2 D17 local dayNumber stays 17', day17c2.dayNumber === 17);
 check('C2 D17 task is still the local day-17 resolver', day17c2.task.day === 17);
 check(
   'C2 D17 task minutes follow cycle personalization',
-  day17c2.task.minutes === 20 &&
+  day17c2.task.minutes === 15 &&
     day17c2.task.title ===
       getTaskForDay(17, cycle2MathOnly.personalization, cycle2MathOnly.resetTypeId).title,
 );

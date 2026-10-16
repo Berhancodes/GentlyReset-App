@@ -8,7 +8,7 @@ type SeasonPillProps = {
   onPress: () => void;
 };
 
-/** "Season 1 ›" under the day; opens the year of seasons. */
+/** "Season N ›" under the day; opens the year of seasons. */
 export function SeasonPill({ label, onPress }: SeasonPillProps) {
   return (
     <Pressable

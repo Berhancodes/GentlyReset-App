@@ -6,6 +6,7 @@ import {
   createResetRepositoryFromAccessors,
   type ResetRepository,
 } from '@/application/reset/ResetRepository';
+import type { FocusAreaId } from '@/domain/reset/roadmap';
 import type { OnboardingAnswer } from '@/features/onboarding/types/onboarding';
 import type { JournalMood, ResetSnapshot } from '@/features/reset/types';
 import {
@@ -45,6 +46,7 @@ type ResetActions = {
   syncResetDay: (answers: Record<string, OnboardingAnswer>, now?: Date) => void;
   startToday: () => void;
   completeToday: (now?: Date) => void;
+  startNextSeason: (focusAreaId: FocusAreaId, now?: Date) => void;
   saveReflection: (input: { mood: JournalMood; text: string; prompt: string }, now?: Date) => void;
   clearReset: () => void;
 };
@@ -95,6 +97,9 @@ export const useResetStore = create<ResetSnapshot & ResetActions>()(
         },
         completeToday: (now = new Date()) => {
           app().completeResetDay(now);
+        },
+        startNextSeason: (focusAreaId, now = new Date()) => {
+          app().startNextSeason(focusAreaId, now);
         },
         saveReflection: (input, now = new Date()) => {
           app().saveReflection(input, now);

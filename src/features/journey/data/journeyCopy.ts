@@ -17,8 +17,9 @@ const QUOTES: Record<JourneyChapterId, string> = {
 };
 
 /** The same three-step checklist on every day's pop-up. */
+/** Fallback labels and hints; each day's plan supplies its own step labels. */
 export const JOURNEY_DAY_STEPS = [
-  { title: "Read today's reset", hint: "Understand today's small step." },
+  { title: 'Get ready', hint: 'Set up today’s small step.' },
   { title: 'Do it', hint: 'Make one small change today.' },
   { title: 'Check in', hint: 'Notice how it felt.' },
 ] as const;

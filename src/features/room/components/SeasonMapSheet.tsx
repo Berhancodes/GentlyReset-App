@@ -9,6 +9,8 @@ import type { RoomState } from '@/features/room/utils/getRoomState';
 type SeasonMapSheetProps = {
   visible: boolean;
   room: RoomState;
+  /** The season in progress, 1-based. */
+  seasonNumber: number;
   onClose: () => void;
 };
 
@@ -18,23 +20,27 @@ const C = colors.room;
 
 type TileStatus = 'current' | 'done' | 'next' | 'locked';
 
-function tileStatus(index: number, seasonComplete: boolean): TileStatus {
-  if (index === 0) {
+function tileStatus(index: number, seasonNumber: number, seasonComplete: boolean): TileStatus {
+  const currentIndex = (seasonNumber - 1) % SEASON_ROOMS.length;
+  if (index < currentIndex) {
+    return 'done';
+  }
+  if (index === currentIndex) {
     return seasonComplete ? 'done' : 'current';
   }
-  if (index === 1 && seasonComplete) {
+  if (index === currentIndex + 1 && seasonComplete) {
     return 'next';
   }
   return 'locked';
 }
 
 /** Twelve seasons, each a room; together they make the year's home. */
-export function SeasonMapSheet({ visible, room, onClose }: SeasonMapSheetProps) {
+export function SeasonMapSheet({ visible, room, seasonNumber, onClose }: SeasonMapSheetProps) {
   const insets = useSafeAreaInsets();
   const progress = room.checkIns / SEASON_LENGTH_DAYS;
   const footer = room.seasonComplete
-    ? 'Season 1 is done! Your next room, a reading nook, is coming soon. After season 12: year one complete, and your home keeps growing.'
-    : `You’re building season 1: ${room.checkIns} of ${SEASON_LENGTH_DAYS} days. After season 12: year one complete, and your home keeps growing.`;
+    ? `Season ${seasonNumber} is done! Choose your next focus on Home to start season ${seasonNumber + 1}.`
+    : `You’re building season ${seasonNumber}: ${room.checkIns} of ${SEASON_LENGTH_DAYS} days. After season 12: year one complete, and your home keeps growing.`;
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -98,7 +104,7 @@ export function SeasonMapSheet({ visible, room, onClose }: SeasonMapSheetProps) 
               </Svg>
               <View style={styles.rooms}>
                 {SEASON_ROOMS.map((name, index) => {
-                  const status = tileStatus(index, room.seasonComplete);
+                  const status = tileStatus(index, seasonNumber, room.seasonComplete);
                   const locked = status === 'locked';
                   return (
                     <View

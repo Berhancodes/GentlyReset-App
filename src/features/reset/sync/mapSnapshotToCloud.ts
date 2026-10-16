@@ -1,10 +1,10 @@
+import { resolveSeason } from '../../../domain/reset/roadmap';
 import { FOUNDATION_PLAN_ID, FOUNDATION_PLAN_VERSION } from '../data/thirtyDayPlan';
 import type { ResetPersonalization, ResetSnapshot } from '../types';
 import { isValidCalendarDate } from './calendarDate';
 import { clampPlanDay, uniquePlanDays } from './clampPlanDay';
 import {
   COMPLETION_DATE_RULE,
-  RESET_SYNC_SEQUENCE,
   RESET_SYNC_STATUS_ACTIVE,
   type CloudCompletionWrite,
   type CloudCycleWrite,
@@ -12,22 +12,34 @@ import {
 
 export { COMPLETION_DATE_RULE };
 
+/** Cloud cycle sequence = season number. Season 1 for snapshots from before seasons. */
+export function getSnapshotSeasonNumber(
+  snapshot: Pick<ResetSnapshot, 'personalization' | 'resetTypeId'>,
+): number {
+  return resolveSeason(snapshot.personalization, snapshot.resetTypeId).number;
+}
+
 function clonePersonalization(personalization: ResetPersonalization): ResetPersonalization {
   return {
     ...personalization,
     desiredFeelings: [...personalization.desiredFeelings],
+    ...(personalization.focusAreas ? { focusAreas: [...personalization.focusAreas] } : {}),
+    ...(personalization.season ? { season: { ...personalization.season } } : {}),
+    ...(personalization.pastFocusAreas
+      ? { pastFocusAreas: [...personalization.pastFocusAreas] }
+      : {}),
   };
 }
 
 /**
- * Cycle 1 cloud fields from a local snapshot.
+ * Cloud cycle fields for the season in progress.
  *
  * Never include todayTask, reflections, acknowledgedDay, companion state,
  * or Journey UI. currentDay stays a local plan day 1–30.
  */
 export function mapSnapshotToCycleWrite(snapshot: ResetSnapshot): CloudCycleWrite {
   return {
-    sequence: RESET_SYNC_SEQUENCE,
+    sequence: getSnapshotSeasonNumber(snapshot),
     planId: FOUNDATION_PLAN_ID,
     planVersion: FOUNDATION_PLAN_VERSION,
     currentDay: clampPlanDay(snapshot.currentDay),

@@ -1,3 +1,4 @@
+import { personalizationForNextSeason, type FocusAreaId } from '../../../domain/reset/roadmap';
 import type { JournalMood, ResetSnapshot } from '../types';
 import { PLAN_DAY_COUNT } from '../data/thirtyDayPlan';
 import { processDateRollover } from './applyDateRollover';
@@ -45,10 +46,52 @@ export function applyCompleteToday(state: ResetSnapshot, now: Date): ResetSnapsh
     completedDays: [...rolled.completedDays, rolled.currentDay],
     completionDates: { ...rolled.completionDates, [rolled.currentDay]: today },
     lastCompletedOn: today,
-    streak: Math.min(PLAN_DAY_COUNT, streak),
+    // Streaks carry across seasons, so they are not capped at one season's length.
+    streak,
     missedYesterday: false,
     todayTask: getCurrentResetTask(rolled),
   };
+}
+
+/** A season is finished once its last plan day is checked in. */
+export function isSeasonFinished(state: Pick<ResetSnapshot, 'completedDays'>): boolean {
+  return state.completedDays.includes(PLAN_DAY_COUNT);
+}
+
+/**
+ * Begin the next season in the chosen focus area, starting today. Progress
+ * days start over; the streak, journal, and identity carry on. Does nothing
+ * until the current season is finished.
+ */
+export function applyStartNextSeason(
+  state: ResetSnapshot,
+  focusAreaId: FocusAreaId,
+  now: Date,
+): ResetSnapshot {
+  const rolled = processDateRollover(state, now);
+  if (!rolled.resetStartedOn || !isSeasonFinished(rolled)) {
+    return rolled;
+  }
+
+  const today = toLocalDateKey(now);
+  const personalization = personalizationForNextSeason(
+    rolled.personalization,
+    focusAreaId,
+    rolled.resetTypeId,
+  );
+  const next: ResetSnapshot = {
+    ...rolled,
+    currentDay: 1,
+    completedDays: [],
+    completionDates: {},
+    todayCompleted: false,
+    todayStarted: false,
+    resetStartedOn: today,
+    lastSeenOn: today,
+    missedYesterday: false,
+    personalization,
+  };
+  return { ...next, todayTask: getCurrentResetTask(next) };
 }
 
 export function applySaveReflection(

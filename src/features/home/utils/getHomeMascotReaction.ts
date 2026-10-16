@@ -45,7 +45,7 @@ const APP_GUIDE: readonly string[] = [
   'Every check-in on Journey adds a new friend to our room.',
   'Every 7 days our room gets a big upgrade. Day 7 brings a window!',
   'Finish 30 days and our room becomes a home. That’s one season.',
-  'Tap “Season 1” up top to see all 12 rooms in your year.',
+  'Tap the season pill up top to see all 12 rooms in your year.',
   'Missed a day? Nothing in our room disappears. Just continue.',
   'Check in on Journey, then come back. Something new will be here.',
   'Short on time? Today’s step only takes a few minutes.',

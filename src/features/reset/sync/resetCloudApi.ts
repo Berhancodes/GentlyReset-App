@@ -1,3 +1,4 @@
+import type { SeasonFocus } from '../../../domain/reset/types';
 import type { ResetPersonalization } from '../types';
 import { supabase } from '@/features/auth/supabase/client';
 import { laterCalendarDate } from './calendarDate';
@@ -65,6 +66,27 @@ function throwIfError(error: { message?: string } | null, fallback: string): voi
   throw new Error(error.message ?? fallback);
 }
 
+function readStringList(value: unknown): string[] | undefined {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : undefined;
+}
+
+function readSeason(value: unknown): SeasonFocus | undefined {
+  if (!value || typeof value !== 'object') {
+    return undefined;
+  }
+  const record = value as Record<string, unknown>;
+  if (
+    typeof record.number !== 'number' ||
+    typeof record.level !== 'number' ||
+    typeof record.focusAreaId !== 'string'
+  ) {
+    return undefined;
+  }
+  return { number: record.number, focusAreaId: record.focusAreaId, level: record.level };
+}
+
 function readPersonalization(value: unknown): ResetPersonalization {
   if (!value || typeof value !== 'object') {
     return { desiredFeelings: [] };
@@ -83,6 +105,9 @@ function readPersonalization(value: unknown): ResetPersonalization {
       : [],
     missedDayResponse:
       typeof record.missedDayResponse === 'string' ? record.missedDayResponse : undefined,
+    focusAreas: readStringList(record.focusAreas),
+    season: readSeason(record.season),
+    pastFocusAreas: readStringList(record.pastFocusAreas),
   };
 }
 
@@ -162,7 +187,9 @@ export function createSupabaseResetCloudGateway(): ResetCloudGateway {
             'id, user_id, sequence, plan_id, plan_version, current_day, today_started, today_completed, reset_started_on, last_seen_on, last_completed_on, streak, missed_yesterday, reset_type_id, personalization, profile_accuracy, status, completed_at',
           )
           .eq('user_id', userId)
-          .eq('sequence', 1)
+          // The newest season is the one in progress.
+          .order('sequence', { ascending: false })
+          .limit(1)
           .maybeSingle(),
       ]);
 
@@ -207,6 +234,17 @@ export function createSupabaseResetCloudGateway(): ResetCloudGateway {
       const client = supabase;
       if (!client) {
         throw new ResetSyncNetworkError('Supabase is not configured.');
+      }
+
+      if (cycle.sequence > 1) {
+        // Only one cycle may be active, so earlier seasons are closed first.
+        const { error: closeError } = await client
+          .from('reset_cycles')
+          .update({ status: 'completed', completed_at: new Date().toISOString() })
+          .eq('user_id', userId)
+          .eq('status', 'active')
+          .lt('sequence', cycle.sequence);
+        throwIfError(closeError, 'Could not close the previous season.');
       }
 
       const { data: cycleData, error: cycleError } = await client

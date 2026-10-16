@@ -57,6 +57,19 @@ export type ResetPersonalization = {
   resetReason?: string;
   desiredFeelings: readonly string[];
   missedDayResponse?: string;
+  /** Life areas from onboarding, most important first. Picks the plan's daily actions. */
+  focusAreas?: readonly string[];
+  /** The season in progress. Missing means season 1 in the first focus area. */
+  season?: SeasonFocus;
+  /** Focus area of each finished season, oldest first. */
+  pastFocusAreas?: readonly string[];
+};
+
+/** Which season this is, what it is about, and how deep it goes (1 = first time in the area). */
+export type SeasonFocus = {
+  number: number;
+  focusAreaId: string;
+  level: number;
 };
 
 export type TodayTask = {
@@ -65,6 +78,8 @@ export type TodayTask = {
   title: string;
   description: string;
   minutes: number;
+  /** Today's checklist: prepare, do the action, check in. */
+  steps: readonly string[];
 };
 
 /**

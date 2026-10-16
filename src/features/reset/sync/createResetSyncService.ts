@@ -1,6 +1,8 @@
 import type { ResetRepository } from '../../../application/reset/ResetRepository';
 import { decideResetSync } from './decideResetSync';
 import type {
+  CloudCycleRecord,
+  CloudCycleWrite,
   ResetCloudGateway,
   ResetSyncConflictCode,
   ResetSyncNetworkError as ResetSyncNetworkErrorType,
@@ -15,6 +17,14 @@ export type ResetSyncRun = {
   message?: string;
   ownership: SyncOwnership;
 };
+
+/** Reuse the cloud row id only for the same season; a new season gets its own row. */
+function sameSeasonCycleId(
+  record: CloudCycleRecord | null | undefined,
+  cycle: CloudCycleWrite,
+): string | undefined {
+  return record && record.cycle.sequence === cycle.sequence ? record.cycle.id : undefined;
+}
 
 function withStatus(
   ownership: SyncOwnership,
@@ -162,7 +172,7 @@ export async function syncResetWithCloud(input: {
         input.userId,
         decision.cycle,
         decision.completions,
-        context.record?.cycle.id,
+        sameSeasonCycleId(context.record, decision.cycle),
       );
       const verified = verifyUpload(
         decision.completions.map((row) => row.localDay),
@@ -185,7 +195,7 @@ export async function syncResetWithCloud(input: {
         input.userId,
         decision.cycle,
         decision.completions,
-        context.record?.cycle.id,
+        sameSeasonCycleId(context.record, decision.cycle),
       );
       const verified = verifyUpload(
         decision.completions.map((row) => row.localDay),

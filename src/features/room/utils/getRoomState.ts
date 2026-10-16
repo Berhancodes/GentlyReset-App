@@ -42,8 +42,8 @@ export function getRoomLabel(state: RoomState): string {
   return `${state.stage.name} · ${state.checkIns} ${state.checkIns === 1 ? 'thing' : 'things'}`;
 }
 
-export function getSeasonLabel(state: RoomState): string {
-  return state.seasonComplete ? 'Season 1 complete' : 'Season 1';
+export function getSeasonLabel(state: RoomState, seasonNumber: number): string {
+  return state.seasonComplete ? `Season ${seasonNumber} complete` : `Season ${seasonNumber}`;
 }
 
 /**

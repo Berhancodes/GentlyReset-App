@@ -105,7 +105,7 @@ check(
   'day 1 title is the plan title, not journal copy',
   homeDay1.title === getPlanDayTitle(1, TYPE),
 );
-check('day 1 default minutes are 5', homeDay1.minutes === 5);
+check('day 1 default minutes start small', homeDay1.minutes === 3);
 check('day 1 default description is type-specific', homeDay1.description.length > 0);
 
 const fiveMinutes = personalization({ dailyCommitment: 'five' });
@@ -113,8 +113,8 @@ const twentyMinutes = personalization({ dailyCommitment: 'twenty' });
 check(
   'same dailyCommitment → identical minutes on Home and Journey',
   getTaskForDay(3, twentyMinutes, TYPE).minutes === getTaskForDay(3, twentyMinutes, TYPE).minutes &&
-    getTaskForDay(3, twentyMinutes, TYPE).minutes === 20 &&
-    getTaskForDay(8, fiveMinutes, TYPE).minutes === 5,
+    getTaskForDay(3, twentyMinutes, TYPE).minutes === 10 &&
+    getTaskForDay(22, fiveMinutes, TYPE).minutes === 5,
 );
 check(
   'different dailyCommitment still matches across surfaces',
