@@ -16,6 +16,7 @@ import {
   shareWorldInvite,
   type WorldNotice,
 } from '@/features/world/components/FriendsSection';
+import { AddFriendDialog } from '@/features/world/components/AddFriendDialog';
 import { WorldFriendCircle } from '@/features/world/components/WorldFriendCircle';
 import { WorldStarting } from '@/features/world/components/WorldStarting';
 import { WORLD_COLUMN_MAX_WIDTH } from '@/features/world/layout/worldHeroLayout';
@@ -42,6 +43,7 @@ export function WorldScreen() {
   const userId = useAuth().user?.id ?? null;
   const currentDay = useResetStore((state) => state.currentDay);
   const [notice, setNotice] = useState<WorldNotice | null>(null);
+  const [addFriendOpen, setAddFriendOpen] = useState(false);
   const [home, setHome] = useState<FriendsHome>(EMPTY_HOME);
   const [nowMs, setNowMs] = useState(0);
 
@@ -111,6 +113,15 @@ export function WorldScreen() {
     router.push('/find-friend');
   };
 
+  /** With friends, "+" asks how: search by @username or share an invite. */
+  const openAddFriend = () => {
+    if (!socialHome.username) {
+      openUsername();
+      return;
+    }
+    setAddFriendOpen(true);
+  };
+
   const openInvite = () => {
     if (!socialHome.username) {
       openUsername();
@@ -172,8 +183,11 @@ export function WorldScreen() {
             </Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Invite a friend"
-              onPress={openInvite}
+              accessibilityLabel={starting ? 'Invite a friend' : 'Add a friend'}
+              accessibilityHint={
+                starting ? undefined : 'Find someone by username or share an invite link'
+              }
+              onPress={starting ? openInvite : openAddFriend}
               style={styles.topButton}
             >
               <MascotIcon name="personAdd" size={24} />
@@ -189,7 +203,7 @@ export function WorldScreen() {
             />
           ) : (
             <View style={styles.circleBlock}>
-              <WorldFriendCircle friends={circleFriends} onInvite={openInvite} />
+              <WorldFriendCircle friends={circleFriends} onInvite={openAddFriend} />
               <View style={styles.circleCopy} accessibilityRole="header">
                 <Text style={styles.title} maxFontSizeMultiplier={1.25}>
                   {circleTitle}
@@ -215,6 +229,12 @@ export function WorldScreen() {
           />
         </View>
       </ScrollView>
+      <AddFriendDialog
+        visible={addFriendOpen}
+        onFindFriend={openFindFriend}
+        onInviteFriend={openInvite}
+        onClose={() => setAddFriendOpen(false)}
+      />
       <NoticeDialog
         visible={notice !== null}
         title={notice?.title ?? ''}
