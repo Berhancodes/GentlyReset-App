@@ -55,6 +55,7 @@ export type FriendActionCode =
   | 'username_required'
   | 'username_taken'
   | 'invalid_username'
+  | 'username_not_allowed'
   | 'claimed'
   | 'invalid_token'
   | 'revoked'
@@ -65,7 +66,12 @@ export type FriendActionCode =
   | 'conflict'
   | 'too_soon'
   | 'invalid_kind'
+  | 'reported'
+  | 'invalid_reason'
   | 'read';
+
+/** Why someone is reported; matches report_user() in the database. */
+export type ReportReason = 'offensive_username' | 'harassment' | 'other';
 
 export type FriendActionResult =
   | {

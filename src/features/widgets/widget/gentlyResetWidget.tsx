@@ -28,10 +28,14 @@ export const GENTLY_RESET_WIDGET_NAME = 'GentlyReset';
  * extension on its own, so it can't read anything outside itself. That is why its colours
  * are written inline here instead of coming from `src/design-system` (they mirror
  * `colors.room`), and why its parameters carry no type annotations.
+ *
+ * It must stay an anonymous function: the build step rewrites a named function expression
+ * into a `var` declaration, which leaves `createWidget` reading an undefined name and crashes
+ * release builds on launch ("Property 'GentlyResetWidget' doesn't exist").
  */
 export const gentlyResetWidget = createWidget<GentlyResetWidgetProps>(
   GENTLY_RESET_WIDGET_NAME,
-  function GentlyResetWidget(props, environment) {
+  function (props, environment) {
     'widget';
     const ink = '#3A2112';
     const muted = '#8A7565';

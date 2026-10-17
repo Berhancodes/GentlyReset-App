@@ -48,7 +48,7 @@ check('B PLAN_DAY_COUNT aliases DEFAULT_CYCLE_LENGTH', PLAN_DAY_COUNT === DEFAUL
 check('B there are 30 canonical titles', PLAN_DAY_TITLES.length === 30);
 
 const defaultTask = getTaskForDay(1, personalization(), 'overloaded-dreamer');
-const twenty = getTaskForDay(24, personalization({ dailyCommitment: 'twenty' }), 'almost-starter');
+const twenty = getTaskForDay(23, personalization({ dailyCommitment: 'twenty' }), 'almost-starter');
 const tooMuch = getTaskForDay(
   2,
   personalization({ primaryObstacle: 'too-much' }),
@@ -57,8 +57,8 @@ const tooMuch = getTaskForDay(
 
 check('B getTaskForDay uses local day', defaultTask.day === 1 && defaultTask.id === 'day-1');
 check(
-  'B getTaskForDay title is the type playlist title',
-  defaultTask.title === getPlanDayTitle(1, 'overloaded-dreamer'),
+  'B getTaskForDay title is the focus-area task, not the playlist theme',
+  defaultTask.title.length > 0 && defaultTask.title !== getPlanDayTitle(1, 'overloaded-dreamer'),
 );
 check('B getTaskForDay minutes come from commitment', twenty.minutes === 20);
 check(
@@ -69,7 +69,7 @@ check(
   'B getTaskForDay clamps above 30 to the same day-30 task',
   getTaskForDay(31, personalization(), 'overloaded-dreamer').day === 30 &&
     getTaskForDay(31, personalization(), 'overloaded-dreamer').title ===
-      getPlanDayTitle(30, 'overloaded-dreamer'),
+      getTaskForDay(30, personalization(), 'overloaded-dreamer').title,
 );
 check(
   'B type-specific titles are not a single shared list',

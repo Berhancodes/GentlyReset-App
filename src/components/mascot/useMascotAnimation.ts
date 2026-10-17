@@ -38,9 +38,24 @@ function configurePlayer(player: VideoPlayer, loop: boolean) {
   player.keepScreenOnWhilePlaying = false;
 }
 
+/**
+ * Runs a player call, ignoring a player that was already released. When a screen
+ * closes, expo-video releases its players before our cleanup runs, and touching a
+ * released player throws a fatal error in release builds.
+ */
+function withLivePlayer(action: () => void) {
+  try {
+    action();
+  } catch {
+    // The player is gone with its screen; there is nothing left to pause.
+  }
+}
+
 function pauseAtStart(player: VideoPlayer) {
-  player.pause();
-  player.currentTime = 0;
+  withLivePlayer(() => {
+    player.pause();
+    player.currentTime = 0;
+  });
 }
 
 export function useMascotAnimation(): UseMascotAnimationResult {
@@ -99,7 +114,8 @@ export function useMascotAnimation(): UseMascotAnimationResult {
 
   const pauseAll = useCallback(() => {
     MASCOT_ANIMATIONS.forEach((animation) => {
-      playersRef.current[animation].pause();
+      const player = playersRef.current[animation];
+      withLivePlayer(() => player.pause());
     });
   }, []);
 
@@ -109,15 +125,17 @@ export function useMascotAnimation(): UseMascotAnimationResult {
     pauseAtStart(nextPlayers.jump);
     pauseAtStart(nextPlayers.hug);
     pauseAtStart(nextPlayers.wiggle);
-    nextPlayers.idle.currentTime = 0;
+    withLivePlayer(() => {
+      nextPlayers.idle.currentTime = 0;
+    });
     syncState({ type: 'idle' });
 
     if (focusedRef.current && !reduceMotionRef.current) {
-      nextPlayers.idle.play();
+      withLivePlayer(() => nextPlayers.idle.play());
       return;
     }
 
-    nextPlayers.idle.pause();
+    withLivePlayer(() => nextPlayers.idle.pause());
   }, [syncState]);
 
   const play = useCallback(
@@ -130,8 +148,10 @@ export function useMascotAnimation(): UseMascotAnimationResult {
       pauseAtStart(nextPlayers[animation]);
       syncState({ type: 'reaction', animation });
       previousReaction.current = animation;
-      nextPlayers[animation].play();
-      nextPlayers.idle.pause();
+      withLivePlayer(() => {
+        nextPlayers[animation].play();
+        nextPlayers.idle.pause();
+      });
       return true;
     },
     [syncState],
@@ -205,7 +225,9 @@ export function useMascotAnimation(): UseMascotAnimationResult {
 
   useEffect(() => {
     MASCOT_ANIMATIONS.forEach((animation) => {
-      statuses.current[animation] = playersRef.current[animation].status;
+      withLivePlayer(() => {
+        statuses.current[animation] = playersRef.current[animation].status;
+      });
     });
     markReadyIfComplete();
   }, [markReadyIfComplete]);

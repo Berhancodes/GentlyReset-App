@@ -4,7 +4,7 @@ import { TASK_PRIMITIVES, getTaskPrimitive } from './primitives';
 import { TYPE_PLAYLISTS } from './playlists';
 import { getRoadmapPhaseForDay } from './phase';
 import { getTaskForDay, resolveTaskForDay } from './resolveTask';
-import { AREA_DEEP_MOVES, AREA_MOVES } from './areaMoves';
+import { AREA_DEEP_MOVES, AREA_MOVES, type AreaMove } from './areaMoves';
 import { FOCUS_AREA_IDS } from './focusAreas';
 import { minutesForResetDay } from './modifiers';
 
@@ -62,10 +62,13 @@ for (const typeId of RESET_TYPE_IDS) {
     }
 
     const resolved = resolveTaskForDay(slot.day, personalization(), typeId);
-    check(`${typeId} d${slot.day} resolves title`, resolved.title === slot.title);
+    check(
+      `${typeId} d${slot.day} resolves a concrete title`,
+      resolved.title.trim().length > 0 && !resolved.title.includes('{m}'),
+    );
     check(
       `${typeId} d${slot.day} resolves minutes`,
-      resolved.minutes >= 3 && resolved.minutes <= 30,
+      resolved.minutes >= 0 && resolved.minutes <= 30,
     );
     check(`${typeId} d${slot.day} id is day-N`, resolved.id === `day-${slot.day}`);
     check(
@@ -76,13 +79,12 @@ for (const typeId of RESET_TYPE_IDS) {
   check(`${typeId} unique count recorded`, uniqueCount === uniqueDays);
 }
 
-const restarterOne = getTaskForDay(1, personalization(), 'soft-restarter');
-const dreamerOne = getTaskForDay(1, personalization(), 'overloaded-dreamer');
+const mindOne = getTaskForDay(1, personalization({ focusAreas: ['mind'] }), 'soft-restarter');
+const energyOne = getTaskForDay(1, personalization({ focusAreas: ['energy'] }), 'soft-restarter');
 check(
-  'type-specific day 1 titles differ',
-  restarterOne.title !== dreamerOne.title &&
-    restarterOne.title === 'Keep the same plan' &&
-    dreamerOne.title === 'Shrink the pile',
+  'the focus area sets the day 1 task',
+  mindOne.title === 'Empty your head onto paper' && energyOne.title === 'Get outside before noon',
+  `${mindOne.title} / ${energyOne.title}`,
 );
 
 const gentle = getTaskForDay(4, personalization({ supportStyle: 'be-gentle' }), 'almost-starter');
@@ -101,58 +103,65 @@ const twenty = getTaskForDay(24, personalization({ dailyCommitment: 'twenty' }),
 const five = getTaskForDay(24, personalization({ dailyCommitment: 'five' }), 'fading-flame');
 check('commitment changes minutes for ordinary types', twenty.minutes === 20 && five.minutes === 5);
 
-const rampDays = [1, 8, 15, 22, 29].map(
-  (day) =>
-    getTaskForDay(day, personalization({ dailyCommitment: 'twenty' }), 'fading-flame').minutes,
-);
+const rampDays = [1, 8, 15, 22, 29].map((day) => minutesForResetDay(day, 'fading-flame', 'twenty'));
 check(
   'minutes grow across the season',
   rampDays.join(',') === '10,12,15,20,20',
   rampDays.join(','),
 );
-check(
-  'week 1 starts below the chosen time',
-  getTaskForDay(2, personalization({ dailyCommitment: 'five' }), 'fading-flame').minutes === 3,
-);
+check('week 1 starts below the chosen time', minutesForResetDay(2, 'fading-flame', 'five') === 3);
+
+const MAX_TITLE_LENGTH = 34;
+const MAX_STEP_LENGTH = 60;
+
+function checkMoveShape(label: string, areaMove: AreaMove) {
+  check(
+    `${label} title is short`,
+    areaMove.title.length <= MAX_TITLE_LENGTH,
+    `${areaMove.title} (${areaMove.title.length})`,
+  );
+  check(`${label} has a why`, areaMove.why.trim().length > 0);
+  check(
+    `${label} has three short steps`,
+    areaMove.steps.length === 3 &&
+      areaMove.steps.every((step) => step.trim().length > 0 && step.length <= MAX_STEP_LENGTH),
+    areaMove.steps.filter((step) => step.length > MAX_STEP_LENGTH).join(' | '),
+  );
+}
 
 for (const areaId of FOCUS_AREA_IDS) {
   const levelTwo = AREA_DEEP_MOVES[areaId];
   check(`${areaId} level 2 has 30 moves`, levelTwo.length === PLAN_DAY_COUNT);
   for (const [index, areaMove] of levelTwo.entries()) {
-    check(
-      `${areaId} level 2 d${index + 1} labels are short`,
-      areaMove.prep.length <= 24 && areaMove.act.length <= 24,
-      `${areaMove.prep} / ${areaMove.act}`,
-    );
+    checkMoveShape(`${areaId} level 2 d${index + 1}`, areaMove);
     check(
       `${areaId} level 2 d${index + 1} differs from level 1`,
-      areaMove.detail !== AREA_MOVES[areaId][index]?.detail,
+      areaMove.steps.join('|') !== AREA_MOVES[areaId][index]?.steps.join('|'),
     );
   }
   const moves = AREA_MOVES[areaId];
   check(`${areaId} has 30 moves`, moves.length === PLAN_DAY_COUNT);
   for (const [index, areaMove] of moves.entries()) {
-    check(
-      `${areaId} d${index + 1} labels are short`,
-      areaMove.prep.length <= 24 && areaMove.act.length <= 24,
-      `${areaMove.prep} / ${areaMove.act}`,
-    );
+    checkMoveShape(`${areaId} d${index + 1}`, areaMove);
   }
+  const titles = new Set(moves.map((areaMove) => areaMove.title));
+  check(`${areaId} level 1 titles are mostly distinct`, titles.size >= PLAN_DAY_COUNT - 4);
 }
 
 const energyDay = resolveTaskForDay(
-  4,
+  3,
   personalization({ dailyCommitment: 'ten', focusAreas: ['energy', 'mind'] }),
   'overloaded-dreamer',
 );
 check(
   'first focus area drives the concrete action',
   energyDay.focusAreaId === 'energy' &&
-    energyDay.steps[1] === 'Easy walk 5 min' &&
-    energyDay.description.startsWith('Take an easy 5-minute walk'),
+    energyDay.title === 'A walk at talking pace' &&
+    energyDay.steps[1] === 'Walk 5 minutes at a pace you could chat at' &&
+    energyDay.description.startsWith('An easy walk'),
   energyDay.description,
 );
-check('steps end with check in', energyDay.steps.length === 3 && energyDay.steps[2] === 'Check in');
+check('a day has three concrete steps', energyDay.steps.length === 3);
 check(
   'no focus area falls back to the type area',
   resolveTaskForDay(4, personalization(), 'quiet-drain').focusAreaId === 'energy',
@@ -167,7 +176,12 @@ check(
   FOCUS_AREA_IDS.every((areaId) =>
     Array.from({ length: PLAN_DAY_COUNT }, (_, index) =>
       resolveTaskForDay(index + 1, personalization({ focusAreas: [areaId] }), 'soft-scatter'),
-    ).every((task) => !task.description.includes('{m}') && !task.steps.join(' ').includes('{m}')),
+    ).every(
+      (task) =>
+        !task.title.includes('{m}') &&
+        !task.description.includes('{m}') &&
+        !task.steps.join(' ').includes('{m}'),
+    ),
   ),
 );
 
@@ -187,6 +201,50 @@ check(
 check(
   'All-In Heart later weeks still cap below hero days',
   minutesForResetDay(20, 'all-in-heart', 'thirty-plus') === 20,
+);
+
+// Time rules: tasks take their own time, capped, never stretched to the commitment.
+const thirtyPlus = personalization({ dailyCommitment: 'thirty-plus', focusAreas: ['habits'] });
+check(
+  'a fixed task keeps its own time',
+  getTaskForDay(1, thirtyPlus, 'soft-scatter').minutes === 2,
+);
+check(
+  'a scaling task is capped',
+  getTaskForDay(2, thirtyPlus, 'soft-scatter').minutes === 15,
+  String(getTaskForDay(2, thirtyPlus, 'soft-scatter').minutes),
+);
+const energyThirty = personalization({ dailyCommitment: 'thirty-plus', focusAreas: ['energy'] });
+check(
+  'a during-your-day task has no minutes',
+  getTaskForDay(2, energyThirty, 'soft-scatter').minutes === 0,
+);
+check(
+  'start-leaning types begin week 1 at half',
+  getTaskForDay(3, energyThirty, 'almost-starter').minutes ===
+    Math.round(getTaskForDay(3, energyThirty, 'soft-scatter').minutes / 2),
+);
+
+// Lighter versions follow the reset type's lean.
+const energyDayOne = personalization({ focusAreas: ['energy'] });
+check(
+  'gentle types are offered the lighter version',
+  getTaskForDay(1, energyDayOne, 'quiet-drain').lighter === 'Sit by your brightest window instead.',
+);
+check(
+  'standard types are not',
+  getTaskForDay(1, energyDayOne, 'soft-scatter').lighter === undefined,
+);
+check(
+  'Soft Restarter gets it in week 1 only',
+  getTaskForDay(1, energyDayOne, 'soft-restarter').lighter !== undefined &&
+    getTaskForDay(9, energyDayOne, 'soft-restarter').lighter === undefined,
+);
+const relationshipsDayOne = personalization({ focusAreas: ['relationships'] });
+check(
+  'Quiet Stranger gets it on social areas only',
+  getTaskForDay(1, relationshipsDayOne, 'quiet-stranger').lighter !== undefined &&
+    getTaskForDay(1, energyDayOne, 'quiet-stranger').lighter === undefined,
 );
 
 const clamped = getTaskForDay(31, personalization(), 'soft-scatter');

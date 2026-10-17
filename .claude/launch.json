@@ -4,8 +4,40 @@
     {
       "name": "web",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "web"],
+      "runtimeArgs": [
+        "run",
+        "web"
+      ],
       "port": 43147
+    },
+    {
+      "name": "website",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "/Users/abdulrahmanberhan/Desktop/gentle-reset-path",
+        "run",
+        "preview",
+        "--",
+        "--port",
+        "4174",
+        "--strictPort"
+      ],
+      "port": 4174
+    },
+    {
+      "name": "web-release",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "expo",
+        "start",
+        "--web",
+        "--no-dev",
+        "--minify",
+        "--port",
+        "43148"
+      ],
+      "port": 43148
     }
   ]
 }

@@ -249,6 +249,7 @@ export function HomeScreen() {
               stageIndex={room.stageIndex}
               itemCount={room.itemCount}
               newestItem={todayCompleted ? room.newestItem : null}
+              seasonIndex={seasonNumber - 1}
             />
           )}
         />

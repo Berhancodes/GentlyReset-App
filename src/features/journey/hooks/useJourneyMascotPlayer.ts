@@ -25,17 +25,26 @@ export function useJourneyMascotPlayer(active: boolean): VideoPlayer {
 
   useEffect(() => {
     shouldPlayRef.current = shouldPlay;
-    if (shouldPlay) {
-      player.play();
-      return;
+    // A released player (its screen already closing) throws; there is nothing to do then.
+    try {
+      if (shouldPlay) {
+        player.play();
+        return;
+      }
+      player.pause();
+    } catch {
+      // Player already released.
     }
-    player.pause();
   }, [player, shouldPlay]);
 
   // A play() before the video view mounts is dropped, so start again once ready.
   useEventListener(player, 'statusChange', ({ status }) => {
     if (status === 'readyToPlay' && shouldPlayRef.current) {
-      player.play();
+      try {
+        player.play();
+      } catch {
+        // Player already released.
+      }
     }
   });
 

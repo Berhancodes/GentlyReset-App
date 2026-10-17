@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { AppText, PrimaryButton } from '@/components/ui';
 import { spacing } from '@/design-system';
 import { AuthTextField } from '@/features/auth/components/AuthTextField';
+import { SocialSignInButtons } from '@/features/auth/components/SocialSignInButtons';
 import { useAuth } from '@/features/auth/session/useAuth';
 import type { SignInErrors, SignInValues } from '@/features/auth/types';
 import { canSubmitSignIn, validateSignIn } from '@/features/auth/utils/validateSignIn';
@@ -109,6 +110,10 @@ export function SignInScreen() {
       }
     >
       <View style={styles.form}>
+        <SocialSignInButtons onSignedIn={finishSignIn} />
+        <AppText variant="caption" color="helper" align="center">
+          or sign in with email
+        </AppText>
         <AuthTextField
           label="email"
           value={values.email}

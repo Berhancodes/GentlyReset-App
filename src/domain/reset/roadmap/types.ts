@@ -53,4 +53,6 @@ export type ResolvedResetTask = {
   uniqueTaskId?: string;
   focusAreaId: FocusAreaId;
   steps: readonly string[];
+  /** An easier version that still counts, for reset types that lean gentle. */
+  lighter?: string;
 };

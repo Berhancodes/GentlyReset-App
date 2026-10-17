@@ -28,7 +28,7 @@ import {
   splitJourneyTaskTitle,
 } from '../layout/journeyStageLayout';
 import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
-import { PLAN_DAY_COUNT, getPlanDayTitle } from '../../reset/data/thirtyDayPlan';
+import { PLAN_DAY_COUNT } from '../../reset/data/thirtyDayPlan';
 import { parseLocalDateKey } from '../../reset/utils/calendar';
 import {
   applyCompleteToday,
@@ -215,7 +215,7 @@ check(
   '10. future tap does not mutate reset state',
   afterFutureOpen === futureState &&
     futureModel.kind === 'future' &&
-    futureModel.cta === 'none' &&
+    futureModel.checkIn === 'none' &&
     futureModel.footnote === "you'll get here soon." &&
     !journeyPressMutates(),
 );
@@ -239,7 +239,7 @@ check(
   '11. completed tap does not recomplete or mutate',
   afterCompletedOpen.completedDays.join(',') === completedState.completedDays.join(',') &&
     afterCompletedClose.todayCompleted === false &&
-    completedModel.cta === 'none' &&
+    completedModel.checkIn === 'none' &&
     completedModel.completeLabel === '✓ done',
 );
 
@@ -266,8 +266,8 @@ const startedModel = getJourneySheetModel({
   rememberLine: SOFT_RESTARTER_LINE,
 });
 check(
-  '13. started current CTA is Complete',
-  startedModel.cta === 'complete' && startedModel.ctaLabel === 'Check in for today',
+  '13. started current day checks in by ticking its steps, no shortcut',
+  startedModel.checkIn === 'by-steps' && !('ctaLabel' in startedModel),
 );
 
 const completedCurrentModel = getJourneySheetModel({
@@ -283,8 +283,7 @@ check(
   '14. completed current shows completed and has no start button',
   completedCurrentModel.kind === 'current' &&
     completedCurrentModel.completeLabel === '✓ checked in' &&
-    completedCurrentModel.cta === 'none' &&
-    completedCurrentModel.ctaLabel === null,
+    completedCurrentModel.checkIn === 'none',
 );
 
 const homeDay8 = getCurrentResetTask(snapshot({ currentDay: 8 }));
@@ -294,9 +293,7 @@ const journeyDay30 = getCurrentResetTask(snapshot({ currentDay: 30 }));
 check(
   '15. Home and Journey titles are identical for the same day',
   homeDay8.title === journeyDay8.title &&
-    homeDay8.title === getPlanDayTitle(8, 'soft-restarter') &&
     homeDay30.title === journeyDay30.title &&
-    homeDay30.title === getPlanDayTitle(30, 'soft-restarter') &&
     homeDay8.minutes === journeyDay8.minutes &&
     homeDay8.description === journeyDay8.description,
 );
@@ -337,7 +334,7 @@ const day30Visible = getJourneyVisibleDays(30);
 check(
   '17. day 30 does not exceed the 30-day plan',
   overflowTask.day === PLAN_DAY_COUNT &&
-    overflowTask.title === getPlanDayTitle(30, 'soft-restarter') &&
+    overflowTask.title === getTaskForDay(30, defaultPersonalization, 'soft-restarter').title &&
     getJourneyChapterForDay(31)?.endDay === 30 &&
     finishDays.join(',') === '29,30' &&
     day30Visible.join(',') === '30' &&
@@ -517,10 +514,7 @@ const idleModel = getJourneySheetModel({
   personalization: defaultPersonalization,
   rememberLine: SOFT_RESTARTER_LINE,
 });
-check(
-  'unstarted current CTA is Start',
-  idleModel.cta === 'start' && idleModel.ctaLabel === "Start today's reset",
-);
+check('unstarted current day checks in by ticking its steps', idleModel.checkIn === 'by-steps');
 
 check(
   'sheet week label comes from chapter metadata',
@@ -706,10 +700,7 @@ const readyModel = getJourneySheetModel({
   personalization: defaultPersonalization,
   rememberLine: SOFT_RESTARTER_LINE,
 });
-check(
-  'READY current day exposes Start',
-  readyModel.cta === 'start' && readyModel.ctaLabel === "Start today's reset",
-);
+check('READY current day is checked in by its steps', readyModel.checkIn === 'by-steps');
 
 const startedOnceMore = applyJourneySheetAction(startedBySheet, 'start');
 check(
@@ -755,10 +746,10 @@ const afterCompleteModel = getJourneySheetModel({
   rememberLine: SOFT_RESTARTER_LINE,
 });
 check(
-  'COMPLETED current day has no primary CTA',
+  'COMPLETED current day has nothing left to check in',
   afterCompleteModel.completeLabel === '✓ checked in' &&
     afterCompleteModel.footnote === 'you showed up.' &&
-    afterCompleteModel.cta === 'none',
+    afterCompleteModel.checkIn === 'none',
 );
 
 check(
@@ -787,7 +778,7 @@ check(
     afterCompleteWalk.toDay === 2 &&
     completedBySheet.currentDay === 1 &&
     nextDayModel.kind === 'future' &&
-    nextDayModel.cta === 'none',
+    nextDayModel.checkIn === 'none',
 );
 
 function completeCurrentDay(

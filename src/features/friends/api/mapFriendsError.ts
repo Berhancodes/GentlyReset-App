@@ -27,6 +27,10 @@ export function friendsErrorMessage(code: FriendActionCode): string {
       return 'that username is already taken.';
     case 'invalid_username':
       return 'use 3–20 letters, numbers, or underscores.';
+    case 'username_not_allowed':
+      return 'that username isn’t available. please choose a different one.';
+    case 'invalid_reason':
+      return 'choose a reason for the report.';
     case 'revoked':
       return 'this invite is no longer active.';
     case 'expired':

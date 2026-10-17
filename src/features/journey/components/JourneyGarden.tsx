@@ -26,6 +26,13 @@ import {
 } from '@/design-system';
 import { GardenWeekStrip } from '@/features/journey/components/GardenWeekStrip';
 import {
+  JourneyNapChair,
+  JourneySleepyZs,
+  NAP_SEAT_RISE,
+  napChairSize,
+} from '@/features/journey/components/JourneyNapScene';
+import {
+  getJourneyNapLine,
   JOURNEY_GARDEN_MOODS,
   JOURNEY_GARDEN_SPOTS,
   type JourneyGardenMood,
@@ -40,6 +47,8 @@ const BUBBLE_ROOM = 56;
 const SPROUT_SIZE = 28;
 const SHADOW_WIDTH = 120;
 const SHADOW_HEIGHT = 14;
+/** Napping in the chair, he's drawn smaller so the chair and his line still fit. */
+const NAP_MASCOT_SCALE = 0.72;
 
 type JourneyGardenProps = {
   day: number;
@@ -101,7 +110,8 @@ export function JourneyGarden({
             width={stage.width}
             height={stage.height}
             mood={mood}
-            line={copy.line}
+            // The heading has moved on to tomorrow; his nap line belongs to the day just done.
+            line={mood === 'done' ? getJourneyNapLine(day - 1) : copy.line}
             sproutCount={sproutCount}
             mascotHidden={mascotHidden}
           />
@@ -130,10 +140,17 @@ function GardenStage({ width, height, mood, line, sproutCount, mascotHidden }: G
   const breath = useSharedValue(0);
   const art = STAGE_POSE_ART[JOURNEY_GARDEN_MOODS[mood].pose];
   const reference = STAGE_POSE_ART['idle-listen'];
-  const mascotHeight = Math.min(height - BUBBLE_ROOM, MAX_MASCOT_HEIGHT);
+  const napping = mood === 'done';
+  const standingHeight = Math.min(height - BUBBLE_ROOM, MAX_MASCOT_HEIGHT);
+  const mascotHeight = napping ? standingHeight * NAP_MASCOT_SCALE : standingHeight;
   const scale = mascotHeight / reference.height;
-  const floor = Math.max(0, (height - mascotHeight - BUBBLE_ROOM) / 2);
+  const chair = napChairSize(art.width * scale);
+  const seatRise = napping ? chair.height * NAP_SEAT_RISE : 0;
+  // Napping, the chair is the tallest thing, so it sets the vertical centring.
+  const sceneHeight = napping ? Math.max(chair.height, seatRise + mascotHeight) : mascotHeight;
+  const floor = Math.max(0, (height - sceneHeight - BUBBLE_ROOM) / 2);
   const centerX = width / 2;
+  const mascotBottom = floor + seatRise;
   const spots = JOURNEY_GARDEN_SPOTS.slice(0, sproutCount)
     .map((spot, index) => ({ ...spot, index }))
     // Rows further back are drawn first so nearer sprouts overlap them.
@@ -177,6 +194,14 @@ function GardenStage({ width, height, mood, line, sproutCount, mascotHidden }: G
           fill={colors.stage.mascotShadow}
         />
       </Svg>
+      {napping && !mascotHidden ? (
+        <JourneyNapChair
+          centerX={centerX}
+          bottom={floor}
+          width={chair.width}
+          height={chair.height}
+        />
+      ) : null}
       {spots.map((spot) => {
         const size = SPROUT_SIZE * spot.scale;
         return (
@@ -195,7 +220,7 @@ function GardenStage({ width, height, mood, line, sproutCount, mascotHidden }: G
       {mascotHidden ? null : (
         <>
           <Animated.View
-            style={[styles.body, { bottom: floor, height: mascotHeight * 1.1 }, breathStyle]}
+            style={[styles.body, { bottom: mascotBottom, height: mascotHeight * 1.1 }, breathStyle]}
           >
             <Animated.Image
               key={mood}
@@ -214,13 +239,22 @@ function GardenStage({ width, height, mood, line, sproutCount, mascotHidden }: G
           <Animated.View
             key={line}
             entering={reduceMotion ? undefined : ZoomIn.duration(motion.duration.bubble)}
-            style={[styles.bubble, { bottom: floor + mascotHeight + spacing.sm }]}
+            style={[
+              styles.bubble,
+              { bottom: Math.max(mascotBottom + mascotHeight, floor + sceneHeight) + spacing.sm },
+            ]}
           >
             <Text style={styles.bubbleText} maxFontSizeMultiplier={1.2}>
               {line}
             </Text>
             <View style={styles.bubbleTail} />
           </Animated.View>
+          {napping ? (
+            <JourneySleepyZs
+              left={centerX + art.width * scale * 0.46}
+              bottom={mascotBottom + mascotHeight * 0.42}
+            />
+          ) : null}
         </>
       )}
     </View>
@@ -272,6 +306,7 @@ const styles = StyleSheet.create({
   bubble: {
     position: 'absolute',
     alignSelf: 'center',
+    maxWidth: 280,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: radius.lg,

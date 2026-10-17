@@ -24,7 +24,7 @@ export const PRIVACY_POLICY: LegalDocument = {
     {
       heading: 'What we collect',
       paragraphs: [
-        'Account details: your email address and password when you create an account. Passwords are handled by our sign-in provider and are never visible to us.',
+        'Account details: if you create an account, your email address, and either a password or your Sign in with Apple or Google sign-in. Passwords are handled by our sign-in provider and are never visible to us. With Sign in with Apple you can choose to hide your email; we then receive a private relay address from Apple.',
         'Profile: the username and display name you choose, your time zone, and when you finished setup.',
         'Your reset: your reset type, your current day, the days you checked in, your streak, and the setup answers that shape your plan (like your goals, how much time you give each day, and your reason for starting). These are backed up so your progress can be restored.',
         'Your journal: the entries you write, the mood you pick for each one, the day’s question, and when you saved them. These are backed up so they aren’t lost if you change phones.',
@@ -32,6 +32,7 @@ export const PRIVACY_POLICY: LegalDocument = {
         'Friends: who you are friends with, requests you send or receive, and invite links you create.',
         'Kind words: the preset encouragements you send or receive, who sent them, and when.',
         'Purchases: if you subscribe, Apple handles payment. We receive only your subscription status through our purchase provider, never your card details.',
+        'Crash reports: if the app crashes or hits an error, it sends a report with technical details (device model, iOS version, app version, and what went wrong) so we can fix it. Reports don’t include your journal, your email, or your name.',
       ],
     },
     {
@@ -45,7 +46,7 @@ export const PRIVACY_POLICY: LegalDocument = {
       heading: 'What we don’t do',
       paragraphs: [
         'We don’t sell or rent your personal information.',
-        'We don’t show ads, and we don’t use analytics or tracking tools to follow you across apps or websites.',
+        'We don’t show ads, and we don’t use analytics or tracking tools to follow you across apps or websites. Crash reports are used only to fix problems.',
         'We don’t access your contacts, location, photos, camera, or microphone.',
       ],
     },
@@ -54,13 +55,14 @@ export const PRIVACY_POLICY: LegalDocument = {
       paragraphs: [
         'To run the app: signing you in, saving and restoring your progress and journal, showing your friends’ progress, and delivering kind words.',
         'To manage your subscription and unlock Gently Reset Pro.',
+        'To find and fix crashes and errors.',
         'To answer you when you contact us.',
       ],
     },
     {
       heading: 'Who helps us run the app',
       paragraphs: [
-        'We use a small number of service providers that process data on our behalf: Supabase for accounts and backups, RevenueCat for subscription status, and Apple for payments and app delivery. They may only use your information to provide their service to us.',
+        'We use a small number of service providers that process data on our behalf: Supabase for accounts and backups, RevenueCat for subscription status, Sentry for crash reports, Apple for payments, app delivery and Sign in with Apple, and Google for Sign in with Google. They may only use your information to provide their service to us.',
         'We may share information if the law requires it, or to protect the safety of our users.',
       ],
     },
@@ -68,7 +70,7 @@ export const PRIVACY_POLICY: LegalDocument = {
       heading: 'Keeping it and deleting it',
       paragraphs: [
         'We keep your information for as long as your account exists.',
-        `You can ask us to delete your account and everything connected to it at any time by emailing ${contactEmail}. Information stored only on your device is removed when you delete the app.`,
+        `You can delete your account and everything connected to it at any time in the app (You → Delete account), or by emailing ${contactEmail}. Information stored only on your device is removed when you delete the app.`,
         'Removing a friend stops them from seeing your progress straight away.',
       ],
     },
@@ -157,7 +159,7 @@ export const TERMS_OF_SERVICE: LegalDocument = {
     {
       heading: 'Ending things',
       paragraphs: [
-        `You can stop using the app at any time and ask us to delete your account by emailing ${contactEmail}. We may suspend or end access for anyone who breaks these terms or misuses the app.`,
+        `You can stop using the app at any time and delete your account in the app (You → Delete account) or by emailing ${contactEmail}. We may suspend or end access for anyone who breaks these terms or misuses the app.`,
       ],
     },
     {

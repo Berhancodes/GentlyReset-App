@@ -1,8 +1,13 @@
+import { useRef, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 import { colors, fontFamilies, fontSizes, fontWeights, radius, spacing } from '@/design-system';
+import {
+  SeasonRoomPreview,
+  type SeasonTileStatus,
+} from '@/features/room/components/SeasonRoomPreview';
 import { SEASON_LENGTH_DAYS, SEASON_ROOMS } from '@/features/room/data/roomStages';
 import type { RoomState } from '@/features/room/utils/getRoomState';
 
@@ -18,10 +23,16 @@ const STAR_PATH =
   'M12 1.5C12.9 7.6 16.4 11.1 22.5 12 16.4 12.9 12.9 16.4 12 22.5 11.1 16.4 7.6 12.9 1.5 12 7.6 11.1 11.1 7.6 12 1.5Z';
 const C = colors.room;
 
-type TileStatus = 'current' | 'done' | 'next' | 'locked';
+function getCurrentIndex(seasonNumber: number): number {
+  return (seasonNumber - 1) % SEASON_ROOMS.length;
+}
 
-function tileStatus(index: number, seasonNumber: number, seasonComplete: boolean): TileStatus {
-  const currentIndex = (seasonNumber - 1) % SEASON_ROOMS.length;
+function tileStatus(
+  index: number,
+  seasonNumber: number,
+  seasonComplete: boolean,
+): SeasonTileStatus {
+  const currentIndex = getCurrentIndex(seasonNumber);
   if (index < currentIndex) {
     return 'done';
   }
@@ -34,26 +45,43 @@ function tileStatus(index: number, seasonNumber: number, seasonComplete: boolean
   return 'locked';
 }
 
-/** Twelve seasons, each a room; together they make the year's home. */
+/** Twelve seasons, each a room; tap one to preview it finished. Together they make the year's home. */
 export function SeasonMapSheet({ visible, room, seasonNumber, onClose }: SeasonMapSheetProps) {
   const insets = useSafeAreaInsets();
+  /** The tapped season; null shows the season in progress. */
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const shownIndex = selectedIndex ?? getCurrentIndex(seasonNumber);
+  const scrollRef = useRef<ScrollView>(null);
+  const showSeason = (index: number) => {
+    setSelectedIndex(index);
+    // The preview sits above the grid; bring it back into view.
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+  };
+  const close = () => {
+    setSelectedIndex(null);
+    onClose();
+  };
   const progress = room.checkIns / SEASON_LENGTH_DAYS;
   const footer = room.seasonComplete
     ? `Season ${seasonNumber} is done! Choose your next focus on Home to start season ${seasonNumber + 1}.`
     : `You’re building season ${seasonNumber}: ${room.checkIns} of ${SEASON_LENGTH_DAYS} days. After season 12: year one complete, and your home keeps growing.`;
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={close}>
       <View style={styles.root}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Close your year"
-          onPress={onClose}
+          onPress={close}
           style={StyleSheet.absoluteFill}
         />
         <View style={[styles.sheet, { paddingBottom: insets.bottom + spacing.lg }]}>
           <View style={styles.grabber} />
-          <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            ref={scrollRef}
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+          >
             <View style={styles.header}>
               <View style={styles.headerCopy}>
                 <Text style={styles.eyebrow} maxFontSizeMultiplier={1.3}>
@@ -66,7 +94,7 @@ export function SeasonMapSheet({ visible, room, seasonNumber, onClose }: SeasonM
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Close"
-                onPress={onClose}
+                onPress={close}
                 hitSlop={spacing.xs}
                 style={styles.close}
               >
@@ -80,6 +108,16 @@ export function SeasonMapSheet({ visible, room, seasonNumber, onClose }: SeasonM
                 </Svg>
               </Pressable>
             </View>
+
+            <SeasonRoomPreview
+              seasonIndex={shownIndex}
+              status={tileStatus(shownIndex, seasonNumber, room.seasonComplete)}
+              checkIns={room.checkIns}
+            />
+
+            <Text style={styles.hint} maxFontSizeMultiplier={1.3}>
+              Tap a season to see its finished room.
+            </Text>
 
             <View style={styles.house}>
               <Svg width="100%" height={70} viewBox="0 0 354 70" preserveAspectRatio="none">
@@ -106,17 +144,23 @@ export function SeasonMapSheet({ visible, room, seasonNumber, onClose }: SeasonM
                 {SEASON_ROOMS.map((name, index) => {
                   const status = tileStatus(index, seasonNumber, room.seasonComplete);
                   const locked = status === 'locked';
+                  const selected = index === shownIndex;
                   return (
-                    <View
+                    <Pressable
                       key={name}
-                      accessible
+                      accessibilityRole="button"
+                      accessibilityState={{ selected }}
                       accessibilityLabel={`Season ${index + 1}, ${name}, ${status === 'current' ? `in progress, ${room.checkIns} of ${SEASON_LENGTH_DAYS} days` : status === 'done' ? 'complete' : status === 'next' ? 'unlocked next' : 'locked'}`}
-                      style={[
+                      accessibilityHint="Shows this room finished"
+                      onPress={() => showSeason(index)}
+                      style={({ pressed }) => [
                         styles.tile,
                         status === 'current' ? styles.tileCurrent : null,
                         status === 'done' ? styles.tileDone : null,
                         status === 'next' ? styles.tileNext : null,
                         locked ? styles.tileLocked : null,
+                        selected ? styles.tileSelected : null,
+                        pressed ? styles.tilePressed : null,
                       ]}
                     >
                       <Text
@@ -170,7 +214,7 @@ export function SeasonMapSheet({ visible, room, seasonNumber, onClose }: SeasonM
                           />
                         </Svg>
                       ) : null}
-                    </View>
+                    </Pressable>
                   );
                 })}
               </View>
@@ -295,6 +339,26 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderColor: C.lockedBorder,
     backgroundColor: C.cream,
+  },
+  tileSelected: {
+    borderWidth: 3,
+    borderStyle: 'solid',
+    borderColor: C.ink,
+    shadowColor: C.ink,
+    shadowOpacity: 0.18,
+    shadowRadius: 0,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  tilePressed: {
+    transform: [{ scale: 0.96 }],
+  },
+  hint: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.xs,
+    fontWeight: fontWeights.heavy,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: -spacing.xs,
   },
   tileKicker: {
     fontFamily: fontFamilies.rounded,

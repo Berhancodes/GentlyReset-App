@@ -19,10 +19,21 @@ const QUOTES: Record<JourneyChapterId, string> = {
 /** The same three-step checklist on every day's pop-up. */
 /** Fallback labels and hints; each day's plan supplies its own step labels. */
 export const JOURNEY_DAY_STEPS = [
-  { title: 'Get ready', hint: 'Set up today’s small step.' },
-  { title: 'Do it', hint: 'Make one small change today.' },
-  { title: 'Check in', hint: 'Notice how it felt.' },
+  { title: 'Step 1', hint: 'Tap when this step is done.' },
+  { title: 'Step 2', hint: 'Tap when this step is done.' },
+  { title: 'Step 3', hint: 'Tap when this step is done.' },
 ] as const;
+
+/** Under the day's steps: how far along today is. The last tick checks the day in. */
+export function getStepProgressLine(checkedCount: number, stepCount: number): string {
+  if (checkedCount <= 0) {
+    return `Tick each step as you go · 0 of ${stepCount}`;
+  }
+  if (checkedCount === stepCount - 1) {
+    return `${checkedCount} of ${stepCount}. Almost there!`;
+  }
+  return `${checkedCount} of ${stepCount} done. Keep going!`;
+}
 
 export function getJourneySignLine(chapterId: JourneyChapterId): string {
   return SIGN_LINES[chapterId];

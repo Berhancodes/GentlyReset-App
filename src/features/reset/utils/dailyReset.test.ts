@@ -102,19 +102,20 @@ const journeyDay1 = getTaskForDay(1, defaultPersonalization, TYPE);
 
 check('day 1 Home and Journey resolve identical task', tasksMatch(homeDay1, journeyDay1));
 check(
-  'day 1 title is the plan title, not journal copy',
-  homeDay1.title === getPlanDayTitle(1, TYPE),
+  'day 1 title is the focus-area task, not journal copy',
+  homeDay1.title === 'Make your bed' && homeDay1.title !== getPlanDayTitle(1, TYPE),
+  homeDay1.title,
 );
-check('day 1 default minutes start small', homeDay1.minutes === 3);
+check('day 1 uses the task’s own fixed time', homeDay1.minutes === 2);
 check('day 1 default description is type-specific', homeDay1.description.length > 0);
 
 const fiveMinutes = personalization({ dailyCommitment: 'five' });
 const twentyMinutes = personalization({ dailyCommitment: 'twenty' });
 check(
   'same dailyCommitment → identical minutes on Home and Journey',
-  getTaskForDay(3, twentyMinutes, TYPE).minutes === getTaskForDay(3, twentyMinutes, TYPE).minutes &&
-    getTaskForDay(3, twentyMinutes, TYPE).minutes === 10 &&
-    getTaskForDay(22, fiveMinutes, TYPE).minutes === 5,
+  getTaskForDay(2, twentyMinutes, TYPE).minutes === getTaskForDay(2, twentyMinutes, TYPE).minutes &&
+    getTaskForDay(2, twentyMinutes, TYPE).minutes === 10 &&
+    getTaskForDay(24, fiveMinutes, TYPE).minutes === 5,
 );
 check(
   'different dailyCommitment still matches across surfaces',
@@ -202,10 +203,8 @@ check(
   'next day after completion uses the next task',
   tasksMatch(
     getTaskForDay(nextMorning.currentDay, nextMorning.personalization, TYPE),
-    getTaskForDay(2, defaultPersonalization, TYPE),
-  ) &&
-    getTaskForDay(nextMorning.currentDay, nextMorning.personalization, TYPE).title ===
-      getPlanDayTitle(2, TYPE),
+    getTaskForDay(2, completed.personalization, TYPE),
+  ),
 );
 
 const missed = applyDateRollover(started, '2026-09-20');
@@ -239,8 +238,8 @@ check(
   'day 30 task stays the day-30 plan task',
   tasksMatch(
     getTaskForDay(day30Next.currentDay, day30Next.personalization, TYPE),
-    getTaskForDay(30, defaultPersonalization, TYPE),
-  ) && getTaskForDay(30, defaultPersonalization, TYPE).title === getPlanDayTitle(30, TYPE),
+    getTaskForDay(30, day30Completed.personalization, TYPE),
+  ) && getTaskForDay(day30Next.currentDay, day30Next.personalization, TYPE).day === 30,
 );
 
 const multiDayGap = applyDateRollover(completed, '2026-09-23');

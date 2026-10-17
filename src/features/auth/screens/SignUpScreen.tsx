@@ -128,7 +128,7 @@ export function SignUpScreen() {
       tone="question"
       hideProgress
       title={'create\naccount'}
-      subtitle="this is the last step before you unlock Gently Reset Pro."
+      subtitle="so your progress follows you to any phone."
       onBack={() => router.back()}
       avoidKeyboard
       footer={

@@ -2,6 +2,7 @@ import type { ResetPersonalization, TodayTask } from '../types';
 import { applyTaskModifiers, minutesForResetDay, resolveContentResetTypeId } from './modifiers';
 import { getAreaMoves, type AreaMove } from './areaMoves';
 import type { FocusAreaId } from './focusAreas';
+import { minutesForTask, offersLighter } from './lean';
 import { clampPlanDay } from './phase';
 import { resolveSeason } from './seasons';
 import { TYPE_PLAYLISTS } from './playlists';
@@ -19,8 +20,6 @@ export function getPlaylistSlot(day: number, resetTypeId?: string): PlaylistSlot
   return slot;
 }
 
-const CHECK_IN_STEP = 'Check in';
-
 function getAreaMove(day: number, focusAreaId: FocusAreaId, level: number): AreaMove {
   const areaMove = getAreaMoves(focusAreaId, level)[clampPlanDay(day) - 1];
   if (!areaMove) {
@@ -34,9 +33,11 @@ function withMinutes(text: string, minutes: number): string {
 }
 
 /**
- * A day is the reset type's playlist slot (title, approach, reflection) made
- * concrete by the season's focus area and level (what to actually do), sized
- * by the day's ramped minutes. Pure and on-device: same inputs, same plan.
+ * A day is the season's focus-area move (the actual task, why it matters and
+ * three concrete steps) shaped by the reset type's playlist slot (how to
+ * approach it, and the reflection prompt). Minutes follow the task's own time
+ * rule, and gentler reset types are offered its lighter version.
+ * Pure and on-device: same inputs, same plan.
  */
 export function resolveTaskForDay(
   day: number,
@@ -48,7 +49,7 @@ export function resolveTaskForDay(
   const slot = getPlaylistSlot(clamped, typeId);
   const primitive = getTaskPrimitive(slot.primitiveId);
   const season = resolveSeason(personalization, typeId);
-  const minutes = minutesForResetDay(
+  const rampedMinutes = minutesForResetDay(
     clamped,
     typeId,
     personalization.dailyCommitment,
@@ -56,6 +57,9 @@ export function resolveTaskForDay(
   );
   const focusAreaId = season.focusAreaId;
   const areaMove = getAreaMove(clamped, focusAreaId, season.level);
+  const minutes = minutesForTask(areaMove.time, rampedMinutes, typeId, clamped);
+  const lighter =
+    areaMove.lighter && offersLighter(typeId, focusAreaId, clamped) ? areaMove.lighter : undefined;
   const approach = applyTaskModifiers(slot.description, {
     supportStyle: personalization.supportStyle,
     primaryObstacle: personalization.primaryObstacle,
@@ -66,8 +70,8 @@ export function resolveTaskForDay(
   return {
     id: `day-${clamped}`,
     day: clamped,
-    title: slot.title,
-    description: `${withMinutes(areaMove.detail, minutes)} ${approach}`,
+    title: withMinutes(areaMove.title, minutes),
+    description: `${areaMove.why} ${approach}`,
     minutes,
     category: primitive.category,
     objective: primitive.objective,
@@ -76,7 +80,8 @@ export function resolveTaskForDay(
     primitiveId: slot.primitiveId,
     uniqueTaskId: slot.uniqueTaskId,
     focusAreaId,
-    steps: [withMinutes(areaMove.prep, minutes), withMinutes(areaMove.act, minutes), CHECK_IN_STEP],
+    steps: areaMove.steps.map((step) => withMinutes(step, minutes)),
+    ...(lighter ? { lighter } : {}),
   };
 }
 
@@ -93,6 +98,7 @@ export function getTaskForDay(
     description: resolved.description,
     minutes: resolved.minutes,
     steps: resolved.steps,
+    ...(resolved.lighter ? { lighter: resolved.lighter } : {}),
   };
 }
 

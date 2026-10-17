@@ -132,19 +132,6 @@ export function JourneyScreen() {
     setTimeout(() => setCelebration('playing'), SHEET_CLOSE_MS);
   }, [completeToday]);
 
-  const onPrimary = useCallback(() => {
-    if (!sheetModel) {
-      return;
-    }
-    if (sheetModel.cta === 'start') {
-      startToday();
-      return;
-    }
-    if (sheetModel.cta === 'complete') {
-      finishDay();
-    }
-  }, [finishDay, sheetModel, startToday]);
-
   const onStepChecked = useCallback(
     (checkedCount: number) => {
       if (todayCompleted) {
@@ -227,7 +214,6 @@ export function JourneyScreen() {
           visible={sheetModel !== null}
           model={sheetModel}
           onClose={closeSheet}
-          onPrimary={onPrimary}
           onStepChecked={onStepChecked}
         />
       ) : null}

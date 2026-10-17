@@ -16,8 +16,29 @@ export const JOURNEY_GARDEN_MOODS: Record<JourneyGardenMood, GardenMoodCopy> = {
     line: "Let's finish it together.",
     ctaLabel: "continue today's reset",
   },
-  done: { pose: 'react-warm', line: 'See you tomorrow.', ctaLabel: "see today's reset" },
+  done: {
+    pose: 'breathe-calm',
+    line: 'My work here is done. See you tomorrow!',
+    ctaLabel: "see today's reset",
+  },
 };
+
+/** Once today is checked in he naps in his armchair; a different line each day. */
+export const JOURNEY_NAP_LINES: readonly string[] = [
+  'My work here is done. See you tomorrow!',
+  'Nap earned. Back tomorrow!',
+  "That's a wrap for today. Wake me tomorrow?",
+  'Brb, dreaming about tomorrow.',
+  'Done and dusted. Time for a little nap.',
+  'We did good today. Zzz…',
+  'Recharging for tomorrow. Night night!',
+];
+
+export function getJourneyNapLine(day: number): string {
+  const index =
+    (((day - 1) % JOURNEY_NAP_LINES.length) + JOURNEY_NAP_LINES.length) % JOURNEY_NAP_LINES.length;
+  return JOURNEY_NAP_LINES[index] ?? JOURNEY_GARDEN_MOODS.done.line;
+}
 
 /** He peeks over the top of the day pop-up in this pose. */
 export const JOURNEY_GARDEN_SHEET_POSE: StagePose = 'react-warm';

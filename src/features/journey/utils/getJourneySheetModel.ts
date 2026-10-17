@@ -9,7 +9,11 @@ import {
 } from '../data/journeyChapters';
 import { getJourneyDayState, type JourneyDayKind } from './getJourneyDayState';
 
-export type JourneySheetCta = 'start' | 'complete' | 'none';
+/**
+ * `by-steps`: today, not done yet. The day is checked in by ticking its three
+ * steps; there is no shortcut button. `none`: nothing to check in.
+ */
+export type JourneySheetCheckIn = 'by-steps' | 'none';
 
 export type JourneySheetDot = {
   day: number;
@@ -25,11 +29,12 @@ export type JourneySheetModel = {
   description: string;
   /** The day's checklist labels, in JOURNEY_DAY_STEPS order. */
   steps: readonly string[];
+  /** An easier version that still counts, for gentler reset types. */
+  lighter: string | null;
   rememberLine: string | null;
   footnote: string | null;
   completeLabel: string | null;
-  cta: JourneySheetCta;
-  ctaLabel: string | null;
+  checkIn: JourneySheetCheckIn;
   weekLabel: string | null;
   /** Eyebrow above the title, e.g. "week 1 · day 1". */
   progressLabel: string;
@@ -81,11 +86,11 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
       minutesLabel: formatMinutesLabel(task.minutes),
       description: task.description,
       steps: task.steps,
+      lighter: task.lighter ?? null,
       rememberLine: null,
       footnote: "you'll get here soon.",
       completeLabel: null,
-      cta: 'none',
-      ctaLabel: null,
+      checkIn: 'none',
       weekLabel,
       progressLabel,
       weekDots,
@@ -101,18 +106,17 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
       minutesLabel: formatMinutesLabel(task.minutes),
       description: task.description,
       steps: task.steps,
+      lighter: task.lighter ?? null,
       rememberLine: null,
       footnote: 'you showed up.',
       completeLabel: state.kind === 'current' ? '✓ checked in' : '✓ done',
-      cta: 'none',
-      ctaLabel: null,
+      checkIn: 'none',
       weekLabel,
       progressLabel,
       weekDots,
     };
   }
 
-  const started = input.todayStarted;
   return {
     day: input.day,
     kind: 'current',
@@ -121,11 +125,11 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
     minutesLabel: formatMinutesLabel(task.minutes),
     description: task.description,
     steps: task.steps,
+    lighter: task.lighter ?? null,
     rememberLine: input.rememberLine,
     footnote: null,
     completeLabel: null,
-    cta: started ? 'complete' : 'start',
-    ctaLabel: started ? 'Check in for today' : "Start today's reset",
+    checkIn: 'by-steps',
     weekLabel,
     progressLabel,
     weekDots,

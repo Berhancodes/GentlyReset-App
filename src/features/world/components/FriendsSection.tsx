@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { colors, fontFamilies, fontSizes, fontWeights, radius, spacing } from '@/design-system';
 import {
@@ -8,13 +8,19 @@ import {
   declineFriendRequest,
   markEncouragementRead,
   removeFriend,
+  reportUser,
   sendEncouragement,
 } from '@/features/friends/api/friendsApi';
 import { EncouragementPicker } from '@/features/friends/components/EncouragementPicker';
 import { FriendIdentityRow } from '@/features/friends/components/FriendIdentityRow';
 import { FriendProgressCard } from '@/features/friends/components/FriendProgressCard';
 import type { EncouragementKind } from '@/features/friends/encouragements';
-import type { PublicFriendIdentity, ReceivedEncouragement } from '@/features/friends/types';
+import type {
+  FriendListItem,
+  PublicFriendIdentity,
+  ReceivedEncouragement,
+  ReportReason,
+} from '@/features/friends/types';
 import type { WorldFriendsPresentation } from '@/features/friends/worldState';
 import { WorldActionCard } from '@/features/world/components/WorldActionCard';
 import { WorldPostcards } from '@/features/world/components/WorldPostcards';
@@ -88,6 +94,45 @@ export function FriendsSection({
       .finally(() => {
         setBusyId(null);
       });
+  };
+
+  /** Report: pick a reason, file it, then offer to remove the friend straight away. */
+  const reportFriend = (friend: FriendListItem) => {
+    const name = friend.username ? `@${friend.username}` : 'this friend';
+    const file = (reason: ReportReason) => {
+      setBusyId(friend.userId);
+      void reportUser(friend.userId, reason)
+        .then((result) => {
+          if (!result.ok) {
+            onNotice({ title: 'report', body: result.message ?? 'couldn’t send that report.' });
+            return;
+          }
+          Alert.alert(
+            'Thanks for telling us',
+            `We’ll review ${name}. Remove them as a friend too?`,
+            [
+              { text: 'Keep', style: 'cancel' },
+              {
+                text: 'Remove',
+                style: 'destructive',
+                onPress: () =>
+                  run(friend.friendshipId, () => removeFriend(friend.friendshipId), 'friends'),
+              },
+            ],
+          );
+        })
+        .finally(() => setBusyId(null));
+    };
+    Alert.alert(
+      `Report ${name}?`,
+      'What’s wrong? Reports are private; they won’t know it was you.',
+      [
+        { text: 'Offensive username', onPress: () => file('offensive_username') },
+        { text: 'Harassment or unkind behaviour', onPress: () => file('harassment') },
+        { text: 'Something else', onPress: () => file('other') },
+        { text: 'Cancel', style: 'cancel' },
+      ],
+    );
   };
 
   const sendKind = (kind: EncouragementKind) => {
@@ -199,6 +244,7 @@ export function FriendsSection({
                   onRemove={() => {
                     run(item.friendshipId, () => removeFriend(item.friendshipId), 'friends');
                   }}
+                  onReport={() => reportFriend(item)}
                 />
               </View>
             ))}

@@ -90,6 +90,22 @@ export const SEASON_ROOMS: readonly string[] = [
   'front porch',
 ];
 
+/** One small picture per season room, in SEASON_ROOMS order. */
+export const SEASON_ROOM_ICONS: readonly string[] = [
+  '🛋️',
+  '📚',
+  '🍳',
+  '🪴',
+  '🎨',
+  '🎵',
+  '🍵',
+  '⭐',
+  '🛁',
+  '🧶',
+  '☀️',
+  '🏡',
+];
+
 export const NAME_TOKEN = '{name}';
 
 /** The first time the room appears, the mascot introduces it over three taps. */

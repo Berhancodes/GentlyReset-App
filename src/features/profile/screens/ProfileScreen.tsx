@@ -288,6 +288,15 @@ export function ProfileScreen() {
         <ProfileAnswersCard rows={answerRows} />
         <ProfileLinkRows
           links={[
+            ...(isAuthenticated
+              ? []
+              : [
+                  {
+                    icon: <MascotIcon name="personAdd" size={22} />,
+                    title: 'Save your progress (not backed up yet)',
+                    onPress: () => router.push('/save-progress'),
+                  },
+                ]),
             {
               icon: <MascotIcon name="tag" size={22} />,
               title: userId && username ? formatUsernameHandle(username) : 'Choose a username',

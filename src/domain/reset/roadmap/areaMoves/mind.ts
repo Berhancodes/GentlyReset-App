@@ -1,305 +1,459 @@
-import { move } from './move';
+import { during, fixed, move, upTo } from './move';
 
-/** A quieter mind: unload, single-task, and let loops close. */
+/** A calmer, clearer head: unload, single-task, breathe, and step away from screens. Every day stands alone. */
 export const MIND_MOVES = [
   move(
-    'Find a quiet spot',
-    'Brain dump {m} min',
-    'Write every thought that keeps looping for {m} minutes, then close the page.',
+    'Empty your head onto paper',
+    'Getting thoughts out of your head and onto paper can make them feel more manageable.',
+    [
+      'Grab paper or open your notes app',
+      'Write every worry and to-do for {m} minutes',
+      'Circle the one that most needs sorting',
+    ],
+    { time: upTo(10) },
   ),
   move(
-    'Phone face down',
-    'Sit still {m} min',
-    'Sit with your phone face down for {m} minutes and simply notice what your mind does.',
+    'Breathe out longer than in',
+    'Slower breathing with longer exhales helps many people feel calmer.',
+    [
+      'Sit comfortably and set a {m}-minute timer',
+      'Breathe in for 4, out for 6',
+      'Notice your shoulders drop',
+    ],
+    { time: upTo(10), lighter: 'Five slow breaths, wherever you are.' },
   ),
   move(
-    'Pick one worry',
-    'Shrink one worry',
-    'Take one worry from your list and write the smallest next step that would help it.',
+    'Do one thing at a time',
+    'Juggling tasks is a big part of what makes a mind feel crowded.',
+    [
+      'Pick one task you need to do today',
+      'Close everything else for {m} minutes',
+      'Gently come back each time you drift',
+    ],
+    { time: upTo(20) },
   ),
   move(
-    'Set a timer',
-    'Breathe {m} min',
-    'Breathe slowly, in for four and out for six, for {m} minutes.',
+    'A walk without headphones',
+    'Quiet time without input gives your mind room to settle.',
+    [
+      'Leave your headphones at home',
+      'Walk for {m} minutes',
+      'Notice three things you hear or see',
+    ],
+    { time: upTo(20), lighter: 'Sit by an open window without audio.' },
   ),
   move(
-    'Pen by your bed',
-    'Night unload',
-    "Before bed, write down three things your mind is holding so you don't have to.",
+    'Put tomorrow on paper',
+    "Writing tomorrow's tasks before bed helps many people switch off.",
+    [
+      "Tonight, write tomorrow's top three tasks",
+      'Add any worry, with one next step',
+      'Close the notebook until morning',
+    ],
+    { time: fixed(5) },
   ),
   move(
-    'Pick a short route',
-    'Walk with no audio',
-    'Walk for {m} minutes with no podcast or music, just the sounds around you.',
+    'Mute one noisy app',
+    'Fewer interruptions means fewer things pulling at your attention.',
+    [
+      'Pick the app that interrupts you most',
+      'Turn its notifications off',
+      'Notice how the day feels with it quiet',
+    ],
+    { time: fixed(3), lighter: 'Mute it just for today.' },
   ),
   move(
-    'Open your list',
-    'Cross one off',
-    'Look at your first brain dump and cross off one thing that no longer matters.',
+    'Notice what calmed you',
+    'Knowing what calms you means you can reach for it on purpose.',
+    [
+      'Think back over the past week',
+      'Name the moment you felt calmest',
+      'Plan to do that again tomorrow',
+    ],
+    { time: fixed(3) },
   ),
   move(
-    'Choose a worry time',
-    'Worry window',
-    'Give your worries one {m}-minute window today and park them on paper outside it.',
+    'Sort one worry',
+    'Asking whether a worry is in your hands helps you act on it or let it rest.',
+    [
+      'Pick one worry on your mind today',
+      'Ask: can I do anything about this?',
+      'If yes, take one small step. If not, let it rest',
+    ],
+    { time: fixed(5) },
   ),
   move(
-    'Mute one app',
-    'Quiet one input',
-    'Mute or move one app that keeps your mind loud, then spend {m} minutes without it.',
+    'Tidy one small space',
+    'A clearer space often helps a busy mind feel a little clearer too.',
+    [
+      'Pick a desk, drawer or bedside table',
+      'Clear and tidy it for {m} minutes',
+      'Notice how it feels to look at now',
+    ],
+    { time: upTo(15) },
   ),
   move(
-    'Close extra tabs',
-    'Single-task {m} min',
-    'Do one thing for {m} minutes with nothing else open.',
+    'Check messages twice',
+    'Checking at set times stops messages breaking up your whole day.',
+    [
+      'Pick two times today to check messages',
+      'Keep the apps closed in between',
+      'Notice how many urges pass on their own',
+    ],
+    { time: during, lighter: 'Pick three or four times instead.' },
   ),
   move(
-    'Write the thought',
-    'Question one thought',
-    'Write down one harsh thought and ask whether it is a fact or a feeling.',
+    'Fact or story?',
+    'Separating what you know from what you fear takes the sting out of a thought.',
+    [
+      "Notice a thought that's bothering you",
+      'Ask: what do I actually know for sure?',
+      'Say the facts-only version to yourself',
+    ],
+    { time: fixed(5) },
   ),
   move(
-    'Find a window',
-    'Look far away',
-    'Spend {m} minutes outside or by a window, letting your eyes rest on something far.',
+    'A screen-free hour',
+    'Time away from screens gives your mind a real break.',
+    [
+      'Pick an hour today for no screens',
+      'Read, walk, cook or make something instead',
+      'Notice how your mind feels after',
+    ],
+    { time: during, lighter: '20 minutes.' },
   ),
   move(
-    'Notebook out',
+    'Finish three small things',
+    'Small unfinished jobs quietly take up space in your head.',
+    [
+      'Pick three tiny jobs you keep putting off',
+      'Do them one after another',
+      'Enjoy crossing them off',
+    ],
+    { time: upTo(20), lighter: 'Just one.' },
+  ),
+  move(
+    'What cleared your head',
+    'Your own experience is the best guide to what helps you think clearly.',
+    [
+      'Think about the past week',
+      'Name what helped your head feel clearer',
+      'Do more of it tomorrow',
+    ],
+    { time: fixed(3) },
+  ),
+  move(
+    'Catch a spiral early',
+    'Noticing racing thoughts early makes them much easier to slow down.',
+    [
+      'Notice when your thoughts start racing today',
+      'Name it: "I\'m spiralling about…"',
+      'Take five slow breaths, then do one small thing',
+    ],
+    { time: during },
+  ),
+  move(
+    'Relax from toes to head',
+    'Relaxing your body one part at a time helps quiet a busy mind before sleep.',
+    [
+      'Lie down in bed with the lights off',
+      'Notice your feet, legs, belly, shoulders, face',
+      'Soften each part as you go, for {m} minutes',
+    ],
+    { time: upTo(15) },
+  ),
+  move(
+    'Do something with your hands',
+    'Absorbing, hands-on activities give your mind a rest from overthinking.',
+    [
+      'Cook, draw, garden, build or fix something',
+      'Give it your full attention for {m} minutes',
+      'Notice when your mind goes quiet',
+    ],
+    { time: upTo(30) },
+  ),
+  move(
+    'Be kind to yourself once',
+    'Talking to yourself kindly lowers stress more than self-criticism does.',
+    [
+      'Notice one harsh thought about yourself',
+      "Ask what you'd say to a friend instead",
+      'Say that to yourself',
+    ],
+    { time: fixed(2) },
+  ),
+  move(
+    'Decide and move on',
+    'Making a small decision frees up the energy spent going back and forth.',
+    [
+      'Pick a small decision you keep revisiting',
+      'Give yourself five minutes to decide',
+      'Decide, and let yourself move on',
+    ],
+    { time: fixed(5) },
+  ),
+  move(
+    'Time in nature',
+    'Time around trees, water or green space helps many people feel calmer.',
+    [
+      'Find a park, trees, water or a garden',
+      'Spend {m} minutes there',
+      'Leave your phone in your pocket',
+    ],
+    { time: upTo(30), lighter: 'Look after a plant, or sit by a window with a view.' },
+  ),
+  move(
+    "What's still on your mind",
+    "Naming what's still weighing on you is the first step to easing it.",
+    [
+      'Think about the past week',
+      'Name one thing still on your mind',
+      'Pick one small step or person to talk to',
+    ],
+    { time: fixed(3) },
+  ),
+  move(
+    'A slow first ten minutes',
+    'A calm start makes the rest of the day feel less rushed.',
+    [
+      'Keep your phone away for 10 minutes after waking',
+      'Have water, stretch or look outside',
+      "Then choose today's one priority",
+    ],
+    { time: fixed(10), lighter: 'Three minutes before the phone.' },
+  ),
+  move(
+    'Talk it through',
+    'Saying a worry out loud often makes it feel smaller.',
+    ['Pick someone you trust', "Share something that's on your mind", 'Ask them to just listen'],
+    { time: upTo(30), lighter: 'Write it as a message, or in your journal.' },
+  ),
+  move(
+    'Let it be good enough',
+    'Aiming for perfect keeps your mind running long after a task is done.',
+    [
+      "Pick a task you'd usually over-polish",
+      'Finish it at "good enough"',
+      'Notice that nothing bad happens',
+    ],
+    { time: during },
+  ),
+  move(
+    'Focus on what matters',
+    'Giving your full attention to one important thing is calming in itself.',
+    [
+      'Pick the task that matters most today',
+      'Phone in another room for {m} minutes',
+      'Notice what you got done',
+    ],
+    { time: upTo(30) },
+  ),
+  move(
     'Three good things',
-    'Write three small things that went okay today, even the tiny ones.',
+    'Noticing what went well, and why, helps balance a mind that scans for problems.',
+    [
+      'Tonight, write three good things from today',
+      'Add why each one happened',
+      'Read them back before sleep',
+    ],
+    { time: fixed(5) },
   ),
   move(
-    "Pick tomorrow's one",
-    'Close the day',
-    "Write tomorrow's single most important thing so your mind can rest tonight.",
+    'Your calm list',
+    'Having your calming tools written down makes them easier to reach for when stressed.',
+    [
+      'Pick three things that calmed you this month',
+      'Save them in your notes or journal',
+      'Use one next time you feel tense',
+    ],
+    { time: fixed(5) },
   ),
   move(
-    'Same spot as before',
-    'Same quiet time',
-    'Do {m} minutes of quiet at the same time and place as yesterday.',
+    'Calm in a real moment',
+    'Using a calming tool in a real moment is how it becomes second nature.',
+    [
+      'Notice the next tense moment today',
+      'Use one of your calm tools',
+      'Notice whether it helped',
+    ],
+    { time: during },
   ),
   move(
-    'Set a timer',
-    'Brain dump {m} min',
-    'Empty your head onto paper for {m} minutes, since you are building a habit, not a masterpiece.',
+    "Notice what's quieter",
+    "Seeing how far you've come makes the calm easier to protect.",
+    [
+      'Think back to how your mind felt at the start',
+      'Name two things that feel quieter now',
+      'Notice which ones now come naturally',
+    ],
+    { time: fixed(5) },
   ),
   move(
-    'Phone in another room',
-    'Screen-free morning',
-    'Keep your phone away for the first {m} minutes after you wake up.',
-  ),
-  move(
-    'Set a timer',
-    'Breathe {m} min',
-    'Breathe in for four and out for six for {m} minutes, steadier than last time.',
-  ),
-  move(
-    'Pick one loop',
-    'Decide and drop it',
-    'Pick one decision you keep circling, choose good-enough, and stop revisiting it.',
-  ),
-  move(
-    'Shoes on',
-    'Walk with no audio',
-    'Take a {m}-minute walk with no audio and let your thoughts settle on their own.',
-  ),
-  move(
-    'Read your notes',
-    'Spot the pattern',
-    'Read your last week of notes and circle the worry that keeps coming back.',
-  ),
-  move(
-    'Choose your favorite',
-    'Your own quiet',
-    'Pick the quiet practice that helped you most and do it for {m} minutes.',
-  ),
-  move(
-    'Notice the noise',
-    'Busy-day version',
-    'On a loud day, do a one-minute version of your quiet practice instead of skipping it.',
-  ),
-  move(
-    'Write the thought',
-    'Answer it kindly',
-    'Answer one anxious thought the way you would answer a good friend.',
-  ),
-  move(
-    'Clear one surface',
-    'Quiet your space',
-    'Clear one surface near where you think, then sit there for {m} minutes.',
-  ),
-  move(
-    'Close extra tabs',
-    'Single-task {m} min',
-    'Give {m} minutes to one task with no switching, then notice how your head feels.',
-  ),
-  move(
-    'Calendar out',
-    'Plan your quiet week',
-    'Write down when your quiet minutes will happen on each day next week.',
-  ),
-  move(
-    'Set a timer',
-    'Full quiet session',
-    'Do your full quiet practice for {m} minutes and notice what feels easier than day one.',
-  ),
-  move(
-    'Open your first list',
-    'Compare the lists',
-    'Reread your first brain dump and mark everything that has gotten quieter.',
-  ),
-  move(
-    'Notebook out',
-    'Keep what worked',
-    'Write down the one quiet habit you are keeping for the next season.',
+    'Keep what calms you',
+    'Choosing what to keep makes a calmer mind part of your everyday life.',
+    [
+      'Pick the three practices that helped most',
+      'Decide when each one fits in your day',
+      'Save them in your journal or tell someone',
+    ],
+    { time: fixed(5) },
   ),
 ] as const;
 
-/** Level 2: from a quieter mind to a calm toolkit that works on hard days. */
+/** Level 2: triggers, uncertainty and deeper focus once the basics are in place. */
 export const MIND_DEEP_MOVES = [
+  move('Season check-up', 'Going deeper starts with knowing exactly what to work on.', [
+    'Rate noise, focus and sleep, 1 to 10 each',
+    'Write your top 3 triggers',
+    'Pick the one to work on this season',
+  ]),
+  move('Map your trigger', 'The first link in a chain is the easiest to break.', [
+    'Write your chosen trigger at the top of a page',
+    'List the thoughts, feelings and urges it brings',
+    'Mark which one shows up first',
+  ]),
+  move('Breathing with a hold', 'Longer practice builds a calmer baseline, not just a quick fix.', [
+    'Set a {m}-minute timer',
+    'Breathe in 4, hold 4, out 6',
+    'Write where you felt it in your body',
+  ]),
+  move('Label your thoughts', 'Naming thoughts puts space between you and them.', [
+    'Sit quietly for {m} minutes',
+    'Label each thought: plan, worry or memory',
+    'Write which label showed up most',
+  ]),
+  move('Name what matters', 'A mind settles when your time matches what matters.', [
+    'Write 5 things that matter most to you',
+    'Circle the 2 getting the least time',
+    'Write one action for each',
+  ]),
+  move('Screen sunset', 'Screens at night keep your brain on alert.', [
+    'Pick a time your phone goes away tonight',
+    'Set an alarm for it',
+    'Spend the last {m} minutes before bed screen-free',
+  ]),
+  move('Week 1 check-up', 'Seeing the chain clearly shows you where to step in.', [
+    'Re-rate noise, focus and sleep',
+    'Write the trigger chain that showed up this week',
+    'Pick one link to interrupt next week',
+  ]),
+  move('Write an if-then plan', 'If-then plans roughly double follow-through.', [
+    'Pick a replacement for the link you chose',
+    'Write "When ___ happens, I will ___"',
+    'Use it the first time the trigger shows up',
+  ]),
+  move('Sit with not knowing', 'Handling small uncertainty shrinks big anxiety.', [
+    'Leave one small thing unchecked today',
+    'Notice the urge to check it',
+    'Wait {m} minutes before you do anything',
+  ]),
+  move('Deep work sprint', "Deep focus is a muscle, and you're adding reps.", [
+    'Pick a task that needs real thinking',
+    'Work {m} minutes, phone in another room',
+    'Write what you got done',
+  ]),
+  move('Self-kindness break', 'A few kind words to yourself lower stress.', [
+    'When stress hits, say "this is hard"',
+    'Then say "other people feel this too"',
+    'Then say "I can be kind to myself right now"',
+  ]),
+  move('Solving or replaying?', 'Replaying a problem feels like work, but it changes nothing.', [
+    "Notice a thought you've had 3+ times today",
+    'Ask: am I solving this or replaying it?',
+    'If replaying, do something hands-on for {m} minutes',
+  ]),
+  move('Gratitude with reasons', 'Adding "why" is what makes gratitude stick.', [
+    'Write 3 good things from today',
+    'Write why each one happened',
+    'Read them again before bed',
+  ]),
+  move('Week 2 check-up', 'Checking the if-then shows whether it works or needs a tweak.', [
+    'Re-rate noise, focus and sleep',
+    'Count how often your if-then worked',
+    'Adjust the plan if it missed',
+  ]),
   move(
-    'Notebook out',
-    'Mind check-up',
-    'Rate how loud your mind feels from 1 to 10 and write what takes up the most space.',
+    'Face a thought you avoid',
+    'Facing a thought on purpose takes away its power to ambush you.',
+    [
+      'Write the worry you avoid thinking about',
+      'Read it slowly for {m} minutes',
+      'Notice whether it feels less sharp by the end',
+    ],
   ),
-  move(
-    'Set a timer',
-    'Morning pages {m} min',
-    'Write whatever comes to mind for {m} minutes first thing in the morning.',
-  ),
-  move(
-    'Pick a trigger',
-    'Name a trigger',
-    'Write down one situation that reliably makes your mind start racing.',
-  ),
-  move(
-    'Set a timer',
-    'Long breaths {m} min',
-    'Breathe slowly for {m} minutes, making each out-breath longer than the in-breath.',
-  ),
-  move(
-    'Phone in a drawer',
-    'Phone-free hour',
-    'Put your phone in a drawer for one full hour this evening.',
-  ),
-  move(
-    'Shoes on',
-    'Mindful walk {m} min',
-    'Walk for {m} minutes and name five things you can see, hear, and feel.',
-  ),
-  move(
-    'Read your week',
-    'Weekly review',
-    "Read this week's notes and write down what calmed you the most.",
-  ),
-  move(
-    'Open your list',
-    'Close an open loop',
-    'Finish or cancel one task that has been sitting in your head for weeks.',
-  ),
-  move(
-    'Pick an app',
-    'Delete one app',
-    'Delete or log out of one app that feeds your overthinking.',
-  ),
-  move(
-    'Notifications off',
-    'Deep focus {m} min',
-    'Work on one important thing for {m} minutes with notifications off.',
-  ),
-  move(
-    'Write the worry',
-    'Rewrite the story',
-    'Write one worry as a story, then write a calmer and truer version of it.',
-  ),
-  move(
-    'Find somewhere green',
-    'Nature {m} min',
-    'Spend {m} minutes somewhere with trees, water, or open sky.',
-  ),
-  move(
-    'Notebook out',
-    'Gratitude list',
-    'Write down five specific things you are grateful for today.',
-  ),
-  move(
-    'Plan tomorrow',
-    'Evening plan',
-    "Write tomorrow's three priorities before bed so you can start the morning calm.",
-  ),
-  move(
-    'Same spot as before',
-    'Quiet ritual {m} min',
-    'Do {m} minutes of quiet in the same place and at the same time as your ritual.',
-  ),
-  move(
-    'Pick a decision',
-    'Decide in five',
-    'Make one decision you have been avoiding within five minutes, then move on.',
-  ),
-  move(
-    'Phone in another room',
-    'Screen-free start',
-    'Keep your phone away for the first {m} minutes of your morning.',
-  ),
-  move(
-    'Lie down',
-    'Body scan {m} min',
-    'Lie down and slowly notice each part of your body for {m} minutes.',
-  ),
-  move(
-    'Open your feeds',
-    'Trim your inputs',
-    'Unfollow or mute three accounts that leave you feeling worse.',
-  ),
-  move(
-    'Shoes on',
-    'Walk and think {m} min',
-    'Walk for {m} minutes and let one problem untangle itself without forcing it.',
-  ),
-  move(
-    'Read your notes',
-    'Find your calm',
-    'Look back at this season and write down when your mind feels quietest.',
-  ),
-  move(
-    'Choose your practice',
-    'Your full practice',
-    'Do your favorite quiet practice for the full {m} minutes.',
-  ),
-  move(
-    'Notebook out',
-    'Stress plan',
-    'Write the two-minute practice you will use the next time stress spikes.',
-  ),
-  move(
+  move('Rehearse a hard moment', 'Practicing in your head makes the real moment easier.', [
+    'Write the toughest moment coming up this week',
+    "Pick the tool you'll use in it",
+    'Picture yourself using it, start to finish',
+  ]),
+  move('One meal, no screen', 'Slowing down at meals trains attention all day.', [
+    'Eat one meal with no phone or TV',
+    'Notice taste, texture and fullness',
+    'Stop when you feel about 80% full',
+  ]),
+  move('Clean up your feed', 'What you scroll shapes what you think about.', [
+    'Mute or unfollow 5 accounts that stir you up',
+    'Remove one app you open out of habit',
+    'Notice the quiet it leaves',
+  ]),
+  move('Time in nature', 'Time around greenery lowers stress.', [
+    'Find a park, trees or water nearby',
+    'Spend {m} minutes there, phone in your pocket',
+    'Write one thing you noticed',
+  ]),
+  move('Say it out loud', 'Saying a worry to someone often makes it smaller.', [
     'Pick someone you trust',
-    'Talk it out',
-    'Tell someone you trust about one worry instead of carrying it alone.',
-  ),
-  move(
-    'Clear a space',
-    'Calm corner',
-    'Set up one corner with a few things that help you feel calm.',
-  ),
-  move(
-    'Notifications off',
-    'Deep focus {m} min',
-    'Give {m} minutes to deep work with nothing else open.',
-  ),
-  move(
-    'Calendar out',
-    'Plan your calm week',
-    'Put your quiet practice into your calendar for every day next week.',
-  ),
-  move('Set a timer', 'Longest quiet', 'Do your longest quiet session yet, for {m} minutes.'),
-  move(
-    'Notebook out',
-    'Check-up again',
-    'Rate how loud your mind feels from 1 to 10 and compare it with day one.',
-  ),
-  move(
-    'Notebook out',
-    'Your calm toolkit',
-    'Write the three practices that work best for you, so you can use them anytime.',
-  ),
+    "Share one thing that's on your mind",
+    'Ask them to just listen, not fix',
+  ]),
+  move('Week 3 check-up', 'A pattern you can see is a pattern you can change.', [
+    'Re-rate noise, focus and sleep',
+    'Write which avoided thought got easier',
+    'Pick the one still left to face',
+  ]),
+  move('Morning pages', 'Writing without stopping clears space before the day starts.', [
+    'First thing today, write for {m} minutes',
+    "Don't stop, edit or reread as you go",
+    'Underline anything that surprised you',
+  ]),
+  move('Make a rule for a small choice', 'Rules for small choices save energy for big ones.', [
+    'Pick a choice you overthink, like replies or meals',
+    'Write a simple rule for it',
+    'Use the rule today',
+  ]),
+  move('Teach one tool', 'Explaining a tool locks in what you know.', [
+    'Pick the tool that works best for you',
+    'Explain it to someone in 2 minutes',
+    'Write what you understood better after',
+  ]),
+  move('Your best focus yet', 'Beating your own record shows your focus is growing.', [
+    'Block {m} minutes in your calendar',
+    'Phone in another room, one tab open',
+    'Write your time and compare with day 10',
+  ]),
+  move('Let one thing be good enough', 'Perfectionism keeps a mind running long after the task.', [
+    'Pick one task you usually over-polish',
+    'Finish it at "good enough"',
+    'Notice that nothing bad happens',
+  ]),
+  move('Update your calm plan', 'A plan built from your own season fits you best.', [
+    "Add this season's best tools to your toolkit",
+    'Add your trigger and your if-then plan',
+    "Save it where you'll see it",
+  ]),
+  move('Test your plan', 'A plan you used under pressure is one you can trust.', [
+    'Do one mildly stressful thing on purpose',
+    'Use your calm plan during it',
+    'Rate how well it held, 1 to 10',
+  ]),
+  move('Measure your season', 'Comparing with day 1 shows how much has changed.', [
+    'Re-rate noise, focus and sleep',
+    'Compare with day 1',
+    'Write your biggest win',
+  ]),
+  move('Choose what comes next', 'Ending with a plan keeps the progress going.', [
+    "Pick 3 practices you'll keep",
+    'Write when each happens in your week',
+    'Write what you want to work on next',
+  ]),
 ] as const;

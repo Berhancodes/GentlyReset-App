@@ -4,6 +4,7 @@ import {
   resolveSeason,
   resolveTaskForDay,
 } from '../../../domain/reset/roadmap';
+import { minutesForResetDay } from '../../../domain/reset/roadmap/modifiers';
 import { mapSnapshotToCycleWrite } from '../sync/mapSnapshotToCloud';
 import { mergeResetProgress } from '../sync/mergeResetProgress';
 import type { CloudCycleRecord } from '../sync/types';
@@ -106,10 +107,12 @@ check(
   levelTwoDay.focusAreaId === 'energy' && levelTwoDay.steps[1] !== levelOneDay.steps[1],
   `${levelOneDay.steps[1]} / ${levelTwoDay.steps[1]}`,
 );
+const seasonOneRamp = minutesForResetDay(1, TYPE, 'ten', 1);
+const seasonTwoRamp = minutesForResetDay(1, TYPE, 'ten', 2);
 check(
   'later seasons skip the warm-up minutes',
-  levelOneDay.minutes === 5 && levelTwoDay.minutes === 8,
-  `${levelOneDay.minutes} / ${levelTwoDay.minutes}`,
+  seasonOneRamp === 5 && seasonTwoRamp === 8,
+  `${seasonOneRamp} / ${seasonTwoRamp}`,
 );
 
 // Starting the next season.

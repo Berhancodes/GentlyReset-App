@@ -13,7 +13,8 @@
       "bundleIdentifier": "com.gentlyreset.app",
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {

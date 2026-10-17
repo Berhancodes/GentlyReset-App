@@ -23,8 +23,9 @@ export function minutesFromCommitment(dailyCommitment?: string): number {
   return MINUTES_BY_COMMITMENT[dailyCommitment] ?? 5;
 }
 
+/** 0 minutes: the task happens inside something you already do. */
 export function formatMinutesLabel(minutes: number): string {
-  return `${minutes} min`;
+  return minutes > 0 ? `${minutes} min` : 'during your day';
 }
 
 /**

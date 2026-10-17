@@ -21,6 +21,7 @@ type FriendProgressCardProps = {
   tone: number;
   onEncourage: () => void;
   onRemove: () => void;
+  onReport: () => void;
 };
 
 export function FriendProgressCard({
@@ -30,6 +31,7 @@ export function FriendProgressCard({
   tone,
   onEncourage,
   onRemove,
+  onReport,
 }: FriendProgressCardProps) {
   const copy = progress ? friendProgressCopy(progress) : null;
   const accessibilityBits = [
@@ -65,6 +67,19 @@ export function FriendProgressCard({
         ) : (
           <View style={styles.flex} />
         )}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Report ${friend.displayName ?? friend.username ?? 'this friend'}`}
+          accessibilityState={{ disabled: busy }}
+          disabled={busy}
+          onPress={onReport}
+          hitSlop={spacing.xs}
+          style={({ pressed }) => [styles.report, pressed ? styles.reportPressed : null]}
+        >
+          <Text style={styles.reportLabel} maxFontSizeMultiplier={1.3}>
+            Report
+          </Text>
+        </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Send ${friend.displayName ?? friend.username ?? 'your friend'} a postcard`}
@@ -110,6 +125,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: radius.pill,
     backgroundColor: colors.stage.chipSelected,
+  },
+  report: {
+    minHeight: spacing.hitTarget - spacing.xxs,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xs,
+  },
+  reportPressed: {
+    opacity: 0.6,
+  },
+  reportLabel: {
+    fontFamily: fontFamilies.rounded,
+    fontSize: fontSizes.xs,
+    fontWeight: fontWeights.bold,
+    color: colors.stage.copySoft,
   },
   sendPressed: {
     transform: [{ scale: 0.96 }],

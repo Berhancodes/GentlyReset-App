@@ -27,6 +27,7 @@ import {
 import { openLegalDocument } from '@/features/legal/utils/openLegalDocument';
 import { UnlockStepsBar } from '@/features/onboarding/components/UnlockStepsBar';
 import { STAGE_POSE_ART, STAGE_POSE_SCALE } from '@/features/onboarding/stage/stagePoses';
+import { useAuth } from '@/features/auth/session/useAuth';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { getResetProfileForAnswers } from '@/features/reset/data/resetProfiles';
 import { getPaywallUnlockLabel } from '@/features/subscription/access/getPaywallPrimaryAction';
@@ -57,6 +58,7 @@ const TIGHT_HEIGHT = 700;
 export function HardPaywallScreen() {
   const router = useRouter();
   const grantLocalAppAccess = useOnboardingStore((state) => state.grantLocalAppAccess);
+  const { isAuthenticated } = useAuth();
   const answers = useOnboardingStore((state) => state.answers);
   const {
     available,
@@ -102,7 +104,8 @@ export function HardPaywallScreen() {
     if (__DEV__) {
       grantLocalAppAccess();
     }
-    router.replace('/(app)/(tabs)/home');
+    // Paid without an account: offer to save progress before Home (skippable).
+    router.replace(isAuthenticated ? '/(app)/(tabs)/home' : '/(app)/save-progress');
   };
 
   /** Buys the selected plan through the App Store. The app opens only once Pro is active. */

@@ -8,11 +8,11 @@ export const LEGAL_DETAILS = {
   /** The person or company that runs the app. */
   operator: 'Gentlyreset',
   /** Where people send privacy requests, deletion requests and questions. */
-  contactEmail: '[support email]',
+  contactEmail: 'gentlyreset@gmail.com',
   /** Whose laws govern the Terms, e.g. "the Province of Alberta, Canada". */
-  governingLaw: '[your province/state and country]',
+  governingLaw: 'the Province of Alberta, Canada',
   /** Shown at the top of both documents. */
-  lastUpdated: 'October 9, 2026',
+  lastUpdated: 'October 16, 2026',
   /** Youngest age allowed to use the app. */
   minimumAge: 13,
 } as const;

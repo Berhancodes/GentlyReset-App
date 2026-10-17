@@ -1,8 +1,18 @@
 import { memo } from 'react';
 import { View } from 'react-native';
-import Svg, { Circle, Defs, Ellipse, G, Path, Pattern, Rect } from 'react-native-svg';
+import Svg, {
+  Circle,
+  Defs,
+  Ellipse,
+  G,
+  Path,
+  Pattern,
+  Rect,
+  Text as SvgText,
+} from 'react-native-svg';
 
 import { colors } from '@/design-system';
+import { SEASON_ROOM_ICONS } from '@/features/room/data/roomStages';
 import type { HomeMascotBackdropLayout } from '@/features/home/components/HomeMascot';
 
 /** The room is drawn in a 390-wide box; this slice of it holds the wall and floor. */
@@ -41,6 +51,8 @@ type HomeRoomProps = {
   /** Which friend just arrived, for its sparkle. */
   newestItem: number | null;
   width: number;
+  /** 0-based season; each season's room has its own wallpaper. */
+  seasonIndex?: number;
 };
 
 function Face({ x, y, size = 1 }: { x: number; y: number; size?: number }) {
@@ -249,7 +261,28 @@ function ShelfAndLamp() {
   );
 }
 
-function PersonalTouches() {
+type SeasonWallpaper = (typeof C.seasons)[number];
+
+/** Season 1 frames a heart; later seasons frame their room's own picture. */
+function FramedPicture({ seasonIndex }: { seasonIndex: number }) {
+  const icon = seasonIndex > 0 ? SEASON_ROOM_ICONS[seasonIndex] : undefined;
+  if (!icon) {
+    return <Heart x={155} y={466} scale={1.5} fill={C.blush} />;
+  }
+  return (
+    <SvgText x={155} y={464} fontSize={32} textAnchor="middle">
+      {icon}
+    </SvgText>
+  );
+}
+
+function PersonalTouches({
+  seasonIndex,
+  wallpaper,
+}: {
+  seasonIndex: number;
+  wallpaper: SeasonWallpaper;
+}) {
   const lights = Array.from({ length: 9 }, (_, index) => ({
     x: 4 + index * 48,
     y: 388 + (index % 2 === 1 ? 8 : 0),
@@ -283,10 +316,10 @@ function PersonalTouches() {
         stroke={C.ink}
         strokeWidth={3}
       />
-      <Heart x={155} y={466} scale={1.5} fill={C.blush} />
+      <FramedPicture seasonIndex={seasonIndex} />
       <Path
         d="M58 726 a20 20 0 0 1 30 -18 a30 30 0 0 1 54 -6 a30 30 0 0 1 54 0 a30 30 0 0 1 54 6 a20 20 0 0 1 30 18 a16 16 0 0 1 -16 18 h-190 a16 16 0 0 1 -16 -18 z"
-        fill={C.rug}
+        fill={wallpaper.rug}
         stroke={C.ink}
         strokeWidth={3}
       />
@@ -454,7 +487,9 @@ export const HomeRoom = memo(function HomeRoom({
   newestItem,
   width,
   look = 'room',
+  seasonIndex = 0,
 }: HomeRoomProps) {
+  const wallpaper = C.seasons[seasonIndex % C.seasons.length] ?? C.seasons[0]!;
   const shape = SHAPES[Math.max(0, Math.min(SHAPES.length - 1, stageIndex))] ?? SHAPES[0]!;
   const golden = stageIndex >= 4;
   const sparkle = newestItem ? sparkleSpot(newestItem, shape.cushionX) : null;
@@ -467,8 +502,8 @@ export const HomeRoom = memo(function HomeRoom({
     >
       <Defs>
         <Pattern id="roomDots" width={26} height={26} patternUnits="userSpaceOnUse">
-          <Circle cx={6} cy={6} r={2.6} fill={C.dotPeach} />
-          <Circle cx={19} cy={19} r={2.6} fill={C.dotButter} />
+          <Circle cx={6} cy={6} r={2.6} fill={wallpaper.dot} />
+          <Circle cx={19} cy={19} r={2.6} fill={wallpaper.accent} />
         </Pattern>
         <Pattern id="roomPlanks" width={60} height={30} patternUnits="userSpaceOnUse">
           <Rect width={60} height={30} fill={C.plank} />
@@ -484,7 +519,7 @@ export const HomeRoom = memo(function HomeRoom({
             width={shape.width}
             height={320}
             rx={shape.radius}
-            fill={C.wall}
+            fill={wallpaper.wall}
             stroke={C.ink}
             strokeWidth={shape.edge}
           />
@@ -530,7 +565,9 @@ export const HomeRoom = memo(function HomeRoom({
       {stageIndex === 1 || stageIndex === 2 ? <Bunting shape={shape} /> : null}
       {stageIndex >= 1 ? <ArchedWindow golden={golden} /> : null}
       {stageIndex >= 2 ? <ShelfAndLamp /> : null}
-      {stageIndex >= 3 ? <PersonalTouches /> : null}
+      {stageIndex >= 3 ? (
+        <PersonalTouches seasonIndex={seasonIndex % C.seasons.length} wallpaper={wallpaper} />
+      ) : null}
       <Friends count={itemCount} cushionX={shape.cushionX} />
       {sparkle ? (
         <G>

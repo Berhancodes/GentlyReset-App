@@ -11,6 +11,7 @@ import type {
   InviteResolution,
   PublicFriendIdentity,
   ReceivedEncouragement,
+  ReportReason,
 } from '../types';
 import { normalizeUsername } from '../username';
 
@@ -332,6 +333,25 @@ export async function cancelFriendRequest(requestId: string): Promise<FriendActi
     return unconfigured();
   }
   const { data, error } = await client.rpc('cancel_friend_request', { request_id: requestId });
+  if (error) {
+    return { ok: false, code: 'conflict', message: friendsErrorMessage('conflict') };
+  }
+  return asAction((data ?? null) as JsonResult | null);
+}
+
+/** Files a report for the owner to review. Users can't read reports back. */
+export async function reportUser(
+  targetUserId: string,
+  reason: ReportReason,
+): Promise<FriendActionResult> {
+  const client = supabase;
+  if (!client || !isSupabaseConfigured) {
+    return unconfigured();
+  }
+  const { data, error } = await client.rpc('report_user', {
+    target_user_id: targetUserId,
+    report_reason: reason,
+  });
   if (error) {
     return { ok: false, code: 'conflict', message: friendsErrorMessage('conflict') };
   }

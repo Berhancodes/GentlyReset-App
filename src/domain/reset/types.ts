@@ -77,9 +77,12 @@ export type TodayTask = {
   day: number;
   title: string;
   description: string;
+  /** The task's own time; 0 means it happens during something you already do. */
   minutes: number;
-  /** Today's checklist: prepare, do the action, check in. */
+  /** Today's three concrete steps. */
   steps: readonly string[];
+  /** An easier version that still counts, offered to gentler reset types. */
+  lighter?: string;
 };
 
 /**

@@ -26,12 +26,11 @@ import {
   textVariants,
 } from '@/design-system';
 import { JourneyConfetti } from '@/features/journey/components/JourneyConfetti';
-import { JOURNEY_DAY_STEPS } from '@/features/journey/data/journeyCopy';
+import { getStepProgressLine, JOURNEY_DAY_STEPS } from '@/features/journey/data/journeyCopy';
 import { JOURNEY_GARDEN_SHEET_POSE } from '@/features/journey/data/journeyGarden';
 import { useJourneyVisualStore } from '@/features/journey/store/useJourneyVisualStore';
 import type { JourneySheetModel } from '@/features/journey/utils/getJourneySheetModel';
 import { shortenSheetDescription } from '@/features/journey/utils/shortenSheetDescription';
-import { StageButton } from '@/features/onboarding/stage/StageButton';
 import { STAGE_POSE_ART } from '@/features/onboarding/stage/stagePoses';
 import { capitalizeHeading } from '@/features/onboarding/utils/capitalizeHeading';
 import { hapticConfetti } from '@/utils/haptics';
@@ -49,17 +48,18 @@ type JourneyGardenSheetProps = {
   visible: boolean;
   model: JourneySheetModel | null;
   onClose: () => void;
-  onPrimary: () => void;
   /** A step was ticked; `checkedCount` of the day's steps are now done. */
   onStepChecked: (checkedCount: number) => void;
 };
 
-/** The day pop-up on the garden stage: him peeking in, the steps as chips, one button. */
+/**
+ * The day pop-up on the garden stage: him peeking in and the day's three steps.
+ * Ticking all three is the only way to check in; there is no shortcut button.
+ */
 export function JourneyGardenSheet({
   visible,
   model,
   onClose,
-  onPrimary,
   onStepChecked,
 }: JourneyGardenSheetProps) {
   const insets = useSafeAreaInsets();
@@ -162,7 +162,6 @@ export function JourneyGardenSheet({
             <View style={styles.handle} accessibilityElementsHidden />
             <SheetContent
               model={shownModel}
-              onPrimary={onPrimary}
               onStepTicked={(checkedCount) => {
                 hopMascot();
                 onStepChecked(checkedCount);
@@ -177,13 +176,12 @@ export function JourneyGardenSheet({
 
 type SheetContentProps = {
   model: JourneySheetModel;
-  onPrimary: () => void;
   onStepTicked: (checkedCount: number) => void;
 };
 
 type Burst = { key: number; x: number; y: number };
 
-function SheetContent({ model, onPrimary, onStepTicked }: SheetContentProps) {
+function SheetContent({ model, onStepTicked }: SheetContentProps) {
   const [burst, setBurst] = useState<Burst>({ key: 0, x: 0, y: 0 });
   const stepChecks = useJourneyVisualStore((state) => state.stepChecks);
   const checkStep = useJourneyVisualStore((state) => state.checkStep);
@@ -275,6 +273,13 @@ function SheetContent({ model, onPrimary, onStepTicked }: SheetContentProps) {
         </View>
       ) : null}
 
+      {model.kind === 'current' && model.lighter ? (
+        <Text style={styles.lighter} maxFontSizeMultiplier={1.3}>
+          <Text style={styles.lighterLabel}>Lighter option: </Text>
+          {model.lighter}
+        </Text>
+      ) : null}
+
       {model.rememberLine ? (
         <Text style={styles.remember} maxFontSizeMultiplier={1.3}>
           {`“${capitalizeHeading(model.rememberLine)}”`}
@@ -287,8 +292,10 @@ function SheetContent({ model, onPrimary, onStepTicked }: SheetContentProps) {
         </Text>
       ) : null}
 
-      {model.cta !== 'none' && model.ctaLabel ? (
-        <StageButton label={model.ctaLabel} onPress={onPrimary} />
+      {model.checkIn === 'by-steps' ? (
+        <Text style={styles.progress} accessibilityLiveRegion="polite" maxFontSizeMultiplier={1.3}>
+          {getStepProgressLine(checked.length, JOURNEY_DAY_STEPS.length)}
+        </Text>
       ) : null}
 
       <JourneyConfetti burstKey={burst.key} originX={burst.x} originY={burst.y} />
@@ -371,9 +378,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   chips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
+    alignSelf: 'stretch',
     gap: spacing.xs,
   },
   chip: {
@@ -383,7 +388,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
-    borderRadius: radius.pill,
+    borderRadius: radius.lg,
     borderWidth: 1.5,
     borderColor: colors.stage.chipBorder,
     backgroundColor: colors.stage.chip,
@@ -401,6 +406,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
   chipLabel: {
+    flex: 1,
     fontFamily: fontFamilies.rounded,
     fontSize: fontSizes.stageChip,
     lineHeight: lineHeights.stageChip,
@@ -428,6 +434,22 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderColor: colors.text.inverse,
     transform: [{ rotate: '-45deg' }],
+  },
+  progress: {
+    ...textVariants.stageSubtitle,
+    color: colors.stage.copySoft,
+    textAlign: 'center',
+    paddingVertical: spacing.xs,
+  },
+  lighter: {
+    ...textVariants.stageSubtitle,
+    color: colors.stage.copySoft,
+    textAlign: 'center',
+    paddingHorizontal: spacing.sm,
+  },
+  lighterLabel: {
+    fontWeight: fontWeights.heavy,
+    color: colors.text.primary,
   },
   remember: {
     ...textVariants.stageSubtitle,

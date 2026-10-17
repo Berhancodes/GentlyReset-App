@@ -7,7 +7,7 @@ import { MIND_DEEP_MOVES, MIND_MOVES } from './mind';
 import type { AreaMove } from './move';
 import { RELATIONSHIPS_DEEP_MOVES, RELATIONSHIPS_MOVES } from './relationships';
 
-export type { AreaMove } from './move';
+export type { AreaMove, TaskTime } from './move';
 
 /** Thirty concrete days per focus area, in plan order. Level 1: the first season in an area. */
 export const AREA_MOVES: Record<FocusAreaId, readonly AreaMove[]> = {
