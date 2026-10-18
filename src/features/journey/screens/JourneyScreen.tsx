@@ -23,6 +23,7 @@ import { getJourneySheetModel } from '@/features/journey/utils/getJourneySheetMo
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
+import { requestReviewAfterCheckIn } from '@/features/review/requestReviewAfterCheckIn';
 import { toLocalDateKey } from '@/features/reset/utils/calendar';
 import { getCurrentResetTask } from '@/features/reset/utils/resetSelectors';
 
@@ -45,6 +46,8 @@ function JourneyStatsButton() {
 const SHEET_CLOSE_MS = 300;
 /** Pause after the last step's tick so it registers before the pop-up leaves. */
 const LAST_TICK_PAUSE_MS = 700;
+/** Lets him settle into his nap before the rating prompt appears. */
+const REVIEW_PROMPT_DELAY_MS = 1200;
 
 /** Streak pill: only shown once there's a streak to show. */
 function JourneyStreakPill({ streak }: { streak: number }) {
@@ -220,7 +223,14 @@ export function JourneyScreen() {
       <JourneyDayCelebration
         active={celebration === 'playing'}
         day={currentDay}
-        onDone={() => setCelebration('none')}
+        onDone={() => {
+          setCelebration('none');
+          // Once day 3 is checked in, Apple's rating prompt follows the celebration.
+          setTimeout(
+            () => void requestReviewAfterCheckIn(completedDays.length),
+            REVIEW_PROMPT_DELAY_MS,
+          );
+        }}
       />
     </Screen>
   );
