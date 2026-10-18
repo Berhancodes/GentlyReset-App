@@ -4,12 +4,12 @@
     "slug": "gently-reset",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/app-icon.png",
     "scheme": "gentlyreset",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": false,
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/images/app-icon.png",
       "bundleIdentifier": "com.gentlyreset.app",
       "config": {
         "usesNonExemptEncryption": false
