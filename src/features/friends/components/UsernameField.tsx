@@ -69,14 +69,17 @@ const styles = StyleSheet.create({
   },
   prefix: {
     marginRight: spacing.xxs,
-    justifyContent: 'center',
   },
+  // Same font as the "@" but no lineHeight: on iOS a lineHeight in a TextInput
+  // pushes the typed text below the centre, out of line with the "@".
   input: {
-    ...textVariants.body,
+    fontFamily: textVariants.body.fontFamily,
+    fontSize: textVariants.body.fontSize,
+    fontWeight: textVariants.body.fontWeight,
     flex: 1,
-    minHeight: spacing.hitTarget + spacing.xs,
+    alignSelf: 'stretch',
     paddingRight: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: 0,
     color: colors.text.primary,
   },
 });
