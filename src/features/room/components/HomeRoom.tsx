@@ -12,6 +12,13 @@ import Svg, {
 } from 'react-native-svg';
 
 import { colors } from '@/design-system';
+import { RoomFace } from '@/features/room/components/RoomFace';
+import {
+  getSeasonWindowView,
+  SeasonFurniture,
+  WindowScene,
+  type WindowView,
+} from '@/features/room/components/SeasonFurniture';
 import { SEASON_ROOM_ICONS } from '@/features/room/data/roomStages';
 import type { HomeMascotBackdropLayout } from '@/features/home/components/HomeMascot';
 
@@ -54,24 +61,6 @@ type HomeRoomProps = {
   /** 0-based season; each season's room has its own wallpaper. */
   seasonIndex?: number;
 };
-
-function Face({ x, y, size = 1 }: { x: number; y: number; size?: number }) {
-  return (
-    <G>
-      <Circle cx={x - 6 * size} cy={y} r={2.1 * size} fill={C.ink} />
-      <Circle cx={x + 6 * size} cy={y} r={2.1 * size} fill={C.ink} />
-      <Path
-        d={`M${x - 3 * size} ${y + 4 * size} q${3 * size} ${3 * size} ${6 * size} 0`}
-        fill="none"
-        stroke={C.ink}
-        strokeWidth={1.7}
-        strokeLinecap="round"
-      />
-      <Ellipse cx={x - 11 * size} cy={y + 5 * size} rx={3.4 * size} ry={2 * size} fill={C.blush} />
-      <Ellipse cx={x + 11 * size} cy={y + 5 * size} rx={3.4 * size} ry={2 * size} fill={C.blush} />
-    </G>
-  );
-}
 
 function Heart({ x, y, scale = 1, fill }: { x: number; y: number; scale?: number; fill: string }) {
   return (
@@ -128,30 +117,35 @@ function Bunting({ shape }: { shape: RoomShape }) {
   );
 }
 
-function ArchedWindow({ golden }: { golden: boolean }) {
+function ArchedWindow({ golden, view }: { golden: boolean; view: WindowView }) {
   return (
     <G>
       <Path
         d="M226 500 V430 a44 44 0 0 1 88 0 V500 Z"
-        fill={golden ? C.sunsetSky : C.sky}
+        fill={view === 'moon' ? C.night : golden ? C.sunsetSky : C.sky}
         stroke={C.ink}
         strokeWidth={3}
       />
-      <Circle
-        cx={270}
-        cy={446}
-        r={18}
-        fill={golden ? C.sunset : C.butter}
-        stroke={C.ink}
-        strokeWidth={2.5}
-      />
-      <Face x={270} y={444} size={0.8} />
-      <Path
-        d="M236 486 a8 8 0 0 1 10 -8 a10 10 0 0 1 18 2 a7 7 0 0 1 4 8 z"
-        fill={C.trim}
-        stroke={C.ink}
-        strokeWidth={2}
-      />
+      {view === 'moon' || view === 'rainbow' || view === 'bubbles' ? null : (
+        <G>
+          <Circle
+            cx={270}
+            cy={446}
+            r={18}
+            fill={golden ? C.sunset : C.butter}
+            stroke={C.ink}
+            strokeWidth={2.5}
+          />
+          <RoomFace x={270} y={444} size={0.8} />
+          <Path
+            d="M236 486 a8 8 0 0 1 10 -8 a10 10 0 0 1 18 2 a7 7 0 0 1 4 8 z"
+            fill={C.trim}
+            stroke={C.ink}
+            strokeWidth={2}
+          />
+        </G>
+      )}
+      <WindowScene view={view} />
       <Path
         d="M218 412 q18 46 -2 92 h-8 v-92 z"
         fill={C.peach}
@@ -192,55 +186,10 @@ function ArchedWindow({ golden }: { golden: boolean }) {
   );
 }
 
-function ShelfAndLamp() {
+/** The mushroom lamp that arrives with week 2 in every season. */
+function MushroomLamp() {
   return (
     <G>
-      <Rect
-        x={22}
-        y={440}
-        width={78}
-        height={168}
-        rx={14}
-        fill={C.plank}
-        stroke={C.ink}
-        strokeWidth={3}
-      />
-      <Path d="M22 498 H100 M22 556 H100" stroke={C.ink} strokeWidth={3} />
-      <Rect
-        x={32}
-        y={470}
-        width={11}
-        height={28}
-        rx={3}
-        fill={C.blush}
-        stroke={C.ink}
-        strokeWidth={2}
-      />
-      <Rect
-        x={45}
-        y={474}
-        width={11}
-        height={24}
-        rx={3}
-        fill={C.butter}
-        stroke={C.ink}
-        strokeWidth={2}
-      />
-      <Rect
-        x={58}
-        y={466}
-        width={12}
-        height={32}
-        rx={3}
-        fill={C.skyBlue}
-        stroke={C.ink}
-        strokeWidth={2}
-      />
-      <Path d="M76 498 v-20 a8 8 0 0 1 16 0 v20 z" fill={C.trim} stroke={C.ink} strokeWidth={2} />
-      <Path d="M81 484 l2 -4 l2 4 l4 1 l-3 3 l1 4 l-4 -2 l-4 2 l1 -4 l-3 -3 z" fill={C.gold} />
-      <Path d="M40 556 v-16 h24 v16 z" fill={C.peach} stroke={C.ink} strokeWidth={2} />
-      <Face x={52} y={547} size={0.55} />
-      <Ellipse cx={52} cy={536} rx={10} ry={7} fill={C.blush} stroke={C.ink} strokeWidth={2} />
       <Circle cx={350} cy={560} r={46} fill={C.lampGlow} />
       <Path d="M318 566 a32 30 0 0 1 64 0 z" fill={C.blush} stroke={C.ink} strokeWidth={3} />
       <Circle cx={336} cy={552} r={5} fill={C.trim} />
@@ -256,7 +205,7 @@ function ShelfAndLamp() {
         stroke={C.ink}
         strokeWidth={3}
       />
-      <Face x={350} y={584} size={0.6} />
+      <RoomFace x={350} y={584} size={0.6} />
     </G>
   );
 }
@@ -370,7 +319,7 @@ function Friends({ count, cushionX }: { count: number; cushionX: number }) {
             stroke={C.ink}
             strokeWidth={3}
           />
-          <Face x={cushionX} y={711} />
+          <RoomFace x={cushionX} y={711} />
         </G>
       ) : null}
       {count >= 2 ? (
@@ -387,7 +336,7 @@ function Friends({ count, cushionX }: { count: number; cushionX: number }) {
             strokeWidth={3}
           />
           <Path d="M312 662 q10 2 8 10 q-2 6 -8 6" fill="none" stroke={C.ink} strokeWidth={3} />
-          <Face x={297} y={668} size={0.8} />
+          <RoomFace x={297} y={668} size={0.8} />
         </G>
       ) : null}
       {count >= 3 ? (
@@ -399,7 +348,7 @@ function Friends({ count, cushionX }: { count: number; cushionX: number }) {
             strokeWidth={3}
             strokeLinejoin="round"
           />
-          <Face x={328} y={731} size={0.8} />
+          <RoomFace x={328} y={731} size={0.8} />
         </G>
       ) : null}
       {count >= 4 ? (
@@ -456,7 +405,7 @@ function Friends({ count, cushionX }: { count: number; cushionX: number }) {
             stroke={C.ink}
             strokeWidth={1.8}
           />
-          <Face x={361} y={680} size={0.6} />
+          <RoomFace x={361} y={680} size={0.6} />
         </G>
       ) : null}
     </G>
@@ -563,8 +512,20 @@ export const HomeRoom = memo(function HomeRoom({
       )}
 
       {stageIndex === 1 || stageIndex === 2 ? <Bunting shape={shape} /> : null}
-      {stageIndex >= 1 ? <ArchedWindow golden={golden} /> : null}
-      {stageIndex >= 2 ? <ShelfAndLamp /> : null}
+      {stageIndex >= 1 ? (
+        <ArchedWindow golden={golden} view={getSeasonWindowView(seasonIndex % C.seasons.length)} />
+      ) : null}
+      {stageIndex >= 2 ? (
+        <G>
+          <SeasonFurniture
+            seasonIndex={seasonIndex % C.seasons.length}
+            roomLeft={shape.x}
+            roomRadius={shape.radius}
+            walls={look === 'room'}
+          />
+          <MushroomLamp />
+        </G>
+      ) : null}
       {stageIndex >= 3 ? (
         <PersonalTouches seasonIndex={seasonIndex % C.seasons.length} wallpaper={wallpaper} />
       ) : null}

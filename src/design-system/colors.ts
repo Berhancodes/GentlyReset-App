@@ -380,6 +380,11 @@ export const colors = {
     kicker: palette.roomKicker,
     locked: palette.roomLocked,
     lockedBorder: palette.cocoaTan,
+    /** Plants in the garden, sunroom and porch rooms. */
+    leaf: palette.leafGreen,
+    leafSoft: palette.sageLight,
+    /** Night sky in the reading nook and star attic windows. */
+    night: palette.night,
     lampGlow: 'rgba(247, 233, 176, 0.5)',
     goldenHour: 'rgba(247, 196, 120, 0.16)',
     floorShadow: 'rgba(58, 33, 18, 0.12)',
