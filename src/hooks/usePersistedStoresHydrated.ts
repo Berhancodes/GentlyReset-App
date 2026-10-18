@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { useJourneyVisualStore } from '@/features/journey/store/useJourneyVisualStore';
+import { useNotificationStore } from '@/features/notifications/store/useNotificationStore';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { useJournalDraftStore } from '@/features/reflect/store/useJournalDraftStore';
 import { useRoomStore } from '@/features/room/store/useRoomStore';
@@ -16,7 +17,8 @@ function bothHydrated(): boolean {
     useResetSyncStore.persist.hasHydrated() &&
     useJournalDraftStore.persist.hasHydrated() &&
     useRoomStore.persist.hasHydrated() &&
-    useWidgetStore.persist.hasHydrated()
+    useWidgetStore.persist.hasHydrated() &&
+    useNotificationStore.persist.hasHydrated()
   );
 }
 
@@ -52,6 +54,7 @@ export function usePersistedStoresHydrated(): boolean {
     const unsubscribeJourneyVisual = useJourneyVisualStore.persist.onFinishHydration(update);
     const unsubscribeResetSync = useResetSyncStore.persist.onFinishHydration(update);
     const unsubscribeJournalDraft = useJournalDraftStore.persist.onFinishHydration(update);
+    const unsubscribeNotifications = useNotificationStore.persist.onFinishHydration(update);
     update();
 
     return () => {
@@ -60,6 +63,7 @@ export function usePersistedStoresHydrated(): boolean {
       unsubscribeJourneyVisual();
       unsubscribeResetSync();
       unsubscribeJournalDraft();
+      unsubscribeNotifications();
     };
   }, []);
 

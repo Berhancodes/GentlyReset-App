@@ -31,6 +31,7 @@ export const PRIVACY_POLICY: LegalDocument = {
         'Your full setup answers and any unsaved journal drafts stay on your device.',
         'Friends: who you are friends with, requests you send or receive, and invite links you create.',
         'Kind words: the preset encouragements you send or receive, who sent them, and when.',
+        'Notifications: if you turn on friend notifications, a notification address for your phone (a push token) so we can tell you when a friend sends kind words or a friend request. It’s removed when you turn them off, sign out, or delete your account. Daily reminders are scheduled on your phone and never sent through our servers.',
         'Purchases: if you subscribe, Apple handles payment. We receive only your subscription status through our purchase provider, never your card details.',
         'Crash reports: if the app crashes or hits an error, it sends a report with technical details (device model, iOS version, app version, and what went wrong) so we can fix it. Reports don’t include your journal, your email, or your name.',
       ],
@@ -53,7 +54,7 @@ export const PRIVACY_POLICY: LegalDocument = {
     {
       heading: 'How we use your information',
       paragraphs: [
-        'To run the app: signing you in, saving and restoring your progress and journal, showing your friends’ progress, and delivering kind words.',
+        'To run the app: signing you in, saving and restoring your progress and journal, showing your friends’ progress, delivering kind words, and sending the notifications you turn on.',
         'To manage your subscription and unlock Gently Reset Pro.',
         'To find and fix crashes and errors.',
         'To answer you when you contact us.',
@@ -62,7 +63,7 @@ export const PRIVACY_POLICY: LegalDocument = {
     {
       heading: 'Who helps us run the app',
       paragraphs: [
-        'We use a small number of service providers that process data on our behalf: Supabase for accounts and backups, RevenueCat for subscription status, Sentry for crash reports, Apple for payments, app delivery and Sign in with Apple, and Google for Sign in with Google. They may only use your information to provide their service to us.',
+        'We use a small number of service providers that process data on our behalf: Supabase for accounts and backups, RevenueCat for subscription status, Sentry for crash reports, Expo for delivering notifications, Apple for payments, notifications, app delivery and Sign in with Apple, and Google for Sign in with Google. They may only use your information to provide their service to us.',
         'We may share information if the law requires it, or to protect the safety of our users.',
       ],
     },

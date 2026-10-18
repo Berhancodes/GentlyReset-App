@@ -29,6 +29,8 @@ import { ResetTypeCard } from '@/features/profile/components/ResetTypeCard';
 import { LEGAL_DETAILS } from '@/features/legal/data/legalDetails';
 import { openLegalDocument } from '@/features/legal/utils/openLegalDocument';
 import { hasSupportEmail, openSupportEmail } from '@/features/legal/utils/openSupport';
+import { NotificationSettingsCard } from '@/features/notifications/components/NotificationSettingsCard';
+import { releasePushToken } from '@/features/notifications/sync/releasePushToken';
 import { ProfileLinkRows } from '@/features/profile/components/ProfileLinkRows';
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
@@ -222,7 +224,8 @@ export function ProfileScreen() {
       returnToFirstOnboarding();
       return;
     }
-    void signOut()
+    void releasePushToken()
+      .then(() => signOut())
       .then((result) => {
         if (!result.ok) {
           setNotice({
@@ -286,6 +289,7 @@ export function ProfileScreen() {
           onSeeAll={() => router.push('/journey-stats')}
         />
         <ProfileAnswersCard rows={answerRows} />
+        <NotificationSettingsCard signedIn={isAuthenticated} />
         <ProfileLinkRows
           links={[
             ...(isAuthenticated

@@ -78,7 +78,8 @@ type SummaryCardProps = {
   children: ReactNode;
 };
 
-function SummaryCard({ title, action, children }: SummaryCardProps) {
+/** A Profile card: heading with an optional action, then its rows. */
+export function SummaryCard({ title, action, children }: SummaryCardProps) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>

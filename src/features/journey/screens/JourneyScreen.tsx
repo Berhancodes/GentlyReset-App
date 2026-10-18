@@ -20,6 +20,8 @@ import { useJourneyVisualStore } from '@/features/journey/store/useJourneyVisual
 import type { JourneySeason } from '@/features/journey/utils/getJourneySeason';
 import { getJourneyVisualTargetDay } from '@/features/journey/utils/getJourneyProgression';
 import { getJourneySheetModel } from '@/features/journey/utils/getJourneySheetModel';
+import { ReminderPromptDialog } from '@/features/notifications/components/ReminderPromptDialog';
+import { useReminderPrompt } from '@/features/notifications/hooks/useReminderPrompt';
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
@@ -46,7 +48,7 @@ function JourneyStatsButton() {
 const SHEET_CLOSE_MS = 300;
 /** Pause after the last step's tick so it registers before the pop-up leaves. */
 const LAST_TICK_PAUSE_MS = 700;
-/** Lets him settle into his nap before the rating prompt appears. */
+/** Lets him settle into his nap before the reminder or rating prompt appears. */
 const REVIEW_PROMPT_DELAY_MS = 1200;
 
 /** Streak pill: only shown once there's a streak to show. */
@@ -67,6 +69,7 @@ function JourneyStreakPill({ streak }: { streak: number }) {
 export function JourneyScreen() {
   useSyncResetDay();
   const insets = useSafeAreaInsets();
+  const reminderPrompt = useReminderPrompt();
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   // 'pending' covers the pop-up sliding away; the heading holds the old day until 'none'.
   const [celebration, setCelebration] = useState<'none' | 'pending' | 'playing'>('none');
@@ -225,12 +228,19 @@ export function JourneyScreen() {
         day={currentDay}
         onDone={() => {
           setCelebration('none');
-          // Once day 3 is checked in, Apple's rating prompt follows the celebration.
-          setTimeout(
-            () => void requestReviewAfterCheckIn(completedDays.length),
-            REVIEW_PROMPT_DELAY_MS,
-          );
+          // After a check-in, ask once about reminders, or (from day 3) for a rating.
+          // Never both at once; a skipped rating is asked after a later check-in.
+          setTimeout(() => {
+            if (!reminderPrompt.showAfterCheckIn()) {
+              void requestReviewAfterCheckIn(completedDays.length);
+            }
+          }, REVIEW_PROMPT_DELAY_MS);
         }}
+      />
+      <ReminderPromptDialog
+        visible={reminderPrompt.visible}
+        timeLabel={reminderPrompt.timeLabel}
+        onAnswer={reminderPrompt.answer}
       />
     </Screen>
   );

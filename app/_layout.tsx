@@ -11,6 +11,7 @@ import { colors } from '@/design-system';
 import { AuthProvider } from '@/features/auth/session/AuthProvider';
 import { useAuth } from '@/features/auth/session/useAuth';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { NotificationSyncController } from '@/features/notifications/sync/NotificationSyncController';
 import { ResetSyncController } from '@/features/reset/sync/ResetSyncController';
 import { WidgetSyncController } from '@/features/widgets/sync/WidgetSyncController';
 import { canEnterApp } from '@/features/subscription/access/canEnterApp';
@@ -67,6 +68,7 @@ function RootLayoutReady() {
         <StatusBar style="dark" />
         <ResetSyncController />
         <WidgetSyncController />
+        <NotificationSyncController />
         <Stack
           screenOptions={{
             headerShown: false,
