@@ -1,5 +1,5 @@
 import { FOCUS_AREA_IDS } from '../roadmap/focusAreas';
-import { buildDailyList, DAILY_LIST_SIZE, DAY_SLOTS } from './buildDailyList';
+import { buildDailyList, DAILY_LIST_SIZE, DAY_SLOTS, dailyHeadline } from './buildDailyList';
 
 let failed = 0;
 
@@ -99,6 +99,19 @@ const day2 = buildDailyList({ day: 2, focusAreaId: 'mind', mainTitle: 'X' }).ite
   (entry) => entry.id,
 );
 check('consecutive days are mostly different', day2.filter((id) => day1.includes(id)).length <= 4);
+
+check(
+  'action titles read as "make sure you"',
+  dailyHeadline('Make your bed') === 'Today, make sure you make your bed.',
+);
+check(
+  'label titles read as a focus',
+  dailyHeadline('A set time for bed') === "Today's focus: A set time for bed.",
+);
+check(
+  'week check-ups read as a focus',
+  dailyHeadline('Week 1 check-up') === "Today's focus: Week 1 check-up.",
+);
 
 if (failed > 0) {
   throw new Error(`${failed} daily list check(s) failed`);
