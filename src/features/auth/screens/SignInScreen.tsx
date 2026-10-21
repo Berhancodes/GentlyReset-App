@@ -139,11 +139,8 @@ export function SignInScreen() {
           <AppText variant="caption" color="secondary" accessibilityLiveRegion="polite">
             {errors.form}
           </AppText>
-        ) : (
-          <AppText variant="caption" color="helper">
-            signing in does not change your local reset.
-          </AppText>
-        )}
+        ) : null}
+        {/* Right under the password box, so it's on screen even with the Apple and Google buttons. */}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Forgot password"
@@ -175,7 +172,8 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   forgot: {
-    alignSelf: 'flex-start',
+    alignSelf: 'flex-end',
+    marginTop: -spacing.xs,
     minHeight: spacing.hitTarget,
     justifyContent: 'center',
   },
