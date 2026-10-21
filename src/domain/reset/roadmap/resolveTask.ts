@@ -1,3 +1,4 @@
+import { buildDailyList } from '../dailyList/buildDailyList';
 import type { ResetPersonalization, TodayTask } from '../types';
 import { applyTaskModifiers, minutesForResetDay, resolveContentResetTypeId } from './modifiers';
 import { getAreaMoves, type AreaMove } from './areaMoves';
@@ -67,10 +68,20 @@ export function resolveTaskForDay(
     day: clamped,
   });
 
+  const title = withMinutes(areaMove.title, minutes);
+  const list = buildDailyList({
+    day: clamped,
+    focusAreaId,
+    mainTitle: title,
+    primaryObstacle: personalization.primaryObstacle,
+    recentFeeling: personalization.recentFeeling,
+    supportTiming: personalization.supportTiming,
+  });
+
   return {
     id: `day-${clamped}`,
     day: clamped,
-    title: withMinutes(areaMove.title, minutes),
+    title,
     description: `${areaMove.why} ${approach}`,
     minutes,
     category: primitive.category,
@@ -82,6 +93,7 @@ export function resolveTaskForDay(
     focusAreaId,
     steps: areaMove.steps.map((step) => withMinutes(step, minutes)),
     ...(lighter ? { lighter } : {}),
+    list,
   };
 }
 
@@ -99,6 +111,7 @@ export function getTaskForDay(
     minutes: resolved.minutes,
     steps: resolved.steps,
     ...(resolved.lighter ? { lighter: resolved.lighter } : {}),
+    list: resolved.list,
   };
 }
 

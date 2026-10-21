@@ -67,6 +67,8 @@ export function personalizationFromAnswers(
     desiredFeelings: getMultiChoiceIds(answers, 'desiredFeelings'),
     missedDayResponse: retention.missedDayResponse,
     focusAreas: focusAreasFromAnswers(answers),
+    recentFeeling: getSingleChoiceId(answers, 'recentFeeling'),
+    supportTiming: getSingleChoiceId(answers, 'supportTiming'),
   };
 }
 

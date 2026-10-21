@@ -1,3 +1,4 @@
+import type { DailyList } from '../dailyList/buildDailyList';
 import type { FocusAreaId } from './focusAreas';
 
 export const ROADMAP_PHASES = ['stabilize', 'change', 'pattern', 'independence', 'close'] as const;
@@ -55,4 +56,6 @@ export type ResolvedResetTask = {
   steps: readonly string[];
   /** An easier version that still counts, for reset types that lean gentle. */
   lighter?: string;
+  /** The day as ten small things around the main task. */
+  list: DailyList;
 };

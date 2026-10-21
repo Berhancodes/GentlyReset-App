@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,7 +12,6 @@ import {
   getJourneyChapterDays,
   getJourneyChapterForDay,
 } from '@/features/journey/data/journeyChapters';
-import { JOURNEY_DAY_STEPS } from '@/features/journey/data/journeyCopy';
 import { useJourneyProgression } from '@/features/journey/hooks/useJourneyProgression';
 import { getJourneyDayState } from '@/features/journey/utils/getJourneyDayState';
 import { StageBackdrop } from '@/features/onboarding/stage/StageBackdrop';
@@ -22,6 +21,9 @@ import { getJourneyVisualTargetDay } from '@/features/journey/utils/getJourneyPr
 import { getJourneySheetModel } from '@/features/journey/utils/getJourneySheetModel';
 import { ReminderPromptDialog } from '@/features/notifications/components/ReminderPromptDialog';
 import { useReminderPrompt } from '@/features/notifications/hooks/useReminderPrompt';
+import { DAILY_LIST_CHECK_IN_COUNT } from '@/domain/reset/dailyList/buildDailyList';
+import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
+import { getSingleChoiceId } from '@/features/onboarding/utils/answerReaders';
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
 import { useSyncResetDay } from '@/features/reset/hooks/useSyncResetDay';
 import { useResetStore } from '@/features/reset/store/useResetStore';
@@ -94,7 +96,19 @@ export function JourneyScreen() {
   const completedDays = useResetStore((state) => state.completedDays);
   const todayCompleted = useResetStore((state) => state.todayCompleted);
   const todayStarted = useResetStore((state) => state.todayStarted);
-  const personalization = useResetStore((state) => state.personalization);
+  const storedPersonalization = useResetStore((state) => state.personalization);
+  const answers = useOnboardingStore((state) => state.answers);
+  // Resets started before the daily list didn't save these two answers; read them from onboarding.
+  const personalization = useMemo(
+    () => ({
+      ...storedPersonalization,
+      recentFeeling:
+        storedPersonalization.recentFeeling ?? getSingleChoiceId(answers, 'recentFeeling'),
+      supportTiming:
+        storedPersonalization.supportTiming ?? getSingleChoiceId(answers, 'supportTiming'),
+    }),
+    [answers, storedPersonalization],
+  );
   const resetTypeId = useResetStore((state) => state.resetTypeId);
   const resetStartedOn = useResetStore((state) => state.resetStartedOn);
   const startToday = useResetStore((state) => state.startToday);
@@ -147,7 +161,8 @@ export function JourneyScreen() {
       if (!todayStarted) {
         startToday();
       }
-      if (checkedCount === JOURNEY_DAY_STEPS.length) {
+      // Any three of the day's list check it in.
+      if (checkedCount === DAILY_LIST_CHECK_IN_COUNT) {
         // Let the last tick and its confetti land before the pop-up slides away.
         setTimeout(finishDay, LAST_TICK_PAUSE_MS);
       }

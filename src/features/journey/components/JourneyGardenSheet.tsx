@@ -1,5 +1,13 @@
-import { useEffect, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Fragment, useEffect, useState } from 'react';
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
@@ -26,7 +34,15 @@ import {
   textVariants,
 } from '@/design-system';
 import { JourneyConfetti } from '@/features/journey/components/JourneyConfetti';
-import { getStepProgressLine, JOURNEY_DAY_STEPS } from '@/features/journey/data/journeyCopy';
+import {
+  getListProgressLine,
+  getStepProgressLine,
+  JOURNEY_DAY_STEPS,
+} from '@/features/journey/data/journeyCopy';
+import {
+  DAILY_LIST_CHECK_IN_COUNT,
+  DAY_SLOT_LABELS,
+} from '@/domain/reset/dailyList/buildDailyList';
 import { JOURNEY_GARDEN_SHEET_POSE } from '@/features/journey/data/journeyGarden';
 import { useJourneyVisualStore } from '@/features/journey/store/useJourneyVisualStore';
 import type { JourneySheetModel } from '@/features/journey/utils/getJourneySheetModel';
@@ -43,6 +59,8 @@ const PEEK_HEIGHT = 104;
 const PEEK_ABOVE = 0.74;
 const PEEK_HOP = 10;
 const TICK_SIZE = 18;
+/** The sheet's content scrolls past this share of the screen height (the ten-item list). */
+const SHEET_MAX_SHARE = 0.68;
 
 type JourneyGardenSheetProps = {
   visible: boolean;
@@ -53,8 +71,8 @@ type JourneyGardenSheetProps = {
 };
 
 /**
- * The day pop-up on the garden stage: him peeking in and the day's three steps.
- * Ticking all three is the only way to check in; there is no shortcut button.
+ * The day pop-up on the garden stage: him peeking in and the day's list of ten
+ * small things. Ticking any three is the only way to check in; there is no shortcut button.
  */
 export function JourneyGardenSheet({
   visible,
@@ -63,6 +81,7 @@ export function JourneyGardenSheet({
   onStepChecked,
 }: JourneyGardenSheetProps) {
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const reduceMotion = useReducedMotion();
   const openOffset = useSharedValue(1000);
   const dragOffset = useSharedValue(0);
@@ -134,8 +153,8 @@ export function JourneyGardenSheet({
       >
         <Animated.View style={[styles.scrim, scrimStyle]} />
       </Pressable>
-      <GestureDetector gesture={pan}>
-        <Animated.View style={sheetStyle} accessibilityViewIsModal>
+      <Animated.View style={sheetStyle} accessibilityViewIsModal>
+        <GestureDetector gesture={pan}>
           <Animated.View
             pointerEvents="none"
             accessibilityElementsHidden
@@ -153,13 +172,23 @@ export function JourneyGardenSheet({
               }}
             />
           </Animated.View>
-          <View
-            style={[
-              styles.sheet,
-              { paddingBottom: getTabBarScenePadding(insets.bottom) + spacing.sm },
-            ]}
+        </GestureDetector>
+        <View
+          style={[
+            styles.sheet,
+            { paddingBottom: getTabBarScenePadding(insets.bottom) + spacing.sm },
+          ]}
+        >
+          <GestureDetector gesture={pan}>
+            <View style={styles.handleArea}>
+              <View style={styles.handle} accessibilityElementsHidden />
+            </View>
+          </GestureDetector>
+          <ScrollView
+            style={{ maxHeight: windowHeight * SHEET_MAX_SHARE }}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
           >
-            <View style={styles.handle} accessibilityElementsHidden />
             <SheetContent
               model={shownModel}
               onStepTicked={(checkedCount) => {
@@ -167,9 +196,9 @@ export function JourneyGardenSheet({
                 onStepChecked(checkedCount);
               }}
             />
-          </View>
-        </Animated.View>
-      </GestureDetector>
+          </ScrollView>
+        </View>
+      </Animated.View>
     </View>
   );
 }
@@ -188,6 +217,20 @@ function SheetContent({ model, onStepTicked }: SheetContentProps) {
   const checked = stepChecks?.day === model.day ? stepChecks.checked : [];
   const [chipsTop, setChipsTop] = useState(0);
   const [chipCenters, setChipCenters] = useState<Record<number, { x: number; y: number }>>({});
+  // The day's list, or the old three steps for a task without one.
+  const items = model.list
+    ? model.list.items.map((entry) => ({
+        key: entry.id,
+        label: entry.text,
+        slot: entry.slot,
+        main: entry.main,
+      }))
+    : JOURNEY_DAY_STEPS.map((step, index) => ({
+        key: step.title,
+        label: model.steps[index] ?? step.title,
+        slot: null,
+        main: false,
+      }));
 
   return (
     <View style={styles.content}>
@@ -207,67 +250,81 @@ function SheetContent({ model, onStepTicked }: SheetContentProps) {
 
       <View style={styles.titleBlock} accessibilityRole="header">
         <Text style={styles.title} maxFontSizeMultiplier={1.25}>
-          {capitalizeHeading(model.title)}
+          {model.list ? model.list.headline : capitalizeHeading(model.title)}
         </Text>
         <Text style={styles.description} maxFontSizeMultiplier={1.3}>
-          {shortenSheetDescription(model.description)}
+          {model.list ? model.list.why : shortenSheetDescription(model.description)}
         </Text>
       </View>
 
       {model.kind === 'current' ? (
         <View
           style={styles.chips}
-          accessibilityLabel={`Today's steps, ${checked.length} of ${JOURNEY_DAY_STEPS.length} done`}
+          accessibilityLabel={`Today's list, ${checked.length} of ${items.length} done`}
           onLayout={(event) => setChipsTop(event.nativeEvent.layout.y)}
         >
-          {JOURNEY_DAY_STEPS.map((step, index) => {
+          {items.map((entry, index) => {
             const isChecked = checked.includes(index);
-            const label = model.steps[index] ?? step.title;
+            const header =
+              entry.slot && entry.slot !== items[index - 1]?.slot
+                ? DAY_SLOT_LABELS[entry.slot]
+                : null;
             return (
-              <Pressable
-                key={step.title}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: isChecked, disabled: isChecked }}
-                accessibilityLabel={label}
-                accessibilityHint={step.hint}
-                disabled={isChecked}
-                onLayout={(event) => {
-                  const { x, y, height } = event.nativeEvent.layout;
-                  setChipCenters((previous) => ({
-                    ...previous,
-                    // Confetti bursts from the tick at the chip's left end.
-                    [index]: { x: x + TICK_SIZE, y: y + height / 2 },
-                  }));
-                }}
-                onPress={() => {
-                  // Ticks are permanent; a ticked chip ignores presses.
-                  const checkedCount = checkStep(model.day, index);
-                  if (checkedCount === null) {
-                    return;
-                  }
-                  // A pop and a sprinkle of taps to go with the confetti.
-                  hapticConfetti();
-                  const center = chipCenters[index] ?? { x: 0, y: 0 };
-                  setBurst((previous) => ({
-                    key: previous.key + 1,
-                    x: center.x,
-                    y: chipsTop + center.y,
-                  }));
-                  onStepTicked(checkedCount);
-                }}
-                style={({ pressed }) => [
-                  styles.chip,
-                  isChecked ? styles.chipChecked : null,
-                  pressed && !isChecked ? styles.chipPressed : null,
-                ]}
-              >
-                <View style={[styles.tick, isChecked ? styles.tickChecked : null]}>
-                  {isChecked ? <View style={styles.tickMark} /> : null}
-                </View>
-                <Text style={styles.chipLabel} maxFontSizeMultiplier={1.3}>
-                  {label}
-                </Text>
-              </Pressable>
+              <Fragment key={entry.key}>
+                {header ? (
+                  <Text
+                    style={styles.slotLabel}
+                    accessibilityRole="header"
+                    maxFontSizeMultiplier={1.3}
+                  >
+                    {header}
+                  </Text>
+                ) : null}
+                <Pressable
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: isChecked, disabled: isChecked }}
+                  accessibilityLabel={entry.main ? `Today's focus: ${entry.label}` : entry.label}
+                  accessibilityHint="Tap when this is done."
+                  disabled={isChecked}
+                  onLayout={(event) => {
+                    const { x, y, height } = event.nativeEvent.layout;
+                    setChipCenters((previous) => ({
+                      ...previous,
+                      // Confetti bursts from the tick at the chip's left end.
+                      [index]: { x: x + TICK_SIZE, y: y + height / 2 },
+                    }));
+                  }}
+                  onPress={() => {
+                    // Ticks are permanent; a ticked chip ignores presses.
+                    const checkedCount = checkStep(model.day, index);
+                    if (checkedCount === null) {
+                      return;
+                    }
+                    // A pop and a sprinkle of taps to go with the confetti.
+                    hapticConfetti();
+                    const center = chipCenters[index] ?? { x: 0, y: 0 };
+                    setBurst((previous) => ({
+                      key: previous.key + 1,
+                      x: center.x,
+                      y: chipsTop + center.y,
+                    }));
+                    onStepTicked(checkedCount);
+                  }}
+                  style={({ pressed }) => [
+                    styles.chip,
+                    entry.main ? styles.chipMain : null,
+                    isChecked ? styles.chipChecked : null,
+                    pressed && !isChecked ? styles.chipPressed : null,
+                  ]}
+                >
+                  <View style={[styles.tick, isChecked ? styles.tickChecked : null]}>
+                    {isChecked ? <View style={styles.tickMark} /> : null}
+                  </View>
+                  <Text style={styles.chipLabel} maxFontSizeMultiplier={1.3}>
+                    {entry.main ? `⭐ ${entry.label}` : entry.label}
+                  </Text>
+                </Pressable>
+              </Fragment>
             );
           })}
         </View>
@@ -292,9 +349,16 @@ function SheetContent({ model, onStepTicked }: SheetContentProps) {
         </Text>
       ) : null}
 
-      {model.checkIn === 'by-steps' ? (
+      {model.kind === 'current' && (model.checkIn === 'by-steps' || model.list) ? (
         <Text style={styles.progress} accessibilityLiveRegion="polite" maxFontSizeMultiplier={1.3}>
-          {getStepProgressLine(checked.length, JOURNEY_DAY_STEPS.length)}
+          {model.list
+            ? getListProgressLine(
+                checked.length,
+                items.length,
+                DAILY_LIST_CHECK_IN_COUNT,
+                model.checkIn !== 'by-steps',
+              )
+            : getStepProgressLine(checked.length, items.length)}
         </Text>
       ) : null}
 
@@ -329,6 +393,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg - spacing.xxs,
     paddingTop: spacing.xs,
     ...shadows.medium,
+  },
+  handleArea: {
+    paddingVertical: spacing.xxs,
   },
   handle: {
     alignSelf: 'center',
@@ -397,6 +464,14 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 3 },
     elevation: 2,
+  },
+  chipMain: {
+    borderColor: colors.stage.chipBorderSelected,
+  },
+  slotLabel: {
+    ...textVariants.stageEyebrow,
+    color: colors.stage.copySoft,
+    marginTop: spacing.xs,
   },
   chipChecked: {
     backgroundColor: colors.stage.chipSelected,

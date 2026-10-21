@@ -42,3 +42,23 @@ export function getJourneySignLine(chapterId: JourneyChapterId): string {
 export function getJourneyQuote(chapterId: JourneyChapterId): string {
   return QUOTES[chapterId];
 }
+
+/** Under the day's list: how far along today is, and when it counts. */
+export function getListProgressLine(
+  checkedCount: number,
+  total: number,
+  checkInAt: number,
+  checkedIn: boolean,
+): string {
+  if (checkedCount >= total) {
+    return `All ${total} done. A full day! 🌟`;
+  }
+  if (checkedIn) {
+    return `${checkedCount} of ${total} done. Checked in. Keep going if you like.`;
+  }
+  if (checkedCount <= 0) {
+    return `Tick any ${checkInAt} to check in · 0 of ${total}`;
+  }
+  const left = checkInAt - checkedCount;
+  return `${checkedCount} of ${total}. ${left} more to check in!`;
+}

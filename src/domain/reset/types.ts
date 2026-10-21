@@ -1,3 +1,4 @@
+import type { DailyList } from './dailyList/buildDailyList';
 export const RESET_TYPE_IDS = [
   'overloaded-dreamer',
   'soft-restarter',
@@ -57,6 +58,10 @@ export type ResetPersonalization = {
   resetReason?: string;
   desiredFeelings: readonly string[];
   missedDayResponse?: string;
+  /** Onboarding "how have you been feeling?" answer; shapes the daily list's why line. */
+  recentFeeling?: string;
+  /** Onboarding "when would a reset help you most?" answer; where the main task sits. */
+  supportTiming?: string;
   /** Life areas from onboarding, most important first. Picks the plan's daily actions. */
   focusAreas?: readonly string[];
   /** The season in progress. Missing means season 1 in the first focus area. */
@@ -83,6 +88,11 @@ export type TodayTask = {
   steps: readonly string[];
   /** An easier version that still counts, offered to gentler reset types. */
   lighter?: string;
+  /**
+   * The day as ten small things; ticking any three checks the day in. Always set on
+   * freshly built tasks; missing on tasks persisted by older versions.
+   */
+  list?: DailyList;
 };
 
 /**

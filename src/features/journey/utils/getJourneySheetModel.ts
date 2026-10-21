@@ -1,3 +1,4 @@
+import type { DailyList } from '../../../domain/reset/dailyList/buildDailyList';
 import { completeResetDay } from '../../../application/reset/completeResetDay';
 import { startResetDay } from '../../../application/reset/startResetDay';
 import type { ResetPersonalization, ResetSnapshot } from '../../reset/types';
@@ -31,6 +32,8 @@ export type JourneySheetModel = {
   steps: readonly string[];
   /** An easier version that still counts, for gentler reset types. */
   lighter: string | null;
+  /** The day as ten small things; any three check the day in. */
+  list: DailyList | null;
   rememberLine: string | null;
   footnote: string | null;
   completeLabel: string | null;
@@ -87,6 +90,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
       description: task.description,
       steps: task.steps,
       lighter: task.lighter ?? null,
+      list: task.list ?? null,
       rememberLine: null,
       footnote: "you'll get here soon.",
       completeLabel: null,
@@ -107,6 +111,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
       description: task.description,
       steps: task.steps,
       lighter: task.lighter ?? null,
+      list: task.list ?? null,
       rememberLine: null,
       footnote: 'you showed up.',
       completeLabel: state.kind === 'current' ? '✓ checked in' : '✓ done',
@@ -126,6 +131,7 @@ export function getJourneySheetModel(input: JourneySheetInput): JourneySheetMode
     description: task.description,
     steps: task.steps,
     lighter: task.lighter ?? null,
+    list: task.list ?? null,
     rememberLine: input.rememberLine,
     footnote: null,
     completeLabel: null,
