@@ -59,8 +59,10 @@ const PEEK_HEIGHT = 104;
 const PEEK_ABOVE = 0.74;
 const PEEK_HOP = 10;
 const TICK_SIZE = 18;
-/** The sheet's content scrolls past this share of the screen height (the ten-item list). */
-const SHEET_MAX_SHARE = 0.68;
+/** Height of the drag handle row (handle bar, its margin and padding). */
+const HANDLE_AREA_HEIGHT = 5 + spacing.sm + spacing.xxs * 2;
+/** The list never gets shorter than this, even on the smallest phones. */
+const MIN_LIST_HEIGHT = 240;
 
 type JourneyGardenSheetProps = {
   visible: boolean;
@@ -136,6 +138,20 @@ export function JourneyGardenSheet({
     );
   };
 
+  // The list scrolls inside whatever is left once the status bar, his peek over the
+  // top edge, the handle and the tab bar have room, so he's never pushed off screen.
+  const sheetBottomPadding = getTabBarScenePadding(insets.bottom) + spacing.sm;
+  const listMaxHeight = Math.max(
+    MIN_LIST_HEIGHT,
+    windowHeight -
+      insets.top -
+      spacing.lg -
+      PEEK_HEIGHT * PEEK_ABOVE -
+      HANDLE_AREA_HEIGHT -
+      spacing.xs -
+      sheetBottomPadding,
+  );
+
   if (!shownModel) {
     return null;
   }
@@ -173,19 +189,14 @@ export function JourneyGardenSheet({
             />
           </Animated.View>
         </GestureDetector>
-        <View
-          style={[
-            styles.sheet,
-            { paddingBottom: getTabBarScenePadding(insets.bottom) + spacing.sm },
-          ]}
-        >
+        <View style={[styles.sheet, { paddingBottom: sheetBottomPadding }]}>
           <GestureDetector gesture={pan}>
             <View style={styles.handleArea}>
               <View style={styles.handle} accessibilityElementsHidden />
             </View>
           </GestureDetector>
           <ScrollView
-            style={{ maxHeight: windowHeight * SHEET_MAX_SHARE }}
+            style={{ maxHeight: listMaxHeight }}
             showsVerticalScrollIndicator={false}
             bounces={false}
           >

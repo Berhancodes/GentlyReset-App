@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,7 +21,10 @@ import { getJourneyVisualTargetDay } from '@/features/journey/utils/getJourneyPr
 import { getJourneySheetModel } from '@/features/journey/utils/getJourneySheetModel';
 import { ReminderPromptDialog } from '@/features/notifications/components/ReminderPromptDialog';
 import { useReminderPrompt } from '@/features/notifications/hooks/useReminderPrompt';
-import { DAILY_LIST_CHECK_IN_COUNT } from '@/domain/reset/dailyList/buildDailyList';
+import {
+  DAILY_LIST_CHECK_IN_COUNT,
+  DAILY_LIST_SIZE,
+} from '@/domain/reset/dailyList/buildDailyList';
 import { useOnboardingStore } from '@/features/onboarding/store/useOnboardingStore';
 import { getSingleChoiceId } from '@/features/onboarding/utils/answerReaders';
 import { getResetProfile } from '@/features/reset/data/resetProfiles';
@@ -140,34 +143,39 @@ export function JourneyScreen() {
           resetTypeId,
         });
 
+  // Set when the third tick checks today in; the celebration waits for the sheet to close.
+  const celebrationOwed = useRef(false);
+
+  /** Slides the pop-up away; if today was just checked in, the celebration follows. */
   const closeSheet = useCallback(() => {
     setSelectedDay(null);
+    if (celebrationOwed.current) {
+      celebrationOwed.current = false;
+      setCelebration('pending');
+      setTimeout(() => setCelebration('playing'), SHEET_CLOSE_MS);
+    }
   }, []);
-
-  /** Completes today, slides the pop-up away, then plays the celebration. */
-  const finishDay = useCallback(() => {
-    completeToday();
-    setSelectedDay(null);
-    setCelebration('pending');
-    setTimeout(() => setCelebration('playing'), SHEET_CLOSE_MS);
-  }, [completeToday]);
 
   const onStepChecked = useCallback(
     (checkedCount: number) => {
-      if (todayCompleted) {
-        return;
+      if (!todayCompleted) {
+        // Ticking the first item counts as starting today.
+        if (!todayStarted) {
+          startToday();
+        }
+        // Any three of the day's list check it in. The list stays open so the
+        // rest can be ticked; the celebration plays once the sheet closes.
+        if (checkedCount === DAILY_LIST_CHECK_IN_COUNT) {
+          completeToday();
+          celebrationOwed.current = true;
+        }
       }
-      // Ticking the first step counts as starting today.
-      if (!todayStarted) {
-        startToday();
-      }
-      // Any three of the day's list check it in.
-      if (checkedCount === DAILY_LIST_CHECK_IN_COUNT) {
-        // Let the last tick and its confetti land before the pop-up slides away.
-        setTimeout(finishDay, LAST_TICK_PAUSE_MS);
+      if (checkedCount === DAILY_LIST_SIZE) {
+        // A full day: let the last tick and its confetti land, then slide the list away.
+        setTimeout(closeSheet, LAST_TICK_PAUSE_MS);
       }
     },
-    [finishDay, startToday, todayCompleted, todayStarted],
+    [closeSheet, completeToday, startToday, todayCompleted, todayStarted],
   );
 
   // Finishing today moves Journey on to the next day's number (the plan day itself
