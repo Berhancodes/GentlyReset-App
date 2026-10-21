@@ -43,3 +43,5 @@ yarn-error.*
 
 expo-env.d.ts
 # @end expo-cli
+# App Store screenshots pulled/pushed by eas metadata
+/store/

@@ -3,15 +3,11 @@
   "apple": {
     "version": "1.0",
     "copyright": "2026 Abdulrahman Nesredin Berhan",
-    "categories": [
-      "HEALTH_AND_FITNESS",
-      "LIFESTYLE"
-    ],
+    "release": {
+      "automaticRelease": true
+    },
     "info": {
       "en-US": {
-        "title": "Gently Reset",
-        "subtitle": "Small daily steps that stick",
-        "promoText": "A cozy 30-day reset built around you. One small, real-life step a day, a little companion cheering you on, and a room that grows with every check-in.",
         "description": "Gently Reset is a cozy daily reset for when you want to feel more like yourself, without the pressure.\n\nAnswer a few questions and get a 30-day plan built around you: your focus, your energy and the time you actually have. Each day is one small, real-life step, like a walk at talking pace, a message to someone you miss, or a ten-minute tidy, with three simple steps to tick off.\n\nWHAT YOU GET\n• A personal 30-day plan across mind, energy, habits, confidence, relationships or direction\n• Daily steps sized to your time, with a lighter version on low days\n• A little companion who cheers you on and naps when the day is done\n• A cozy room that grows every time you check in, and a new room every season\n• A private journal to notice how you're doing\n• Friends, if you want them: see each other's day and send a kind word\n• A home screen widget for your day and streak\n\nMiss a day? Just continue. That's the whole point.\n\nSUBSCRIPTION\nGently Reset Pro unlocks the app and is available as a monthly or yearly auto-renewing subscription. Payment is charged to your Apple ID at confirmation of purchase. Your subscription renews automatically unless cancelled at least 24 hours before the end of the current period. You can manage or cancel it anytime in your App Store account settings.\n\nTerms of Use: https://www.gentlyreset.com/terms\nPrivacy Policy: https://www.gentlyreset.com/privacy",
         "keywords": [
           "habit",
@@ -29,9 +25,55 @@
           "streak"
         ],
         "marketingUrl": "https://www.gentlyreset.com",
+        "promoText": "A cozy 30-day reset built around you. One small, real-life step a day, a little companion cheering you on, and a room that grows with every check-in.",
         "supportUrl": "https://www.gentlyreset.com/support",
-        "privacyPolicyUrl": "https://www.gentlyreset.com/privacy"
+        "title": "Gently Reset",
+        "subtitle": "Small daily steps that stick",
+        "privacyPolicyUrl": "https://www.gentlyreset.com/privacy",
+        "screenshots": {
+          "APP_IPHONE_61": [
+            "store/apple/screenshot/en-US/APP_IPHONE_61/01_Feel_Like_Yourself_Again.png",
+            "store/apple/screenshot/en-US/APP_IPHONE_61/02_One_Tiny_Step.png",
+            "store/apple/screenshot/en-US/APP_IPHONE_61/03_Just_Continue.png",
+            "store/apple/screenshot/en-US/APP_IPHONE_61/04_Watch_Your_World_Grow.png",
+            "store/apple/screenshot/en-US/APP_IPHONE_61/05_Private_Journal.png",
+            "store/apple/screenshot/en-US/APP_IPHONE_61/06_Reminders_And_Friends.png"
+          ]
+        }
       }
+    },
+    "categories": [
+      "HEALTH_AND_FITNESS",
+      "LIFESTYLE"
+    ],
+    "advisory": {
+      "ageRatingOverride": "NONE",
+      "alcoholTobaccoOrDrugUseOrReferences": "NONE",
+      "contests": "NONE",
+      "gambling": false,
+      "gamblingSimulated": "NONE",
+      "horrorOrFearThemes": "NONE",
+      "kidsAgeBand": null,
+      "koreaAgeRatingOverride": "NONE",
+      "lootBox": false,
+      "matureOrSuggestiveThemes": "NONE",
+      "medicalOrTreatmentInformation": "NONE",
+      "profanityOrCrudeHumor": "NONE",
+      "sexualContentGraphicAndNudity": "NONE",
+      "sexualContentOrNudity": "NONE",
+      "unrestrictedWebAccess": false,
+      "violenceCartoonOrFantasy": "NONE",
+      "violenceRealistic": "NONE",
+      "violenceRealisticProlongedGraphicOrSadistic": "NONE",
+      "advertising": false,
+      "ageAssurance": false,
+      "ageRatingOverrideV2": "NONE",
+      "developerAgeRatingInfoUrl": null,
+      "gunsOrOtherWeapons": "NONE",
+      "healthOrWellnessTopics": true,
+      "messagingAndChat": false,
+      "parentalControls": false,
+      "userGeneratedContent": true
     }
   }
 }
