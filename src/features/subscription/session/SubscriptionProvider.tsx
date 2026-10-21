@@ -89,15 +89,21 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
             setCustomerInfo(info);
           }
         });
-        const [info, offering] = await Promise.all([
-          client.getCustomerInfo(),
-          client.getCurrentOffering(),
-        ]);
+        // Entitlement first and on its own: RevenueCat answers it from its cache offline,
+        // so a paying subscriber isn't sent to the paywall just because prices can't load.
+        const info = await client.getCustomerInfo();
         if (!active) {
           return;
         }
         setCustomerInfo(info);
-        setCurrentOffering(offering);
+        try {
+          const offering = await client.getCurrentOffering();
+          if (active) {
+            setCurrentOffering(offering);
+          }
+        } catch {
+          // No prices right now (offline); the paywall offers a retry. Access is unaffected.
+        }
       } catch {
         if (active) {
           setAvailable(false);
@@ -164,8 +170,11 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     }
     const info = await client.getCustomerInfo();
     setCustomerInfo(info);
-    const offering = await client.getCurrentOffering();
-    setCurrentOffering(offering);
+    try {
+      setCurrentOffering(await client.getCurrentOffering());
+    } catch {
+      // Keep the entitlement just loaded even if prices can't load.
+    }
   }, []);
 
   const purchasePackage = useCallback(

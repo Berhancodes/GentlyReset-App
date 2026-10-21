@@ -90,6 +90,6 @@ export function useNotificationSettings() {
     toggleFriendPush,
     earlier: () => setReminderTime(shiftReminderTime(time, -1)),
     later: () => setReminderTime(shiftReminderTime(time, 1)),
-    openSettings: () => void Linking.openSettings(),
+    openSettings: () => void Linking.openSettings().catch(() => undefined),
   };
 }

@@ -100,13 +100,26 @@ export function addNotificationTapListener(onOpen: (url: string) => void): () =>
   if (!notificationsAvailable) {
     return () => {};
   }
+  const handled = new Set<string>();
   const open = (response: Notifications.NotificationResponse | null) => {
-    const url = response?.notification.request.content.data?.url;
-    if (typeof url === 'string' && url.startsWith('/')) {
+    if (!response) {
+      return;
+    }
+    // iOS keeps the last tapped notification around; handle each tap once, then forget it,
+    // or the app would jump to that screen again on every launch.
+    const id = response.notification.request.identifier;
+    if (handled.has(id)) {
+      return;
+    }
+    handled.add(id);
+    Notifications.clearLastNotificationResponse();
+    const url = response.notification.request.content.data?.url;
+    // Only our own screens: a path like "/world", never "//host" or a full URL.
+    if (typeof url === 'string' && /^\/[a-z-]+$/.test(url)) {
       onOpen(url);
     }
   };
-  void Notifications.getLastNotificationResponseAsync().then(open);
+  open(Notifications.getLastNotificationResponse());
   const subscription = Notifications.addNotificationResponseReceivedListener(open);
   return () => subscription.remove();
 }
